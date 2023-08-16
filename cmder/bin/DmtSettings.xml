@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<settings>
+	<setting name="WallpaperChanger__Fit" value="248" />
+	<setting name="___FirstRun" value="False" />
+	<setting name="Cursor__MinStickyForce" value="0" />
+	<setting name="Cursor__FreeMovementKey" value="162" />
+	<setting name="Cursor__FreeMovementButton" value="1048576" />
+	<setting name="Cursor__DefaultCursorMode" value="0" />
+	<setting name="Snap__ShowSnapsOn" value="1" />
+	<setting name="Cursor__AllowDeadSpaceYJump" value="True" />
+	<setting name="WallpaperChanger__IntervalHours" value="1" />
+	<setting name="WallpaperChanger__MonitorMapping" value="0" />
+	<setting name="SwapScreen__BorderOutsideSda" value="True" />
+	<setting name="SwapScreen__SdaModifiers" value="131072,524288,65536,655360,589824,196608,720896" />
+</settings>
