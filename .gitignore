@@ -1,32 +1,14 @@
-# Prerequisites
-*.d
+#comming lines just to ignore /cmder but  'track user_aliases.cmd' , bin/* only
+#tried shortcuts but this only worked
+tempCodeRunnerFile.java
+cmder/opt
+cmder/icons
+cmder/vendor
+cmder/cmder.exe
+cmder/license
+cmder/Version*
+cmder/vlc-help.txt
+cmder/config/*
+!cmder/config/*.cmd
+!cmder/bin/*
 
-# Compiled Object files
-*.slo
-*.lo
-*.o
-*.obj
-
-# Precompiled Headers
-*.gch
-*.pch
-
-# Compiled Dynamic libraries
-*.so
-*.dylib
-*.dll
-
-# Fortran module files
-*.mod
-*.smod
-
-# Compiled Static libraries
-*.lai
-*.la
-*.a
-*.lib
-
-# Executables
-*.exe
-*.out
-*.app

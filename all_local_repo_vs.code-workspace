@@ -1,0 +1,201 @@
+{
+	"folders": [
+		{
+			"name": "Desktop",
+			"path": "C:/Users/OmarPC/Desktop"
+		},
+		{
+			"name": "repo_CHROMA_BMP_proj",
+			"path": "C:/Users/OmarPC/repo_CHROMA_BMP_proj"
+		},
+		{
+			"name": "repo_CPP_COMP_study",
+			"path": "C:/Users/OmarPC/repo_CPP_COMP_study"
+		},
+		{
+			"name": "repo_CRAFTING_INTERPRETERS_study",
+			"path": "C:/Users/OmarPC/repo_CRAFTING_INTERPRETERS_study"
+		},
+		{
+			"name": "repo_MSP_College_system_mini_proj",
+			"path": "C:/Users/OmarPC/repo_MSP_College_system_mini_proj"
+		},
+		{
+			"name": "repo_MSP_ML_study",
+			"path": "C:/Users/OmarPC/repo_MSP_ML_study"
+		},
+		{
+			"name": "repo_Smart_parking_system",
+			"path": "C:/Users/OmarPC/repo_Smart_parking_system"
+		},
+		{
+			"name": "repo_Old_projects_stash",
+			"path": "C:/Users/OmarPC/repo_Old_projects_stash"
+		},
+		{
+			"name": "repo_Embedded-C",
+			"path": "C:/Users/OmarPC/repo_Embedded_C"
+		},
+		{
+			"name": "htdocs",
+			"path": "C:/xampp/htdocs"
+		},
+		{
+			"name": "repo_KeyRec_tool",
+			"path": "C:/Users/OmarPC/repo_KeyRec_tool"
+		},
+		{
+			"name": "others_repo_Imgui",
+			"path": "C:/Users/OmarPC/others_repo_Imgui"
+		},
+		{
+			"name": "repo_Discord_bot_ai",
+			"path": "C:/Users/OmarPC/repo_Discord_bot_ai"
+		},
+		{
+			"name": "repo_Embedded_C",
+			"path": "C:/Users/OmarPC/repo_Embedded_C"
+		},
+		{
+			"name": "repo_My_configs_cmder",
+			"path": "C:/Users/OmarPC/repo_My_configs_cmder"
+		},
+		{
+			"name": "repo_Orsnaro",
+			"path": "C:/Users/OmarPC/repo_Orsnaro"
+		},
+		{
+			"name": "repo_PC_metrics",
+			"path": "C:/Users/OmarPC/repo_PC_metrics"
+		},
+		{
+			"name": "py_env",
+			"path": "C:/Users/OmarPC/py_env"
+		}
+	],
+	"settings": {
+		"clang-format.language.cpp.enable": true,
+		"clang-format.language.cpp.style": "{UseTab: Always ,IndentWidth: 3 }",
+		"clang-format.language.c.style": "{UseTab: Always ,IndentWidth: 3 }",
+		"editor.detectIndentation": false,
+		"editor.tabSize": 3,
+		"prettier.useTabs": true,
+		"editor.insertSpaces": false,
+		"files.associations": {
+			"iostream": "cpp",
+			"ostream": "cpp",
+			"algorithm": "cpp",
+			"any": "cpp",
+			"array": "cpp",
+			"atomic": "cpp",
+			"barrier": "cpp",
+			"bit": "cpp",
+			"bitset": "cpp",
+			"cctype": "cpp",
+			"cfenv": "cpp",
+			"charconv": "cpp",
+			"chrono": "cpp",
+			"cinttypes": "cpp",
+			"clocale": "cpp",
+			"cmath": "cpp",
+			"codecvt": "cpp",
+			"compare": "cpp",
+			"complex": "cpp",
+			"concepts": "cpp",
+			"condition_variable": "cpp",
+			"coroutine": "cpp",
+			"csetjmp": "cpp",
+			"csignal": "cpp",
+			"cstdarg": "cpp",
+			"cstddef": "cpp",
+			"cstdint": "cpp",
+			"cstdio": "cpp",
+			"cstdlib": "cpp",
+			"cstring": "cpp",
+			"ctime": "cpp",
+			"cuchar": "cpp",
+			"cwchar": "cpp",
+			"cwctype": "cpp",
+			"deque": "cpp",
+			"exception": "cpp",
+			"resumable": "cpp",
+			"filesystem": "cpp",
+			"format": "cpp",
+			"forward_list": "cpp",
+			"fstream": "cpp",
+			"functional": "cpp",
+			"future": "cpp",
+			"initializer_list": "cpp",
+			"iomanip": "cpp",
+			"ios": "cpp",
+			"iosfwd": "cpp",
+			"istream": "cpp",
+			"iterator": "cpp",
+			"latch": "cpp",
+			"limits": "cpp",
+			"list": "cpp",
+			"locale": "cpp",
+			"map": "cpp",
+			"memory": "cpp",
+			"memory_resource": "cpp",
+			"mutex": "cpp",
+			"new": "cpp",
+			"numbers": "cpp",
+			"numeric": "cpp",
+			"optional": "cpp",
+			"queue": "cpp",
+			"random": "cpp",
+			"ranges": "cpp",
+			"ratio": "cpp",
+			"regex": "cpp",
+			"scoped_allocator": "cpp",
+			"semaphore": "cpp",
+			"set": "cpp",
+			"shared_mutex": "cpp",
+			"source_location": "cpp",
+			"span": "cpp",
+			"sstream": "cpp",
+			"stack": "cpp",
+			"stdexcept": "cpp",
+			"stop_token": "cpp",
+			"streambuf": "cpp",
+			"string": "cpp",
+			"syncstream": "cpp",
+			"system_error": "cpp",
+			"thread": "cpp",
+			"tuple": "cpp",
+			"type_traits": "cpp",
+			"typeindex": "cpp",
+			"typeinfo": "cpp",
+			"unordered_map": "cpp",
+			"unordered_set": "cpp",
+			"utility": "cpp",
+			"valarray": "cpp",
+			"variant": "cpp",
+			"vector": "cpp",
+			"xfacet": "cpp",
+			"xhash": "cpp",
+			"xiosbase": "cpp",
+			"xlocale": "cpp",
+			"xlocbuf": "cpp",
+			"xlocinfo": "cpp",
+			"xlocmes": "cpp",
+			"xlocmon": "cpp",
+			"xlocnum": "cpp",
+			"xloctime": "cpp",
+			"xmemory": "cpp",
+			"xstddef": "cpp",
+			"xstring": "cpp",
+			"xtr1common": "cpp",
+			"xtree": "cpp",
+			"xutility": "cpp",
+			"*.tcc": "cpp",
+			"expected": "cpp",
+			"string_view": "cpp",
+			"spanstream": "cpp",
+			"stacktrace": "cpp"
+		},
+		"editor.rulers": [],
+		"liveServer.settings.multiRootWorkspaceName": "repo_Old_projects_stash"
+	}
+}
