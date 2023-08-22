@@ -6,6 +6,21 @@
         {
             "command": 
             {
+                "action": "swapPane",
+                "direction": "down"
+            }
+        },
+        {
+            "command": 
+            {
+                "action": "splitPane",
+                "split": "right"
+            },
+            "keys": "ctrl+alt+d"
+        },
+        {
+            "command": 
+            {
                 "action": "copy",
                 "singleLine": false
             },
@@ -32,10 +47,35 @@
             "command": 
             {
                 "action": "globalSummon"
-            },
-            "keys": "win+`"
+            }
         },
         {
+            "command": 
+            {
+                "action": "globalSummon",
+                "desktop": "toCurrent",
+                "dropdownDuration": 200,
+                "monitor": "any",
+                "toggleVisibility": true
+            }
+        },
+        {
+            "command": 
+            {
+                "action": "splitPane",
+                "split": "down"
+            },
+            "keys": "ctrl+alt+s"
+        },
+        {
+            "command": "unbound",
+            "keys": "alt+shift+plus"
+        },
+        {
+            "command": "unbound",
+            "keys": "alt+shift+minus"
+        },
+		{
             "command": 
             {
                 "action": "globalSummon",
