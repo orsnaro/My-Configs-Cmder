@@ -401,8 +401,14 @@ ctr+shift+l= shortcut menu
   ---> to write any block of code  in (jupyter markdown - md - discord ... etc )of any language just replace C++ with your language
 
 
-################ bash #############IMPORTANT only
+################ bash ubuntu#############IMPORTANT only
 pwd (echo current dir)
+
+export var=any-val (makes env var also could use set)
+
+printenv ( prints all env variables 'set shows also but show many non needed not good like in cmder')
+
+unset env_variable (to remove env. variable  'set env_var=' does not delete it like in cmder it jsut makes is empty)
 
 htop (task maneger of the ubuntu :) 
 
@@ -422,7 +428,7 @@ ps -e (print all running processes even ones not attached to terminal 'runs in b
 
 ll ( is modified ls command to show more details on files and dirs in current dir )
 
-################ tmux in bash #############IMPORTANT only
+################ tmux in bash ubuntu#############IMPORTANT only
 
 ctrl + b c ( new tab )(press them seperatly ) 
 
