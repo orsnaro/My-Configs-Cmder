@@ -1,6 +1,6 @@
 
 
-~~~F10 to toggle notepad++ bar~~~
+(F10 to toggle notepad++ bar)
 
 # ###############VS code#############IMPORTANT only
 ctr+ shift+ p (all shortcuts vs code)
