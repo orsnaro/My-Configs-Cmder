@@ -443,6 +443,26 @@ ps -e
 ll 
 -> ( is modified ls command to show more details on files and dirs in current dir )
 
+tmux ls 
+-> to see all tmux session and which one your attached to
+
+tmux new -d -s tmux_session_nam  'command-to-run-at-start'
+
+-> ( name is optional also command to run is optional but must be inside single qotation)
+-> (-d to start detached session with out it you detach to the new made tmux session)
+-> (most power full command to isolate and silence a process and keep it working even if shell is closed some it may be risky cant exit cmder proberly)
+
+tmux kill-session -t  session-num
+-> (to kill a session of tmux)
+
+& at end of commands
+-> makes commands run in background ex : ./start_silent.sh &
+
+nohup comnd.sh  and  comnd.sh & disown
+-> also makes command run in background but kinda more detached ( search more on it )
+
+
+
 # ############### tmux in bash ubuntu#############IMPORTANT only
 
 ctrl + b c 
