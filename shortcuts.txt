@@ -399,3 +399,43 @@ ctr+shift+l= shortcut menu
     
   ```
   ---> to write any block of code  in (jupyter markdown - md - discord ... etc )of any language just replace C++ with your language
+
+
+################ bash #############IMPORTANT only
+pwd (echo current dir)
+
+htop (task maneger of the ubuntu :) 
+
+sudo apt-get -y install app-name ( installs app and says yes to all prompts )
+
+sudo shutdown -r now (reboots the system)
+
+chmod u+x filename.sh (chmod modifies permissions of a file and this one give right to exec'x' and ower permission 'u')
+
+kill task-id (kills task by id) 
+
+pkill task-name ( kills task by name )
+
+ps (print running processes that are attached to terminal only)
+
+ps -e (print all running processes even ones not attached to terminal 'runs in background')
+
+ll ( is modified ls command to show more details on files and dirs in current dir )
+
+################ tmux in bash #############IMPORTANT only
+
+ctrl + b c ( new tab )(press them seperatly ) 
+
+ctrl + b <tab num> (moves to tab)
+
+ctrl + b % (split  new pan to right)
+
+ctrl + b hold → (resize the pane also left resize)
+
+ctrl + b → ( move to the right pan  also left moves to the right pan)
+
+ctrl + b " (split down)(doesnt work for some reason)
+
+ctrl + b   ( searches tab by name and goes to it)
+
+exit (gets out of program if in bash exits tmux)

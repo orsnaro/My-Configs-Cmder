@@ -651,3 +651,4 @@ allcode=code C:\users\%USERNAME%\repo_My_configs_cmder\all_local_repo_vs.code-wo
 shorts=start C:\Users\%USERNAME%\repo_MY_configs_cmder\shortcuts.txt  
 ls=ls --show-control-chars -F -A --color $*  
 root=cd /d C:\Users\OmarPc  
+ec2bot1=ssh -i "aws-ec2-discordpy-bot-wiz.pem" ubuntu@ec2-3-75-231-15.eu-central-1.compute.amazonaws.com  
