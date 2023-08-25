@@ -1,8 +1,9 @@
 
 
-(F10 to toggle notepad++ bar)
+> (F10 to toggle notepad++ task bar)
 
-# ###############VS code#############IMPORTANT only
+# -----------------VS code-----------------IMPORTANT only
+```
 ctr+ shift+ p (all shortcuts vs code)
 (NOT DEFAULT) `+4  ( collapse all folders in explorer )
 (NOT DEFAULT) shift + ctrl + alt + f (fetch or one mouse button using xmouse)
@@ -41,13 +42,10 @@ ctrl + alt + N (to build and run  using code runner in terminal <no debugging> )
 
 --> for more  https://code.visualstudio.com/shortcuts/keyboard-shortcuts-windows.pdf
 
+```
 
-
-# ############### (Cmder + bash + CMD + powershell) ############# IMPORTANT only
-
-
-
-
+#  -----------------(Cmder + bash + CMD + powershell)-----------------IMPORTANT only
+```
 cmd 
 --> to run/nest new cmd inside cmder/cmd/powershell ( not cmder alias is windows default argument)
 
@@ -162,10 +160,10 @@ Ctrl + Alt + U : Traverse up in directory structure (lovely feature!)
 End, Home, Ctrl : Traversing text with as usual on Windows
 Ctrl + R : History search
 Shift + Mouse : Select and copy text from buffer
+```
 
-
-# ############### (Git) ############# IMPORTANT only
-
+#  -----------------(Git) -----------------IMPORTANT only
+```
 https://kbroman.org/github_tutorial/pages/first_time.html
 --> connect and auth git with github acc for push 
 
@@ -226,9 +224,9 @@ C: The file has been copied.
 U: The file is unmerged, meaning it has conflicts that need to be resolved.
 !: file has merge conflict that need to be manually done ( both modified in local and remote)
 
-
-# ############### (CMD & power shell) ############# IMPORTANT only
-
+```
+# -----------------(CMD & power shell)-----------------IMPORTANT only
+```
 help <ur command> 
 or <ur command> /? 
 or <ur command>  --help
@@ -322,9 +320,10 @@ echo any thing
 ====> for more usefull  general 'power shell' and 'cmd' commands : https://www.makeuseof.com/tag/15-cmd-commands-every-windows-user-know/
 
 ====> crash CLI course : https://youtube.com/playlist?list=PLDoPjvoNmBAxzNO8ixW83Sf8FnLy_MkUT
+```
 
-
-# ###############CODELITE#############IMPORTANT only
+# -----------------CODELITE-----------------IMPORTANT only
+```
 'ctrl+up\down' to swap lines places
 'end' to go to the end of the line
 'home' to go to the begining of line
@@ -341,9 +340,9 @@ select same word  or edit same word (not in codelite)  T_T
 
 =====> all ECLIPSE  shortcut ctrl+ shft+L (see keybindings)
 very usefull explanation for c functions at : https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_74/rtref/scanf.htm
-
-# ###############ATOM#############IMPORTANT only
-
+```
+# -----------------ATOM-----------------IMPORTANT only
+```
 'ctrl+shift+p' open  kebindings in Atom Editor
 'ctrl+,' open settings in Atom editor
 'Alt+F3' select only next same word  (ATOM shortcut)
@@ -351,9 +350,9 @@ very usefull explanation for c functions at : https://www.ibm.com/support/knowle
 'ctrl+f' find and replace (ATOM)
 
 ======> more ATOM  shortcuts https://github.com/nwinkler/atom-keyboard-shortcuts
-
-# ###############ECLIPSE#############IMPORTANT only
-
+```
+# -----------------ECLIPSE-----------------IMPORTANT only
+```
 
 macro for build and run in eclipse (f12)
 
@@ -387,10 +386,10 @@ ctrl+# = commit
 
 ctr+shift+l= shortcut menu
 
+```
 
 
-
-# ###############Jupyter in vs code #############IMPORTANT only
+# -----------------Jupyter in vs code-----------------IMPORTANT only
   
   ```c++
   
@@ -400,7 +399,9 @@ ctr+shift+l= shortcut menu
   ---> to write any block of code  in (jupyter markdown - md - discord ... etc )of any language just replace C++ with your language
 
 
-# ############### bash ubuntu#############IMPORTANT only
+# -----------------bash ubuntu-----------------IMPORTANT only
+```
+
 pwd 
 -> (echo current dir)
 
@@ -460,11 +461,13 @@ tmux kill-session -t  session-num
 
 nohup comnd.sh  and  comnd.sh & disown
 -> also makes command run in background but kinda more detached ( search more on it )
+```
 
 
 
-# ############### tmux in bash ubuntu#############IMPORTANT only
-
+# -----------------tmux in bash ubuntu-----------------IMPORTANT only
+```
+>>>>>>> 12d66c89a3c4f95cdc17dde4610c9425c1e0deae
 ctrl + b c 
 -> ( new tab )(press them seperatly ) 
 
@@ -486,5 +489,7 @@ ctrl + b "
 ctrl + b   
 -> ( searches tab by name and goes to it)
 
-exit 
+ exit 
+-> (gets out of program if in bash exits tmux)
+```
 -> (gets out of program if in bash exits tmux)
