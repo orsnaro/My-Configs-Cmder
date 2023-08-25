@@ -2,7 +2,7 @@
 
 ~~~F10 to toggle notepad++ bar~~~
 
-################VS code#############IMPORTANT only
+# ###############VS code#############IMPORTANT only
 ctr+ shift+ p (all shortcuts vs code)
 (NOT DEFAULT) `+4  ( collapse all folders in explorer )
 (NOT DEFAULT) shift + ctrl + alt + f (fetch or one mouse button using xmouse)
@@ -43,7 +43,7 @@ ctrl + alt + N (to build and run  using code runner in terminal <no debugging> )
 
 
 
-################ (Cmder + bash + CMD + powershell) ############# IMPORTANT only
+# ############### (Cmder + bash + CMD + powershell) ############# IMPORTANT only
 
 
 
@@ -164,7 +164,7 @@ Ctrl + R : History search
 Shift + Mouse : Select and copy text from buffer
 
 
-################ (Git) ############# IMPORTANT only
+# ############### (Git) ############# IMPORTANT only
 
 https://kbroman.org/github_tutorial/pages/first_time.html
 --> connect and auth git with github acc for push 
@@ -227,7 +227,7 @@ U: The file is unmerged, meaning it has conflicts that need to be resolved.
 !: file has merge conflict that need to be manually done ( both modified in local and remote)
 
 
-################ (CMD & power shell) ############# IMPORTANT only
+# ############### (CMD & power shell) ############# IMPORTANT only
 
 help <ur command> 
 or <ur command> /? 
@@ -324,7 +324,7 @@ echo any thing
 ====> crash CLI course : https://youtube.com/playlist?list=PLDoPjvoNmBAxzNO8ixW83Sf8FnLy_MkUT
 
 
-################CODELITE#############IMPORTANT only
+# ###############CODELITE#############IMPORTANT only
 'ctrl+up\down' to swap lines places
 'end' to go to the end of the line
 'home' to go to the begining of line
@@ -342,7 +342,7 @@ select same word  or edit same word (not in codelite)  T_T
 =====> all ECLIPSE  shortcut ctrl+ shft+L (see keybindings)
 very usefull explanation for c functions at : https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_74/rtref/scanf.htm
 
-################ATOM#############IMPORTANT only
+# ###############ATOM#############IMPORTANT only
 
 'ctrl+shift+p' open  kebindings in Atom Editor
 'ctrl+,' open settings in Atom editor
@@ -352,7 +352,7 @@ very usefull explanation for c functions at : https://www.ibm.com/support/knowle
 
 ======> more ATOM  shortcuts https://github.com/nwinkler/atom-keyboard-shortcuts
 
-################ECLIPSE#############IMPORTANT only
+# ###############ECLIPSE#############IMPORTANT only
 
 
 macro for build and run in eclipse (f12)
@@ -390,8 +390,7 @@ ctr+shift+l= shortcut menu
 
 
 
-
-  ################Jupyter in vs code #############IMPORTANT only
+# ###############Jupyter in vs code #############IMPORTANT only
   
   ```c++
   
@@ -401,47 +400,71 @@ ctr+shift+l= shortcut menu
   ---> to write any block of code  in (jupyter markdown - md - discord ... etc )of any language just replace C++ with your language
 
 
-################ bash ubuntu#############IMPORTANT only
-pwd (echo current dir)
+# ############### bash ubuntu#############IMPORTANT only
+pwd 
+-> (echo current dir)
 
-export var=any-val (makes env var also could use set)
+export var=any-val 
+-> (makes env var also could use set)
 
-printenv ( prints all env variables 'set shows also but show many non needed not good like in cmder')
+printenv 
+-> ( prints all env variables 'set shows also but show many non needed not good like in cmder')
 
-unset env_variable (to remove env. variable  'set env_var=' does not delete it like in cmder it jsut makes is empty)
+unset env_variable 
+-> (to remove env. variable  'set env_var=' does not delete it like in cmder it jsut makes is empty)
 
-htop (task maneger of the ubuntu :) 
+htop 
+-> (call it task maneger of  ubuntu & unix <3 btw made by someone called hisham) 
 
-sudo apt-get -y install app-name ( installs app and says yes to all prompts )
+iotop 
+-> (similar to htop but stats  more about disk usage by processes) 
 
-sudo shutdown -r now (reboots the system)
+sudo apt-get -y install app-name 
+-> ( installs app and says yes to all prompts )
 
-chmod u+x filename.sh (chmod modifies permissions of a file and this one give right to exec'x' and ower permission 'u')
+sudo shutdown -r now 
+-> (reboots the system)
 
-kill task-id (kills task by id) 
+chmod u+x filename.sh 
+-> (chmod modifies permissions of a file and this one give right to exec'x' and ower permission 'u')
 
-pkill task-name ( kills task by name )
+kill task-id 
+-> (kills task by id) 
 
-ps (print running processes that are attached to terminal only)
+pkill task-name 
+-> ( kills task by name )
 
-ps -e (print all running processes even ones not attached to terminal 'runs in background')
+ps 
+-> (print running processes that are attached to terminal only)
 
-ll ( is modified ls command to show more details on files and dirs in current dir )
+ps -e 
+-> (print all running processes even ones not attached to terminal 'runs in background')
 
-################ tmux in bash ubuntu#############IMPORTANT only
+ll 
+-> ( is modified ls command to show more details on files and dirs in current dir )
 
-ctrl + b c ( new tab )(press them seperatly ) 
+# ############### tmux in bash ubuntu#############IMPORTANT only
 
-ctrl + b <tab num> (moves to tab)
+ctrl + b c 
+-> ( new tab )(press them seperatly ) 
 
-ctrl + b % (split  new pan to right)
+ctrl + b <tab num> 
+-> (moves to tab)
 
-ctrl + b hold → (resize the pane also left resize)
+ctrl + b % 
+->(split  new pan to right)
 
-ctrl + b → ( move to the right pan  also left moves to the right pan)
+ctrl + b hold → 
+-> (resize the pane also left resize)
 
-ctrl + b " (split down)(doesnt work for some reason)
+ctrl + b → 
+-> ( move to the right pan  also left moves to the right pan)
 
-ctrl + b   ( searches tab by name and goes to it)
+ctrl + b " 
+-> (split down)(doesnt work for some reason)
 
-exit (gets out of program if in bash exits tmux)
+ctrl + b   
+-> ( searches tab by name and goes to it)
+
+exit 
+-> (gets out of program if in bash exits tmux)
