@@ -462,6 +462,22 @@ ctr+shift+l= shortcut menu
 
 `nohup comnd.sh`  and  `comnd.sh & disown`
 -> also makes command run in background but kinda more detached ( search more on it )
+
+
+`drwx-rwx-rwx` or `d-7
+-> this permission says that its a dir and owner group and others all have read write execute permissons
+x -> this permission has value '001' or in dec 1 and its an execution permission
+w -> //   //         //   //   '010' or in dec 2 and its an write permission
+r -> //   //         //   //   '100' or in dec 4 and its a  read permision
+d -> not actual permission but tells us that this is a `dir` or if '-' instead of 'd' then its a `file`
+
+u -> in `chmod` command means owner 
+g -> in `chmod` command means group 
+o -> in `chomd` command means others 
+
+`chmod ugo+rwx foo.sh`
+-> this example comand give all fileOwner-group-others the permission to read write and execute
+-> in numeric values we code write `chmod 777 foo.sh` this does same as prev. command
 ```
 
 
