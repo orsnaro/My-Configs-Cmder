@@ -6,17 +6,17 @@
         {
             "command": 
             {
-                "action": "swapPane",
-                "direction": "down"
-            }
-        },
-        {
-            "command": 
-            {
                 "action": "splitPane",
                 "split": "right"
             },
             "keys": "ctrl+alt+d"
+        },
+        {
+            "command": 
+            {
+                "action": "swapPane",
+                "direction": "down"
+            }
         },
         {
             "command": 
@@ -27,12 +27,28 @@
             "keys": "ctrl+c"
         },
         {
+            "command": 
+            {
+                "action": "resizePane",
+                "direction": "up"
+            },
+            "keys": "ctrl+alt+up"
+        },
+        {
             "command": "paste",
             "keys": "ctrl+v"
         },
         {
             "command": "find",
             "keys": "ctrl+shift+f"
+        },
+        {
+            "command": 
+            {
+                "action": "resizePane",
+                "direction": "left"
+            },
+            "keys": "ctrl+alt+left"
         },
         {
             "command": 
@@ -57,7 +73,8 @@
                 "dropdownDuration": 200,
                 "monitor": "any",
                 "toggleVisibility": true
-            }
+            },
+            "keys": "ctrl+`"
         },
         {
             "command": 
@@ -75,21 +92,45 @@
             "command": "unbound",
             "keys": "alt+shift+minus"
         },
-		{
+        {
+            "command": "unbound",
+            "keys": "alt+shift+right"
+        },
+        {
+            "command": "unbound",
+            "keys": "alt+shift+up"
+        },
+        {
+            "command": "unbound",
+            "keys": "alt+shift+left"
+        },
+        {
+            "command": "unbound",
+            "keys": "alt+shift+down"
+        },
+        {
             "command": 
             {
-                "action": "globalSummon",
-                "desktop": "toCurrent",
-                "dropdownDuration": 200,
-                "monitor": "any",
-                "toggleVisibility": true
+                "action": "resizePane",
+                "direction": "right"
             },
-            "keys": "ctrl+`"
+            "keys": "ctrl+alt+right"
+        },
+        {
+            "command": 
+            {
+                "action": "resizePane",
+                "direction": "down"
+            },
+            "keys": "ctrl+alt+down"
         }
     ],
     "copyFormatting": "none",
     "copyOnSelect": false,
     "defaultProfile": "{75ed6414-ebe1-412b-af1c-173b22eb1130}",
+    "initialCols": 80,
+    "initialRows": 20,
+    "launchMode": "default",
     "newTabMenu": 
     [
         {
@@ -138,10 +179,10 @@
                 "source": "Git"
             },
             {
-                "adjustIndistinguishableColors": "always",
+                "adjustIndistinguishableColors": "never",
                 "background": "#2E3436",
-                "closeOnExit": "graceful",
-                "colorScheme": "Gruvbox Dark",
+                "closeOnExit": "always",
+                "colorScheme": "Dracula",
                 "commandline": "cmd.exe /k C:\\Users\\OmarPc\\repo_My_configs_cmder\\cmder\\vendor\\init.bat",
                 "cursorShape": "filledBox",
                 "elevate": true,
@@ -156,7 +197,7 @@
                 "guid": "{75ed6414-ebe1-412b-af1c-173b22eb1130}",
                 "icon": "C:\\Users\\OmarPc\\repo_My_configs_cmder\\cmder\\icons\\cmder.ico",
                 "name": "Cmder",
-                "opacity": 45,
+                "opacity": 85,
                 "padding": "15",
                 "snapOnInput": true,
                 "startingDirectory": "%USERPROFILE%",
