@@ -46,19 +46,19 @@ ctrl + alt + N (to build and run  using code runner in terminal <no debugging> )
 
 #  -----------------(Cmder + bash + CMD + powershell)-----------------IMPORTANT only
 ```
-cmd 
+`cmd`
 --> to run/nest new cmd inside cmder/cmd/powershell ( not cmder alias is windows default argument)
 
-ps
+`ps`
 -->(NOT DEFAULT)(cmder alias)  to run powershell inside the current cmd/cmder/powershell and nest them 
 
-set 
+`set`
 --> to echo all windaws deafult arguments and variables  
 
-code
+`code`
 --> opens vs code
 
-code .
+`code .`
 --> open all current dir on vs code as current workspace
 
 ctrl +c   OR   q
@@ -80,13 +80,13 @@ $*
 --> more special chars for cmder alias : https://stackoverflow.com/a/59397138
 
 
-command | clip   OR clip < filename.txt
+`command | clip   OR clip < filename.txt`
 --->   copy terminal o\p or any .txt to the clipboard
 
-CHDIR /d  drive: path
+`CHDIR /d  drive: path`
 --> (to change to another partion or drive)
 
-start filename.exe (
+`start filename.exe`
 --> (open any exe in directory)
 
 ctrl + r 
@@ -98,42 +98,43 @@ arrow right
 --> get the found search to terminal
  
  
-winget list 
+`winget list`
 --> list all installed programs versions and if there is newer available version for upgrade
 
-winget upgrade --all 
+`winget upgrade --all`
 --> update all programs installed 
 
-dir  "\*part_of_filename*"  /s
+`dir  "\*part_of_filename*"  /s`
 --> searches for ur file (for linux and cmder u can use 'find' also try find --help)
 -->The backslash tells dir to search from the root directory of the current drive.
 --> to search for a dir not a file use:
- dir "\*part_of_dir_name*" /AD /S 
+
+ `dir "\*part_of_dir_name*" /AD /S`
 --> /A- Displays files with specified attributes. D-May the attribute be Directories
 
-xxd filename.extention 
+`xxd filename.extention`
 --> to memory view the file in hexadecimal dump (for bash only + cmder)
-xxd filename.extention | vim - 
+`xxd filename.extention | vim`
 --> same as previous put to open it inside vim
 
 
-starz github-username
+`starz github-username`
 --> to install 'npm install -g starz' . it's an CMD tool that shows total gihub account stars
 
- tasklist | grep *your running process name*
+ `tasklist | grep *your running process name*`
  --> this will only search and echo the runing tasks that has same name if there is any
  --> (user defined alias for tasklist command is 'tsk' or 'task'
  
- taskkill /im runing_task_name 
---> kill task using image name (omit /im to kill task by process number PID) 
+ `taskkill /im runing_task_name`
+-->kill task using image name (omit /im to kill task by process number PID) 
 
-python -m venv virtual_env_name
+`python -m venv virtual_env_name`
 --> make new python virtual env 
 
-vritual_env_path/Scripts/activate
+`vritual_env_path/Scripts/activate`
 --> start your virtual env
 
-deactivate
+`deactivate`
 --> go back to master env (windows)
 
 
@@ -165,41 +166,41 @@ Shift + Mouse : Select and copy text from buffer
 #  -----------------(Git) -----------------IMPORTANT only
 ```
 https://kbroman.org/github_tutorial/pages/first_time.html
---> connect and auth git with github acc for push 
+-->docs on: connect and auth git with github acc for push 
 
-create-shortcut "source path" "destination path"
+`create-shortcut "source path" "destination path"`
 --> create a shortcut (must apend destination path with "ShortcutName.lnk")
 
-git checkout   "hash or branch name"
+`git checkout   "hash or branch name"`
 --> move head (ure current snapshot) to older snapshot of ur dir 
 --> or move head to another local branch
 
-git fetch --prune 
+`git fetch --prune`
 --> delete remote ref branches that still shows after u delete them
 
 
 
-git rebase -i head~(number of commits before current that you want to delete)
+`git rebase -i head~(number of commits before current that you want to delete)`
 --> will open an editor jsut put 'd' before any commit u want to delete
 --> after that save and close editor 
 
-git branch -vv 
+`git branch -vv`
 --> to view all current branches data
 
-git reflog
+`git reflog`
 --> view some important data on your head and branches changes 
 
-git branch -b ur_local_branch_name
+`git branch -b ur_local_branch_name`
 --> to make new local branch in your local repo (copying all from current branch as default)
 
-git push -u  ur_local_branch_name
+`git push -u ur_local_branch_name`
 --> to make new remote branch for your new local branch
 
-git push -f to final update the commit histroy at remote  
--- > all commits u done 'd' before them gone for ever !
+`git push -f` to final update the commit histroy at remote  
+-- > all commits u done 'd' before them gone for ever! DONT USE `-f` unless needed
 
 
-git merge branch_to_merge -m "Merge msg"
+`git merge branch_to_merge -m "Merge msg"`
 --> to merge a branch with another branch (will not delete any of the two brancheds)
 
 --> to copy already made local repo to already made remote repo please use either gh commands or github desktop
@@ -227,91 +228,92 @@ U: The file is unmerged, meaning it has conflicts that need to be resolved.
 ```
 # -----------------(CMD & power shell)-----------------IMPORTANT only
 ```
-help <ur command> 
-or <ur command> /? 
-or <ur command>  --help
+`help <ur command>`
+or `<ur command> /?`
+or `<ur command>  --help`
 --> to read documentaion for the command u want (last one for cmder and linux only)
 
 to use help in cmd 
 
 *note:  using '/' or '\' is interchangable in cmd -most if time- also 'tab' will autocomplete ur command
 
-code
+`code`
 --> opens vs code
 
-start filename.exe 
+`start filename.exe`
 --> (open any exe in directory)
 
-start/min filename.exe 
+`start/min filename.exe`
 --> (start any exe minimized)
 
-command |clip   OR    clip <filename.txt
+`command |clip   OR    clip <filename.txt`
 ---> copy terminal  or any .txt to clip board
 
-type nul > filename.txt
+`type nul > filename.txt`
 ---> to make new .txt file
 ---> to write to file use (@echo ur text >> filename.txt) '>>' to append in new line not to overwrite
 ---> also check cat command and cp or copy on alzero crash course (link is down).
 
-
-'cd .\folder1\folder2'                 
+`cd .\folder1\folder2`                
  --> change directory to a one inside ur current directory (dont miss dot in begining)
 
-'cd C:\folder1\folder2'              
+`cd C:\folder1\folder2`
  --> change directory to a totally different one (u need to type full path starting from partition letter )
 
-'cd ..'                              
-  --> go back in directory only one location ( too location would be 'cd ..\..')
+`cd ..`
+--> go back in directory only one location ( too location would be 'cd ..\..')
 
-CHDIR /d  drive: path
+`CHDIR /d  drive: path`
 --> (to change to another partion or drive)
 
-'mkdir .\foldername'                   
+`mkdir .\foldername`
 --> make new folder inside current directory
 
-'Remove-Item 'D:\temp\Test Folder1' 
+`Remove-Item 'D:\temp\Test Folder1`
 --> removes the folder but it must be empty (to force remove append -recurse)
 
-'New-Item filename.txt -ItemType file'                            
+`New-Item filename.txt -ItemType file`  
 --> make a new file (u can make it .cpp and it will open in txt normally)
 
-'New-Item filename.txt -path [UR FULL PATH HERE] -ItemType file'  
+`New-Item filename.txt -path [UR FULL PATH HERE] -ItemType file`
 --> make a new file in another dir (u can make it .cpp and it will open in txt normally)
 
-1..5 | foreach { new-item "FILENAME$_.txt" }
+`1..5 | foreach { new-item "FILENAME$_.txt" }`
 --> ***POWER SHELL ONLY!*** --> make multiple new files -5 in this example -  (1st file = FILENAME1 2nd  file= FILENAME2 ...)(make sure to apend by '$_' and if any thing comes after it put space between them)
 
-1..5 | foreach { new-item -path [UR FULL PATH] }
+`1..5 | foreach { new-item -path [UR FULL PATH] }`
 -->multiple files in another dir (u can make an file typ like .cpp) ***POWER SHELL ONLY!***
 
-'get-childitem'                         
+`get-childitem`
 --> will list all content -files and folders- inside current directory 
 
-'g++ filname.cpp -o filename.exe' ; .\filename.exe'
+`g++ filname.cpp -o filename.exe' ; .\filename.exe`
 --> ***POWER SHELL ONLY!*** (compile and run filname.exe in one statement)(filename.exe could be written only filename)
 --> to do same in cmd in one command use '&&' instead of ';' (.\filename --> here'\' is NOT interchangable with '/')
 
-'g++ -c filname.cpp -o filename.exe' ; .\filename.exe'
+`g++ -c filname.cpp -o filename.exe' ; .\filename.exe`
 ---> '-c' to just only compile filname not link it (output file is filename.o)
 
 ====> for more cpp commands in cmd : https://www.makeuseof.com/tag/15-cmd-commands-every-windows-user-know/
-
+```batch
 for /l %x in (1, 1, 100) do (
 echo %x
 
 echo any thing
 
 )
+```
+```
 --> for loop that works in cmer for more type for /?
 --> if used in batch file use double percent '%%' before var name
 
 'notepad'
 --> open standard notepad
 
-'cls'
+`cls`
 --> clears all cmd screen
 
-'Measure-Command {start-process 'FILE U WANT TO EXECUTE no qoutes!' -Wait}'
+`Measure-Command {start-process 'FILE U WANT TO EXECUTE no qoutes!' -Wait}`
 ----> to calc execution time taken in this .exe file runtime.
 
 ====> on echo new line either using echo. or envisible 255 arg using alt+255 
@@ -402,64 +404,63 @@ ctr+shift+l= shortcut menu
 # -----------------bash ubuntu-----------------IMPORTANT only
 ```
 
-pwd 
--> (echo current dir)
+`pwd` 
+-> (echo current dir also use env. var. `~`)
 
-export var=any-val 
--> (makes env var also could use set)
+`export var=any-val` 
+-> (makes env. var. also could use set)
 
-printenv 
--> ( prints all env variables 'set shows also but show many non needed not good like in cmder')
+`printenv`
+-> (prints all env. variables: set shows variables also but along with many non-needed scripts/info. Not good like 'set' in cmder)
 
-unset env_variable 
--> (to remove env. variable  'set env_var=' does not delete it like in cmder it jsut makes is empty)
+`unset env_variable`
+-> (to remove env. variable  'set env_var=' does not delete it like it does in cmder. It jsut makes variable empty)
 
-htop 
+`htop`
 -> (call it task maneger of  ubuntu & unix <3 btw made by someone called hisham) 
 
-iotop 
--> (similar to htop but stats  more about disk usage by processes) 
+`iotop`
+-> (similar to htop but stats: provides more deatails about disk usage by processes) 
 
-sudo apt-get -y install app-name 
--> ( installs app and says yes to all prompts )
+`sudo apt-get -y install app-name `
+-> ( installs apps and auto  'yes' to all prompts )
 
-sudo shutdown -r now 
+`sudo shutdown -r now`
 -> (reboots the system)
 
-chmod u+x filename.sh 
--> (chmod modifies permissions of a file and this one give right to exec'x' and ower permission 'u')
+`chmod u+x filename.sh`
+-> (chmod modifies permissions of a file: this one gives right to exec'x' and owmer permission 'u')
 
-kill task-id 
--> (kills task by id) 
+`kill task-id`
+-> (kills task by pid) 
 
-pkill task-name 
+`pkill task-name`
 -> ( kills task by name )
 
-ps 
+`ps` 
 -> (print running processes that are attached to terminal only)
 
-ps -e 
+`ps -e`
 -> (print all running processes even ones not attached to terminal 'runs in background')
 
-ll 
--> ( is modified ls command to show more details on files and dirs in current dir )
+`ll`
+-> (modified 'ls' command to show more verbose details on files and dirs in current directory)
 
-tmux ls 
--> to see all tmux session and which one your attached to
+`tmux ls`
+-> to see all tmux sessions and which one you're attached to
 
-tmux new -d -s tmux_session_nam  'command-to-run-at-start'
+`tmux new -d -s tmux_session_nam  'command-to-run-at-start'`
+-> (-s session-name is optional. Also command to start session with  is optional.  must be inside single qotation)
+-> (-d to start detached session with out it you attach to the new made tmux session)
+-> (most power full command to isolate and silence a process and keep it working even if shell is closed. somtimes  may be risky: cant exit cmder/win-terminal-preview proberly)
 
--> ( name is optional also command to run is optional but must be inside single qotation)
--> (-d to start detached session with out it you detach to the new made tmux session)
--> (most power full command to isolate and silence a process and keep it working even if shell is closed some it may be risky cant exit cmder proberly)
-
-tmux kill-session -t  session-num
+`tmux kill-session -t  session-num or name`
 -> (to kill a session of tmux)
 
-& at end of commands
+`&` at end of commands
 -> makes commands run in background ex : ./start_silent.sh &
 
-nohup comnd.sh  and  comnd.sh & disown
+`nohup comnd.sh`  and  `comnd.sh & disown`
 -> also makes command run in background but kinda more detached ( search more on it )
 ```
 
@@ -467,29 +468,27 @@ nohup comnd.sh  and  comnd.sh & disown
 
 # -----------------tmux in bash ubuntu-----------------IMPORTANT only
 ```
->>>>>>> 12d66c89a3c4f95cdc17dde4610c9425c1e0deae
 ctrl + b c 
--> ( new tab )(press them seperatly ) 
+-> (tabbing: new tab )(press them seperatly) 
 
 ctrl + b <tab num> 
--> (moves to tab)
+-> (switches to tab)
 
 ctrl + b % 
-->(split  new pan to right)
+->(panning: split a new pan to right)
 
 ctrl + b hold → 
--> (resize the pane also left resize)
+-> (resize the pane)
 
 ctrl + b → 
--> ( move to the right pan  also left moves to the right pan)
+-> ( switch to the right pan  also : ctrl+b+left moves to the left pan)
 
 ctrl + b " 
--> (split down)(doesnt work for some reason)
+-> (split down)(doesnt work for some reason: mostly due to  keybindings conflict)
 
 ctrl + b   
--> ( searches tab by name and goes to it)
+-> (searches tab by name and switches to it)
 
  exit 
--> (gets out of program if in bash exits tmux)
+-> (gets out of program. if in bash exits tmux)
 ```
--> (gets out of program if in bash exits tmux)
