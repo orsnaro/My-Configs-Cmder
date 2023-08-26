@@ -500,9 +500,9 @@ ctrl + b →
 -> ( switch to the right pan  also : ctrl+b+left moves to the left pan)
 
 ctrl + b " 
--> (split down)(doesnt work for some reason: mostly due to  keybindings conflict)
+-> (split down)
 
-ctrl + b   
+ctrl + b + '
 -> (searches tab by name and switches to it)
 
  exit 
