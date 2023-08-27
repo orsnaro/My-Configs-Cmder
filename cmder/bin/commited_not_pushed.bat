@@ -14,8 +14,8 @@ git rev-parse --abbrev-ref HEAD> tmpFile
 rem save current branch name in temp variable
 set /p crntBrnch=< tmpFile
 
-rem run final command to get unpushed commits (git log <since>..<until>)
-git log origin/%crntBrnch%..HEAD  && echo Clear! no unpushed commits
+rem run final command to get unpushed commits (git log <since>..<until>) 
+git log origin/%crntBrnch%..HEAD && echo Clear! no unpushed commits
 
 
 rem clean
