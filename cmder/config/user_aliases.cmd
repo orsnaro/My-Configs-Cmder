@@ -652,3 +652,4 @@ ls=ls --show-control-chars -F -A --color $*
 root=cd /d C:\Users\OmarPc  
 shorts=start C:\Users\OmarPc\repo_MY_configs_cmder\shortcuts.md  
 ec2bot1=ssh -i "c:\Users\OmarPc\aws-ec2-discordpy-bot-wiz.pem" ubuntu@ec2-3-75-231-15.eu-central-1.compute.amazonaws.com  
+locom=commited_not_pushed.bat  
