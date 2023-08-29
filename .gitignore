@@ -11,5 +11,5 @@ cmder/vlc-help.txt
 cmder/config/*
 !cmder/config/*.cmd
 !cmder/bin/*
-!C:\Users\OmarPc\repo_My_configs_cmder\cmder\vendor\conemu-maximus5\Logs\cmder_userconsole_log
+!C:\Users\OmarPc\repo_My_configs_cmder\cmder\vendor\conemu-maximus5\Logs\cmder_userconsole_log\*
 
