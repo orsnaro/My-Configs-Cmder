@@ -3,13 +3,12 @@
 tempCodeRunnerFile.java
 cmder/opt
 cmder/icons
-cmder/vendor/*
+cmder/vendor/
 cmder/cmder.exe
 cmder/license
 cmder/Version*
 cmder/vlc-help.txt
+cmder_log/
 cmder/config/*
 !cmder/config/*.cmd
 !cmder/bin/*
-!cmder/vendor/conemu-maximus5/Logs/cmder_userconsole_log/*
-
