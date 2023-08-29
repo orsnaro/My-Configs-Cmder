@@ -3,7 +3,7 @@
 tempCodeRunnerFile.java
 cmder/opt
 cmder/icons
-cmder/vendor
+cmder/vendor/*
 cmder/cmder.exe
 cmder/license
 cmder/Version*
