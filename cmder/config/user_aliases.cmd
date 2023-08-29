@@ -80,7 +80,6 @@ bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 spot="C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_1.210.760.0_x86__zpdnekdrzrea0\Spotify.exe" $t  mmt /MoveWindow 1  Process "Spotify.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 schrome=chrome "https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9" $t mmt /MoveWindow 1  Process "chrome.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
-gpt4="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito --app=https://chat.forefront.ai/ $t mmt /MoveWindow 1 Title "Forefront Chat" /WindowLeft -10 /WindowTop 0 /WindowWidth 917 /WindowHeight 1600  
 sound=chrome https://soundcloud.com  
 gptp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://poe.com/ChatGPT  
 parkorg=cd /d C:\Users\%USERNAME%\repo_Smart_parking_system\  
@@ -188,7 +187,6 @@ bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 spot="C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_1.210.760.0_x86__zpdnekdrzrea0\Spotify.exe" $t  mmt /MoveWindow 1  Process "Spotify.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 schrome=chrome "https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9" $t mmt /MoveWindow 1  Process "chrome.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
-gpt4="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito --app=https://chat.forefront.ai/ $t mmt /MoveWindow 1 Title "Forefront Chat" /WindowLeft -10 /WindowTop 0 /WindowWidth 917 /WindowHeight 1600  
 sound=chrome https://soundcloud.com  
 gptp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://poe.com/ChatGPT  
 parkorg=cd /d C:\Users\%USERNAME%\repo_Smart_parking_system\  
@@ -296,7 +294,6 @@ bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 spot="C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_1.210.760.0_x86__zpdnekdrzrea0\Spotify.exe" $t  mmt /MoveWindow 1  Process "Spotify.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 schrome=chrome "https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9" $t mmt /MoveWindow 1  Process "chrome.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
-gpt4="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito --app=https://chat.forefront.ai/ $t mmt /MoveWindow 1 Title "Forefront Chat" /WindowLeft -10 /WindowTop 0 /WindowWidth 917 /WindowHeight 1600  
 sound=chrome https://soundcloud.com  
 gptp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://poe.com/ChatGPT  
 parkorg=cd /d C:\Users\%USERNAME%\repo_Smart_parking_system\  
@@ -404,7 +401,6 @@ bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 spot="C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_1.210.760.0_x86__zpdnekdrzrea0\Spotify.exe" $t  mmt /MoveWindow 1  Process "Spotify.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 schrome=chrome "https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9" $t mmt /MoveWindow 1  Process "chrome.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
-gpt4="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito --app=https://chat.forefront.ai/ $t mmt /MoveWindow 1 Title "Forefront Chat" /WindowLeft -10 /WindowTop 0 /WindowWidth 917 /WindowHeight 1600  
 sound=chrome https://soundcloud.com  
 gptp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://poe.com/ChatGPT  
 parkorg=cd /d C:\Users\%USERNAME%\repo_Smart_parking_system\  
@@ -512,7 +508,6 @@ bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 spot="C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_1.210.760.0_x86__zpdnekdrzrea0\Spotify.exe" $t  mmt /MoveWindow 1  Process "Spotify.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 schrome=chrome "https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9" $t mmt /MoveWindow 1  Process "chrome.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
-gpt4="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito --app=https://chat.forefront.ai/ $t mmt /MoveWindow 1 Title "Forefront Chat" /WindowLeft -10 /WindowTop 0 /WindowWidth 917 /WindowHeight 1600  
 sound=chrome https://soundcloud.com  
 gptp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://poe.com/ChatGPT  
 parkorg=cd /d C:\Users\%USERNAME%\repo_Smart_parking_system\  
@@ -620,7 +615,6 @@ bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 spot="C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_1.210.760.0_x86__zpdnekdrzrea0\Spotify.exe" $t  mmt /MoveWindow 1  Process "Spotify.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 schrome=chrome "https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9" $t mmt /MoveWindow 1  Process "chrome.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
-gpt4="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito --app=https://chat.forefront.ai/ $t mmt /MoveWindow 1 Title "Forefront Chat" /WindowLeft -10 /WindowTop 0 /WindowWidth 917 /WindowHeight 1600  
 sound=chrome https://soundcloud.com  
 gptp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://poe.com/ChatGPT  
 parkorg=cd /d C:\Users\%USERNAME%\repo_Smart_parking_system\  
@@ -653,3 +647,5 @@ root=cd /d C:\Users\OmarPc
 shorts=start C:\Users\OmarPc\repo_MY_configs_cmder\shortcuts.md  
 ec2bot1=ssh -i "c:\Users\OmarPc\aws-ec2-discordpy-bot-wiz.pem" ubuntu@ec2-3-75-231-15.eu-central-1.compute.amazonaws.com  
 locom=commited_not_pushed.bat  
+gptf="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito --app=https://chat.forefront.ai/ $t mmt /MoveWindow 1 Title "Forefront Chat" /WindowLeft -10 /WindowTop 0 /WindowWidth 917 /WindowHeight 1600 gptp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://poe.com/ChatGPT  
+gpt="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://chat.openai.com/  
