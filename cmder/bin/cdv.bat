@@ -86,7 +86,7 @@ if exist "!toCheckPath!" (
 		if defined VIRTUAL_ENV ( call %VIRTUAL_ENV%\Scripts\deactivate )
 		call %final_venv_active_path%
 		
-		rm  C:\Users\%USERNAME%\final_venv_active_path.txt
+		
 	) else (
 		ENDLOCAL
 	)	
@@ -96,13 +96,17 @@ if exist "!toCheckPath!" (
 	exit /b 3 rem error val: didn't find resources requested
 )
 
-cd /d %1
+
+if defined VIRTUAL_ENV ( call %VIRTUAL_ENV%\Scripts\deactivate )
+call %final_venv_active_path%
+rm -f C:\Users\%USERNAME%\final_venv_active_path.txt
 
 :normal_cd
 rem finally cd to your project folder and exit :)!
 
 rem ENDLOCAL
 cd /d %1
+
 rem cd works after ending localisation  so new dir in %CD% is in global scope not local
 exit /b 0
 
