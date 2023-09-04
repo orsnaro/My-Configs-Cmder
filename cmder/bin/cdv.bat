@@ -35,7 +35,7 @@ set "toggleVenv= %2"
 
 
 rem safer to get all strings in double quotes but for our script will take all quotes out
-rem if "!toCheckPath:~0,1!"=="!dquote!" ( set toCheckPath=!toCheckPath:~1,-1! )
+if "!toCheckPath:~0,1!"=="!dquote!" ( set toCheckPath=!toCheckPath:~1,-1! )
 rem remove any white spaces
 set toCheckPath=!toCheckPath: =!
 
