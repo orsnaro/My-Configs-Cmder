@@ -89,6 +89,10 @@ if exist "!toCheckPath!" (
 		
 	) else (
 		ENDLOCAL
+		rem ENDLOCAL
+		cd /d %1
+		rem cd works after ending localisation  so new dir in %CD% is in global scope not local
+		exit /b 0
 	)	
 ) else (
 	echo err: provided path Does not Exist!
@@ -106,7 +110,6 @@ rem finally cd to your project folder and exit :)!
 
 rem ENDLOCAL
 cd /d %1
-
 rem cd works after ending localisation  so new dir in %CD% is in global scope not local
 exit /b 0
 
