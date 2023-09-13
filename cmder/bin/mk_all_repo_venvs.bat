@@ -24,11 +24,11 @@ for /d %%b in ("%sourcedir%\%target%*") do (
 	
 	
 	@echo on
-	cdv %%b 
+	cdv %%b -d
 	@echo off
 )
 
-echo onar
+echo on
 echo %oldPath%
 @echo on
 cd %home% 
