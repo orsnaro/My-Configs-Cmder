@@ -92,7 +92,6 @@ addtodo=add_todo_prob.bat
 ntype=start https://www.nitrotype.com/  
 typer=start https://play.typeracer.com/  
 stat=git status  
-comp=cdv c:\users\%USERNAME%\repo_CPP_COMP_study $t code . $t start ms-clock: $t start  https://commons.wikimedia.org/wiki/File:Ascii-proper-color.svg#/media/File:Ascii-proper-color.svg $t start https://en.cppreference.com/w/cpp/language/operator_precedence $t start  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t start  https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
@@ -195,7 +194,6 @@ addtodo=add_todo_prob.bat
 ntype=start https://www.nitrotype.com/  
 typer=start https://play.typeracer.com/  
 stat=git status  
-comp=cdv c:\users\%USERNAME%\repo_CPP_COMP_study $t code . $t start ms-clock: $t start  https://commons.wikimedia.org/wiki/File:Ascii-proper-color.svg#/media/File:Ascii-proper-color.svg $t start https://en.cppreference.com/w/cpp/language/operator_precedence $t start  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t start  https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
@@ -298,7 +296,6 @@ addtodo=add_todo_prob.bat
 ntype=start https://www.nitrotype.com/  
 typer=start https://play.typeracer.com/  
 stat=git status  
-comp=cdv c:\users\%USERNAME%\repo_CPP_COMP_study $t code . $t start ms-clock: $t start  https://commons.wikimedia.org/wiki/File:Ascii-proper-color.svg#/media/File:Ascii-proper-color.svg $t start https://en.cppreference.com/w/cpp/language/operator_precedence $t start  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t start  https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
@@ -401,7 +398,6 @@ addtodo=add_todo_prob.bat
 ntype=start https://www.nitrotype.com/  
 typer=start https://play.typeracer.com/  
 stat=git status  
-comp=cdv c:\users\%USERNAME%\repo_CPP_COMP_study $t code . $t start ms-clock: $t start  https://commons.wikimedia.org/wiki/File:Ascii-proper-color.svg#/media/File:Ascii-proper-color.svg $t start https://en.cppreference.com/w/cpp/language/operator_precedence $t start  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t start  https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
@@ -504,7 +500,6 @@ addtodo=add_todo_prob.bat
 ntype=start https://www.nitrotype.com/  
 typer=start https://play.typeracer.com/  
 stat=git status  
-comp=cdv c:\users\%USERNAME%\repo_CPP_COMP_study $t code . $t start ms-clock: $t start  https://commons.wikimedia.org/wiki/File:Ascii-proper-color.svg#/media/File:Ascii-proper-color.svg $t start https://en.cppreference.com/w/cpp/language/operator_precedence $t start  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t start  https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
@@ -607,7 +602,6 @@ addtodo=add_todo_prob.bat
 ntype=start https://www.nitrotype.com/  
 typer=start https://play.typeracer.com/  
 stat=git status  
-comp=cdv c:\users\%USERNAME%\repo_CPP_COMP_study $t code . $t start ms-clock: $t start  https://commons.wikimedia.org/wiki/File:Ascii-proper-color.svg#/media/File:Ascii-proper-color.svg $t start https://en.cppreference.com/w/cpp/language/operator_precedence $t start  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t start  https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
@@ -629,3 +623,6 @@ sshvbox=ssh -p 2022 orsnaro@127.0.0.1
 env=cdv C:\Users\OmarPc\py_envs\  
 phporg=cdv c:\xampp\htdocs\repo_ps_site\ 1  
 root=cdv C:\Users\OmarPc 1  
+cd=cdv $*  
+comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t start  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t start  https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t start https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609  
+gtubelst=youtube-dl $*  
