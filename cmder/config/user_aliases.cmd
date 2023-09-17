@@ -602,3 +602,6 @@ schrome=chrome "https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9" $t  
 diff=git diff  
 what=chrome --app=https://web.whatsapp.com/ $t timeout /t 2 $t  mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t chrome  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t chrome https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t chrome https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609 $t chrome https://codeforces.com/contests $t chrome https://www.codechef.com/contests $t chrome https://www.hackerrank.com/dashboard  
+bin=cd /d c:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\  
+pydoneprob=save_N_push_solved_prob_py.bat  
+pyaddtodo=add_todo_prob_py.bat  
