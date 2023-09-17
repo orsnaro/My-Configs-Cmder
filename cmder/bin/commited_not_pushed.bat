@@ -15,10 +15,20 @@ rem save current branch name in temp variable
 set /p crntBrnch=< tmpFile
 
 rem run final command to get unpushed commits (git log <since>..<until>) 
-git log origin/%crntBrnch%..HEAD && echo Clear! no unpushed commits
+ git log origin/%crntBrnch%..HEAD > tmpFile2
+ 
+ 
+rem if output of command saved in temp file is empty then we're clear
+rem else print the unpushed commits to console
+set /p is_clear=< tmpFile2
+for /f %%i in ("tmpFile2") do set size=%%~zi
+if %size% EQU 0 (echo Clear! no unpushed commits) else ( git log origin/%crntBrnch%..HEAD )
+
+ 
 
 
 rem clean
+del /F tmpFile2
 del /F tmpFile
 set crntBrnch=
 
