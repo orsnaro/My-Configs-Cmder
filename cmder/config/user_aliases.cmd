@@ -91,7 +91,6 @@ stat=git status
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
-what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 bardapp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"  --app=https://bard.google.com/  
@@ -189,7 +188,6 @@ stat=git status
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
-what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 bardapp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"  --app=https://bard.google.com/  
@@ -287,7 +285,6 @@ stat=git status
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
-what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 bardapp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"  --app=https://bard.google.com/  
@@ -385,7 +382,6 @@ stat=git status
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
-what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 bardapp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"  --app=https://bard.google.com/  
@@ -483,7 +479,6 @@ stat=git status
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
-what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 bardapp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"  --app=https://bard.google.com/  
@@ -581,7 +576,6 @@ stat=git status
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bard=bard-cli $*  
 mx=sndvol.exe  
-what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 bardapp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe"  --app=https://bard.google.com/  
@@ -599,10 +593,12 @@ env=cdv C:\Users\OmarPc\py_envs\
 phporg=cdv c:\xampp\htdocs\repo_ps_site\ 1  
 root=cdv C:\Users\OmarPc 1  
 cd=cdv $*  
-comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t start  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t start  https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t start https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609  
 gtubelst=youtube-dl $*  
 gptp= "C:\program files\BraveSoftware\Brave-Browser\Application\brave.exe"  --app=https://www.phind.com/  
 gptf="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://chat.forefront.ai/ $t  timeout /t 2 $t  mmt /MoveWindow 1 Title "Forefront: Your new AI assistant" /WindowLeft -10 /WindowTop 0 /WindowWidth 917 /WindowHeight 1600 gptp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://poe.com/ChatGPT  
 tele="C:\Users\OmarPc\AppData\Roaming\Telegram Desktop\Telegram.exe" $t  timeout /t 2 $t mmt  /MoveWindow 1  Process "Telegram.exe" /WindowTop -10 /WindowLeft 0 /WindowWidth 900 /WindowHeight 1600 what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 spot="C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_1.210.760.0_x86__zpdnekdrzrea0\Spotify.exe" $t timeout /t 2 $t mmt /MoveWindow 1  Process "Spotify.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 schrome=chrome "https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9" $t  timeout /t 2 $t mmt /MoveWindow 1 Process "chrome.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
+diff=git diff  
+what=chrome --app=https://web.whatsapp.com/ $t timeout /t 2 $t  mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
+comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t chrome  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t chrome https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t chrome https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609 $t chrome https://codeforces.com/contests $t chrome https://www.codechef.com/contests $t chrome https://www.hackerrank.com/dashboard  
