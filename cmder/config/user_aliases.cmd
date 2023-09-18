@@ -41,7 +41,6 @@ hex=xxd -c 16 $*
 chex=xxd -c 16 -i $*  
 cpplng=clang++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
 hddf= cdv f:  
-grp= grep  -i -n -H -G  $*  
 embedorg=cdv C:\Users\%USERNAME%\repo_embedded-C  
 sqlite= sqlite3  
 sql= sqlite3  
@@ -56,7 +55,6 @@ allgitstat= allgitstat.bat
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
-find=tasklist  $b sort $b  grep -i  "$* *"  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
 exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
@@ -74,13 +72,11 @@ phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.
 dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
-bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
 parkorg=cdv C:\Users\%USERNAME%\repo_Smart_parking_system\  
 oldorg=cdv "C:\Users\%USERNAME%\repo_Old_projects_stash"  
 speed=speedtest.exe  
-grep= grep -i "$*"  
 botorg=cdv C:\Users\%USERNAME%\repo_Discord_bot_ai\  
 clock=start ms-clock:  
 doneprob=save_N_push_solved_prob.bat  
@@ -138,7 +134,6 @@ hex=xxd -c 16 $*
 chex=xxd -c 16 -i $*  
 cpplng=clang++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
 hddf= cdv f:  
-grp= grep  -i -n -H -G  $*  
 embedorg=cdv C:\Users\%USERNAME%\repo_embedded-C  
 sqlite= sqlite3  
 sql= sqlite3  
@@ -153,7 +148,6 @@ allgitstat= allgitstat.bat
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
-find=tasklist  $b sort $b  grep -i  "$* *"  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
 exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
@@ -171,13 +165,11 @@ phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.
 dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
-bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
 parkorg=cdv C:\Users\%USERNAME%\repo_Smart_parking_system\  
 oldorg=cdv "C:\Users\%USERNAME%\repo_Old_projects_stash"  
 speed=speedtest.exe  
-grep= grep -i "$*"  
 botorg=cdv C:\Users\%USERNAME%\repo_Discord_bot_ai\  
 clock=start ms-clock:  
 doneprob=save_N_push_solved_prob.bat  
@@ -235,7 +227,6 @@ hex=xxd -c 16 $*
 chex=xxd -c 16 -i $*  
 cpplng=clang++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
 hddf= cdv f:  
-grp= grep  -i -n -H -G  $*  
 embedorg=cdv C:\Users\%USERNAME%\repo_embedded-C  
 sqlite= sqlite3  
 sql= sqlite3  
@@ -250,7 +241,6 @@ allgitstat= allgitstat.bat
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
-find=tasklist  $b sort $b  grep -i  "$* *"  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
 exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
@@ -268,13 +258,11 @@ phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.
 dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
-bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
 parkorg=cdv C:\Users\%USERNAME%\repo_Smart_parking_system\  
 oldorg=cdv "C:\Users\%USERNAME%\repo_Old_projects_stash"  
 speed=speedtest.exe  
-grep= grep -i "$*"  
 botorg=cdv C:\Users\%USERNAME%\repo_Discord_bot_ai\  
 clock=start ms-clock:  
 doneprob=save_N_push_solved_prob.bat  
@@ -332,7 +320,6 @@ hex=xxd -c 16 $*
 chex=xxd -c 16 -i $*  
 cpplng=clang++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
 hddf= cdv f:  
-grp= grep  -i -n -H -G  $*  
 embedorg=cdv C:\Users\%USERNAME%\repo_embedded-C  
 sqlite= sqlite3  
 sql= sqlite3  
@@ -347,7 +334,6 @@ allgitstat= allgitstat.bat
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
-find=tasklist  $b sort $b  grep -i  "$* *"  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
 exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
@@ -365,13 +351,11 @@ phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.
 dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
-bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
 parkorg=cdv C:\Users\%USERNAME%\repo_Smart_parking_system\  
 oldorg=cdv "C:\Users\%USERNAME%\repo_Old_projects_stash"  
 speed=speedtest.exe  
-grep= grep -i "$*"  
 botorg=cdv C:\Users\%USERNAME%\repo_Discord_bot_ai\  
 clock=start ms-clock:  
 doneprob=save_N_push_solved_prob.bat  
@@ -429,7 +413,6 @@ hex=xxd -c 16 $*
 chex=xxd -c 16 -i $*  
 cpplng=clang++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
 hddf= cdv f:  
-grp= grep  -i -n -H -G  $*  
 embedorg=cdv C:\Users\%USERNAME%\repo_embedded-C  
 sqlite= sqlite3  
 sql= sqlite3  
@@ -444,7 +427,6 @@ allgitstat= allgitstat.bat
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
-find=tasklist  $b sort $b  grep -i  "$* *"  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
 exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
@@ -462,13 +444,11 @@ phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.
 dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
-bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
 parkorg=cdv C:\Users\%USERNAME%\repo_Smart_parking_system\  
 oldorg=cdv "C:\Users\%USERNAME%\repo_Old_projects_stash"  
 speed=speedtest.exe  
-grep= grep -i "$*"  
 botorg=cdv C:\Users\%USERNAME%\repo_Discord_bot_ai\  
 clock=start ms-clock:  
 doneprob=save_N_push_solved_prob.bat  
@@ -526,7 +506,6 @@ hex=xxd -c 16 $*
 chex=xxd -c 16 -i $*  
 cpplng=clang++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
 hddf= cdv f:  
-grp= grep  -i -n -H -G  $*  
 embedorg=cdv C:\Users\%USERNAME%\repo_embedded-C  
 sqlite= sqlite3  
 sql= sqlite3  
@@ -541,7 +520,6 @@ allgitstat= allgitstat.bat
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
-find=tasklist  $b sort $b  grep -i  "$* *"  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
 exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
@@ -559,13 +537,11 @@ phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.
 dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
-bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
 parkorg=cdv C:\Users\%USERNAME%\repo_Smart_parking_system\  
 oldorg=cdv "C:\Users\%USERNAME%\repo_Old_projects_stash"  
 speed=speedtest.exe  
-grep= grep -i "$*"  
 botorg=cdv C:\Users\%USERNAME%\repo_Discord_bot_ai\  
 clock=start ms-clock:  
 doneprob=save_N_push_solved_prob.bat  
@@ -605,3 +581,8 @@ comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t chr
 bin=cd /d c:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\  
 pydoneprob=save_N_push_solved_prob_py.bat  
 pyaddtodo=add_todo_prob_py.bat  
+grep=grep -i "$*" --color  
+sbravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
+bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito $*  
+grp=grep  -i -n -H -G  $* --color  
+find=tasklist  $b sort $b  grep -i  "$* *" --color  
