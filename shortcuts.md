@@ -250,6 +250,7 @@ to use help in cmd
 ---> copy terminal  or any .txt to clip board
 
 `type nul > filename.txt`
+'dir "" > filename.txt'
 ---> to make new .txt file
 ---> to write to file use (@echo ur text >> filename.txt) '>>' to append in new line not to overwrite
 ---> also check cat command and cp or copy on alzero crash course (link is down).
