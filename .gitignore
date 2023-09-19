@@ -12,3 +12,4 @@ cmder_log/
 cmder/config/*
 !cmder/config/*.cmd
 !cmder/bin/*
+tst/
