@@ -568,7 +568,6 @@ gptf="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=
 tele="C:\Users\OmarPc\AppData\Roaming\Telegram Desktop\Telegram.exe" $t  timeout /t 2 $t mmt  /MoveWindow 1  Process "Telegram.exe" /WindowTop -10 /WindowLeft 0 /WindowWidth 900 /WindowHeight 1600 what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 spot="C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_1.210.760.0_x86__zpdnekdrzrea0\Spotify.exe" $t timeout /t 2 $t mmt /MoveWindow 1  Process "Spotify.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 schrome=chrome "https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9" $t  timeout /t 2 $t mmt /MoveWindow 1 Process "chrome.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
-diff=git diff  
 what=chrome --app=https://web.whatsapp.com/ $t timeout /t 2 $t  mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 bin=cd /d c:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\  
 pydoneprob=save_N_push_solved_prob_py.bat  
@@ -581,4 +580,5 @@ find=tasklist  $b sort $b  grep -i  "$* *" --color
 gptph="C:\program files\BraveSoftware\Brave-Browser\Application\brave.exe"  --app=https://www.phind.com/  
 strtvbox= start /min setup_vbox_ubuntu.bat  
 desk=chdir /d c:\Users\OmarPc\Desktop\  
-comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t chrome  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t chrome https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t chrome https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609 $t chrome https://codeforces.com/contests $t chrome https://www.codechef.com/contests $t chrome https://www.hackerrank.com/dashboard $t start https://github.com/orsnaro/CP-Beginner-Cheat-Sheets/blob/main/README.md  
+comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t chrome  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t chrome https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t chrome https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609 $t chrome https://codeforces.com/contests $t chrome https://www.codechef.com/contests $t chrome https://www.hackerrank.com/dashboard $t chrome https://github.com/orsnaro/CP-Beginner-Cheat-Sheets/blob/main/README.md  
+diff=git diff $*  
