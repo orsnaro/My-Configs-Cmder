@@ -68,7 +68,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cdv C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
@@ -160,7 +159,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cd C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
@@ -252,7 +250,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cd C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
@@ -344,7 +341,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cd C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
@@ -436,7 +432,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cd C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
@@ -528,7 +523,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cd C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  /WindowLeft -5  /WindowTop 0  /WindowWidth 900   /WindowHeight 1580  
 twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
@@ -582,3 +576,5 @@ strtvbox= start /min setup_vbox_ubuntu.bat
 desk=chdir /d c:\Users\OmarPc\Desktop\  
 comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t chrome  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t chrome https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t chrome https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609 $t chrome https://codeforces.com/contests $t chrome https://www.codechef.com/contests $t chrome https://www.hackerrank.com/dashboard $t chrome https://github.com/orsnaro/CP-Beginner-Cheat-Sheets/blob/main/README.md  
 diff=git diff $*  
+disweb=move_dicord_webapp_brave.bat  
+dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  
