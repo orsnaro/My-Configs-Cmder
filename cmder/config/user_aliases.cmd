@@ -68,7 +68,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cdv C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
@@ -159,7 +158,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cd C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
@@ -250,7 +248,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cd C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
@@ -341,7 +338,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cd C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
@@ -432,7 +428,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cd C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
@@ -523,7 +518,6 @@ ffindhere=dir "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\*$**" /s
 movdis= mmt /MoveWindow 1 Process Discord.exe  
 orsorg= cd C:\Users\%USERNAME%\repo_Orsnaro  
 phone="C:\Program Files\WindowsApps\SAMSUNGELECTRONICSCoLtd.SamsungFlux_4.9.704.0_x64__wyx1vj98g3asy\SamsungFlow.exe"  
-twt=start https://www.twitch.tv/  
 gmail= start https://www.gmail.com  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sound=chrome https://soundcloud.com  
@@ -578,3 +572,5 @@ comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t chr
 diff=git diff $*  
 disweb=move_dicord_webapp_brave.bat  
 dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  
+brave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" $*  
+twt=start https://www.twitch.tv/search?term=$1%20$2%20$3%20$4%20$5%20$6%20$7%20$8%20$9  
