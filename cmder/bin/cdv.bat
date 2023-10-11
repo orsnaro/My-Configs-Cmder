@@ -3,8 +3,8 @@ SETLOCAL EnableDelayedExpansion ENABLEEXTENSIONS
 
 @REM ~ABOUT THE COMMAND~
 
-@REM version : V0.1.1
-@REM Date    : 5-9-2023
+@REM version : V0.1.2
+@REM Date    : 11-10-2023
 @REM made by : orsnaro - Omar Rashad
 @REM system  : win10 - cmd 
 
@@ -93,8 +93,8 @@ if "!command_options!"=="-h" (
 	echo [93m [93m==============================================================================[0m
 	echo [93m =                    [96m      ~ABOUT THE "CDV" COMMAND~                         [93m= [0m
 	echo [93m [93m==============================================================================[0m	
-	echo [93m version : V0.1.1
-	echo [93m Date    : 5-9-2023
+	echo [93m version : V0.1.2
+	echo [93m Date    : 11-10-2023
 	echo [93m made by : orsnaro - Omar Rashad
 	echo [93m system  : win10 - cmd 
 	echo.
