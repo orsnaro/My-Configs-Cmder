@@ -5,7 +5,6 @@
 ;= goto:eof
 ;= Add aliases below here
 
-unalias=alias /d $1
 e.=explorer .
 pwd=cd
 clear=cls
@@ -94,7 +93,6 @@ notpushed= git log --stat --branches --not --remotes
 ;= goto:eof
 ;= Add aliases below here
 
-unalias=alias /d $1
 e.=explorer .
 pwd=cd
 clear=cls
@@ -183,7 +181,6 @@ notpushed= git log --stat --branches --not --remotes
 ;= goto:eof
 ;= Add aliases below here
 
-unalias=alias /d $1
 e.=explorer .
 pwd=cd
 clear=cls
@@ -272,7 +269,6 @@ notpushed= git log --stat --branches --not --remotes
 ;= goto:eof
 ;= Add aliases below here
 
-unalias=alias /d $1
 e.=explorer .
 pwd=cd
 clear=cls
@@ -361,7 +357,6 @@ notpushed= git log --stat --branches --not --remotes
 ;= goto:eof
 ;= Add aliases below here
 
-unalias=alias /d $1
 e.=explorer .
 pwd=cd
 clear=cls
@@ -450,7 +445,6 @@ notpushed= git log --stat --branches --not --remotes
 ;= goto:eof
 ;= Add aliases below here
 
-unalias=alias /d $1
 e.=explorer .
 pwd=cd
 clear=cls
@@ -544,7 +538,6 @@ sshvbox=ssh -p 2022 orsnaro@127.0.0.1
 env=cdv C:\Users\OmarPc\py_envs\  
 phporg=cdv c:\xampp\htdocs\repo_ps_site\ 1  
 root=cdv C:\Users\OmarPc 1  
-cd=cdv $*  
 gtubelst=youtube-dl $*  
 gptf="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://chat.forefront.ai/ $t  timeout /t 2 $t  mmt /MoveWindow 1 Title "Forefront: Your new AI assistant" /WindowLeft -10 /WindowTop 0 /WindowWidth 917 /WindowHeight 1600 gptp="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://poe.com/ChatGPT  
 tele="C:\Users\OmarPc\AppData\Roaming\Telegram Desktop\Telegram.exe" $t  timeout /t 2 $t mmt  /MoveWindow 1  Process "Telegram.exe" /WindowTop -10 /WindowLeft 0 /WindowWidth 900 /WindowHeight 1600 what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
@@ -569,3 +562,6 @@ twt=start https://www.twitch.tv/search?term=$1%20$2%20$3%20$4%20$5%20$6%20$7%20$
 grep=grep -i $* --color  
 ~1=~0,-1  
 find=tasklist  $b sort $b  grep -i -e "image name" -e "=" -e "$*"  --color  
+cd=cdv $*  
+ua=alias /d $*  
+unalias=alias /d $*  
