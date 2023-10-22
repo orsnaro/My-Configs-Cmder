@@ -20,7 +20,7 @@ if [%1] == [] (
 		echo [93m made by : orsnaro - Omar Rashad
 		echo [93m system  : win10 - cmd 
 		
-		echo [96m 0. [0m "To get `cdv` command help [THIS]  use `cdv -h`"
+		echo [96m 0. [0m "To get `allgitstat` command help [THIS]  use `allgitstat -h`"
 		echo [96m 1. [0m "just type `allgitstat` in CMD to use the tool and check all your repoes status"
 		echo [96m 2. [0m "The tool simply loops on all your repo folder and checks using `git status`"
 		echo             "if there is any untracked/uncommite/commited but not pushed  files" 
