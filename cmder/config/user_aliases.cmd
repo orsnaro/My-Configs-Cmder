@@ -29,7 +29,6 @@ bmpremote= start https://github.com/orsnaro/Static_chroma_bmp
 allgit=git add --all $t git commit -m "# $*" $t git push  
 mspremote= start https://github.com/orsnaro/MSP-MachineLearning-tasks  
 cporg=cdv C:\Users\%USERNAME%\repo_CPP_COMP_study  
-jptopdf= jupyter-nbconvert --to pdfviahtml $*  
 bmporg= cdv C:\Users\%USERNAME%\repo_CHROMA_BMP_proj  
 msporg=cdv C:\Users\%USERNAME%\repo_MSP_ML_study  
 interporg=cdv C:\Users\%USERNAME%\repo_CRAFTING_INTERPRETERS_study  
@@ -116,7 +115,6 @@ bmpremote= start https://github.com/orsnaro/Static_chroma_bmp
 allgit=git add --all $t git commit -m "# $*" $t git push  
 mspremote= start https://github.com/orsnaro/MSP-MachineLearning-tasks  
 cporg=cdv C:\Users\%USERNAME%\repo_CPP_COMP_study  
-jptopdf= jupyter-nbconvert --to pdfviahtml $*  
 bmporg= cdv C:\Users\%USERNAME%\repo_CHROMA_BMP_proj  
 msporg=cdv C:\Users\%USERNAME%\repo_MSP_ML_study  
 interporg=cdv C:\Users\%USERNAME%\repo_CRAFTING_INTERPRETERS_study  
@@ -203,7 +201,6 @@ bmpremote= start https://github.com/orsnaro/Static_chroma_bmp
 allgit=git add --all $t git commit -m "# $*" $t git push  
 mspremote= start https://github.com/orsnaro/MSP-MachineLearning-tasks  
 cporg=cdv C:\Users\%USERNAME%\repo_CPP_COMP_study  
-jptopdf= jupyter-nbconvert --to pdfviahtml $*  
 bmporg= cdv C:\Users\%USERNAME%\repo_CHROMA_BMP_proj  
 msporg=cdv C:\Users\%USERNAME%\repo_MSP_ML_study  
 interporg=cdv C:\Users\%USERNAME%\repo_CRAFTING_INTERPRETERS_study  
@@ -290,7 +287,6 @@ bmpremote= start https://github.com/orsnaro/Static_chroma_bmp
 allgit=git add --all $t git commit -m "# $*" $t git push  
 mspremote= start https://github.com/orsnaro/MSP-MachineLearning-tasks  
 cporg=cdv C:\Users\%USERNAME%\repo_CPP_COMP_study  
-jptopdf= jupyter-nbconvert --to pdfviahtml $*  
 bmporg= cdv C:\Users\%USERNAME%\repo_CHROMA_BMP_proj  
 msporg=cdv C:\Users\%USERNAME%\repo_MSP_ML_study  
 interporg=cdv C:\Users\%USERNAME%\repo_CRAFTING_INTERPRETERS_study  
@@ -377,7 +373,6 @@ bmpremote= start https://github.com/orsnaro/Static_chroma_bmp
 allgit=git add --all $t git commit -m "# $*" $t git push  
 mspremote= start https://github.com/orsnaro/MSP-MachineLearning-tasks  
 cporg=cdv C:\Users\%USERNAME%\repo_CPP_COMP_study  
-jptopdf= jupyter-nbconvert --to pdfviahtml $*  
 bmporg= cdv C:\Users\%USERNAME%\repo_CHROMA_BMP_proj  
 msporg=cdv C:\Users\%USERNAME%\repo_MSP_ML_study  
 interporg=cdv C:\Users\%USERNAME%\repo_CRAFTING_INTERPRETERS_study  
@@ -464,7 +459,6 @@ bmpremote= start https://github.com/orsnaro/Static_chroma_bmp
 allgit=git add --all $t git commit -m "# $*" $t git push  
 mspremote= start https://github.com/orsnaro/MSP-MachineLearning-tasks  
 cporg=cdv C:\Users\%USERNAME%\repo_CPP_COMP_study  
-jptopdf= jupyter-nbconvert --to pdfviahtml $*  
 bmporg= cdv C:\Users\%USERNAME%\repo_CHROMA_BMP_proj  
 msporg=cdv C:\Users\%USERNAME%\repo_MSP_ML_study  
 interporg=cdv C:\Users\%USERNAME%\repo_CRAFTING_INTERPRETERS_study  
@@ -541,7 +535,6 @@ pyaddtodo=add_todo_prob_py.bat
 sbravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito $*  
 grp=grep  -i -n -H -G  $* --color  
-gptph="C:\program files\BraveSoftware\Brave-Browser\Application\brave.exe"  --app=https://www.phind.com/  
 strtvbox= start /min setup_vbox_ubuntu.bat  
 desk=chdir /d c:\Users\OmarPc\Desktop\  
 comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t chrome  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t chrome https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t chrome https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609 $t chrome https://codeforces.com/contests $t chrome https://www.codechef.com/contests $t chrome https://www.hackerrank.com/dashboard $t chrome https://github.com/orsnaro/CP-Beginner-Cheat-Sheets/blob/main/README.md  
@@ -566,3 +559,8 @@ bardapp=chrome --app=https://bard.google.com/
 gxcog=opera --incognito $*  
 gx=opera $*  
 gpt=chrome --app=https://chat.openai.com/  
+ocd=cd $*  
+gptph=chrome  --app=https://www.phind.com/  
+gproj=cd /d "E:\omar-work\Grad Proj Reality SimSuit"  
+jptopdf=jupyter-nbconvert --to pdf $*  
+twtdisorg= cdv C:\Users\OmarPc\repo_Tweet_discord\  
