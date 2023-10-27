@@ -47,7 +47,6 @@ tsk=tasklist $1 $b sort
 klterm= taskkill /im WindowsTerminal.exe /f  
 jp= start C:\Users\%USERNAME%\win_trm_mnmzd.exe $t jupyter-lab  
 cpp=g++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
-allgitstat= allgitstat.bat  
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
@@ -79,7 +78,6 @@ ntype=start https://www.nitrotype.com/
 typer=start https://play.typeracer.com/  
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
-bard=bard-cli $*  
 mx=sndvol.exe  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
@@ -133,7 +131,6 @@ tsk=tasklist $1 $b sort
 klterm= taskkill /im WindowsTerminal.exe /f  
 jp= start C:\Users\%USERNAME%\win_trm_mnmzd.exe $t jupyter-lab  
 cpp=g++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
-allgitstat= allgitstat.bat  
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
@@ -165,7 +162,6 @@ ntype=start https://www.nitrotype.com/
 typer=start https://play.typeracer.com/  
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
-bard=bard-cli $*  
 mx=sndvol.exe  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
@@ -219,7 +215,6 @@ tsk=tasklist $1 $b sort
 klterm= taskkill /im WindowsTerminal.exe /f  
 jp= start C:\Users\%USERNAME%\win_trm_mnmzd.exe $t jupyter-lab  
 cpp=g++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
-allgitstat= allgitstat.bat  
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
@@ -251,7 +246,6 @@ ntype=start https://www.nitrotype.com/
 typer=start https://play.typeracer.com/  
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
-bard=bard-cli $*  
 mx=sndvol.exe  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
@@ -305,7 +299,6 @@ tsk=tasklist $1 $b sort
 klterm= taskkill /im WindowsTerminal.exe /f  
 jp= start C:\Users\%USERNAME%\win_trm_mnmzd.exe $t jupyter-lab  
 cpp=g++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
-allgitstat= allgitstat.bat  
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
@@ -337,7 +330,6 @@ ntype=start https://www.nitrotype.com/
 typer=start https://play.typeracer.com/  
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
-bard=bard-cli $*  
 mx=sndvol.exe  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
@@ -391,7 +383,6 @@ tsk=tasklist $1 $b sort
 klterm= taskkill /im WindowsTerminal.exe /f  
 jp= start C:\Users\%USERNAME%\win_trm_mnmzd.exe $t jupyter-lab  
 cpp=g++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
-allgitstat= allgitstat.bat  
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
@@ -423,7 +414,6 @@ ntype=start https://www.nitrotype.com/
 typer=start https://play.typeracer.com/  
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
-bard=bard-cli $*  
 mx=sndvol.exe  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
@@ -477,7 +467,6 @@ tsk=tasklist $1 $b sort
 klterm= taskkill /im WindowsTerminal.exe /f  
 jp= start C:\Users\%USERNAME%\win_trm_mnmzd.exe $t jupyter-lab  
 cpp=g++ $* -Wall -Wextra -g -o active $t check_file_exist.bat  
-allgitstat= allgitstat.bat  
 allgitdiff= allgitdiff.bat  
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
@@ -509,7 +498,6 @@ ntype=start https://www.nitrotype.com/
 typer=start https://play.typeracer.com/  
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
-bard=bard-cli $*  
 mx=sndvol.exe  
 bothost=bothost.lnk  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
@@ -555,7 +543,6 @@ sgxcog=opera --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8
 sgx=opera https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 gptp=chrome --app=https://poe.com/ChatGPT  
 gptf=chrome --app=https://chat.forefront.ai/ $t  timeout /t 2 $t  mmt /MoveWindow 1 Title "Forefront: Your new AI assistant" /WindowLeft -10 /WindowTop 0 /WindowWidth 917 /WindowHeight 1600  
-bardapp=chrome --app=https://bard.google.com/  
 gxcog=opera --incognito $*  
 gx=opera $*  
 gpt=chrome --app=https://chat.openai.com/  
@@ -564,3 +551,6 @@ gptph=chrome  --app=https://www.phind.com/
 gproj=cd /d "E:\omar-work\Grad Proj Reality SimSuit"  
 jptopdf=jupyter-nbconvert --to pdf $*  
 twtdisorg= cdv C:\Users\OmarPc\repo_Tweet_discord\  
+mongo=mongosh $*  
+allgitstat=allgitstat.bat $*  
+bard= opera https://bard.google.com/  
