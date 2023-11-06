@@ -5,6 +5,8 @@ rem assign this bat file to an cmder alias  so you can with one command save the
 setlocal
 set oldpath=%cd%
 
+set ext=%1
+
 rem change your repo path here
 cd C:\Users\%USERNAME%\repo_CPP_COMP_study\
 
@@ -20,12 +22,13 @@ for /f %%a in ('dir /b /a-d-s-h "%todoFolder%"') do set /a FILECOUNT+=1
 rem enter the link of problem to be added to git commit message (optional)
 set /p commitMsg=paste problem link:  || set commitMsg=NoLinkProvided
 
-rem change the file that you solve CP in it ( -1 one for the readme.md that is counted once as a a problem code )
+
+rem change the file that you solve CP in it  ( -1 one for the readme.md that is counted once as a a problem code )
 set /a FILECOUNT= %FILECOUNT% - 1
-copy CP.cpp  %todoFolder%\prob_no_%FILECOUNT%.cpp
+copy CP.%ext%  %todoFolder%\prob_no_%FILECOUNT%.%ext%
 
 rem add commit then push the new problem in todo folder
-git add .\CP.cpp .\todo_probs\ & git commit -m "#todo: %commitMsg% #" & git push
+git add .\CP.%ext% .\todo_probs\ & git commit -m "#todo: %commitMsg% #" & git push
 
 
 cd %oldpath%

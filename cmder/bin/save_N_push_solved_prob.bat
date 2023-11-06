@@ -3,6 +3,7 @@ rem assign this bat file to an cmder alias  so you can with one command save the
 
 setlocal
 set oldpath=%cd%
+set ext=%1
 
 rem change your repo path here
 cd C:\Users\%USERNAME%\repo_CPP_COMP_study\
@@ -19,10 +20,10 @@ rem enter the link of problem to be added to git commit message (optional)
 set /p commitMsg=paste problem link:  || set commitMsg=NoLinkProvided
 
 rem note: change the file CP.cpp to one that you solve problems in it 
-copy CP.cpp  %probsFolder%\prob_no_%FILECOUNT%.cpp
+copy CP.%ext%  %probsFolder%\prob_no_%FILECOUNT%.%ext%
 
 rem add, commit and push your new solved problem in its own file (optional: leave problem url in the commit message)
-git add .\CP.cpp .\done_probs\ & git commit -m "#Done: %commitMsg% #" & git push
+git add .\CP.%ext% .\done_probs\ & git commit -m "#Done: %commitMsg% #" & git push
 
 
 cd %oldpath%
