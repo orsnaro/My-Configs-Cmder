@@ -17,6 +17,7 @@ set /p crntBrnch=< tmpFile
 rem run final command to get unpushed commits (git log <since>..<until>) 
  git log origin/%crntBrnch%..HEAD > tmpFile2
  
+echo [105m [105m Searching For not Pushed Commits...[0m
  
 rem if output of command saved in temp file is empty then we're clear
 rem else print the unpushed commits to console
