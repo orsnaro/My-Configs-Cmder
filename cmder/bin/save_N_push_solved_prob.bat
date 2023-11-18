@@ -20,7 +20,7 @@ rem enter the link of problem to be added to git commit message (optional)
 set /p commitMsg=paste problem link:  || set commitMsg=NoLinkProvided
 
 rem note: change the file CP.cpp to one that you solve problems in it 
-copy CP.%ext%  %probsFolder%\prob_no_%FILECOUNT%.%ext%
+copy Cp.%ext%  %probsFolder%\prob_no_%FILECOUNT%.%ext%
 
 rem add, commit and push your new solved problem in its own file (optional: leave problem url in the commit message)
 git add .\Cp.%ext% .\done_probs\ & git commit -m "#Done: %commitMsg% #" & git push

@@ -550,3 +550,4 @@ addtodo=add_todo_prob.bat cpp
 csaddtodo=add_todo_prob.bat cs  
 csdoneprob=save_N_push_solved_prob.bat cs  
 pyaddtodo=add_todo_prob.bat py  
+calc_lines=git ls-files -z  

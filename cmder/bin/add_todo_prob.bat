@@ -25,10 +25,10 @@ set /p commitMsg=paste problem link:  || set commitMsg=NoLinkProvided
 
 rem change the file that you solve CP in it  ( -1 one for the readme.md that is counted once as a a problem code )
 set /a FILECOUNT= %FILECOUNT% - 1
-copy CP.%ext%  %todoFolder%\prob_no_%FILECOUNT%.%ext%
+copy Cp.%ext%  %todoFolder%\prob_no_%FILECOUNT%.%ext%
 
 rem add commit then push the new problem in todo folder
-git add .\CP.%ext% .\todo_probs\ & git commit -m "#todo: %commitMsg% #" & git push
+git add .\Cp.%ext% .\todo_probs\ & git commit -m "#todo: %commitMsg% #" & git push
 
 
 cd %oldpath%

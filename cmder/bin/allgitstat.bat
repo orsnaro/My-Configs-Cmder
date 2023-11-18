@@ -67,7 +67,6 @@ for /d %%b in ("%sourcedir%\%target%*") do (
 	cd %%b 
 	git status 
 	echo ---------------------------------------- 
-	echo [105m [105m Searching For not Pushed Commits...[0m
 	call commited_not_pushed.bat
 )
 
