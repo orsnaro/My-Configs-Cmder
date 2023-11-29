@@ -551,3 +551,4 @@ csaddtodo=add_todo_prob.bat cs
 csdoneprob=save_N_push_solved_prob.bat cs  
 pyaddtodo=add_todo_prob.bat py  
 calc_lines=git ls-files -z  
+flip=py C:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\flip_screen.py  
