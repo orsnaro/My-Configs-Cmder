@@ -44,6 +44,16 @@ ctrl + alt + N (to build and run  using code runner in terminal <no debugging> )
 
 ```
 
+# -----------------VS Studio-----------------IMPORTANT only
+
+ctrl + Q (global search in VS studio)
+ctrl + alt + L (open explorer)
+ctrl + D (duplicate line/selected)
+ctrl + W (select highlighted / select next occurance)
+Alt  + 1 (open terminal)
+ctrl + space (view suggestion list)
+
+
 #  -----------------(Cmder + bash + CMD + powershell)-----------------IMPORTANT only
 ```
 `cmd`
