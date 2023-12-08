@@ -519,3 +519,26 @@ ctrl + b + '
  exit 
 -> (gets out of program. if in bash exits tmux)
 ```
+
+# -----------------Unity Editor-----------------IMPORTANT only
+Hand Tool: [Q]
+Move Tool: [W]
+Rotate Tool: [E]
+Scale Tool: [R]
+Rect Tool: [T]
+Unified Tool: [Y]
+Toggle Pivot/Center: [Z]
+Toggle Global/Local: [X] 
+Vertex Snap: [V]
+Grid Snap: [Ctrl]
+Toggle Play: [Space]
+Next Frame: [.]
+Previous Frame: [,]
+Play: [Ctrl/Cmd + P]
+Pause: [Ctrl /Cmd + Shift + P]
+Step: [Ctrl/Cmd + Alt + P]
+Create Empty Game Object: [Ctrl/Cmd + Shift + N]
+Duplicate: [Ctrl/Cmd + D]
+Invert Selection: [Ctrl/Cmd + I]
+Deselect All: [Shift + D]q
+Move Object to View: [Ctrl/Cmd + Alt + F]
