@@ -553,3 +553,4 @@ pyaddtodo=add_todo_prob.bat py
 calc_lines=git ls-files -z  
 flip=py C:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\flip_screen.py  
 gorg=cdv C:\Users\OmarPc\repo_Reality_SimSuit_grad_project  
+ngrp=grep  -v -i -n -H -G  $* --color  
