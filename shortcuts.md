@@ -49,9 +49,14 @@ ctrl + alt + N (to build and run  using code runner in terminal <no debugging> )
 ctrl + Q (global search in VS studio)
 ctrl + alt + L (open explorer)
 ctrl + D (duplicate line/selected)
+ctrl + x ( delete )
 ctrl + W (select highlighted / select next occurance)
 Alt  + 1 (open terminal)
 ctrl + space (view suggestion list)
+ctrl +k , ctrl + d (format all document)
+ctrl + tab (switch between opened files)
+ctrl + p (switch to file fast by typing name like vs code) (default is ctrl + T or ctrl + ,)
+
 
 
 #  -----------------(Cmder + bash + CMD + powershell)-----------------IMPORTANT only
@@ -521,6 +526,7 @@ ctrl + b + '
 ```
 
 # -----------------Unity Editor-----------------IMPORTANT only
+
 Hand Tool: [Q]
 Move Tool: [W]
 Rotate Tool: [E]
@@ -542,3 +548,6 @@ Duplicate: [Ctrl/Cmd + D]
 Invert Selection: [Ctrl/Cmd + I]
 Deselect All: [Shift + D]q
 Move Object to View: [Ctrl/Cmd + Alt + F]
+Maximize Game View: [Shift + Space]
+Open Console: [Ctrl + Shift + C]
+make camera same as scene view: [ctrl + shift + f]
