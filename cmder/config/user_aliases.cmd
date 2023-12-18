@@ -517,7 +517,6 @@ disweb=move_dicord_webapp_brave.bat
 dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  
 brave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" $*  
 twt=start https://www.twitch.tv/search?term=$1%20$2%20$3%20$4%20$5%20$6%20$7%20$8%20$9  
-grep=grep -i $* --color  
 ~1=~0,-1  
 find=tasklist  $b sort $b  grep -i -e "image name" -e "=" -e "$*"  --color  
 ua=alias /d $*  
@@ -527,13 +526,9 @@ what=chrome --app=https://web.whatsapp.com/ $t timeout /t 2 $t  mmt /MoveWindow 
 look=start https://outlook.office.com/mail/?actSwt=true  
 sgxcog=opera --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 sgx=opera https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
-gptp=chrome --app=https://poe.com/ChatGPT  
-gptf=chrome --app=https://chat.forefront.ai/ $t  timeout /t 2 $t  mmt /MoveWindow 1 Title "Forefront: Your new AI assistant" /WindowLeft -10 /WindowTop 0 /WindowWidth 917 /WindowHeight 1600  
 gxcog=opera --incognito $*  
 gx=opera $*  
-gpt=chrome --app=https://chat.openai.com/  
 ocd=cd $*  
-gptph=chrome  --app=https://www.phind.com/  
 gproj=cd /d "E:\omar-work\Grad Proj Reality SimSuit"  
 jptopdf=jupyter-nbconvert --to pdf $*  
 twtdisorg= cdv C:\Users\OmarPc\repo_Tweet_discord\  
@@ -554,3 +549,6 @@ calc_lines=git ls-files -z
 flip=py C:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\flip_screen.py  
 gorg=cdv C:\Users\OmarPc\repo_Reality_SimSuit_grad_project  
 ngrp=grep  -v -i -n -H -G  $* --color  
+grep=grep -i $* --color  
+gptg=chrome --app=https://chat.openai.com  
+gpt=python C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py $*  
