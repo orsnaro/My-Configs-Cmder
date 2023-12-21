@@ -48,14 +48,16 @@ ctrl + alt + N (to build and run  using code runner in terminal <no debugging> )
 
 ctrl + Q (global search in VS studio)
 ctrl + alt + L (open explorer)
-ctrl + W (duplicate line/selected)
-ctrl + L ( line delet )
+ctrl + W (close file)
+ctrl + shift + / (dup line / selected)
+ctrl + \ ( toggle block comment)
+ctrl + L ( line delete )
 ctrl + D (select highlighted / select next occurance)
 Alt  + 1 (open terminal)
 ctrl + space (view suggestion list)
 ctrl + k , ctrl + d (format all document)
 ctrl + tab (switch between opened files)
-ctrl + p (switch to file fast by typing name like vs code) (default is ctrl + T or ctrl + ,)
+ctrl + p (switch to file fast by typing name like vs code)(to specifically search files not classes or etc use `f:<file name>`) (default is ctrl + T or ctrl + ,)
 
 
 
