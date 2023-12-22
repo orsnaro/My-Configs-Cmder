@@ -13,7 +13,7 @@ ctr+ shift+ p (all shortcuts vs code)
 (NOT DEFAULT) ~ + Q (toggle side activity bar))
 (NOT DEFAULT)ctrl + j/k/l/i (move cursor a word 'instead of arrows')
 (NOT DEFAULT)ctrl + alt + j/l (select word lift or right)
-(NOT DEFAULT) Alt + T (toggle whitespaces render) 
+
 
 ctrl + k + release + o (separate vs code in totally diff windows)
 ctrl+ tab   (switch between "active" tabs)
@@ -45,7 +45,8 @@ ctrl + alt + N (to build and run  using code runner in terminal <no debugging> )
 ```
 
 # -----------------VS Studio-----------------IMPORTANT only
-
+(NOT DEFAULT)
+```
 ctrl + Q (global search in VS studio)
 ctrl + alt + L (open explorer)
 ctrl + W (close file)
@@ -58,7 +59,8 @@ ctrl + space (view suggestion list)
 ctrl + k , ctrl + d (format all document)
 ctrl + tab (switch between opened files)
 ctrl + p (switch to file fast by typing name like vs code)(to specifically search files not classes or etc use `f:<file name>`) (default is ctrl + T or ctrl + ,)
-
+Alt + T (toggle whitespaces render) 
+```
 
 
 #  -----------------(Cmder + bash + CMD + powershell)-----------------IMPORTANT only
@@ -528,17 +530,10 @@ ctrl + b + '
 ```
 
 # -----------------Unity Editor-----------------IMPORTANT only
-
-Hand Tool: [Q]
-Move Tool: [W]
-Rotate Tool: [E]
-Scale Tool: [R]
-Rect Tool: [T]
-Unified Tool: [Y]
-Toggle Pivot/Center: [Z]
-Toggle Global/Local: [X] 
-Vertex Snap: [V]
-Grid Snap: [Ctrl]
+global search [Ctrl + K]
+scroll between Scene Tools: [Q-W-E-R-T-Y]
+Scene Vertex Snap: hold[V]
+Scene Grid Snap: hold[Ctrl]
 Toggle Play: [Space]
 Next Frame: [.]
 Previous Frame: [,]
