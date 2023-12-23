@@ -11,5 +11,6 @@ cmder/vlc-help.txt
 cmder_log/
 cmder/config/*
 !cmder/config/*.cmd
+!cmder/config/user-ConEmu.xml
 !cmder/bin/*
 tst/
