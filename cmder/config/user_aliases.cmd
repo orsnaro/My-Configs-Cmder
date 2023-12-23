@@ -517,7 +517,6 @@ disweb=move_dicord_webapp_brave.bat
 dis=powershell.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  
 brave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" $*  
 twt=start https://www.twitch.tv/search?term=$1%20$2%20$3%20$4%20$5%20$6%20$7%20$8%20$9  
-~1=~0,-1  
 find=tasklist  $b sort $b  grep -i -e "image name" -e "=" -e "$*"  --color  
 ua=alias /d $*  
 unalias=alias /d $*  
@@ -552,3 +551,4 @@ ngrp=grep  -v -i -n -H -G  $* --color
 grep=grep -i $* --color  
 gptg=chrome --app=https://chat.openai.com  
 gpt=python C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py $*  
+~1=~0,-1  
