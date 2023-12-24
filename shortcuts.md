@@ -180,6 +180,8 @@ Ctrl + Alt + U : Traverse up in directory structure (lovely feature!)
 End, Home, Ctrl : Traversing text with as usual on Windows
 Ctrl + R : History search
 Shift + Mouse : Select and copy text from buffer
+
+win + alt + a : open ConEmu about window ( from there you can find monitors ids)
 ```
 
 #  -----------------(Git) -----------------IMPORTANT only
