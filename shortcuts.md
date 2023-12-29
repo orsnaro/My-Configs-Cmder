@@ -317,7 +317,7 @@ to use help in cmd
 ---> '-c' to just only compile filname not link it (output file is filename.o)
 
 ====> for more cpp commands in cmd : https://www.makeuseof.com/tag/15-cmd-commands-every-windows-user-know/
-```
+
 ```batch
 for /l %x in (1, 1, 100) do (
 echo %x
@@ -326,8 +326,8 @@ echo any thing
 
 )
 ```
-```
---> for loop that works in cmer for more type for /?
+
+--> for loop that works in cmder for more type for /?
 --> if used in batch file use double percent '%%' before var name
 
 'notepad'
