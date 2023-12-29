@@ -63,7 +63,7 @@ Alt + T (toggle whitespaces render)
 ```
 
 
-#  -----------------(Cmder + bash + CMD + powershell)-----------------IMPORTANT only
+#  -----------------(Cmder)-----------------IMPORTANT only
 ```
 `cmd`
 --> to run/nest new cmd inside cmder/cmd/powershell ( not cmder alias is windows default argument)
@@ -175,7 +175,7 @@ Ctrl + Shift + Tab : Switch to previous tab
 Ctrl + #Number : Switch to tab #Number
 Alt + Enter: Fullscreen
 
-*Shell  
+*terminal  
 Ctrl + Alt + U : Traverse up in directory structure (lovely feature!)
 End, Home, Ctrl : Traversing text with as usual on Windows
 Ctrl + R : History search
@@ -247,7 +247,7 @@ U: The file is unmerged, meaning it has conflicts that need to be resolved.
 !: file has merge conflict that need to be manually done ( both modified in local and remote)
 
 ```
-# -----------------(CMD & power shell)-----------------IMPORTANT only
+# -----------------(power shell & CMD)-----------------IMPORTANT only
 ```
 `help <ur command>`
 or `<ur command> /?`
@@ -317,6 +317,7 @@ to use help in cmd
 ---> '-c' to just only compile filname not link it (output file is filename.o)
 
 ====> for more cpp commands in cmd : https://www.makeuseof.com/tag/15-cmd-commands-every-windows-user-know/
+```
 ```batch
 for /l %x in (1, 1, 100) do (
 echo %x
@@ -346,84 +347,7 @@ echo any thing
 ====> crash CLI course : https://youtube.com/playlist?list=PLDoPjvoNmBAxzNO8ixW83Sf8FnLy_MkUT
 ```
 
-# -----------------CODELITE-----------------IMPORTANT only
-```
-'ctrl+up\down' to swap lines places
-'end' to go to the end of the line
-'home' to go to the begining of line
-'ctrl+tap' to switch between taps
-'ctrl+y' redo last undo
-'ctrl+tap+left or right' to delete word at once
-'ctrl+scroll' zoom in or ou
-'ctrl+shift+p' open  kebindings in Atom Editor
-'ctrl+,' open settings in Atom editor
-'Alt+F3' select only next same word  (ATOM shortcut)
-'Alt+d' select all same next word (ATOM)
-'ctrl+f' find and replace (ATOM)
-select same word  or edit same word (not in codelite)  T_T
-
-=====> all ECLIPSE  shortcut ctrl+ shft+L (see keybindings)
-very usefull explanation for c functions at : https://www.ibm.com/support/knowledgecenter/ssw_ibm_i_74/rtref/scanf.htm
-```
-# -----------------ATOM-----------------IMPORTANT only
-```
-'ctrl+shift+p' open  kebindings in Atom Editor
-'ctrl+,' open settings in Atom editor
-'Alt+F3' select only next same word  (ATOM shortcut)
-'Alt+d' select all same next word (ATOM)
-'ctrl+f' find and replace (ATOM)
-
-======> more ATOM  shortcuts https://github.com/nwinkler/atom-keyboard-shortcuts
-```
-# -----------------ECLIPSE-----------------IMPORTANT only
-```
-
-macro for build and run in eclipse (f12)
-
-ctrl+d = delete all line
-
-ctrl+shift+delete = delete to line end
-
-ctrl +alt + up or down = duplicate line
-
-alt + up or down= move line
-
-alt+/ = auto complete
-
-ctrl+space = auto complete +
-
-alt+ shift +z = auto wrap code 
-
-ctrl+f = find and replace/replace all
-
-ctrl+k= find next 
-
-ctrl+shift+k+ find previous
-
-ctrl+shift+f= auto reformate code
-
-ctrl+b =build code 
-
-ctrl+y=redo
-
-ctrl+# = commit
-
-ctr+shift+l= shortcut menu
-
-```
-
-
-# -----------------Jupyter in vs code-----------------IMPORTANT only
-  
-  ```c++
-  
-    YOUR BLOCK OF CODE 
-    
-  ```
-  ---> to write any block of code  in (jupyter markdown - md - discord ... etc )of any language just replace C++ with your language
-
-
-# -----------------bash ubuntu-----------------IMPORTANT only
+# -----------------(bash in ubuntu)-----------------IMPORTANT only
 ```
 
 `pwd` 
@@ -503,8 +427,7 @@ o -> in `chomd` command means others
 ```
 
 
-
-# -----------------tmux in bash ubuntu-----------------IMPORTANT only
+# -----------------(tmux in bash ubuntu)-----------------IMPORTANT only
 ```
 ctrl + b c 
 -> (tabbing: new tab )(press them seperatly) 
@@ -532,6 +455,7 @@ ctrl + b + '
 ```
 
 # -----------------Unity Editor-----------------IMPORTANT only
+```
 global search [Ctrl + K]
 scroll between Scene Tools: [Q-W-E-R-T-Y]
 Scene Vertex Snap: hold[V]
@@ -545,8 +469,9 @@ Step: [Ctrl/Cmd + Alt + P]
 Create Empty Game Object: [Ctrl/Cmd + Shift + N]
 Duplicate: [Ctrl/Cmd + D]
 Invert Selection: [Ctrl/Cmd + I]
-Deselect All: [Shift + D]q
+Deselect All: [Shift + D]
 Move Object to View: [Ctrl/Cmd + Alt + F]
 Maximize Game View: [Shift + Space]
 Open Console: [Ctrl + Shift + C]
 make camera same as scene view: [ctrl + shift + f]
+```
