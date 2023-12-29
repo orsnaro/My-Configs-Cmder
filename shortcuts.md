@@ -325,7 +325,7 @@ echo %x
 echo any thing
 
 )
-```
+\```
 
 --> for loop that works in cmder for more type for /?
 --> if used in batch file use double percent '%%' before var name
@@ -345,6 +345,7 @@ echo any thing
 ====> for more usefull  general 'power shell' and 'cmd' commands : https://www.makeuseof.com/tag/15-cmd-commands-every-windows-user-know/
 
 ====> crash CLI course : https://youtube.com/playlist?list=PLDoPjvoNmBAxzNO8ixW83Sf8FnLy_MkUT
+
 ```
 
 # -----------------(bash in ubuntu)-----------------IMPORTANT only
