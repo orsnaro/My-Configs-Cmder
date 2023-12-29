@@ -318,7 +318,7 @@ to use help in cmd
 
 ====> for more cpp commands in cmd : https://www.makeuseof.com/tag/15-cmd-commands-every-windows-user-know/
 
-```batch
+\```batch
 for /l %x in (1, 1, 100) do (
 echo %x
 
