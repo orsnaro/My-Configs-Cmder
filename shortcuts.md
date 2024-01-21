@@ -1,7 +1,7 @@
 
-
-> (F10 to toggle notepad++ task bar)
-
+# ----------------- NOTEPAD++ -----------------IMPORTANT only
+> (F10) to toggle notepad++ task bar
+> (ctrl + shift + m ) to open md preview
 # -----------------VS code-----------------IMPORTANT only
 ```
 ctr+ shift+ p (all shortcuts vs code)
