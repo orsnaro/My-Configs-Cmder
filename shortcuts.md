@@ -52,7 +52,6 @@ ctrl + alt + L (open explorer)
 ctrl + W (close file)
 ctrl + shift + / (dup line / selected)
 ctrl + \ ( toggle block comment)
-ctrl + L ( line delete )
 ctrl + D (select highlighted / select next occurance)
 Alt  + 1 (open terminal)
 ctrl + space (view suggestion list)
@@ -60,6 +59,8 @@ ctrl + k , ctrl + d (format all document)
 ctrl + tab (switch between opened files)
 ctrl + p (switch to file fast by typing name like vs code)(to specifically search files not classes or etc use `f:<file name>`) (default is ctrl + T or ctrl + ,)
 Alt + T (toggle whitespaces render) 
+ctrl + shift + x ( line delete )
+ctrl + x ( line cut )
 ```
 
 
@@ -475,4 +476,5 @@ Move Object to View: [Ctrl/Cmd + Alt + F]
 Maximize Game View: [Shift + Space]
 Open Console: [Ctrl + Shift + C]
 make camera same as scene view: [ctrl + shift + f]
+shrink all child dirs: [alt + click on shrink arrow]
 ```
