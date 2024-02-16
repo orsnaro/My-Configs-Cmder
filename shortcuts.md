@@ -61,6 +61,8 @@ ctrl + p (switch to file fast by typing name like vs code)(to specifically searc
 Alt + T (toggle whitespaces render) 
 ctrl + shift + x ( line delete )
 ctrl + x ( line cut )
+alt + w then V (new window vertical)
+alt + w then H (new window horz)
 ```
 
 
@@ -477,4 +479,5 @@ Maximize Game View: [Shift + Space]
 Open Console: [Ctrl + Shift + C]
 make camera same as scene view: [ctrl + shift + f]
 shrink all child dirs: [alt + click on shrink arrow]
+manual refresh assets [ctrl + r] (if u wnna enable auto refresh edit -> preferences -> Asset pipeline)
 ```
