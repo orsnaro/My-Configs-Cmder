@@ -22,6 +22,7 @@ ctrl+b (close side bar )
 win+`  (close terminal side)
 ctrl + g (go to line X)
 ctrl + 0 ( go outside bracket)
+alt + enter (open search result in formated tab)
 
 
 shift+ctrl+/ (jmp to matching bracket)
