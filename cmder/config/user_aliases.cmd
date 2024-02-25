@@ -50,7 +50,6 @@ allgitdiff= allgitdiff.bat
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
-exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
 kltsk=taskkill /im "$*"  /f  
 remotes=start https://github.com/  
@@ -131,7 +130,6 @@ allgitdiff= allgitdiff.bat
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
-exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
 kltsk=taskkill /im "$*"  /f  
 remotes=start https://github.com/  
@@ -212,7 +210,6 @@ allgitdiff= allgitdiff.bat
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
-exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
 kltsk=taskkill /im "$*"  /f  
 remotes=start https://github.com/  
@@ -293,7 +290,6 @@ allgitdiff= allgitdiff.bat
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
-exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
 kltsk=taskkill /im "$*"  /f  
 remotes=start https://github.com/  
@@ -374,7 +370,6 @@ allgitdiff= allgitdiff.bat
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
-exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
 kltsk=taskkill /im "$*"  /f  
 remotes=start https://github.com/  
@@ -455,7 +450,6 @@ allgitdiff= allgitdiff.bat
 allgitall= allgitall.bat  
 parkremote=start https://github.com/Gehad-AboElmagd/smart_parking_system  
 keyorg= cdv C:\Users\%USERNAME%\repo_KeyRec_tool  
-exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.0B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.0B.py  
 asdarec= KeyRec-Asda  
 kltsk=taskkill /im "$*"  /f  
 remotes=start https://github.com/  
@@ -557,3 +551,6 @@ games=cdv "C:\Users\OmarPc\Documents\game_fast\" $t explorer .
 gorg=cdv C:\Users\OmarPc\others_repo_grad\  
 gproj=cdv "C:\Users\OmarPc\others_repo_grad\unity_study\unity_projs\"  
 bard=opera https://gemini.google.com/app  
+komo=komorebic start --wkhd --config C:\Users\OmarPc\komorebi.json $*  
+klmutli=taskkill /im "UniversalSplitScreen.exe" /f  
+exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\OmarPc\repo_KeyRec_tool\dump --distpath=C:\Users\OmarPc\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.1B\ --onefile --icon=C:\Users\OmarPc\repo_KeyRec_tool\dump\KeyRec.ico C:\Users\OmarPc\repo_KeyRec_tool\source\keyrec_1window_V2.1.1B.py  
