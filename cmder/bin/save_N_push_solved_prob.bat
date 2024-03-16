@@ -32,7 +32,11 @@ rem enter the link of problem to be added to git commit message (optional)
 set /p commitMsg=paste problem link: || set commitMsg=NoLinkProvided
 
 rem add, commit and push your new solved problem in its own file (optional: leave problem url in the commit message)
+<<<<<<< HEAD
 git add .\%src_file%.%ext% .\%probsFolder% & git commit -m "#Done: %commitMsg% #" & git push
+=======
+git add .\Cp.%ext% .\%probsFolder%\ & git commit -m "#Done: %commitMsg% #" & git push
+>>>>>>> 3c95e8a (Update save_N_push_solved_prob.bat: all pathes of done probs vis the variable not literals)
 
 
 cd %oldpath%
