@@ -40,6 +40,7 @@ p (paste line "pastes before the end of your cursor" while in visual mode)
 
 misc.
 :<command1> | :<command2> (chain commands using pipe'|')
+:source ~/.vimrc (reloads the .vimrc "can be used with some other files)
 ```
 # -----------------VS code-----------------IMPORTANT only
 ```
