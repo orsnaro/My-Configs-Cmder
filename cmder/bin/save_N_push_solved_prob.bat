@@ -23,7 +23,7 @@ rem note: change the file CP.cpp to one that you solve problems in it
 copy Cp.%ext%  %probsFolder%\prob_no_%FILECOUNT%.%ext%
 
 rem add, commit and push your new solved problem in its own file (optional: leave problem url in the commit message)
-git add .\Cp.%ext% .\done_probs\ & git commit -m "#Done: %commitMsg% #" & git push
+git add .\Cp.%ext% .\%probsFolder%\ & git commit -m "#Done: %commitMsg% #" & git push
 
 
 cd %oldpath%
