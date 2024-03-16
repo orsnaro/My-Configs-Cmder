@@ -27,7 +27,8 @@ i (enter insert mode from command mode)
 u ( undo last changes 'like ctrl-z' )
 Esc (enter command mode)
 v (enter visual mode from command mode 'V' in captial for visual line mode)
-:!<cmd command> (executes cmder/cmd command while inside nvim like `:!ls`)
+:!<cmd command> (executes cmder/cmd command while inside nvim liie `:!ls`)
+/<searh query> + Enter (search in nvim use n,N to cycle between matches)
 :help (obvious "any `:` is when ur in viusla/command mode not insert mode!")
 :<line no,col>g g (move to specific line in text while in command mode)
 <line no>g (go to the line number in text while in command or visual mode)
@@ -36,6 +37,9 @@ G (go to bottom of text)
 V + <line no, col>gg (select lines until given line)
 y (copy line "or to end of your cursor" while in visual mode)
 p (paste line "pastes before the end of your cursor" while in visual mode)
+
+misc.
+:<command1> | :<command2> (chain commands using pipe'|')
 ```
 # -----------------VS code-----------------IMPORTANT only
 ```
@@ -89,7 +93,7 @@ ctrl + W (close file)
 ctrl + shift + / (dup line / selected)
 ctrl + \ ( toggle block comment)
 ctrl + D (select highlighted / select next occurance)
-Alt  + 1 (open terminal)
+ctrl  + 1 , 1 (open terminal)
 ctrl + space (view suggestion list)
 ctrl + k , ctrl + d (format all document)
 ctrl + tab (switch between opened files)
