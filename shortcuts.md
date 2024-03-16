@@ -2,6 +2,41 @@
 # ----------------- NOTEPAD++ -----------------IMPORTANT only
 > (F10) to toggle notepad++ task bar
 > (ctrl + shift + m ) to open md preview
+# -----------------Komorebi Tiling manager-----------------IMPORTANT only
+> CONFIG AT : "C:\Program Files\whkd\bin\whkd_komorebi.whkdrc" & ENV VAR IS "WHKD_CONFIG_HOME"
+```
+alt + T (float/unfloat selected  "free")
+alt + P (pause/unpause komorebi)
+alt + H,J,K,L(move focus: up,left,down,right) (same as vim but made it more natural to me)
+alt + shift + H,J,K,L(move window: up,left,down,right) (same as vim but made it more natural to me)
+alt + 1,2,3.... (switch between workspaces)
+alt + shift + 1,2,3.... (move app between workspaces)
+
+misc.
+alt + '+' (resize also '-')
+alt + shift + r  ((reset tile grid)
+alt + X,Y (flip windows horz and vertic)
+alt + ctrl + up,down,left,right(stack)
+alt + ],[ (cycle in stack)
+alt + ; right(unstack)
+```
+# -----------------NVIM-----------------IMPORTANT only
+> NVIM binds are case Sensitive!
+```
+i (enter insert mode from command mode)
+u ( undo last changes 'like ctrl-z' )
+Esc (enter command mode)
+v (enter visual mode from command mode 'V' in captial for visual line mode)
+:!<cmd command> (executes cmder/cmd command while inside nvim like `:!ls`)
+:help (obvious "any `:` is when ur in viusla/command mode not insert mode!")
+:<line no,col>g g (move to specific line in text while in command mode)
+<line no>g (go to the line number in text while in command or visual mode)
+gg (go to top of text)
+G (go to bottom of text)
+V + <line no, col>gg (select lines until given line)
+y (copy line "or to end of your cursor" while in visual mode)
+p (paste line "pastes before the end of your cursor" while in visual mode)
+```
 # -----------------VS code-----------------IMPORTANT only
 ```
 ctr+ shift+ p (all shortcuts vs code)
@@ -59,11 +94,17 @@ ctrl + space (view suggestion list)
 ctrl + k , ctrl + d (format all document)
 ctrl + tab (switch between opened files)
 ctrl + p (switch to file fast by typing name like vs code)(to specifically search files not classes or etc use `f:<file name>`) (default is ctrl + T or ctrl + ,)
-Alt + T (toggle whitespaces render) 
+Alt + T (toggle whitespaces render)
 ctrl + shift + x ( line delete )
 ctrl + x ( line cut )
 alt + w then V (new window vertical)
 alt + w then H (new window horz)
+ctrl + M, ctrl + A (COLLAPSE ALL!)
+ctrl + M, ctrl + X (EXPAND ALL!)
+ctrl + M, ctrl + S (collapse region)
+ctrl + M, ctrl + E (expand region)
+shft + Alt + = (expand The Hilight highlight more)
+
 ```
 
 
@@ -73,10 +114,10 @@ alt + w then H (new window horz)
 --> to run/nest new cmd inside cmder/cmd/powershell ( not cmder alias is windows default argument)
 
 `ps`
--->(NOT DEFAULT)(cmder alias)  to run powershell inside the current cmd/cmder/powershell and nest them 
+-->(NOT DEFAULT)(cmder alias)  to run powershell inside the current cmd/cmder/powershell and nest them
 
 `set`
---> to echo all windaws deafult arguments and variables  
+--> to echo all windaws deafult arguments and variables
 
 `code`
 --> opens vs code
@@ -112,20 +153,20 @@ $*
 `start filename.exe`
 --> (open any exe in directory)
 
-ctrl + r 
+ctrl + r
 --> reverse search command histroy ( if ur wanted command is before found one just PRESS ctr + r again until u found it )
 ctrl + s
 --> forward search in cmder
 
 arrow right
 --> get the found search to terminal
- 
- 
+
+
 `winget list`
 --> list all installed programs versions and if there is newer available version for upgrade
 
 `winget upgrade --all`
---> update all programs installed 
+--> update all programs installed
 
 `dir  "\*part_of_filename*"  /s`
 --> searches for ur file (for linux and cmder u can use 'find' also try find --help)
@@ -147,12 +188,12 @@ arrow right
  `tasklist | grep *your running process name*`
  --> this will only search and echo the runing tasks that has same name if there is any
  --> (user defined alias for tasklist command is 'tsk' or 'task'
- 
+
  `taskkill /im runing_task_name`
--->kill task using image name (omit /im to kill task by process number PID) 
+-->kill task using image name (omit /im to kill task by process number PID)
 
 `python -m venv virtual_env_name`
---> make new python virtual env 
+--> make new python virtual env
 
 `vritual_env_path/Scripts/activate`
 --> start your virtual env
@@ -162,7 +203,7 @@ arrow right
 
 
 *Pan manipulation
-(WIN TERMINAL PREVIEW)  alt + shift + d/s 
+(WIN TERMINAL PREVIEW)  alt + shift + d/s
 --> duplicate pane ( split horz / vertically ) (ctrl instead of alt to duplicate whole tab not good in quake mode)
 
 (WIN TERMINAL PREVIEW)  alt + right /lift / up / down
@@ -179,7 +220,7 @@ Ctrl + Shift + Tab : Switch to previous tab
 Ctrl + #Number : Switch to tab #Number
 Alt + Enter: Fullscreen
 
-*terminal  
+*terminal
 Ctrl + Alt + U : Traverse up in directory structure (lovely feature!)
 End, Home, Ctrl : Traversing text with as usual on Windows
 Ctrl + R : History search
@@ -191,13 +232,13 @@ win + alt + a : open ConEmu about window ( from there you can find monitors ids)
 #  -----------------(Git) -----------------IMPORTANT only
 ```
 https://kbroman.org/github_tutorial/pages/first_time.html
--->docs on: connect and auth git with github acc for push 
+-->docs on: connect and auth git with github acc for push
 
 `create-shortcut "source path" "destination path"`
 --> create a shortcut (must apend destination path with "ShortcutName.lnk")
 
 `git checkout   "hash or branch name"`
---> move head (ure current snapshot) to older snapshot of ur dir 
+--> move head (ure current snapshot) to older snapshot of ur dir
 --> or move head to another local branch
 
 `git fetch --prune`
@@ -207,13 +248,13 @@ https://kbroman.org/github_tutorial/pages/first_time.html
 
 `git rebase -i head~(number of commits before current that you want to delete)`
 --> will open an editor jsut put 'd' before any commit u want to delete
---> after that save and close editor 
+--> after that save and close editor
 
 `git branch -vv`
 --> to view all current branches data
 
 `git reflog`
---> view some important data on your head and branches changes 
+--> view some important data on your head and branches changes
 
 `git branch -b ur_local_branch_name`
 --> to make new local branch in your local repo (copying all from current branch as default)
@@ -221,7 +262,7 @@ https://kbroman.org/github_tutorial/pages/first_time.html
 `git push -u ur_local_branch_name`
 --> to make new remote branch for your new local branch
 
-`git push -f` to final update the commit histroy at remote  
+`git push -f` to final update the commit histroy at remote
 -- > all commits u done 'd' before them gone for ever! DONT USE `-f` unless needed
 
 
@@ -229,7 +270,7 @@ https://kbroman.org/github_tutorial/pages/first_time.html
 --> to merge a branch with another branch (will not delete any of the two brancheds)
 
 --> to copy already made local repo to already made remote repo please use either gh commands or github desktop
---> PLEASE DONT MAKE LOCAL AND REMOTE BRANCHES WITH DIFF NAMES PLEASE!! 
+--> PLEASE DONT MAKE LOCAL AND REMOTE BRANCHES WITH DIFF NAMES PLEASE!!
 .....THIS IS NOT GIT DEFAULT AND CAUSESE MAMY HEADEACHES LATER ON IF U MANAGED TO DO IT IN FIRST PLACE
 
 all important commands r here :
@@ -258,7 +299,7 @@ or `<ur command> /?`
 or `<ur command>  --help`
 --> to read documentaion for the command u want (last one for cmder and linux only)
 
-to use help in cmd 
+to use help in cmd
 
 *note:  using '/' or '\' is interchangable in cmd -most if time- also 'tab' will autocomplete ur command
 
@@ -280,7 +321,7 @@ to use help in cmd
 ---> to write to file use (@echo ur text >> filename.txt) '>>' to append in new line not to overwrite
 ---> also check cat command and cp or copy on alzero crash course (link is down).
 
-`cd .\folder1\folder2`                
+`cd .\folder1\folder2`
  --> change directory to a one inside ur current directory (dont miss dot in begining)
 
 `cd C:\folder1\folder2`
@@ -298,7 +339,7 @@ to use help in cmd
 `Remove-Item 'D:\temp\Test Folder1`
 --> removes the folder but it must be empty (to force remove append -recurse)
 
-`New-Item filename.txt -ItemType file`  
+`New-Item filename.txt -ItemType file`
 --> make a new file (u can make it .cpp and it will open in txt normally)
 
 `New-Item filename.txt -path [UR FULL PATH HERE] -ItemType file`
@@ -311,7 +352,7 @@ to use help in cmd
 -->multiple files in another dir (u can make an file typ like .cpp) ***POWER SHELL ONLY!***
 
 `get-childitem`
---> will list all content -files and folders- inside current directory 
+--> will list all content -files and folders- inside current directory
 
 `g++ filname.cpp -o filename.exe' ; .\filename.exe`
 --> ***POWER SHELL ONLY!*** (compile and run filname.exe in one statement)(filename.exe could be written only filename)
@@ -343,9 +384,9 @@ echo any thing
 `Measure-Command {start-process 'FILE U WANT TO EXECUTE no qoutes!' -Wait}`
 ----> to calc execution time taken in this .exe file runtime.
 
-====> on echo new line either using echo. or envisible 255 arg using alt+255 
+====> on echo new line either using echo. or envisible 255 arg using alt+255
  https://stackoverflow.com/questions/132799/how-can-i-echo-a-newline-in-a-batch-file#:~:text=You%20can%20insert%20an%20invisible,top%20of%20the%20querty%20keyboard!
- 
+
 ====> for more usefull  general 'power shell' and 'cmd' commands : https://www.makeuseof.com/tag/15-cmd-commands-every-windows-user-know/
 
 ====> crash CLI course : https://youtube.com/playlist?list=PLDoPjvoNmBAxzNO8ixW83Sf8FnLy_MkUT
@@ -355,10 +396,10 @@ echo any thing
 # -----------------(bash in ubuntu)-----------------IMPORTANT only
 ```
 
-`pwd` 
+`pwd`
 -> (echo current dir also use env. var. `~`)
 
-`export var=any-val` 
+`export var=any-val`
 -> (makes env. var. also could use set)
 
 `printenv`
@@ -368,10 +409,10 @@ echo any thing
 -> (to remove env. variable  'set env_var=' does not delete it like it does in cmder. It jsut makes variable empty)
 
 `htop`
--> (call it task maneger of  ubuntu & unix <3 btw made by someone called hisham) 
+-> (call it task maneger of  ubuntu & unix <3 btw made by someone called hisham)
 
 `iotop`
--> (similar to htop but stats: provides more deatails about disk usage by processes) 
+-> (similar to htop but stats: provides more deatails about disk usage by processes)
 
 `sudo apt-get -y install app-name `
 -> ( installs apps and auto  'yes' to all prompts )
@@ -383,12 +424,12 @@ echo any thing
 -> (chmod modifies permissions of a file: this one gives right to exec'x' and owmer permission 'u')
 
 `kill task-id`
--> (kills task by pid) 
+-> (kills task by pid)
 
 `pkill task-name`
 -> ( kills task by name )
 
-`ps` 
+`ps`
 -> (print running processes that are attached to terminal only)
 
 `ps -e`
@@ -422,9 +463,9 @@ w -> //   //         //   //   '010' or in dec 2 and its an write permission
 r -> //   //         //   //   '100' or in dec 4 and its a  read permision
 d -> not actual permission but tells us that this is a `dir` or if '-' instead of 'd' then its a `file`
 
-u -> in `chmod` command means owner 
-g -> in `chmod` command means group 
-o -> in `chomd` command means others 
+u -> in `chmod` command means owner
+g -> in `chmod` command means group
+o -> in `chomd` command means others
 
 `chmod ugo+rwx foo.sh`
 -> this example comand give all fileOwner-group-others the permission to read write and execute
@@ -434,28 +475,28 @@ o -> in `chomd` command means others
 
 # -----------------(tmux in bash ubuntu)-----------------IMPORTANT only
 ```
-ctrl + b c 
--> (tabbing: new tab )(press them seperatly) 
+ctrl + b c
+-> (tabbing: new tab )(press them seperatly)
 
-ctrl + b <tab num> 
+ctrl + b <tab num>
 -> (switches to tab)
 
-ctrl + b % 
+ctrl + b %
 ->(panning: split a new pan to right)
 
-ctrl + b hold → 
+ctrl + b hold →
 -> (resize the pane)
 
-ctrl + b → 
+ctrl + b →
 -> ( switch to the right pan  also : ctrl+b+left moves to the left pan)
 
-ctrl + b " 
+ctrl + b "
 -> (split down)
 
 ctrl + b + '
 -> (searches tab by name and switches to it)
 
- exit 
+ exit
 -> (gets out of program. if in bash exits tmux)
 ```
 
