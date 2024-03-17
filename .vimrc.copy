@@ -1,0 +1,4 @@
+filetype plugin indent on
+set autoindent
+syntax on
+set number
