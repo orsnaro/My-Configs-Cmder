@@ -1,0 +1,82 @@
+{
+	"$schema": "https://raw.githubusercontent.com/LGUG2Z/komorebi/v0.1.20/schema.json",
+	"app_specific_configuration_path": "$Env:USERPROFILE/applications.yaml",
+	"window_hiding_behaviour": "Minimize",
+	"cross_monitor_move_behaviour": "Insert",
+	"default_workspace_padding": 0,
+	"default_container_padding": 2,
+	"app_specific_configuration_path": "C:\Users\OmarPc\applications.yaml",
+	"border_width": 4,
+	"border_offset": 0,
+	"active_window_border": true,
+	"active-window-border-width": 4,
+	"active-window-border-offset": 0,
+	"active_window_border_colours": {
+		"single": { "r": 178, "g": 102, "b": 255 },
+		"stack": { "r": 76, "g": 153, "b": 0 },
+		"monocle": { "r": 255, "g": 51, "b": 153 }
+	},
+	"monitors": [
+		{
+			"workspaces": [
+				{
+					"name": "Custom1lay",
+					"custom_layout": "c:/users/omarpc/komo_customLay1.json"
+				},
+				{ "name": "I", "layout": "BSP" },
+				{ "name": "II", "layout": "VerticalStack" },
+				{ "name": "III", "layout": "HorizontalStack" },
+				{ "name": "IV", "layout": "UltrawideVerticalStack" },
+				{ "name": "V", "layout": "Rows" }
+			]
+		},
+		{
+			"workspaces": [
+				{ "name": "V", "layout": "Rows" },
+				{ "name": "III", "layout": "HorizontalStack" }
+			]
+		}
+	],
+	"float_rules": [
+		{
+			"kind": "Exe",
+			"id": "ConEmu64.exe"
+		},
+		{
+			"kind": "Class",
+			"id": "HwndWrapper[DefaultDomain;;5f04116e-051e-42d5-be0a-ae2890b72e1c]"
+		},
+		{
+			"kind": "Exe",
+			"id": "WindowsTerminal.exe"
+		},
+		{
+			"kind": "Title",
+			"id": "Microsoft Visual Studio"
+		},
+		{
+			"kind": "Title",
+			"id": "Task Scheduler"
+		},
+		{
+			"kind": "Title",
+			"id": "Search everywhere"
+		},
+		{
+			"kind": "Class",
+			"id": "HwndWrapper[DefaultDomain;;54f9325a-101d-472f-9490-06ffdfc197d9]"
+		},
+		{
+			"kind": "Class",
+			"id": "HwndWrapper[DefaultDomain;;7d476ca0-246f-45ef-b6de-ae5a8c9c77c7]"
+		}
+	],
+
+	"tray_and_multi_window_applications": [
+		{
+			"kind": "Exe",
+			"id": "devenv.exe",
+			"matching_strategy": "Equals"
+		}
+	]
+}
