@@ -1,0 +1,28 @@
+set runtimepath^=~/.vim runtimepath+=~/.vim/after
+let &packpath = &runtimepath
+source ~/.vimrc
+nmap j <left>
+nmap l <right>
+nmap k <down>
+nmap i <up>
+nmap ; <insert>
+vmap j <left>
+vmap l <right>
+vmap k <down>
+vmap i <up>
+vmap <C-o> <Esc>
+imap <Up> <up>
+imap <Down> <down>
+imap <Left> <left>
+imap <Right> <right>
+inoremap <C-o> <Esc>
+inoremap <C-i> <Up>
+inoremap <C-k> <Down>
+inoremap <C-j> <Left>
+inoremap <C-l> <Right>
+ab init c:/users/omarpc/appdata/local/nvim/init.vim
+ab komo c:/users/omarpc/komorebi.json
+ab whkdrc c:/program files/whkd/bin/whkdrc 
+ab root c:/users/omarpc
+ab notes c:/users/omarpc/txt-notes
+
