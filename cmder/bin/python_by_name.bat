@@ -1,3 +1,5 @@
+ECHO OFF
+
 rem  it starts a python script but changes the process name in tskmgr
 rem this makes it easier to know which running python script is which
 

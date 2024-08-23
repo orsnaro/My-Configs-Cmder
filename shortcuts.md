@@ -7,7 +7,7 @@
 ```
 alt + T (float/unfloat selected  "free")
 alt + P (pause/unpause komorebi)
-alt + H,J,K,L(move focus: up,left,down,right) (same as vim but made it more natural to me)
+alt + I,J,K,L(move focus: up,left,down,right) (same as vim but made it more natural to me)
 alt + shift + H,J,K,L(move window: up,left,down,right) (same as vim but made it more natural to me)
 alt + 1,2,3.... (switch between workspaces)
 alt + shift + 1,2,3.... (move app between workspaces)
@@ -16,19 +16,446 @@ misc.
 alt + '+' (resize also '-')
 alt + shift + r  ((reset tile grid)
 alt + X,Y (flip windows horz and vertic)
-alt + ctrl + up,down,left,right(stack)
+alt + ctrl + shift + up,down,left,right(stack)
 alt + ],[ (cycle in stack)
 alt + ; right(unstack)
 ```
 # -----------------NVIM-----------------IMPORTANT only
 > NVIM binds are case Sensitive!
 ```
-i (enter insert mode from command mode)
+;,o,a (enter insert mode from normal mode. ';' overrides default 'i' for insert mode)
 u ( undo last changes 'like ctrl-z' )
 Esc (enter command mode)
 v (enter visual mode from command mode 'V' in captial for visual line mode)
 :!<cmd command> (executes cmder/cmd command while inside nvim liie `:!ls`)
 /<searh query> + Enter (search in nvim use n,N to cycle between matches)
+general:
+  # Whether to automatically focus windows underneath the cursor.
+  focus_follows_cursor: false 
+
+  # Whether to jump the cursor between windows focused by the WM.
+  cursor_follows_focus: true 
+
+  # Whether to switch back and forth between the previously focused workspace
+  # when focusing the current workspace.
+  toggle_workspace_on_refocus: true
+
+  # Whether to show floating windows as always on top.
+  show_floating_on_top: true 
+
+  # Amount to move floating windows by (eg. when using `alt+<ijkl>` on a floating window)
+  floating_window_move_amount: "15%"
+
+  # Whether to center new floating windows.
+  center_new_floating_windows: true
+
+  # *Strongly* recommended to set to 'false'. Whether to globally enable/disable
+  # window transition animations (on minimize, close, etc). Set to 'unchanged'
+  # to make no setting changes.
+  window_animations: "false"
+
+gaps:
+  # Gap between adjacent windows.
+  inner_gap: "10px"
+
+  # Gap between windows and the screen edge.
+  outer_gap: "4px"
+
+# Highlight active/inactive windows with a colored border.
+# ** Exclusive to Windows 11 due to API limitations.
+focus_borders:
+  active:
+    enabled: true 
+    color: "#16ffa1"
+
+  inactive:
+    enabled: true 
+    color: "#ff0000"
+
+bar:
+  enabled: true
+  always_on_top: true
+  height: "18px"
+  position: "bottom"
+  opacity: 0.9
+  background: *crust
+  foreground: *mauve
+  font_family: "Agave Nerd Font"
+  font_size: "10px"
+  padding: "4px 6px"
+  offset_x: "0"
+  offset_y: "0"
+  border_radius: "0"
+
+  components_left:
+    - type: "workspaces"
+      focused_workspace_background: "#ffffff33"
+      displayed_workspace_background: "#00000033"
+      default_workspace_background: "transparent"
+      padding: "0 4px"
+    - type: "window title"
+  components_center:
+    - type: "clock"
+      # Documentation on formatting date/time string:
+      # https://learn.microsoft.com/en-us/dotnet/standard/base-types/custom-date-and-time-format-strings
+      time_formatting: "hh:mm tt  ddd MMM d"
+  components_right:
+    - type: "weather"
+      latitude: 31.1341 
+      longitude: 30.6460
+      label: "{temperature_celsius}°C"
+      label_sun: "☀️ {temperature_celsius}°C"
+      label_moon: "🌙 {temperature_celsius}°C"
+      label_cloud_moon: "🌙☁️ {temperature_celsius}°C"
+      label_cloud_sun: "⛅ {temperature_celsius}°C"
+      label_cloud_moon_rain: "🌙🌧️ {temperature_celsius}°C"
+      label_cloud_sun_rain: "🌦️ {temperature_celsius}°C"
+      label_cloud_rain: "🌧️ {temperature_celsius}°C"
+      label_snow_flake: "❄️ {temperature_celsius}°C"
+      label_thunderstorm: "⚡ {temperature_celsius}°C"
+      label_cloud: "☁️ {temperature_celsius}°C"
+    - type: "system tray"
+    - type: "tiling direction"
+      label_horizontal: "⮂"
+      label_vertical: "⮁"
+      background: "#ffffff33"
+      margin: "0 4px"
+      padding: "0 8px"
+    - type: "binding mode"
+      background: "#ffffff33"
+      margin: "0 4px 0 0"
+      padding: "0 8px"
+    - type: "volume"
+      padding: "0 4px"
+      label_low: "🔊{volume_level}%"
+      label_medium: "🔊{volume_level}%"
+      label_high: "🔊{volume_level}%"
+      label_mute: "🔊{volume_level}%"
+    - type: "network"
+      label_no_internet: "NC"
+      label_ethernet: "Eth"
+      label_wifi_strength_0: "WiFi: 0%"
+      label_wifi_strength_25: "WiFi: 25%"
+      label_wifi_strength_50: "WiFi: 50%"
+      label_wifi_strength_75: "WiFi: 75%"
+      label_wifi_strength_100: "WiFi: 100%"
+
+workspaces:
+  - name: "1"
+    display_name: "1:Work"
+    keep_alive: true
+
+  - name: "2"
+    display_name: "2:Work-sub"
+    keep_alive: true
+
+  - name: "3"
+    display_name: "3:Search"
+    keep_alive: true
+
+  - name: "4"
+    display_name: "4:Chat"
+    keep_alive: true
+
+  - name: "5"
+    display_name: "5:Mail"
+    keep_alive: false 
+
+  - name: "6"
+  - name: "7"
+  - name: "8"
+  - name: "9"
+
+# when match process name don't append .exe
+window_rules:
+# SET ignore rules # 
+# i.e.(I don't ever wnna tile those)
+  
+    # Do not manage picture-in-picture windows for browsers. Note that the default is for
+    # English; change `match_title` to the window's title if you use another language.
+  - command: "ignore"
+    match_title: "[Pp]icture.in.[Pp]icture"
+    match_class_name: "Chrome_WidgetWin_1|MozillaDialogClass"
+
+  - command: "ignore"
+    match_process_name: "Riot Client"
+
+      # - command: "ignore"
+      #match_process_name: ""
+
+  # Task Manager requires admin privileges to manage and should be ignored unless running
+  # the WM as admin.
+  - command: "ignore"
+    match_process_name: "/Taskmgr|ScreenClippingHost/"
+      
+  - command: "ignore"
+    match_process_name: "Vortex"
+  
+  - command: "ignore"
+    match_class_name: "VirtualConsoleClass"
+    match_title: "*Cmder"
+    match_process_name: "ConEmu64"
+
+  - command: "ignore"
+    match_process_name: "ConEmuC64"
+
+  - command: "ignore"
+    match_process_name: "ONCE_HUMAN"
+
+  - command: "ignore"
+    match_process_name: "LoadingBayInstaller"
+
+# SET FLOATING RULES #
+  - command: "set floating"
+    match_process_name: "devenv"
+
+  - command: "set floating"
+    match_title: "LoadingBayInstaller"
+
+  - command: "set floating"
+    match_process_name: "Flow.Launcher"
+
+  - command: "set floating"
+    match_title: "AutoHotkey 64-bit"
+    match_process_name: "AutoHotkeyUX"
+
+  - command: "set floating"
+    match_title: "Unity Hub"
+
+  - command: "set floating"
+    match_process_name: "qbittorrent"
+
+  - command: "set floating"
+    match_process_name: "obs64"
+
+  - command: "set floating"
+    match_title: "Window Spy for AHKv2"
+      
+  - command: "set floating"
+    match_process_name: "ApplicationFrameHost"
+
+  - command: "set floating"
+    match_process_name: "Windows Explorer"
+
+  - command: "set floating"
+    match_process_name: "explorer"
+    match_class_name: "WorkerW"
+
+  - command: "set floating"
+    match_class_name: "CabinetWClass"
+
+  - command: "set floating"
+    match_process_name: "mmc"
+    match_title: "Task Scheduler"
+
+  - command: "set floating"
+    match_title: "Avast Free Antivirus"
+    match_process_name: "AvastUI"
+
+  # Launches system dialogs as floating by default (eg. File Explorer save/open dialog).
+  - command: "set floating"
+    match_class_name: "#32770"
+
+
+# SET TILING RULE #
+  - command: "set tiling"
+    match_process_name: "Discord"
+#    match_title: "*- Discord"
+      
+  - command: "set tiling"
+    match_title: "*Microsoft Visual Studio Preview*"
+
+  - command: "set tiling"
+    match_title: "*Microsoft Visual Studio*"
+
+# OTHER RULES #
+  # Some applications (eg. Steam) have borders that extend past the normal border size.
+  - command: "resize borders 0px -7px -7px -7px"
+    match_process_name: "steam"
+
+binding_modes:
+  - name: "resize"
+    keybindings:
+      # Resize focused window by a percentage or pixel amount.
+      - command: "resize width -2%"
+        bindings: ["L", "Right"]
+      - command: "resize width +2%"
+        bindings: ["J", "Left"]
+      - command: "resize height +2%"
+        bindings: ["K", "Down"]
+      - command: "resize height -2%"
+        bindings: ["I", "Up"]
+      # Press enter/escape to return to default keybindings.
+      - command: "binding mode none"
+        bindings: ["Escape", "Enter"]
+
+keybindings:
+  # Shift focus in a given direction.
+  - command: "focus left"
+    bindings: ["Alt+J", "Alt+J"]
+  - command: "focus right"
+    bindings: ["Alt+L", "Alt+L"]
+  - command: "focus up"
+    bindings: ["Alt+I", "Alt+I"]
+  - command: "focus down"
+    bindings: ["Alt+K", "Alt+K"]
+
+  # Move focused window in a given direction.
+  - command: "move left"
+    bindings: ["Alt+Shift+J", "Alt+Shift+Left"]
+  - command: "move right"
+    bindings: ["Alt+Shift+L", "Alt+Shift+Right"]
+  - command: "move up"
+    bindings: ["Alt+Shift+I", "Alt+Shift+Up"]
+  - command: "move down"
+    bindings: ["Alt+Shift+K", "Alt+Shift+Down"]
+
+  # Resize focused window by a percentage or pixel amount.
+  - command: "resize width -2%"
+    binding: "Alt+U"
+  - command: "resize width +2%"
+    binding: "Alt+P"
+  - command: "resize height +2%"
+    binding: "Alt+O"
+  - command: "resize height -2%"
+    binding: "Alt+H"
+
+  # As an alternative to the resize keybindings above, resize mode enables resizing via
+  # HJKL or arrow keys. The binding mode is defined above with the name "resize".
+
+  - command: "toggle floating"
+    binding: "Alt+T"
+
+  - command: "binding mode resize"
+    binding: "Alt+R"
+
+  # Change tiling direction. This determines where new tiling windows will be inserted.
+  - command: "tiling direction toggle"
+    binding: "Alt+V"
+
+  # Change focus between floating / tiling windows.
+  - command: "focus mode toggle"
+    binding: "Alt+Ctrl+Space"
+
+  # Change the focused window to be floating / tiling.
+  - command: "toggle floating"
+    binding: "Alt+Shift+Space"
+
+  # Change the focused window to be maximized / unmaximized.
+  - command: "toggle maximized"
+    binding: "Alt+X"
+
+  # Minimize focused window.
+  - command: "set minimized"
+    binding: "Alt+M"
+
+  # Close focused window.
+  - command: "close"
+    binding: "Alt+Shift+Q"
+
+  # Kill GlazeWM process safely.
+  - command: "exit wm"
+    binding: "Alt+Shift+E"
+
+  # Re-evaluate configuration file.
+  - command: "reload config"
+    binding: "Alt+Shift+R"
+
+  # Launch CMD terminal (alternatively `exec wt` or `exec %ProgramFiles%/Git/git-bash.exe`
+  # to start Windows Terminal and Git Bash respectively.
+  - command: "exec cmder"
+    binding: "Alt+Shift+Enter"
+
+  # Focus the workspace that last had focus.
+  - command: "focus workspace recent"
+    binding: "Alt+Y"
+
+  # Focus the next/previous workspace defined in `workspaces` config.
+  - command: "focus workspace next"
+    binding: "Alt+T"
+  - command: "focus workspace prev"
+    binding: "Alt+Shift+T"
+
+  # Change focus to a workspace defined in `workspaces` config.
+  - command: "focus workspace 1"
+    binding: "Alt+1"
+  - command: "focus workspace 2"
+    binding: "Alt+2"
+  - command: "focus workspace 3"
+    binding: "Alt+3"
+  - command: "focus workspace 4"
+    binding: "Alt+4"
+  - command: "focus workspace 5"
+    binding: "Alt+5"
+  - command: "focus workspace 6"
+    binding: "Alt+6"
+  - command: "focus workspace 7"
+    binding: "Alt+7"
+  - command: "focus workspace 8"
+    binding: "Alt+8"
+  - command: "focus workspace 9"
+    binding: "Alt+9"
+
+  # Move focused workspace to a monitor in a given direction.
+  - command: "move workspace left"
+    binding: "Alt+A"
+  - command: "move workspace right"
+    binding: "Alt+D"
+  - command: "move workspace up"
+    binding: "Alt+W"
+  - command: "move workspace down"
+    binding: "Alt+S"
+
+  # Move focused window to a workspace defined in `workspaces` config.
+  - commands: ["move to workspace 1", "focus workspace 1"]
+    binding: "Alt+Shift+1"
+  - commands: ["move to workspace 2", "focus workspace 2"]
+    binding: "Alt+Shift+2"
+  - commands: ["move to workspace 3", "focus workspace 3"]
+    binding: "Alt+Shift+3"
+  - commands: ["move to workspace 4", "focus workspace 4"]
+    binding: "Alt+Shift+4"
+  - commands: ["move to workspace 5", "focus workspace 5"]
+    binding: "Alt+Shift+5"
+  - commands: ["move to workspace 6", "focus workspace 6"]
+    binding: "Alt+Shift+6"
+  - commands: ["move to workspace 7", "focus workspace 7"]
+    binding: "Alt+Shift+7"
+  - commands: ["move to workspace 8", "focus workspace 8"]
+    binding: "Alt+Shift+8"
+  - commands: ["move to workspace 9", "focus workspace 9"]
+    bindings: ["Alt+Shift+9"]
+
+
+  
+
+      # SOME COLOR SCHEMES # 
+rosewater: &rosewater "#f5e0dc"
+flamingo: &flamingo "#f2cdcd"
+pink: &pink "#f5c2e7"
+mauve: &mauve "#cba6f7"
+red: &red "#f38ba8"
+maroon: &maroon "#eba0ac"
+peach: &peach "#fab387"
+yellow: &yellow "#f9e2af"
+green: &green "#a6e3a1"
+teal: &teal "#94e2d5"
+sky: &sky "#89dceb"
+sapphire: &sapphire "#74c7ec"
+blue: &blue "#89b4fa"
+lavender: &lavender "#b4befe"
+text: &text "#cdd6f4"
+subtext1: &subtext1 "#bac2de"
+subtext0: &subtext0 "#a6adc8"
+overlay2: &overlay2 "#9399b2"
+overlay1: &overlay1 "#7f849c"
+overlay0: &overlay0 "#6c7086"
+surface2: &surface2 "#585b70"
+surface1: &surface1 "#45475a"
+surface0: &surface0 "#313244"
+base: &base "#1e1e2e"
+mantle: &mantle "#181825"
+crust: &crust "#11111b"
 :help (obvious "any `:` is when ur in viusla/command mode not insert mode!")
 :<line no,col>g g (move to specific line in text while in command mode)
 <line no>g (go to the line number in text while in command or visual mode)
@@ -39,6 +466,8 @@ y (copy line "or to end of your cursor" while in visual mode)
 p (paste line "pastes before the end of your cursor" while in visual mode)
 
 misc.
+:%s/<search_phrase>/<replace_phrase>/g (search and replace 'g' to replace all occurances)
+move to begin of word + '*' (searches for this word in whole text)
 :<command1> | :<command2> (chain commands using pipe'|')
 :source ~/.vimrc (reloads the .vimrc "can be used with some other files)
 ```
@@ -96,7 +525,7 @@ ctrl + \ ( toggle block comment)
 ctrl + D (select highlighted / select next occurance)
 ctrl  + 1 , 1 (open terminal)
 ctrl + space (view suggestion list)
-ctrl + k , ctrl + d (format all document)
+ctrl + m , f (format all document)
 ctrl + tab (switch between opened files)
 ctrl + p (switch to file fast by typing name like vs code)(to specifically search files not classes or etc use `f:<file name>`) (default is ctrl + T or ctrl + ,)
 Alt + T (toggle whitespaces render)
