@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <key name="Software">
 	<key name="ConEmu">
-		<key name=".Vanilla" modified="2024-03-18 03:21:54" build="230724">
+		<key name=".Vanilla" modified="2024-09-03 12:30:26" build="230724">
 			<value name="ColorTable00" type="dword" data="00222827"/>
 			<value name="ColorTable01" type="dword" data="009e5401"/>
 			<value name="ColorTable02" type="dword" data="0004aa74"/>
@@ -73,7 +73,7 @@
 			<value name="StartType" type="hex" data="02"/>
 			<value name="CmdLine" type="string" data=""/>
 			<value name="StartTasksFile" type="string" data=""/>
-			<value name="StartTasksName" type="string" data="{STARTUP Cmder(admin) + GPT + vim notes}"/>
+			<value name="StartTasksName" type="string" data="{CmderAdmin}"/>
 			<value name="StartFarFolders" type="hex" data="00"/>
 			<value name="StartFarEditors" type="hex" data="00"/>
 			<value name="StoreTaskbarkTasks" type="hex" data="00"/>
@@ -98,7 +98,7 @@
 			<value name="Multi.SplitWidth" type="hex" data="04"/>
 			<value name="Multi.SplitHeight" type="hex" data="04"/>
 			<value name="KeyboardHooks" type="hex" data="02"/>
-			<value name="FontName" type="string" data="Agave Nerd Font"/>
+			<value name="FontName" type="string" data="Consolas"/>
 			<value name="FontName2" type="string" data="Consolas"/>
 			<value name="FontAutoSize" type="hex" data="00"/>
 			<value name="FontSize" type="ulong" data="20"/>
@@ -127,7 +127,7 @@
 			<value name="ConWnd Width" type="dword" data="02000064"/>
 			<value name="ConWnd Height" type="dword" data="02000009"/>
 			<value name="Cascaded" type="hex" data="01"/>
-			<value name="ConWnd X" type="long" data="-900"/>
+			<value name="ConWnd X" type="long" data="0"/>
 			<value name="ConWnd Y" type="long" data="-37"/>
 			<value name="16bit Height" type="ulong" data="0"/>
 			<value name="AutoSaveSizePos" type="hex" data="01"/>
@@ -485,80 +485,80 @@
 			<value name="WndDragKey" type="dword" data="00121101"/>
 			<key name="Tasks" modified="2024-03-18 03:21:54" build="230724">
 				<value name="Count" type="long" data="16"/>
-				<key name="Task1" modified="2024-03-18 03:21:54" build="230724">
+				<key name="Task1" modified="2024-09-03 11:48:05" build="230724">
 					<value name="Name" type="string" data="{CmderAdmin}"/>
 					<value name="GuiArgs" type="string" data=' /icon "%CMDER_ROOT%\icons\cmder.ico"'/>
-					<value name="Cmd1" type="string" data='* -new_console:d:C:\Users\OmarPc\ cmd /k ""%ConEmuDir%\..\init.bat" "'/>
+					<value name="Cmd1" type="string" data='* -new_console:d:C:\Users\%USERNAME%\ cmd /k ""%ConEmuDir%\..\init.bat" "'/>
 					<value name="Active" type="long" data="0"/>
 					<value name="Count" type="long" data="1"/>
 					<value name="Hotkey" type="dword" data="0000a031"/>
 					<value name="Flags" type="dword" data="00000000"/>
 				</key>
-				<key name="Task2" modified="2024-03-18 03:21:54" build="230724">
+				<key name="Task2" modified="2024-09-03 11:48:05" build="230724">
 					<value name="Name" type="string" data="{Cmder}"/>
 					<value name="GuiArgs" type="string" data=' /icon "%CMDER_ROOT%\icons\cmder.ico"'/>
-					<value name="Cmd1" type="string" data='-new_console:d:C:\Users\OmarPc\ cmd /k ""%ConEmuDir%\..\init.bat" "'/>
+					<value name="Cmd1" type="string" data='-new_console:d:C:\Users\%USERNAME%\ cmd /k ""%ConEmuDir%\..\init.bat" "'/>
 					<value name="Active" type="long" data="0"/>
 					<value name="Count" type="long" data="1"/>
 					<value name="Hotkey" type="dword" data="00001232"/>
 					<value name="Flags" type="dword" data="00000004"/>
 				</key>
-				<key name="Task3" modified="2024-03-18 03:21:54" build="230724">
+				<key name="Task3" modified="2024-09-03 11:48:05" build="230724">
 					<value name="Name" type="string" data="{STARTUP Cmder(admin) + GPT + vim notes}"/>
 					<value name="Hotkey" type="dword" data="0000a032"/>
 					<value name="GuiArgs" type="string" data=' /icon "%CMDER_ROOT%\icons\cmder.ico"'/>
-					<value name="Cmd1" type="string" data='*&gt;-new_console:d:C:\Users\OmarPc\ cmd /k ""%ConEmuDir%\..\init.bat" "'/>
+					<value name="Cmd1" type="string" data='*&gt;-new_console:d:C:\Users\%USERNAME%\ cmd /k ""%ConEmuDir%\..\init.bat" "'/>
 					<value name="Active" type="long" data="0"/>
 					<value name="Count" type="long" data="3"/>
 					<value name="Flags" type="dword" data="00000003"/>
-					<value name="Cmd2" type="string" data='-new_console:d:C:\Users\OmarPc\ python "C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py"'/>
-					<value name="Cmd3" type="string" data='-new_console:d:C:\Users\OmarPc\txt-notes\ "C:\tools\neovim\nvim-win64\bin\nvim.exe"'/>
+					<value name="Cmd2" type="string" data='-new_console:d:C:\Users\%USERNAME%\ python "C:\Users\%USERNAME%\others_repo_GptCli\src\chatgpt.py"'/>
+					<value name="Cmd3" type="string" data='-new_console:d:C:\Users\%USERNAME%\txt-notes\ "C:\tools\neovim\nvim-win64\bin\nvim.exe"'/>
 				</key>
-				<key name="Task4" modified="2024-03-18 03:21:54" build="230724">
+				<key name="Task4" modified="2024-09-03 11:48:05" build="230724">
 					<value name="Name" type="string" data="{Cmder &amp; GPT (horz)}"/>
 					<value name="Hotkey" type="dword" data="0000a033"/>
 					<value name="GuiArgs" type="string" data=' /icon "%CMDER_ROOT%\icons\cmder.ico"'/>
-					<value name="Cmd1" type="string" data="python C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py "/>
-					<value name="Cmd2" type="string" data='&gt; -new_console:d:C:\Users\OmarPc\ cmd /k ""%ConEmuDir%\..\init.bat" " -new_console:n:s60H'/>
+					<value name="Cmd1" type="string" data="python C:\Users\%USERNAME%\others_repo_GptCli\src\chatgpt.py "/>
+					<value name="Cmd2" type="string" data='&gt; -new_console:d:C:\Users\%USERNAME%\ cmd /k ""%ConEmuDir%\..\init.bat" " -new_console:n:s60H'/>
 					<value name="Active" type="long" data="2"/>
 					<value name="Count" type="long" data="2"/>
 					<value name="Flags" type="dword" data="00000000"/>
 				</key>
-				<key name="Task5" modified="2024-03-18 03:21:54" build="230724">
+				<key name="Task5" modified="2024-09-03 11:48:05" build="230724">
 					<value name="Name" type="string" data="{Cmder &amp; GPT (vertical)}"/>
 					<value name="Flags" type="dword" data="00000004"/>
 					<value name="Hotkey" type="dword" data="0000a034"/>
 					<value name="GuiArgs" type="string" data=' /icon "%CMDER_ROOT%\icons\cmder.ico"'/>
-					<value name="Cmd1" type="string" data="python C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py "/>
+					<value name="Cmd1" type="string" data="python C:\Users\%USERNAME%\others_repo_GptCli\src\chatgpt.py "/>
 					<value name="Active" type="long" data="2"/>
 					<value name="Count" type="long" data="2"/>
-					<value name="Cmd2" type="string" data='&gt; -new_console:d:C:\Users\OmarPc\ cmd /k ""%ConEmuDir%\..\init.bat" " -new_console:n:s60V'/>
+					<value name="Cmd2" type="string" data='&gt; -new_console:d:C:\Users\%USERNAME%\ cmd /k ""%ConEmuDir%\..\init.bat" " -new_console:n:s60V'/>
 				</key>
-				<key name="Task6" modified="2024-03-18 03:21:54" build="230724">
+				<key name="Task6" modified="2024-09-03 11:48:05" build="230724">
 					<value name="Name" type="string" data="{Cmder(admin) &amp; GPT}"/>
 					<value name="Flags" type="dword" data="00000000"/>
 					<value name="Hotkey" type="dword" data="0000a035"/>
 					<value name="GuiArgs" type="string" data=' /icon "%CMDER_ROOT%\icons\cmder.ico"'/>
-					<value name="Cmd1" type="string" data='&gt;* -new_console:d:C:\Users\OmarPc\ cmd /k ""%ConEmuDir%\..\init.bat" "'/>
+					<value name="Cmd1" type="string" data='&gt;* -new_console:d:C:\Users\%USERNAME%\ cmd /k ""%ConEmuDir%\..\init.bat" "'/>
 					<value name="Active" type="long" data="1"/>
 					<value name="Count" type="long" data="2"/>
-					<value name="Cmd2" type="string" data="python C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py -new_console:n:s40H"/>
+					<value name="Cmd2" type="string" data="python C:\Users\%USERNAME%\others_repo_GptCli\src\chatgpt.py -new_console:n:s40H"/>
 				</key>
-				<key name="Task7" modified="2024-03-18 03:21:54" build="230724">
+				<key name="Task7" modified="2024-09-03 11:48:05" build="230724">
 					<value name="Name" type="string" data="{nvim}"/>
 					<value name="Flags" type="dword" data="00000004"/>
 					<value name="Hotkey" type="dword" data="0000a036"/>
 					<value name="GuiArgs" type="string" data=' /icon "%CMDER_ROOT%\icons\cmder.ico"'/>
 					<value name="Active" type="long" data="0"/>
 					<value name="Count" type="long" data="1"/>
-					<value name="Cmd1" type="string" data='-new_console:d:C:\Users\OmarPc\txt-notes\ "C:\tools\neovim\nvim-win64\bin\nvim.exe"'/>
+					<value name="Cmd1" type="string" data='-new_console:d:C:\Users\%USERNAME%\txt-notes\ "C:\tools\neovim\nvim-win64\bin\nvim.exe"'/>
 				</key>
-				<key name="Task8" modified="2024-03-18 03:21:54" build="230724">
+				<key name="Task8" modified="2024-09-03 11:48:05" build="230724">
 					<value name="Name" type="string" data="{GPT}"/>
 					<value name="Flags" type="dword" data="00000004"/>
 					<value name="Hotkey" type="dword" data="0000a037"/>
 					<value name="GuiArgs" type="string" data=' /icon "%CMDER_ROOT%\icons\cmder.ico"'/>
-					<value name="Cmd1" type="string" data='-new_console:d:C:\Users\OmarPc\ python "C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py"'/>
+					<value name="Cmd1" type="string" data='-new_console:d:C:\Users\%USERNAME%\ python "C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py"'/>
 					<value name="Active" type="long" data="0"/>
 					<value name="Count" type="long" data="1"/>
 				</key>
@@ -942,7 +942,7 @@
 			</key>
 			<value name="StartCreateDelay" type="ulong" data="10"/>
 			<value name="DefaultTerminalDebugLog" type="hex" data="00"/>
-			<value name="LastMonitor" type="string" data="-900,-58,0,1512"/>
+			<value name="LastMonitor" type="string" data="0,0,1366,768"/>
 			<value name="Restore2ActiveMon" type="hex" data="00"/>
 			<value name="DownShowExOnTopMessage" type="hex" data="00"/>
 			<value name="EnvironmentSet" type="multi">
