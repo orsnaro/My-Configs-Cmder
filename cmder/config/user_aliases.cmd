@@ -409,24 +409,24 @@ notpushed= git log --stat --branches --not --remotes
 conforg=cdv "C:\Users\%USERNAME%\repo_My_configs_cmder"  
 allcode=code C:\users\%USERNAME%\repo_My_configs_cmder\all_local_repo_vs.code-workspace  
 ls=ls --show-control-chars -F -A --color $*  
-ec2bot1=ssh -i "c:\Users\OmarPc\aws-ec2-discordpy-bot-wiz.pem" ubuntu@ec2-3-75-231-15.eu-central-1.compute.amazonaws.com  
+ec2bot1=ssh -i "c:\Users\%USERNAME%\aws-ec2-discordpy-bot-wiz.pem" ubuntu@ec2-3-75-231-15.eu-central-1.compute.amazonaws.com  
 locom=commited_not_pushed.bat  
 strtvm=start /min setup_vbox_ubuntu.bat  
 sshvbox=ssh -p 2022 orsnaro@127.0.0.1  
-env=cdv C:\Users\OmarPc\py_envs\  
+env=cdv C:\Users\%USERNAME%\py_envs\  
 phporg=cdv c:\xampp\htdocs\repo_ps_site\ 1  
-root=cdv C:\Users\OmarPc 1  
+root=cdv C:\Users\%USERNAME% 1  
 gtubelst=youtube-dl $*  
-tele="C:\Users\OmarPc\AppData\Roaming\Telegram Desktop\Telegram.exe" $t  timeout /t 2 $t mmt  /MoveWindow 1  Process "Telegram.exe" /WindowTop -10 /WindowLeft 0 /WindowWidth 900 /WindowHeight 1600 what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
+tele="C:\Users\%USERNAME%\AppData\Roaming\Telegram Desktop\Telegram.exe" $t  timeout /t 2 $t mmt  /MoveWindow 1  Process "Telegram.exe" /WindowTop -10 /WindowLeft 0 /WindowWidth 900 /WindowHeight 1600 what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 spot="C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_1.210.760.0_x86__zpdnekdrzrea0\Spotify.exe" $t timeout /t 2 $t mmt /MoveWindow 1  Process "Spotify.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 schrome=chrome "https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9" $t  timeout /t 2 $t mmt /MoveWindow 1 Process "chrome.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
-bin=cd /d c:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\  
+bin=cd /d c:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\  
 sbravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito $*  
 grp=grep  -i -n -H -G  $* --color  
 strtvbox= start /min setup_vbox_ubuntu.bat  
-desk=chdir /d c:\Users\OmarPc\Desktop\  
-comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t chrome  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t chrome https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t chrome https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609 $t chrome https://codeforces.com/contests $t chrome https://www.codechef.com/contests $t chrome https://www.hackerrank.com/dashboard $t chrome https://github.com/orsnaro/CP-Beginner-Cheat-Sheets/blob/main/README.md  
+desk=chdir /d c:\Users\%USERNAME%\Desktop\  
+comp=cdv c:\users\%USERNAME%\repo_CPP_COMP_study $t code . $t start ms-clock: $t chrome  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t chrome https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t chrome https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609 $t chrome https://codeforces.com/contests $t chrome https://www.codechef.com/contests $t chrome https://www.hackerrank.com/dashboard $t chrome https://github.com/orsnaro/CP-Beginner-Cheat-Sheets/blob/main/README.md  
 diff=git diff $*  
 disweb=move_dicord_webapp_brave.bat  
 brave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" $*  
@@ -443,7 +443,7 @@ gxcog=opera --incognito $*
 gx=opera $*  
 ocd=cd $*  
 jptopdf=jupyter-nbconvert --to pdf $*  
-twtdisorg= cdv C:\Users\OmarPc\repo_Tweet_discord\  
+twtdisorg= cdv C:\Users\%USERNAME%\repo_Tweet_discord\  
 mongo=mongosh $*  
 allgitstat=allgitstat.bat $*  
 csrn=csc cp.cs $t CP.exe  $t del CP.exe  
@@ -456,35 +456,35 @@ csaddtodo=add_todo_prob.bat cs
 csdoneprob=save_N_push_solved_prob.bat cs  
 pyaddtodo=add_todo_prob.bat py  
 calc_lines=git ls-files -z | xargs -0 wc -l
-flip=py C:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\flip_screen.py  
+flip=py C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\flip_screen.py  
 ngrp=grep  -v -i -n -H -G  $* --color  
 grep=grep -i $* --color  
 thun=thunderbird.exe $*  
 pygraph='find . -iname "*.py"  
 work=cd /d E:\omar-work  
-catshort=cat C:\Users\OmarPc\repo_MY_configs_cmder\shortcuts.md  
+catshort=cat C:\Users\%USERNAME%\repo_MY_configs_cmder\shortcuts.md  
 grp20=grep -inHGA 20  $* --color  
 grp3010=grep -inHG -A 30 -B 10 $* --color  
 tstkey=opera https://en.key-test.ru/  
-games=cdv "C:\Users\OmarPc\Documents\game_fast\" $t explorer .  
-gorg=cdv C:\Users\OmarPc\others_repo_grad\  
+games=cdv "C:\Users\%USERNAME%\Documents\game_fast\" $t explorer .  
+gorg=cdv C:\Users\%USERNAME%\others_repo_grad\  
 klmutli=taskkill /im "UniversalSplitScreen.exe" /f  
-SplitScreen2Pal=xcopy /E /I /Y C:\Users\OmarPc\NucleusCoop\Rune\AppData\Local\Pal\Saved\SaveGames\76561198168605560\692998AA4810C7E84A83CC82405E8A07 C:\Users\OmarPc\AppData\Local\Pal\Saved\SaveGames\76561197960271872\692998AA4810C7E84A83CC82405E8A07  
-Pal2Splitscreen=xcopy /E /I /Y  C:\Users\OmarPc\AppData\Local\Pal\Saved\SaveGames\76561197960271872\692998AA4810C7E84A83CC82405E8A07 C:\Users\OmarPc\NucleusCoop\Rune\AppData\Local\Pal\Saved\SaveGames\76561198168605560\692998AA4810C7E84A83CC82405E8A07  
+SplitScreen2Pal=xcopy /E /I /Y C:\Users\%USERNAME%\NucleusCoop\Rune\AppData\Local\Pal\Saved\SaveGames\76561198168605560\692998AA4810C7E84A83CC82405E8A07 C:\Users\%USERNAME%\AppData\Local\Pal\Saved\SaveGames\76561197960271872\692998AA4810C7E84A83CC82405E8A07  
+Pal2Splitscreen=xcopy /E /I /Y  C:\Users\%USERNAME%\AppData\Local\Pal\Saved\SaveGames\76561197960271872\692998AA4810C7E84A83CC82405E8A07 C:\Users\%USERNAME%\NucleusCoop\Rune\AppData\Local\Pal\Saved\SaveGames\76561198168605560\692998AA4810C7E84A83CC82405E8A07  
 qb=qutebrowser.exe $*  
 bard=qutebrowser https://gemini.google.com/app  
 rnunity="C:\Program Files\Unity\Hub\Editor\2022.3.15f1\Editor\unity.exe" -projectPath $*C:\Program Files\Unity\Hub\Editor\2022.3.15f1\Editor  
 repoSZ=qutebrowser.exe "https://onlineminitools.com/github-repo-size-checker"  
 e= explorer $*  
 komo=komorebic $*  
-vin=cd c:\Users\OmarPc\txt-notes\ $t nvim  
-shortss=start C:\Users\OmarPc\repo_MY_configs_cmder\shortcuts.md  
-shorts=nvim C:\Users\OmarPc\repo_MY_configs_cmder\shortcuts.md  
+vin=cd c:\Users\%USERNAME%\txt-notes\ $t nvim  
+shortss=start C:\Users\%USERNAME%\repo_MY_configs_cmder\shortcuts.md  
+shorts=nvim C:\Users\%USERNAME%\repo_MY_configs_cmder\shortcuts.md  
 nv=nvim $*  
 clone=git clone https://github.com/$*  
 komostop=komorebic stop $t taskkill /f /im "komo*"  
-pyname=C:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\python_by_name.bat $*  
-komoedit=code c:\Users\OmarPc\komorebi.json  
+pyname=C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\python_by_name.bat $*  
+komoedit=code c:\Users\%USERNAME%\komorebi.json  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
 ;= %SystemRoot%\system32\doskey /listsize=1000 /macrofile=%0%
@@ -896,24 +896,24 @@ notpushed= git log --stat --branches --not --remotes
 conforg=cdv "C:\Users\%USERNAME%\repo_My_configs_cmder"  
 allcode=code C:\users\%USERNAME%\repo_My_configs_cmder\all_local_repo_vs.code-workspace  
 ls=ls --show-control-chars -F -A --color $*  
-ec2bot1=ssh -i "c:\Users\OmarPc\aws-ec2-discordpy-bot-wiz.pem" ubuntu@ec2-3-75-231-15.eu-central-1.compute.amazonaws.com  
+ec2bot1=ssh -i "c:\Users\%USERNAME%\aws-ec2-discordpy-bot-wiz.pem" ubuntu@ec2-3-75-231-15.eu-central-1.compute.amazonaws.com  
 locom=commited_not_pushed.bat  
 strtvm=start /min setup_vbox_ubuntu.bat  
 sshvbox=ssh -p 2022 orsnaro@127.0.0.1  
-env=cdv C:\Users\OmarPc\py_envs\  
+env=cdv C:\Users\%USERNAME%\py_envs\  
 phporg=cdv c:\xampp\htdocs\repo_ps_site\ 1  
-root=cdv C:\Users\OmarPc 1  
+root=cdv C:\Users\%USERNAME% 1  
 gtubelst=youtube-dl $*  
-tele="C:\Users\OmarPc\AppData\Roaming\Telegram Desktop\Telegram.exe" $t  timeout /t 2 $t mmt  /MoveWindow 1  Process "Telegram.exe" /WindowTop -10 /WindowLeft 0 /WindowWidth 900 /WindowHeight 1600 what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
+tele="C:\Users\%USERNAME%\AppData\Roaming\Telegram Desktop\Telegram.exe" $t  timeout /t 2 $t mmt  /MoveWindow 1  Process "Telegram.exe" /WindowTop -10 /WindowLeft 0 /WindowWidth 900 /WindowHeight 1600 what=chrome --app=https://web.whatsapp.com/ $t mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 spot="C:\Program Files\WindowsApps\SpotifyAB.SpotifyMusic_1.210.760.0_x86__zpdnekdrzrea0\Spotify.exe" $t timeout /t 2 $t mmt /MoveWindow 1  Process "Spotify.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 schrome=chrome "https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9" $t  timeout /t 2 $t mmt /MoveWindow 1 Process "chrome.exe" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
-bin=cd /d c:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\  
+bin=cd /d c:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\  
 sbravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 bravecog="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --incognito $*  
 grp=grep  -i -n -H -G  $* --color  
 strtvbox= start /min setup_vbox_ubuntu.bat  
-desk=chdir /d c:\Users\OmarPc\Desktop\  
-comp=cdv c:\users\OmarPc\repo_CPP_COMP_study $t code . $t start ms-clock: $t chrome  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t chrome https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t chrome https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609 $t chrome https://codeforces.com/contests $t chrome https://www.codechef.com/contests $t chrome https://www.hackerrank.com/dashboard $t chrome https://github.com/orsnaro/CP-Beginner-Cheat-Sheets/blob/main/README.md  
+desk=chdir /d c:\Users\%USERNAME%\Desktop\  
+comp=cdv c:\users\%USERNAME%\repo_CPP_COMP_study $t code . $t start ms-clock: $t chrome  https://www.calculatorsoup.com/calculators/math/modulo-calculator.php $t chrome https://docs.google.com/spreadsheets/d/1Dz4BqGn9Ddc3ptAw4J8kwXHsRU_hLtaBuioPbCCkScw/edit#gid=855203541 $t chrome https://docs.google.com/spreadsheets/d/1DtuVRvM_eikroXM7fFBUA78ldjOEDTRP_lYsnVHtf_M/edit#gid=593476609 $t chrome https://codeforces.com/contests $t chrome https://www.codechef.com/contests $t chrome https://www.hackerrank.com/dashboard $t chrome https://github.com/orsnaro/CP-Beginner-Cheat-Sheets/blob/main/README.md  
 diff=git diff $*  
 disweb=move_dicord_webapp_brave.bat  
 brave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" $*  
@@ -930,7 +930,7 @@ gxcog=opera --incognito $*
 gx=opera $*  
 ocd=cd $*  
 jptopdf=jupyter-nbconvert --to pdf $*  
-twtdisorg= cdv C:\Users\OmarPc\repo_Tweet_discord\  
+twtdisorg= cdv C:\Users\%USERNAME%\repo_Tweet_discord\  
 mongo=mongosh $*  
 allgitstat=allgitstat.bat $*  
 csrn=csc cp.cs $t CP.exe  $t del CP.exe  
@@ -943,63 +943,63 @@ csaddtodo=add_todo_prob.bat cs
 csdoneprob=save_N_push_solved_prob.bat cs  
 pyaddtodo=add_todo_prob.bat py  
 calc_lines=git ls-files -z | xargs -0 wc -l
-flip=py C:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\flip_screen.py  
+flip=py C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\flip_screen.py  
 ngrp=grep  -v -i -n -H -G  $* --color  
 grep=grep -i $* --color  
 thun=thunderbird.exe $*  
 pygraph='find . -iname "*.py"  
 work=cd /d E:\omar-work  
-catshort=cat C:\Users\OmarPc\repo_MY_configs_cmder\shortcuts.md  
+catshort=cat C:\Users\%USERNAME%\repo_MY_configs_cmder\shortcuts.md  
 grp20=grep -inHGA 20  $* --color  
 grp3010=grep -inHG -A 30 -B 10 $* --color  
 tstkey=opera https://en.key-test.ru/  
-games=cdv "C:\Users\OmarPc\Documents\game_fast\" $t explorer .  
-gorg=cdv C:\Users\OmarPc\others_repo_grad\  
+games=cdv "C:\Users\%USERNAME%\Documents\game_fast\" $t explorer .  
+gorg=cdv C:\Users\%USERNAME%\others_repo_grad\  
 klmutli=taskkill /im "UniversalSplitScreen.exe" /f  
-SplitScreen2Pal=xcopy /E /I /Y C:\Users\OmarPc\NucleusCoop\Rune\AppData\Local\Pal\Saved\SaveGames\76561198168605560\692998AA4810C7E84A83CC82405E8A07 C:\Users\OmarPc\AppData\Local\Pal\Saved\SaveGames\76561197960271872\692998AA4810C7E84A83CC82405E8A07  
-Pal2Splitscreen=xcopy /E /I /Y  C:\Users\OmarPc\AppData\Local\Pal\Saved\SaveGames\76561197960271872\692998AA4810C7E84A83CC82405E8A07 C:\Users\OmarPc\NucleusCoop\Rune\AppData\Local\Pal\Saved\SaveGames\76561198168605560\692998AA4810C7E84A83CC82405E8A07  
+SplitScreen2Pal=xcopy /E /I /Y C:\Users\%USERNAME%\NucleusCoop\Rune\AppData\Local\Pal\Saved\SaveGames\76561198168605560\692998AA4810C7E84A83CC82405E8A07 C:\Users\%USERNAME%\AppData\Local\Pal\Saved\SaveGames\76561197960271872\692998AA4810C7E84A83CC82405E8A07  
+Pal2Splitscreen=xcopy /E /I /Y  C:\Users\%USERNAME%\AppData\Local\Pal\Saved\SaveGames\76561197960271872\692998AA4810C7E84A83CC82405E8A07 C:\Users\%USERNAME%\NucleusCoop\Rune\AppData\Local\Pal\Saved\SaveGames\76561198168605560\692998AA4810C7E84A83CC82405E8A07  
 qb=qutebrowser.exe $*  
 bard=qutebrowser https://gemini.google.com/app  
 rnunity="C:\Program Files\Unity\Hub\Editor\2022.3.15f1\Editor\unity.exe" -projectPath $*C:\Program Files\Unity\Hub\Editor\2022.3.15f1\Editor  
 repoSZ=qutebrowser.exe "https://onlineminitools.com/github-repo-size-checker"  
 e= explorer $*  
 komo=komorebic $*  
-vin=cd c:\Users\OmarPc\txt-notes\ $t nvim  
-shortss=start C:\Users\OmarPc\repo_MY_configs_cmder\shortcuts.md  
-shorts=nvim C:\Users\OmarPc\repo_MY_configs_cmder\shortcuts.md  
+vin=cd c:\Users\%USERNAME%\txt-notes\ $t nvim  
+shortss=start C:\Users\%USERNAME%\repo_MY_configs_cmder\shortcuts.md  
+shorts=nvim C:\Users\%USERNAME%\repo_MY_configs_cmder\shortcuts.md  
 nv=nvim $*  
 clone=git clone https://github.com/$*  
 komostop=komorebic stop $t taskkill /f /im "komo*"  
-pyname=C:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\python_by_name.bat $*  
-komoedit=code c:\Users\OmarPc\komorebi.json  
+pyname=C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\python_by_name.bat $*  
+komoedit=code c:\Users\%USERNAME%\komorebi.json  
 cop=qutebrowser "https://copilot.microsoft.com/"  
 aprilorg=cd /d c:\VS2022_repos\April-Tag-VR-FullBody-Tracker\  
-yasb=taskkill /im "yasb.exe" /f $t cd /d C:\Users\OmarPc\py_envs\others_repo_yasb_venv\Scripts $t start /B C:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\python_by_name.bat yasb "C:\Users\OmarPc\others_repo_yasb\src\main.py"  
+yasb=taskkill /im "yasb.exe" /f $t cd /d C:\Users\%USERNAME%\py_envs\others_repo_yasb_venv\Scripts $t start /B C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\python_by_name.bat yasb "C:\Users\%USERNAME%\others_repo_yasb\src\main.py"  
 ref=git reflog $*  
 vspre="C:\Program Files\Microsoft Visual Studio\2022\Preview\Common7\IDE\devenv.exe"  
 vs="C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe"  
 vsi="C:\Program Files (x86)\Microsoft Visual Studio\Installer\setup.exe"  
-komost=komorebic-no-console start --config C:\Users\OmarPc\komorebi.json --whkd --ffm  
+komost=komorebic-no-console start --config C:\Users\%USERNAME%\komorebi.json --whkd --ffm  
 qbs=qutebrowser.exe https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
-suitorg= cd /d c:\Users\OmarPc\repo_Reality_simsuit\  
-gunity="C:\Program Files\Unity 2022.3.22f1\Editor\Unity.exe" -projectPath "C:\Users\OmarPc\repo_Reality_simsuit\unity_physics1"  
+suitorg= cd /d c:\Users\%USERNAME%\repo_Reality_simsuit\  
+gunity="C:\Program Files\Unity 2022.3.22f1\Editor\Unity.exe" -projectPath "C:\Users\%USERNAME%\repo_Reality_simsuit\unity_physics1"  
 netcat=nc $*  
 komowhkd=code "C:\Program Files\whkd\bin\whkdrc"  
 com=git commit -m"$*"  
 ctyper=cli-typer  
 remotes2=opera https://dev.azure.com/  
-asdarec= C:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\KeyRec-Asda.exe  
-exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\OmarPc\repo_KeyRec_tool\dump --distpath=C:\Users\OmarPc\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.2B\ --onefile --icon=C:\Users\OmarPc\repo_KeyRec_tool\KeyRec.ico C:\Users\OmarPc\repo_KeyRec_tool\source\keyrec_1window_V2.1.2B.py $t copy C:\Users\OmarPc\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.2B\KeyRec-Asda.exe C:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\KeyRec-Asda.exe  
+asdarec= C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\KeyRec-Asda.exe  
+exe-keyrec=pyinstaller --name=KeyRec-Asda --specpath=C:\Users\%USERNAME%\repo_KeyRec_tool\dump --distpath=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.2B\ --onefile --icon=C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec.ico C:\Users\%USERNAME%\repo_KeyRec_tool\source\keyrec_1window_V2.1.2B.py $t copy C:\Users\%USERNAME%\repo_KeyRec_tool\KeyRec-tool\KeyRec-Asda_V2.1.2B\KeyRec-Asda.exe C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\KeyRec-Asda.exe  
 lognf=git log -q --all --graph --decorate --stat  
 pydoneprob=save_N_push_solved_prob.bat py  
 discback="C:\narol_discord_backup_codes.txt"  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 viv=vivaldi $*  
 remotes=start https://github.com/  
-gproj=cdv "C:\Users\OmarPc\repo_Reality_simsuit\"  
+gproj=cdv "C:\Users\%USERNAME%\repo_Reality_simsuit\"  
 gptg=vivaldi --app=https://chat.openai.com  
 cla=vivaldi --app=https://claude.ai/new  
-gptcli-old=python C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py $*  
+gptcli-old=python C:\Users\%USERNAME%\others_repo_GptCli\src\chatgpt.py $*  
 hdde=cd /d E:  
 sharedv=cd /d F:\VMS\shared\  
 log=git log --all --graph --decorate --oneline --source  
@@ -1008,7 +1008,7 @@ logme=git log --all --graph  --decorate --stat --author="Omar Rashad*" --source
 loga=git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --stat  
 dis=pwsh.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  
 glz="C:\Program Files\glzr.io\GlazeWM\glazewm.exe"  
-glzconf=nvim C:\Users\OmarPc\.glzr\glazewm\config.yaml  
+glzconf=nvim C:\Users\%USERNAME%\.glzr\glazewm\config.yaml  
 ze="C:\Program Files\glzr.io\Zebar\resources\start.bat"  
-zeconf=nvim c:\Users\OmarPc\.glzr\zebar\config.yaml  
-stube=vivaldi https://www.youtube.com/results?search_query=$1+$2+$3+$4+$5+$6+$7+$8+$9C  
+zeconf=nvim c:\Users\%USERNAME%\.glzr\zebar\config.yaml  
+stube=start  https://www.youtube.com/results?search_query=$1+$2+$3+$4+$5+$6+$7+$8+$9+  
