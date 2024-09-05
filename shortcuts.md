@@ -502,9 +502,9 @@ SHIFT + K (edit highlighted)
 ctrl + space (suggestions)
 (NOT DEFAULT) win+F5  (to use vscode debugger <build>)
 (NOT DEFAULT) win+F6   ( to use vscode debugger <run>)
-(NOT DEFAULT) ` + Q ( to toggle side bar "activity bar")
-(NOT DEFAULT) ` + R ( change editor mode " text or hex... etc")
-(NOT DEFAULT) ` + 1 (toggle minimap)
+(NOT DEFAULT) shift + ` + Q ( to toggle side bar "activity bar")
+(NOT DEFAULT) shift + ` + R ( change editor mode " text or hex... etc")
+(NOT DEFAULT) shift + ` + 1 (toggle minimap)
 
 
 ctrl + alt + N (to build and run  using code runner in terminal <no debugging> )
