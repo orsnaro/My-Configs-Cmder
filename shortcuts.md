@@ -61,16 +61,15 @@ ctrl + j (open terminal panel)
 (NOT DEFAULT) shift + ` + w (show explorer)
 (NOT DEFAULT) ctrl + space  (delete line)
 
-(NOT ACTIVE) ctrl+ tab   (switch between "active" tabs)
-(NOT ACTIVE) alt + left/right (navigate between active tabs)
-(NOT ACITVE) shift + alt + up/down   (duplicate selected lines)
+(WONT WORK if tab is of editor type) alt + left/right (navigate between active tabs)
 
+ctrl+ tab   (switch between "active" tabs)
+ctrl + shift + /(duplicate selected lines)
 ctrl + k + release + o (separate vs code in totally diff windows)
-ctrl+b (close side bar ).
+ctrl + b (close side bar ).
 ctrl + g (go to line X)
 ctrl + 0 ( go outside bracket)
-alt + enter (open search result in formated tab)
-shift + ctrl+ / (jmp to matching bracket)
+alt + enter (open search result in formated tab).
 shift + d    (select highlited)
 ctrl + /     (comment lines)
 ctrl + I (suggestions)
