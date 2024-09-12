@@ -1012,3 +1012,4 @@ glzconf=nvim C:\Users\%USERNAME%\.glzr\glazewm\config.yaml
 ze="C:\Program Files\glzr.io\Zebar\resources\start.bat"  
 zeconf=nvim c:\Users\%USERNAME%\.glzr\zebar\config.yaml  
 stube=start  https://www.youtube.com/results?search_query=$1+$2+$3+$4+$5+$6+$7+$8+$9+  
+techno=cd /d c:\xampp\htdocs\repo_Future_techno_data\  
