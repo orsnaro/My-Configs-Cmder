@@ -53,6 +53,7 @@ ctrl + j (open terminal panel)
 (NOT DEFAULT)ctrl + j/k/l/i (move cursor a word 'instead of arrows')
 (NOT DEFAULT)ctrl + alt + j/l (select word lift or right)
 (NOT DEFAULT) win+F5  (to use vscode debugger <build>)
+<<<<<<< HEAD
 (NOT DEFAULT) win+F6   ( to use vscode debugger <run>)
 (NOT DEFAULT) shift + ` + Q ( to toggle side bar "activity bar")
 (NOT DEFAULT) shift + ` + R ( change editor mode " text or hex... etc")
@@ -74,11 +75,30 @@ alt + enter (open search result in formated tab).
 shift + d    (select highlited)
 ctrl + /     (comment lines)
 ctrl + I (suggestions)
+=======
+>>>>>>> ffb637d (update shortcuts.md + techno cmder alias#)
 (NOT DEFAULT) win+F6   ( to use vscode debugger <run>)
 (NOT DEFAULT) shift + ` + Q ( to toggle side bar "activity bar")
 (NOT DEFAULT) shift + ` + R ( change editor mode " text or hex... etc")
 (NOT DEFAULT) shift + ` + 1 (toggle minimap)
+(NOT DEFAULT) shift + ` + E (show extesions)
+(NOT DEFAULT) shift + ` + w (show explorer)
+(NOT DEFAULT) ctrl + space  (delete line)
 
+(NOT ACTIVE) ctrl+ tab   (switch between "active" tabs)
+(NOT ACTIVE) alt + left/right (navigate between active tabs)
+(NOT ACITVE) shift + alt + up/down   (duplicate selected lines)
+
+ctrl + k + release + o (separate vs code in totally diff windows)
+ctrl+b (close side bar ).
+ctrl + g (go to line X)
+ctrl + 0 ( go outside bracket)
+alt + enter (open search result in formated tab)
+shift + ctrl+ / (jmp to matching bracket)
+shift + d    (select highlited)
+ctrl + /     (comment lines)
+ctrl + I (suggestions)
+(NOT DEFAULT) win+F6   ( to use vscode debugger <run>)
 
 ctrl + alt + N (to build and run  using code runner in terminal <no debugging> )
 
