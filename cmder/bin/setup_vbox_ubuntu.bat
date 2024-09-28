@@ -6,7 +6,7 @@ taskkill /im "vbox*" /f
 
 rem boot up the ubutnu virtual OS on VmBox 
 rem (the serial is from ubunto setttingsin vbox or /bin/virt-ubuntu.lnk properties)
-vboxheadless --startvm "ce742fbb-b557-4a7f-b1b1-1845ae9856e4" --password-id orsnaro --password C:\Users\OmarPc\virt-ubuntu-pass.txt 
+vboxheadless --startvm "598c3280-7025-4efe-b9f8-58712460cfe2" --password-id orsnaro-vm --password C:\Users\OmarPc\virt-ubuntu-pass.txt 
 
 
 
