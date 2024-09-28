@@ -60,6 +60,7 @@ ctrl + j (open terminal panel)
 (NOT DEFAULT) shift + ` + E (show extesions)
 (NOT DEFAULT) shift + ` + w (show explorer)
 (NOT DEFAULT) ctrl + space  (delete line)
+(NOT DEFAULT) ctrl + alt + s (split editor)
 
 (WONT WORK if tab is of editor type) alt + left/right (navigate between active tabs)
 
