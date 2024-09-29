@@ -995,7 +995,6 @@ s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9
 viv=vivaldi $*  
 remotes=start https://github.com/  
 gproj=cdv "C:\Users\%USERNAME%\repo_Reality_simsuit\"  
-gptg=vivaldi --app=https://chat.openai.com  
 cla=vivaldi --app=https://claude.ai/new  
 gptcli-old=python C:\Users\%USERNAME%\others_repo_GptCli\src\chatgpt.py $*  
 hdde=cd /d E:  
@@ -1006,11 +1005,12 @@ logme=git log --all --graph  --decorate --stat --author="Omar Rashad*" --source
 loga=git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --stat  
 dis=pwsh.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  
 glz="C:\Program Files\glzr.io\GlazeWM\glazewm.exe"  
-glzconf=nvim C:\Users\%USERNAME%\.glzr\glazewm\config.yaml  
 ze="C:\Program Files\glzr.io\Zebar\resources\start.bat"  
 zeconf=nvim c:\Users\%USERNAME%\.glzr\zebar\config.yaml  
 stube=start  https://www.youtube.com/results?search_query=$1+$2+$3+$4+$5+$6+$7+$8+$9+  
+xamporg=cd /d c:\xampp\htdocs\  
 techno=cd /d c:\xampp\htdocs\repo_Future_techno_data\  
+glzconf=nvim C:\Users\%USERNAME%\.glzr\glazewm\config.yaml  
 reglz=taskkill /im "glaze*" /f $t "C:\Program Files\glzr.io\GlazeWM\glazewm.exe"  
 sshvbox=ssh orsnaro-vm@192.168.1.30  
 stopvm=VBoxManage controlvm ubuntu-vm poweroff  
