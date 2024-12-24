@@ -510,6 +510,9 @@ ctrl + b + '
 
  exit
 -> (gets out of program. if in bash exits tmux)
+
+more: 
+https://hamvocke.com/blog/a-quick-and-easy-guide-to-tmux/
 ```
 
 # -----------------Unity Editor-----------------IMPORTANT only
