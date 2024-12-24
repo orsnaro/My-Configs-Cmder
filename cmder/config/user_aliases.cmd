@@ -457,7 +457,6 @@ pyaddtodo=add_todo_prob.bat py
 calc_lines=git ls-files -z | xargs -0 wc -l
 flip=py C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\flip_screen.py  
 ngrp=grep  -v -i -n -H -G  $* --color  
-grep=grep -i $* --color  
 thun=thunderbird.exe $*  
 pygraph='find . -iname "*.py"  
 work=cd /d E:\omar-work  
@@ -943,7 +942,6 @@ pyaddtodo=add_todo_prob.bat py
 calc_lines=git ls-files -z | xargs -0 wc -l
 flip=py C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\flip_screen.py  
 ngrp=grep  -v -i -n -H -G  $* --color  
-grep=grep -i $* --color  
 thun=thunderbird.exe $*  
 pygraph='find . -iname "*.py"  
 work=cd /d E:\omar-work  
@@ -1015,3 +1013,8 @@ reglz=taskkill /im "glaze*" /f $t "C:\Program Files\glzr.io\GlazeWM\glazewm.exe"
 sshvbox=ssh orsnaro-vm@192.168.1.30  
 stopvm=VBoxManage controlvm ubuntu-vm poweroff  
 sshvm=ssh orsnaro-vm@192.168.1.30  
+sshmohd=ssh omar4@DESKTOP-PE24VUF  
+hotstop=netsh wlan stop  
+hotspot=netsh wlan set hostednetwork mode=allow ssid=$1 key=$2 $t netsh wlan start hosetednetwork  
+technodrive=start https://docs.google.com/spreadsheets/d/1AKQP43CF1b_4mct_raJFfcync71_pX5QrI8nS6lW3OA/edit?usp=drive_link  
+gptg=start https://chatgpt.com  

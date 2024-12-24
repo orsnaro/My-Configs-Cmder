@@ -455,6 +455,15 @@ echo any thing
 `&` at end of commands
 -> makes commands run in background ex : ./start_silent.sh &
 
+`ctr+b` then `p` 
+-> switch to last tmux window (windows are listed in status bar)
+
+`ctrl+b` then `%`
+-> split tmux pan to right
+
+`ctrl+b` then arrows
+-> move between tmux panes
+
 `nohup comnd.sh`  and  `comnd.sh & disown`
 -> also makes command run in background but kinda more detached ( search more on it )
 
