@@ -1018,3 +1018,8 @@ hotstop=netsh wlan stop
 hotspot=netsh wlan set hostednetwork mode=allow ssid=$1 key=$2 $t netsh wlan start hosetednetwork  
 technodrive=start https://docs.google.com/spreadsheets/d/1AKQP43CF1b_4mct_raJFfcync71_pX5QrI8nS6lW3OA/edit?usp=drive_link  
 gptg=start https://chatgpt.com  
+sshome=ssh ors@192.168.1.12  
+sshome2=ssh ors@41.196.252.205  
+sshome3=ssh ors@orsnaro.ddns.net  
+homelocal=ssh ors@192.168.1.12 $*  
+homepublic=ssh ors@41.196.252.205 $*  
