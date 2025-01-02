@@ -11,6 +11,12 @@ fi
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
+
+# tmux 
+if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+ tmux new -d -s remote || tmux new -d -s main || tmux attach -t main;
+fi
+
 # Set name of the theme to load --- if set to "random", it will
 # load a random theme each time Oh My Zsh is loaded, in which case,
 # to know which specific one was loaded, run: echo $RANDOM_THEME
@@ -136,7 +142,7 @@ alias os='neofetch'
 alias stat='git status'
 alias com='git commit -m'
 alias botorg="cd $HOME/repos/Discord_bot_ai  && source $HOME/pyenvs/discord_bot_ai_venv/bin/activate"
-
+alias omarpc='ssh omarpc@192.168.1.10'
 
 export zsh="$HOME/.zshrc"
 
