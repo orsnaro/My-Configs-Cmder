@@ -142,11 +142,8 @@ alias os='neofetch'
 alias stat='git status'
 alias com='git commit -m'
 alias botorg="cd $HOME/repos/Discord_bot_ai  && source $HOME/pyenvs/discord_bot_ai_venv/bin/activate"
-<<<<<<< HEAD
 alias omarpc='ssh omarpc@192.168.1.10'
-=======
 
->>>>>>> 0bcceb0 (update backup configs of remote home server shell#)
 
 export zsh="$HOME/.zshrc"
 
