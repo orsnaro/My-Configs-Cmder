@@ -1505,10 +1505,8 @@ glz="C:\Program Files\glzr.io\GlazeWM\glazewm.exe"
 ze="C:\Program Files\glzr.io\Zebar\resources\start.bat"  
 zeconf=nvim c:\Users\%USERNAME%\.glzr\zebar\config.yaml  
 stube=start  https://www.youtube.com/results?search_query=$1+$2+$3+$4+$5+$6+$7+$8+$9+  
-<<<<<<< HEAD
 xamporg=cd /d c:\xampp\htdocs\  
 techno=cd /d c:\xampp\htdocs\repo_Future_techno_data\  
-reglz=taskkill /im "glaze*" /f $t "C:\Program Files\glzr.io\GlazeWM\glazewm.exe"  
 sshvbox=ssh orsnaro-vm@192.168.1.30  
 stopvm=VBoxManage controlvm ubuntu-vm poweroff  
 sshvm=ssh orsnaro-vm@192.168.1.30  
@@ -1522,3 +1520,6 @@ sshome2=ssh ors@41.196.252.205
 sshome3=ssh ors@orsnaro.ddns.net  
 homelocal=ssh ors@192.168.1.12 $*  
 homepublic=ssh ors@41.196.252.205 $*  
+reglz=taskkill /im "glaze*" /f $t taskkill /im "zebar*" /f $t "C:\Program Files\glzr.io\GlazeWM\glazewm.exe"  
+glzconf=nvim C:\Users\OmarPc\.glzr\glazewm\config.yaml  
+wakeserver=WakeMeOnLan.exe /wakeup 192.168.1.12  
