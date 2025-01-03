@@ -14,7 +14,7 @@ export ZSH="$HOME/.oh-my-zsh"
 
 # tmux 
 if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
- tmux new -d -s remote || tmux new -d -s main || tmux attach -t main;
+ tmux new -d -s remote || tmux new -d -s main || exec tmux attach -t main;
 fi
 
 # Set name of the theme to load --- if set to "random", it will
