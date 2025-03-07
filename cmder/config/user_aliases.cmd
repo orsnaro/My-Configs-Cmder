@@ -1503,7 +1503,6 @@ loga=git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar)
 dis=pwsh.exe -Command "Start-Process powershell -WindowStyle Hidden -ArgumentList 'Start-Process opendiscord_2nd_monitor.bat -WindowStyle Hidden'" $t mmt /MoveWindow 1 Process "Discord.exe"  
 glz="C:\Program Files\glzr.io\GlazeWM\glazewm.exe"  
 ze="C:\Program Files\glzr.io\Zebar\resources\start.bat"  
-zeconf=nvim c:\Users\%USERNAME%\.glzr\zebar\config.yaml  
 stube=start  https://www.youtube.com/results?search_query=$1+$2+$3+$4+$5+$6+$7+$8+$9+  
 xamporg=cd /d c:\xampp\htdocs\  
 techno=cd /d c:\xampp\htdocs\repo_Future_techno_data\  
@@ -1523,3 +1522,5 @@ homepublic=ssh ors@41.196.252.205 $*
 reglz=taskkill /im "glaze*" /f $t taskkill /im "zebar*" /f $t "C:\Program Files\glzr.io\GlazeWM\glazewm.exe"  
 glzconf=nvim C:\Users\OmarPc\.glzr\glazewm\config.yaml  
 wakeserver=WakeMeOnLan.exe /wakeup 192.168.1.12  
+zeconf=nvim c:\Users\OmarPc\.glzr\zebar\config.yaml  
+tskbar=c:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\TaskbarToggle.exe  
