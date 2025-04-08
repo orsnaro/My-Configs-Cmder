@@ -1490,7 +1490,6 @@ pydoneprob=save_N_push_solved_prob.bat py
 discback="C:\narol_discord_backup_codes.txt"  
 s=start https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 viv=vivaldi $*  
-remotes=start https://github.com/  
 gproj=cdv "C:\Users\%USERNAME%\repo_Reality_simsuit\"  
 cla=vivaldi --app=https://claude.ai/new  
 gptcli-old=python C:\Users\%USERNAME%\others_repo_GptCli\src\chatgpt.py $*  
@@ -1524,3 +1523,4 @@ glzconf=nvim C:\Users\OmarPc\.glzr\glazewm\config.yaml
 wakeserver=WakeMeOnLan.exe /wakeup 192.168.1.12  
 zeconf=nvim c:\Users\OmarPc\.glzr\zebar\config.yaml  
 tskbar=c:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\TaskbarToggle.exe  
+remotes=start https://github.com/orsnaro/  
