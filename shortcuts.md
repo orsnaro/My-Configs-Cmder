@@ -449,8 +449,11 @@ echo any thing
 -> (-d to start detached session with out it you attach to the new made tmux session)
 -> (most power full command to isolate and silence a process and keep it working even if shell is closed. somtimes  may be risky: cant exit cmder/win-terminal-preview proberly)
 
-`tmux kill-session -t  session-num or name`
+`tmux kill-session -t  <session-num or name>`
 -> (to kill a session of tmux)
+
+`tmux switch <session-num or name>`
+-> (to switch to antother session and detach from the current)
 
 `&` at end of commands
 -> makes commands run in background ex : ./start_silent.sh &
