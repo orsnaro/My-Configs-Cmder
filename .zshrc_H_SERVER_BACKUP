@@ -137,8 +137,9 @@ alias root="cd ~"
 alias os='neofetch'
 alias stat='git status'
 alias com='git commit -m'
-alias botorg="cd $HOME/repos/Discord_bot_ai  && source $HOME/pyenvs/discord_bot_ai_venv/bin/activate"
+alias botorg="cd $HOME/repos/Discord_bot_ai"
 alias omarpc='ssh omarpc@192.168.1.10'
+alias monk='ttyper'
 
 export zsh="$HOME/.zshrc"
 
@@ -170,9 +171,12 @@ ua() {
     unalias "$@"
 }
 
+search() {
+   ddgr "$@"
+}
 
 #wake on lan using magic packet configure
-sudo ethtool --change enp9s0 wol g
+sudo /usr/sbin/ethtool --change enp9s0 wol g
 
 
 # tmux 
@@ -186,13 +190,29 @@ if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] &&
  	tmux attach-session -t remote;
 fi
 
+#Discord Bot (Wizard GPTEOUS) auto run script
+export IS_PRODUCTION=1
+export CURRENT_DATETIME=$(date +"%Y-%m-%d,%H:%M:%S")
+pkill -f "main_wizard_bot.py"
+cd ~/repos/Discord_bot_ai
+echo -e "#################################### \n\n\n [STARTING NEW BOT SESSION] DATE: $CURRENT_DATETIME GMT \n\n\n#################################### \n" >> ./std_log.txt
+echo "python3 $HOME/repos/Discord_bot_ai/main_wizard_bot.py 2" > ../bot_runner.sh
+chmod u+x ../discord_bot_runner.sh
+if ! tmux has-session -t discord_bot_runner_tmux 2>/dev/null; 
+then
+	tmux new -d -s discord_bot_runner_tmux '../discord_bot_runner.sh >> ../discord_bot_shell_log.txt'
+else
+   tmux kill-session -t discord_bot_runner_tmux
+   tmux new -d -s discord_bot_runner_tmux '../discord_bot_runner.sh >> ../discord_bot_shell_log.txt'
+fi
+rm ../discord_bot_runner.sh
+cd ~
+
 
 
 # To customize prompt, run `p10k configure` or edit ~/.p10k.zsh.
 [[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
 
 
-
-
-
-
+# python auto venv tool
+source ~/.autoenv/activate.sh
