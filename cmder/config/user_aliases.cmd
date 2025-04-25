@@ -1524,3 +1524,4 @@ wakeserver=WakeMeOnLan.exe /wakeup 192.168.1.12
 zeconf=nvim c:\Users\OmarPc\.glzr\zebar\config.yaml  
 tskbar=c:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\TaskbarToggle.exe  
 remotes=start https://github.com/orsnaro/  
+deep=start https://chat.deepseek.com/  
