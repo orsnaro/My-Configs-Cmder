@@ -23,7 +23,6 @@ rem Get the number of files in the folder.
 set /a FILECOUNT=0
 for /f %%a in ('dir /b /a-d-s-h "%probsFolder%"') do set /a FILECOUNT+=1
 
-<<<<<<< HEAD
 
 rem note: change the file CP.cpp to one that you solve problems in it 
 copy %src_file%.%ext%  %probsFolder%prob_no_%FILECOUNT%.%ext%
@@ -33,23 +32,7 @@ rem enter the link of problem to be added to git commit message (optional)
 set /p commitMsg=paste problem link: || set commitMsg=NoLinkProvided
 
 rem add, commit and push your new solved problem in its own file (optional: leave problem url in the commit message)
-<<<<<<< HEAD
-git add .\%src_file%.%ext% .\%probsFolder% & git commit -m "#Done: %commitMsg% #" & git push
-=======
 git add .\Cp.%ext% .\%probsFolder%\ & git commit -m "#Done: %commitMsg% #" & git push
->>>>>>> 3c95e8a (Update save_N_push_solved_prob.bat: all pathes of done probs vis the variable not literals)
-=======
-
-rem note: change the file CP.cpp to one that you solve problems in it 
-copy %src_file%.%ext%  %probsFolder%prob_no_%FILECOUNT%.%ext%
-echo solution file: prob_no_%FILECOUNT%.%ext%
-
-rem enter the link of problem to be added to git commit message (optional)
-set /p commitMsg=paste problem link: || set commitMsg=NoLinkProvided
-
-rem add, commit and push your new solved problem in its own file (optional: leave problem url in the commit message)
-git add .\%src_file%.%ext% .\%probsFolder% & git commit -m "#Done: %commitMsg% #" & git push
->>>>>>> 03f0b9d (Update save_N_push_solved_prob.bat: if solved probs dir isnt there make it , print sol file name to console, replace literal with variables)
 
 
 cd %oldpath%
