@@ -63,7 +63,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -130,7 +129,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -197,7 +195,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -264,7 +261,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -331,7 +327,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -398,7 +393,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 conforg=cdv "C:\Users\%USERNAME%\repo_My_configs_cmder"  
 allcode=code C:\users\%USERNAME%\repo_My_configs_cmder\all_local_repo_vs.code-workspace  
@@ -542,7 +536,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -609,7 +602,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -676,7 +668,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -743,7 +734,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -810,7 +800,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -877,7 +866,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 conforg=cdv "C:\Users\%USERNAME%\repo_My_configs_cmder"  
 allcode=code C:\users\%USERNAME%\repo_My_configs_cmder\all_local_repo_vs.code-workspace  
@@ -1021,7 +1009,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -1088,7 +1075,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -1155,7 +1141,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -1222,7 +1207,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -1289,7 +1273,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 ;= @echo off
 ;= rem Call DOSKEY and use this file as the macrofile
@@ -1356,7 +1339,6 @@ typer=start https://play.typeracer.com/
 stat=git status  
 sbrave="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 mx=sndvol.exe  
-cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 notpushed= git log --stat --branches --not --remotes  
 conforg=cdv "C:\Users\%USERNAME%\repo_My_configs_cmder"  
 allcode=code C:\users\%USERNAME%\repo_My_configs_cmder\all_local_repo_vs.code-workspace  
@@ -1510,5 +1492,8 @@ notes=cd C:\Users\OmarPc\obsidians\notes\
 obs=obsidian.exe  
 sshome=ssh ors@192.168.1.12  
 ssphone=ssh -p 8022 u0_a295@localhost  
-g=gt $*  
 reglz=taskkill /im "glaze*" /f $t "C:\Program Files\glzr.io\GlazeWM\cli\glazewm.exe"$t taskkill /im "yasb*" /f  
+g=git $*  
+yasbconf=nvim c:\Users\OmarPc\.config\yasb\config.yaml  
+cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
+csrn2= dotnet build C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\TestProject.csproj $t C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\bin\Debug\net8.0\TestProject.exe $t rm C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\bin\Debug\net8.0\TestProject.exe  
