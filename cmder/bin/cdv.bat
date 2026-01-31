@@ -71,8 +71,7 @@ if "!fstPoShellArg!"=="-i" (
 	)
 )
 
-@REM it's safer with quotes! but REMOVE any double quote in the path 
-@REM then append and prepend double quotes to the path just before using normal cd  command at end of the process
+@REM it's safer with quotes! but REMOVE any double quote in the path then append and prepend double quotes to the path just before using normal cd  command at end of the process
 set toCheckPath=!toCheckPath:"=!
 
 @REM replace all forward slashes with back slashes 
@@ -127,7 +126,7 @@ if "!command_options!"=="-h" (
 	echo.
 	echo.
 	echo [91m ~
-	echo [93m IMPORTANT: [0m "(DONT USE FOLDER NAMES OR PATHS HAVING WHITE CHARACTERS!)"
+	echo [93m IMPORTANT: [0m "(DON'T USE FOLDER NAMES OR PATHS HAVING WHITE CHARACTERS!)"
 	echo.
 	echo [0m "the command is mostly used with cd aliases to repoes ( other wise make its default is to disable extra modification and do normal cd unless ^%2 is set to "1")"
 	echo.
@@ -176,7 +175,7 @@ if exist "!toCheckPath!" (
 	if "!command_options!"=="-i" ( 
 		type nul > !toCheckPath!.is_autoVenv
 			@REM if it's a git repo add this file to ignored files
-		if exist "!toCheckPath!.git\" ( echo .is_autovEnv >> !toCheckPath!.gitignore )
+		if exist "!toCheckPath!.git\" ( echo .is_autoVenv >> !toCheckPath!.gitignore )
 	)
 	
 	@REM leaving the backslash at end of path will make it harder to use '~' or get dir name using other methods. so remove it!
