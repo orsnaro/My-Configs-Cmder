@@ -421,7 +421,6 @@ twt=start https://www.twitch.tv/search?term=$1%20$2%20$3%20$4%20$5%20$6%20$7%20$
 find=tasklist  $b sort $b  grep -i -e "image name" -e "=" -e "$*"  --color  
 ua=alias /d $*  
 unalias=alias /d $*  
-cd=cdv $*  
 what=chrome --app=https://web.whatsapp.com/ $t timeout /t 2 $t  mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 look=start https://outlook.office.com/mail/?actSwt=true  
 sgxcog=opera --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
@@ -894,7 +893,6 @@ twt=start https://www.twitch.tv/search?term=$1%20$2%20$3%20$4%20$5%20$6%20$7%20$
 find=tasklist  $b sort $b  grep -i -e "image name" -e "=" -e "$*"  --color  
 ua=alias /d $*  
 unalias=alias /d $*  
-cd=cdv $*  
 what=chrome --app=https://web.whatsapp.com/ $t timeout /t 2 $t  mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 look=start https://outlook.office.com/mail/?actSwt=true  
 sgxcog=opera --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
@@ -1374,7 +1372,6 @@ twt=start https://www.twitch.tv/search?term=$1%20$2%20$3%20$4%20$5%20$6%20$7%20$
 find=tasklist  $b sort $b  grep -i -e "image name" -e "=" -e "$*"  --color  
 ua=alias /d $*  
 unalias=alias /d $*  
-cd=cdv $*  
 what=chrome --app=https://web.whatsapp.com/ $t timeout /t 2 $t  mmt /MoveWindow 1  Title  "web.whatsapp.com" /WindowTop 0 /WindowLeft -10 /WindowWidth 910 /WindowHeight 1600  
 look=start https://outlook.office.com/mail/?actSwt=true  
 sgxcog=opera --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
@@ -1443,7 +1440,6 @@ suitorg= cd /d c:\Users\%USERNAME%\repo_Reality_simsuit\
 gunity="C:\Program Files\Unity 2022.3.22f1\Editor\Unity.exe" -projectPath "C:\Users\%USERNAME%\repo_Reality_simsuit\unity_physics1"  
 netcat=nc $*  
 komowhkd=code "C:\Program Files\whkd\bin\whkdrc"  
-com=git commit -m"$*"  
 ctyper=cli-typer  
 remotes2=opera https://dev.azure.com/  
 asdarec= C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\KeyRec-Asda.exe  
@@ -1492,8 +1488,10 @@ notes=cd C:\Users\OmarPc\obsidians\notes\
 obs=obsidian.exe  
 sshome=ssh ors@192.168.1.12  
 ssphone=ssh -p 8022 u0_a295@localhost  
-reglz=taskkill /im "glaze*" /f $t "C:\Program Files\glzr.io\GlazeWM\cli\glazewm.exe"$t taskkill /im "yasb*" /f  
 g=git $*  
 yasbconf=nvim c:\Users\OmarPc\.config\yasb\config.yaml  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 csrn2= dotnet build C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\TestProject.csproj $t C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\bin\Debug\net8.0\TestProject.exe $t rm C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\bin\Debug\net8.0\TestProject.exe  
+cd=cdv $*  
+reglz=taskkill /im "glaze*" /f $t "C:\Program Files\glzr.io\GlazeWM\cli\glazewm.exe"$t taskkill /im "yasb*" /f $t taskkill /im pythonw.exe /f  
+com=com.bat  
