@@ -1494,4 +1494,4 @@ cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.ex
 csrn2= dotnet build C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\TestProject.csproj $t C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\bin\Debug\net8.0\TestProject.exe $t rm C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\bin\Debug\net8.0\TestProject.exe  
 cd=cdv $*  
 reglz=taskkill /im "glaze*" /f $t "C:\Program Files\glzr.io\GlazeWM\cli\glazewm.exe"$t taskkill /im "yasb*" /f $t taskkill /im pythonw.exe /f  
-com=com.bat  
+com=com.bat $*  
