@@ -1,0 +1,3 @@
+[submodule "conf_backups/.glzr/zebar/quiet-velvet"]
+	path = conf_backups/.glzr/zebar/quiet-velvet
+	url = https://github.com/LeoBessin/quiet-velvet

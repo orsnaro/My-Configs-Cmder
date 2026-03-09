@@ -14,3 +14,4 @@ cmder/config/*
 !cmder/config/user-ConEmu.xml
 !cmder/bin/*
 tst/\"cmder/bin/WakeMeOnLan.cfg\" 
+conf_backups/.glzr/zebar/tmp*
