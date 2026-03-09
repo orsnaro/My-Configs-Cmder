@@ -1,0 +1,2412 @@
+/* ===================== */
+/* === COLOR VARIABLES === */
+/* ===================== */
+:root {
+    /* Catppuccin Mocha color palette */
+    --rosewater: #f5e0dc;
+    --flamingo: #f2cdcd;
+    --pink: #f5c2e7;
+    --mauve: #cba6f7;
+    --red: #f38ba8;
+    --maroon: #eba0ac;
+    --peach: #fab387;
+    --yellow: #f9e2af;
+    --green: #a6e3a1;
+    --teal: #94e2d5;
+    --sky: #89dceb;
+    --sapphire: #74c7ec;
+    --blue: #89b4fa;
+    --lavender: #b4befe;
+    --og: #c39ff1;
+
+/* Text colors */
+    --text: #cdd6f4;
+    --subtext1: #bac2de;
+    --subtext0: #a6adc8;
+
+/* Overlay colors */
+    --overlay2: #9399b2;
+    --overlay1: #7f849c;
+    --overlay0: #6c7086;
+
+/* Surface colors */
+    --surface2: #585b70;
+    --surface1: #45475a;
+    --surface0: #282936;
+
+/* Base colors */
+    --base: #1e1e2e;
+    --mantle: rgba(24, 24, 37, 0.5);
+    --crust: rgba(17, 17, 27, 0.75);
+}
+
+/* ================= */
+/* === BASE STYLES === */
+/* ================= */
+* {
+    font-size: 12px;
+    color: var(--subtext0);
+    font-weight: 700;
+    font-family: "JetBrainsMono NFP";
+    margin: 0;
+    padding: 0;
+}
+
+/* ================= */
+/* === BAR LAYOUT === */
+/* ================= */
+.yasb-bar {
+    padding: 0;
+    margin: 1px 0;
+    background: var(--base);
+    border-radius: 6px;
+}
+
+.power-menu-popup,
+.audio-menu,
+.disk-group,
+.calendar,
+.weather-card,
+.home-menu {
+    background: rgb(24, 24, 37);
+    border: 1.5px solid rgba(69, 71, 90, 0.5);
+    border-radius: 6px;
+}
+
+/* Common widget styles */
+.widget {
+    padding: 0 2px;
+    margin: 0 1.5px;
+}
+
+.widget .label {
+    padding: 0px 2px;
+}
+
+.widget .label.alt {
+    padding: 0px 2px;
+}
+
+.icon {
+    font-size: 14px;
+    margin: 0 4px 0 0;
+}
+
+/* Icon hover effect */
+.power-menu-widget .label:hover,
+.battery-widget .icon:hover,
+.disk-widget .icon:hover,
+.clock-widget .icon:hover,
+.weather-widget .icon:hover,
+.wifi-widget .icon:hover,
+.memory-widget .icon:hover,
+.volume-widget .icon:hover,
+.libre-monitor-widget .widget-container .icon:hover,
+.cpu-widget .icon:hover,
+.notification-widget .icon:hover,
+.notification-widget .icon.new-notification:hover,
+.vscode-widget .widget-container .icon:hover,
+.traffic-widget .icon:hover,
+.home-widget .icon:hover,
+.wallpapers-widget .icon:hover,
+.systray .unpinned-visibility-btn:hover
+{
+    color: rgba(230, 84, 171, 0.903);
+    
+}
+
+/* ==================== */
+/* === POWER MENU === */
+/* ==================== */
+.power-menu-widget {
+    padding: 0 2px;
+    margin-left: -2px;
+    margin-right: 4px;
+    background: transparent;
+    box-shadow: 0 2px 8px 0 rgba(24, 24, 37, 0.15);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+}
+
+.power-menu-widget .label {
+    color: var(--red);
+    font-size: 14px;
+}
+
+.power-menu-popup .button {
+    padding: 0;
+    width: 180px;
+    height: 230px;
+    border-radius: 8px;
+    background-color: var(--base);
+    border: 8px solid rgba(58, 59, 83, 0);
+    margin: 0;
+}
+
+.power-menu-popup .button.hover {
+    background-color: var(--crust);
+    border: 4px solid var(--og);
+}
+
+.power-menu-popup .button .label {
+    margin-bottom: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--og);
+}
+
+.power-menu-popup .button .icon {
+    font-size: 64px;
+    padding-top: 32px;
+    color: var(--og);
+}
+
+.power-menu-popup .button.cancel {
+    height: 32px;
+    border-radius: 4px;
+}
+
+.power-menu-popup .button.cancel .icon {
+    padding: 0;
+    margin: 0;
+}
+
+.power-menu-popup .button.cancel .label {
+    color: var(--red);
+    margin: 0;
+}
+
+.power-menu-popup .button.cancel:hover {
+    background-color: var(--crust);
+    border: 2px solid var(--red);
+}
+
+/* ========================= */
+/* === MEDIA WIDGET      === */
+/* ========================= */
+.media-widget {
+    background: rgba(0, 0, 0, 0);
+    padding: 0;
+    color: var(--text);
+    min-width: 150px;
+    margin: 3px;
+    border-radius: 6px;
+    border-bottom: 1px solid rgba(177, 140, 225, 0.385);
+    border-style: double;
+}
+.media-widget .label {
+    font-size: 12px;
+    background-color: transparent;
+    margin-left: 6px;
+    margin-right: 4px;
+    letter-spacing: -1px;
+}
+.media-widget .btn {
+    background: transparent;
+    border: none;
+    color: var(--og);
+    border-radius: 6px;
+    font-family: "Segoe Fluent Icons";
+    transition: background 0.15s, color 0.15s, border 0.15s;
+}
+.media-widget .btn.play,
+.media-widget .btn.pause,
+.media-widget .btn.next,
+.media-widget .btn.prev {
+    background-color: transparent;
+    border: 1px solid var(--og); /* og accent */
+    padding: 0 3px;
+    margin: 3px 0 3px 4px;
+    color: var(--og);
+    border-radius: 6px;
+    font-size: 12px;
+}
+.media-widget .btn:hover {
+    color: var(--surface0);
+    background-color: var(--og);
+    border-color: var(--og);
+}
+.media-widget .btn.disabled,
+.media-widget .btn.disabled:hover {
+    color: var(--overlay0);
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(195, 159, 241, 0.15);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.media-menu {
+    min-width: 420px;
+    max-width: 420px;
+    background: rgb(24, 24, 37);
+    border: 1.5px solid rgba(69, 71, 90, 0.5);
+    border-radius: 6px;
+    box-shadow: 0 4px 24px 0 rgba(24, 24, 37, 0.25);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    padding: 16px 20px 12px 20px;
+    color: var(--text);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+.media-menu .title,
+.media-menu .artist,
+.media-menu .source {
+    font-size: 14px;
+    font-weight: 600;
+    margin-left: 10px;
+    font-family: "JetBrainsMono NFP", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.media-menu .title {
+    color: var(--og);
+    font-size: 16px;
+    margin-bottom: 2px;
+}
+
+.media-menu .artist {
+    font-size: 13px;
+    color: var(--overlay1);
+    margin-top: 0px;
+    margin-bottom: 8px;
+}
+
+.media-menu .source {
+    font-size: 11px;
+    color: var(--surface0);
+    font-weight: normal;
+    border-radius: 3px;
+    background-color: var(--og);
+    color: #fff;
+    padding: 2px 6px;
+    margin-bottom: 8px;
+    margin-left: 0;
+    letter-spacing: 0.5px;
+}
+
+/* The source class name is the same as what you see in the media widget; just replace spaces with dashes and convert it to lowercase.
+Example: "Windows Media" becomes "windows-media" */
+.media-menu .source.firefox {
+    background-color: #ff583b;
+    color: #ffffff;
+}
+.media-menu .source.spotify {
+    background-color: #199143;
+    color: #ffffff;
+}
+.media-menu .source.edge,
+.media-menu .source.windows-media {
+    background-color: #0078d4;
+    color: #ffffff;
+}
+
+.media-menu .btn {
+    font-family: "Segoe Fluent Icons";
+    font-size: 15px;
+    font-weight: 500;
+    margin: 6px 2px 0px 2px;
+    min-width: 32px;
+    max-width: 32px;
+    min-height: 28px;
+    max-height: 28px;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--og);
+    border: 1px solid var(--og);
+    transition: background 0.15s, color 0.15s, border 0.15s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: none;
+}
+
+.media-menu .btn.prev {
+    margin-left: 8px;
+}
+
+.media-menu .btn:hover {
+    color: var(--surface0);
+    background-color: var(--og);
+    border-color: var(--og);
+}
+
+.media-menu .btn.play {
+    background-color: var(--og);
+    color: var(--surface0);
+    font-size: 17px;
+    border-color: var(--og);
+}
+
+.media-menu .btn.disabled,
+.media-menu .btn.disabled:hover {
+    color: var(--overlay0);
+    background-color: rgba(0, 0, 0, 0);
+    border-color: rgba(195, 159, 241, 0.15);
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.media-menu .playback-time {
+    font-size: 13px;
+    font-family: "JetBrainsMono NFP", 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--overlay1);
+    margin-top: 20px;
+    min-width: 100px;
+}
+
+.media-menu .progress-slider {
+    height: 10px;
+    margin: 5px 4px;
+    border-radius: 3px;
+}
+
+.media-menu .progress-slider::groove {
+    background: transparent;
+    height: 2px;
+    border-radius: 3px;
+    background: rgba(195, 159, 241, 0.3);
+}
+
+.media-menu .progress-slider::groove:hover {
+    background: rgba(195, 159, 241, 0.5);
+    height: 6px;
+    border-radius: 3px;
+}
+
+.media-menu .progress-slider::sub-page {
+    background: var(--og);
+    border-radius: 3px;
+    height: 4px;
+}
+
+/* ==================== */
+/* === VOLUME WIDGET === */
+/* ==================== */
+.volume-widget .icon {
+    color: var(--blue);
+    margin: 1px 2px 0 0;
+}
+
+.volume-widget .label {
+    font-size: 12px;
+    color: var(--subtext0);
+    font-weight: 700;
+    font-family: "JetBrainsMono NFP";
+    background: transparent;
+}
+
+.audio-container .device {
+    font-size: 10px;
+    background-color: transparent;
+    border: none;
+    padding: 6px 8px 6px 4px;
+    margin: 2px 0;
+    border-radius: 4px;
+}
+
+.audio-container .device.selected {
+    background-color: rgba(211, 133, 188, 0.264);
+}
+
+.audio-container .device:hover {
+    background-color: rgba(124, 88, 113, 0.264);
+}
+
+.audio-menu {
+    background: rgb(24, 24, 37);
+    border: 1.5px solid rgba(69, 71, 90, 0.5);
+    border-radius: 6px;
+    box-shadow: 0 4px 24px 0 rgba(24, 24, 37, 0.25);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    padding: 8px;
+}
+
+
+/* ================= */
+/* === DISK WIDGET === */
+/* ================= */
+.disk-widget .icon {
+    color: var(--teal);
+}
+
+.disk-group-row {
+    min-width: 220px;
+    max-width: 220px;
+    max-height: 40px;
+    margin: 0;
+    padding: 0;
+    border-radius: 6px;
+    border: 1px solid transparent;
+}
+
+.disk-group-row:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.disk-group-label-bar {
+    max-height: 8px;
+    border: 0;
+    background-color: var(--surface0);
+    border-radius: 4px;
+}
+
+.disk-group-label-bar::chunk {
+    background-color: var(--og);
+    border-radius: 4px;
+}
+
+.disk-group-label {
+    font-size: 13px;
+}
+
+.disk-group-label-size {
+    font-size: 12px;
+    color: rgba(205, 214, 244, 0.5);
+}
+
+/* ================= */
+/* === CLOCK WIDGET === */
+/* ================= */
+
+.clock-widget .icon {
+    font-size: 12px;
+    color: var(--sky)
+}
+
+.clock-widget .label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--subtext0);
+}
+
+.calendar {
+    background: rgb(24, 24, 37);
+    border: 1.5px solid rgba(69, 71, 90, 0.5);
+    border-radius: 6px;
+    box-shadow: 0 4px 24px 0 rgba(24, 24, 37, 0.25);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    padding: 12px;
+    color: var(--text);
+}
+
+.calendar .calendar-table,
+.calendar .calendar-table::item {
+    background-color: transparent;
+    color: var(--og);
+    margin: 0;
+    padding: 0;
+    border: none;
+    outline: none;
+    transition: color 0.15s, background 0.15s;
+}
+
+.calendar .calendar-table::item {
+    border-radius: 4px;
+}
+
+.calendar .calendar-table::item:hover {
+    background-color: rgba(241, 159, 208, 0.8); 
+    color: var(--surface0);
+}
+
+.calendar .calendar-table::item:selected {
+    color: var(--crust);
+    background-color: var(--og);
+    border-radius: 5px;
+    font-weight: 900;
+    box-shadow: 0 2px 8px 0 rgba(195, 159, 241, 0.18);
+}
+
+.calendar .day-label {
+    margin-top: 20px;
+}
+
+.calendar .day-label,
+.calendar .month-label,
+.calendar .date-label {
+    font-size: 16px;
+    color: var(--og);
+    font-weight: 700;
+    min-width: 180px;
+    max-width: 180px;
+    letter-spacing: 0.5px;
+}
+
+.calendar .month-label {
+    font-weight: 600;
+    color: var(--mauve);
+}
+
+.calendar .date-label {
+    font-size: 88px;
+    font-weight: 900;
+    color: var(--og);
+    margin-top: -20px;
+    text-shadow: 0 2px 12px rgba(195, 159, 241, 0.12);
+    letter-spacing: 2px;
+}
+
+/* ==================== */
+/* === WEATHER WIDGET === */
+/* ==================== */
+.weather-widget .icon {
+    font-size: 18px;
+    margin: 0 2px 1px 0;
+    color: var(--maroon);
+}
+
+.weather-widget .label {
+    font-size: 12px;
+    color: var(--subtext0);
+    font-weight: 700;
+    font-family: "JetBrainsMono NFP";
+    background: transparent;
+}
+
+.weather-card {
+    background: rgb(24, 24, 37);
+    border: 1.5px solid rgba(69, 71, 90, 0.5);
+    border-radius: 6px;
+    box-shadow: 0 4px 24px 0 rgba(24, 24, 37, 0.25);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    padding: 12px 16px;
+    color: var(--text);
+}
+
+.weather-card-today {
+    border: 1.5px solid var(--og);
+    border-radius: 8px;
+    background-color: rgba(195, 159, 241, 0.07);
+    box-shadow: 0 2px 8px 0 rgba(195, 159, 241, 0.10);
+}
+.weather-card-today .label {
+    font-size: 13px;
+    color: var(--subtext1);
+}
+.weather-card-today .label.location {
+    font-size: 24px;
+    font-weight: 900;
+    color: var(--og);
+    letter-spacing: 1px;
+}
+.weather-card-today .label.alert {
+    font-size: 12px;
+    font-weight: 700;
+    background-color: rgba(250, 179, 135, 0.10);
+    border: 1px solid rgba(250, 179, 135, 0.18);
+    color: var(--yellow);
+    border-radius: 6px;
+    padding: 5px 0;
+    margin-top: 6px;
+}
+
+.weather-card-day {
+    border: 1px solid var(--surface1);
+    border-radius: 8px;
+    background-color: rgba(195, 159, 241, 0.04);
+    transition: background 0.15s, border 0.15s;
+}
+.weather-card-day .label {
+    font-size: 12px;
+    color: var(--subtext0);
+}
+.weather-card-day:hover {
+    background-color: rgba(195, 159, 241, 0.13);
+    border: 1.5px solid var(--og);
+}
+
+/* ====================== */
+/* === WORKSPACE WIDGET === */
+/* ====================== */
+.glazewm-workspaces {
+    background-color: rgba(108, 82, 165, 0.171);
+    margin: 4px 4px;
+    border-radius: 4px;
+    box-shadow: 0 4px 24px 0 rgba(24, 24, 37, 0.25);
+    padding: 4px 2px;
+}
+
+.glazewm-workspaces .ws-btn {
+    font-size: 12px;
+    border: none;
+    color: var(--overlay2);
+    padding: 0 5px;
+    cursor: pointer;
+}
+
+.glazewm-workspaces .ws-btn:hover,
+.glazewm-workspaces .ws-btn.active_populated:hover {
+    background-color: var(--og);
+    color: var(--surface0);
+    border-radius: 6px;
+}
+
+.glazewm-workspaces .ws-btn.empty{
+    color: var(--overlay0);
+}
+
+.glazewm-workspaces .ws-btn.active_populated,
+.glazewm-workspaces .ws-btn.active_empty {
+    color: var(--red);
+    font-weight: 900;
+}
+
+/* ================= */
+/* === WIFI WIDGET === */
+/* ================= */
+.wifi-widget .icon {
+    color: var(--yellow);
+}
+.wifi-widget .label {
+    font-size: 12px;
+    color: var(--subtext0);
+    font-weight: 700;
+    font-family: "JetBrainsMono NFP";
+    background: transparent;
+}
+
+/* ===================== */
+/* === BATTERY WIDGET === */
+/* ===================== */
+.battery-widget .icon {
+    color: var(--flamingo);
+}
+
+.battery-widget {
+    padding: 0;
+    margin: 0 0 0 2px;
+    background: transparent;
+    box-shadow: 0 2px 8px 0 rgba(24, 24, 37, 0.15);
+    border-radius: 6px;
+}
+
+.battery-widget .label {
+    color: var(--subtext0);
+    font-size: 12px;
+    font-weight: 700;
+    font-family: "JetBrainsMono NFP";
+    background: transparent;
+}
+
+/* ==================== */
+/* === MEMORY WIDGET === */
+/* ==================== */
+.memory-widget .icon {
+    color: var(--red);
+}
+
+.memory-widget .label {
+    font-size: 12px;
+    color: var(--subtext0);
+    font-weight: 700;
+    font-family: "JetBrainsMono NFP";
+    background: transparent;
+}
+
+/* ================= */
+/* === UPTIME WIDGET === */
+/* ================= */
+.uptime {
+    font-size: 14px;
+    margin-bottom: 10px;
+    color: var(--subtext0);
+    font-weight: 600;
+}
+
+/* ================= */
+/* === HOME WIDGET === */
+/* ================= */
+.home-widget {
+    padding: 0 2px 0 8px;
+}
+
+.home-widget .icon {
+    font-size: 18px;
+    color: var(--subtext1);
+}
+
+.home-menu .menu-item {
+    padding: 8px 48px 8px 12px;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.home-menu .menu-item:hover {
+    background-color: var(--og);
+    color: var(--surface0);
+    margin: 4px 6px;
+    border-radius: 4px;
+}
+
+.home-menu .separator {
+    max-height: 1px;
+    background-color: var(--overlay0);
+    margin: 0 8px;
+}
+
+/* ================= */
+/* === System Tray === */
+/* ================= */
+.systray {
+    background: var(--base);
+    background-color: transparent;
+    /* border-radius: 4px; */
+    /* margin: 0 3px; */
+    display: flex;
+    align-items: center;
+}
+
+.systray .unpinned-container {
+    background: transparent;
+    display: flex;
+    align-items: center;
+    padding: 0 -2px;
+}
+
+.systray .button {
+    /* border-radius: 12px; */
+    /* padding: 1px; */
+    /* /* background: transparent; */
+    color: var(--text);
+    margin: 1px 0.5px;
+    transition: background 0.15s, color 0.15s;
+    font-size: 16px;
+}
+
+.systray .button:hover {
+    background: var(--og);
+    border-color: var(--lavender);
+}
+
+.systray .button[dragging=true] {
+    background: var(--sky);
+    border: 1.5px solid var(--peach);
+    color: var(--surface0);
+}
+
+.systray .unpinned-visibility-btn {
+    border-radius: 6px;
+    background: var(--pink);
+    color: var(--crust);
+    border: 1px solid transparent;
+    margin: 7px 0.5px;
+    font-size: 17px;
+}
+
+.systray .unpinned-visibility-btn.active {
+    background: var(--blue);
+    color: var(--crust);
+    border-color: var(--blue);
+}
+
+/* ================= */
+/* === lIBRE HM === */
+/* ================= */
+
+.libre-monitor-widget .widget-container .label {
+    color: var(--subtext0);
+    font-size: 10px;
+    font-family: "JetBrainsMono NFP";
+    font-weight: 700;
+    background: transparent;
+}
+
+.libre-monitor-widget .widget-container .icon {
+    color: var(--mauve);
+    font-size: 14px;
+    background: transparent;
+}
+
+.libre-menu {
+    background: rgb(24, 24, 37);
+    border: 1px solid var(--og);
+    border-radius: 6px;
+    box-shadow: 0 4px 24px 0 rgba(24, 24, 37, 0.25);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+    padding: 10px 12px 6px 12px;
+    color: var(--og);
+    min-width: 260px;
+    max-width: 340px;
+    overflow-y: auto;
+}
+
+.libre-menu .header {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--og);
+    font-family: "JetBrainsMono NFP", "Segoe UI", sans-serif;
+    padding: 4px 0 4px 0;
+    margin: 8px 0 4px 0;
+    letter-spacing: 0.5px;
+    background: transparent;
+}
+
+.libre-menu .sensor-item {
+    background-color: var(--og);
+    padding: 3px 8px;
+    border-radius: 5px;
+    border: 1px solid var(--og);
+    margin-bottom: 2px;
+    display: flex;
+    align-items: center;
+    transition: background 0.15s, border 0.15s, color 0.15s;
+}
+
+.libre-menu .sensor-item:last-child {
+    margin-bottom: 0;
+}
+
+.libre-menu .sensor-item:hover {
+    background-color: var(--og);
+    border: 1px solid var(--og);
+    filter: brightness(0.92);
+}
+
+.libre-menu .sensor-item:hover .sensor-name,
+.libre-menu .sensor-item:hover .sensor-value {
+    color: var(--surface0);
+}
+
+.libre-menu .sensor-name {
+    font-size: 13px;
+    font-weight: 600;
+    font-family: "JetBrainsMono NFP", "Segoe UI", sans-serif;
+    color: var(--surface0);
+    flex: 1;
+    transition: color 0.15s;
+    background: transparent;
+}
+
+.libre-menu .sensor-value {
+    font-size: 12px;
+    font-family: "JetBrainsMono NFP", "Segoe UI", sans-serif;
+    font-weight: 700;
+    color: var(--surface0);
+    min-width: 54px;
+    text-align: right;
+    transition: color 0.15s;
+    background: transparent;
+}
+
+/* ============================== */
+/* ==== Notification Widget ==== */
+/* ============================ */
+
+.notification-widget {
+    padding: 0 0px;
+    margin-left: -2px;
+    margin-right: -2px;;
+}
+
+.notification-widget .widget-container {
+    margin: 0px 0 px 0;
+    box-shadow: 0 1px 8px 0 rgba(24, 24, 37, 0.10);
+}
+
+.notification-widget .icon {
+    font-size: 14px;
+    color: var(--rosewater);
+    margin-right: 0px;
+}
+
+.notification-widget .icon.new-notification {
+    color: var(--flamingo);
+}
+
+/* ======================== */
+/* === Traffic Widget === */
+/* ===================== */
+
+.traffic-widget {
+    padding: 0 0px;
+    margin: 0px;
+    background: rgb(24, 24, 37);
+    box-shadow: 0 2px 8px 0 rgba(24, 24, 37, 0.15);
+    backdrop-filter: blur(12px) saturate(1.1);
+}
+
+/* ======================= */
+/* === VSCode Widget === */
+/* ==================== */
+.vscode-widget {
+    padding: 0;
+    background: transparent;
+}
+
+.vscode-widget .widget-container .icon {
+    color: var(--sapphire);
+}
+
+.vscode-menu {
+    max-height: 410px;
+    min-width: 300px;
+}
+
+.vscode-menu .header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+    font-size: 15px;
+    font-weight: 400;
+    padding: 8px;
+    color: var(--text);
+    background-color: var(--crust);
+}
+
+.vscode-menu .contents {
+    background-color: var(--base);
+}
+
+.vscode-menu .contents .item {
+    min-height: 30px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.vscode-menu .contents .item .title {
+    font-size: 12px;
+    margin-right: 5px;
+    color: var(--text);
+}
+
+.vscode-menu .contents .item .folder-icon {
+    font-size: 16px;
+    margin-left: 8px;
+    color: #89b4fa;
+}
+
+.vscode-menu .contents .item .file-icon {
+    font-size: 16px;
+    margin-left: 8px;
+    color: #f5c2e7;
+}
+
+.vscode-menu .contents .item:hover {
+    background-color: rgba(195, 159, 241, 0.4); 
+    border-bottom: 1px solid rgba(255, 255, 255, 0);
+}
+
+/* ========================= */
+/* === Wallpaper Widget === */
+/* ======================= */
+
+.wallpapers-widget {
+    padding: 0;
+    background: transparent;
+}
+
+.wallpapers-gallery-window {
+    background: var(--base);
+    border: 1.5px solid var(--surface1);
+    border-radius: 8px;
+    margin: 0;
+}
+
+.wallpapers-gallery-buttons {
+    background: rgba(100, 67, 157, 0.171);
+    color: var(--text);
+    border: 1px solid var(--og);
+    font-size: 13px;
+    padding: 10px 0;
+    border-radius: 8px;
+    margin: 0 10px 14px 10px;
+    width: 210px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.wallpapers-gallery-buttons:hover {
+    background: var(--og);
+    color: var(--surface0);
+}
+
+.wallpapers-gallery-image {
+    border: 1.5px solid var(--surface1);
+    border-radius: 14px;
+    box-shadow: 0 2px 12px 0 rgba(24,24,37,0.11);
+    transition: border 0.15s, box-shadow 0.15s;
+}
+
+.wallpapers-gallery-image:hover {
+    border: 2.5px solid var(--maroon);
+}
+
+.wallpapers-gallery-image.focused {
+    border: 2px solid var(--og);
+    box-shadow: 0 0 16px 2px var(--og);
+}
+
+/* ==================== */
+/* === TODO widget (default) === */
+/* ==================== */
+.todo-widget {
+    padding: 0 6px 0 6px;
+}
+.todo-widget .icon {
+    /* color: #00f8d7; */
+    padding: 0;
+}
+.todo-widget .label {
+    font-size: 12px;
+    padding: 0;
+}
+/* Todo Menu Styles */
+.todo-menu {
+    /* background-color: rgba(24, 25, 27, 0.8); */
+    background-color: #1e1e2e;
+    min-width: 400px;
+    max-width: 400px;
+    min-height: 500px;
+    max-height: 500px;
+}
+.todo-menu .header {
+    margin: 16px 10px
+}
+.todo-menu .header .add-task-button,
+.todo-menu .header .tab-buttons {
+    border: none;
+    border-radius: 13px;
+    /* color: #ffffff; */
+    padding: 4px 8px;
+    font-size: 14px;
+    font-weight: 600;
+    margin: 0px;
+    font-family: 'Segoe UI', 'JetBrainsMono NFP';
+}
+.todo-menu .header .tab-buttons {
+    margin: 0;
+    font-size: 12px;
+}
+.todo-menu .header .add-task-button:hover {
+    background-color: #0f91e7;
+}
+.todo-menu .header .tab-buttons.in-progress,
+.todo-menu .header .tab-buttons.completed {
+    background-color: transparent;
+}
+.todo-menu .header .tab-buttons.in-progress:checked {
+    color: #7fffd4;
+}
+.todo-menu .header .tab-buttons.completed:checked {
+    color: #ff583b;
+}
+.todo-menu .header .tab-buttons.sort {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: #ffffff;
+    border-radius: 10px;
+    min-height: 20px;
+    min-width: 20px;
+    max-width: 20px;
+    max-height: 20px;
+    padding: 0;
+    margin: 0 8px 0 0;
+    font-family: 'JetBrainsMono NFP';
+}
+.todo-menu .header .tab-buttons.sort:pressed {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+.todo-menu .no-tasks {
+    font-family: 'Segoe UI';
+    font-size: 18px;
+    color: #979fa0;
+    font-weight: 400;
+    margin-top: 16px;
+}
+.todo-menu .no-tasks-icon {
+    font-size: 80px;
+    color: #979fa0;
+    font-family: "JetBrainsMono NFP";
+    margin-top: 64px;
+    font-weight: 400;
+}
+
+/* Task item styles */
+.todo-menu .task-item {
+    background-color: rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin: 0px 12px 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 8px 0;
+}
+.todo-menu .task-item.expanded {
+    background-color: rgba(211, 214, 219, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+.todo-menu .task-item.drop-highlight,
+.todo-menu .task-item.drop-highlight:hover,
+.todo-menu .task-item.drop-highlight:focus {
+    background-color: rgba(0, 120, 212, 0.26);
+    border: 1px solid #007acc;
+}
+.todo-menu .task-item .title {
+    color: #ebebeb;
+    font-size: 13px;
+    font-weight: 600;
+    font-family: 'Segoe UI';
+    padding: 0 8px 8px 8px;
+    margin-top: 6px;
+}
+.todo-menu .task-item.completed .title,
+.todo-menu .task-item.completed .description {
+    text-decoration: line-through;
+    color: #7f8c8d;
+}
+.todo-menu .task-item .description {
+    color: #bdc3c7;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 0 8px 8px 8px;
+    font-family: 'Segoe UI';
+}
+.todo-menu .task-checkbox {
+    background-color: transparent;
+    border: none;
+    margin-left: 12px;
+    margin-top: 5px;
+    font-size: 18px;
+    color: #ebebeb;
+    font-family: 'JetBrainsMono NFP';
+}
+.todo-menu .task-checkbox:checked {
+    color: #7f8c8d;
+}
+
+/* Task info row styles */
+.todo-menu .task-info-row {
+    margin-left: 8px;
+    margin-bottom: 8px;
+}
+.todo-menu .task-info-row .date-text,
+.todo-menu .task-info-row .category-text {
+    font-family: 'Segoe UI';
+    font-weight: 600;
+    color: #7e7f88;
+    font-size: 13px;
+    padding-left: 0px;
+    margin-right: 12px;
+}
+.todo-menu .task-info-row .date-icon,
+.todo-menu .task-info-row .category-icon {
+    font-weight: 400;
+    color: #a7a8b3;
+    font-size: 14px;
+    font-family: 'JetBrainsMono NFP';
+    margin-top: 1px;
+}
+.todo-menu .task-info-row .category-text.important,
+.todo-menu .task-info-row .category-icon.important {
+    color: #ff2600;
+}
+.todo-menu .task-info-row .category-text.urgent,
+.todo-menu .task-info-row .category-icon.urgent {
+    color: #ff583b;
+}
+.todo-menu .task-info-row .category-text.soon,
+.todo-menu .task-info-row .category-icon.soon {
+    color: #7fffd4;
+}
+.todo-menu .task-info-row .category-text.today,
+.todo-menu .task-info-row .category-icon.today {
+    color: #f9e2af;
+}
+.todo-menu .task-info-row .delete-task-button {
+    background-color: rgb(160, 160, 160);
+    color: #000000;
+    font-family: 'Segoe UI';
+    font-weight: 600;
+    font-size: 12px;
+    padding: 0 8px;
+    border-radius: 10px;
+    min-height: 20px;
+    max-height: 20px;
+    margin-right: 8px;
+}
+
+/* App dialog style */
+.todo-menu .app-dialog {
+    font-family: 'Segoe UI';
+    background-color: #202020;
+}
+.todo-menu .app-dialog .buttons-container {
+    background-color: #171717;
+    margin-top: 16px;
+    border-top: 1px solid #000;
+    max-height: 80px;
+    min-height: 80px;
+    padding: 0 20px 0 20px;
+}
+
+.todo-menu .app-dialog .title-field,
+.todo-menu .app-dialog .desc-field {
+    background-color: #181818;
+    border: 1px solid #303030;
+    border-radius: 4px;
+    padding: 0 6px;
+    font-family: 'Segoe UI';
+    font-size: 12px;
+    font-weight: 600;
+    color: #FFFFFF;
+    margin: 10px 0px 5px 0;
+    min-height: 30px;
+}
+.todo-menu .app-dialog .desc-field {
+    max-height: 60px;
+}
+.todo-menu .app-dialog .title-field:focus,
+.todo-menu .app-dialog .desc-field:focus {
+    border-bottom-color: #4cc2ff;
+}
+.todo-menu .app-dialog .button {
+    background-color: #2d2d2d;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Segoe UI';
+    font-size: 12px;
+    font-weight: 600;
+    color: #FFFFFF;
+    min-width: 80px;
+    padding: 0 6px;
+    margin: 10px 0 5px 6px;
+    min-height: 28px;
+    outline: none;
+}
+.todo-menu .app-dialog .buttons-container .button {
+    margin: 10px 0 5px 0px;
+    font-size: 13px;
+}
+.todo-menu .app-dialog .button:focus {
+    border: 2px solid #adadad;
+}
+.todo-menu .app-dialog .button:focus,
+.todo-menu .app-dialog .button:hover {
+    background-color: #4A4A4A;
+}
+.todo-menu .app-dialog .button:pressed {
+    background-color: #3A3A3A;
+}
+.todo-menu .app-dialog .button.add {
+    background-color: #0078D4;
+}
+.todo-menu .app-dialog .button.add:focus,
+.todo-menu .app-dialog .button.add:hover {
+    background-color: #0066B2;
+}
+.todo-menu .app-dialog .button.add:pressed {
+    background-color: #00509E;
+}
+.todo-menu .app-dialog .warning-message {
+    background-color: #2b0b0e;
+    border: 1px solid #5a303c;
+    border-radius: 4px;
+    color: #cc9b9f;
+    font-family: 'Segoe UI';
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 12px;
+    margin: 4px 0px;
+}
+.todo-menu .app-dialog .category-button {
+    background-color: #2d2d2d;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Segoe UI';
+    font-size: 11px;
+    font-weight: 700;
+    color: #afafaf;
+    padding: 0 6px;
+    margin-top: 8px;
+    min-height: 24px;
+    outline: none;
+}
+.todo-menu .app-dialog .category-button:checked {
+    background-color: #535353;
+    color: #ffffff;
+}
+
+/* ==================== */
+/* === AI CHAT (DEFAULT) === */
+/* ==================== */
+
+.ai-chat-widget {
+    padding: 0 6px 0 6px;
+}
+.ai-chat-widget .icon {
+    /* color: white; */
+    font-size: 16px;
+}
+.ai-chat-widget .icon:hover {
+    color: rgba(230, 84, 171, 0.903);
+    font-size: 16px;
+}
+
+.ai-chat-popup {
+    /* background-color: rgba(24, 25, 27, 0.8); */
+    background-color:  #1e1e2e;
+    min-width: 500px;
+    max-width: 500px;
+    min-height: 600px;
+    max-height: 600px;
+}
+.ai-chat-popup.floating {
+    background-color: rgba(24, 25, 27, 0.9);
+    min-width: 1000px;
+    max-width: 1000px;
+    min-height: 800px;
+    max-height: 800px;
+}
+.ai-chat-popup .chat-header {
+    background-color: rgba(0, 0, 0, 0);
+    padding: 8px 16px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.ai-chat-popup .chat-header .loader-line {
+    color: #2d8fff;
+ }
+.ai-chat-popup .chat-header .float-button,
+.ai-chat-popup .chat-header .close-button {
+    background-color: transparent;
+    font-family: "JetBrainsMono NFP";
+    border: none;
+    color: #cfcfcf;
+    font-weight: 400;
+    font-size: 16px;
+    padding: 3px 8px;
+    border-radius: 4px;
+    margin-left: 4px;
+}
+.ai-chat-popup.floating .chat-header .float-button:hover,
+.ai-chat-popup.floating .chat-header .close-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+} 
+.ai-chat-popup .chat-footer {
+    background-color: rgba(24, 60, 134, 0);
+    padding: 16px;
+}
+.ai-chat-popup .chat-header .provider-button,
+.ai-chat-popup .chat-header .model-button {
+    font-family: "Segoe UI Variable","Segoe UI";
+    background-color: #252525;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 12px;
+    color: #ffffff;
+    margin-right: 8px;
+    min-width: 130px;
+    max-width: 230px;
+    border-radius: 4px;
+    padding: 4px 10px;
+    margin-bottom: 8px;
+    margin-top: 8px;
+}
+.ai-chat-popup .chat-header .provider-button:hover,
+.ai-chat-popup .chat-header .model-button:hover {
+    background-color: #2c2c2c;
+    border-color: #3a3a3a;
+}
+.ai-chat-popup .chat-header .provider-button:pressed,
+.ai-chat-popup .chat-header .model-button:pressed {
+    background-color: #3a3a3a;
+    border-color: #4a4a4a;
+}
+.ai-chat-popup .chat-header .provider-button:disabled,
+.ai-chat-popup .chat-header .model-button:disabled {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+/* Context menu styles for header and chat content */
+.ai-chat-popup .context-menu {
+    background-color: #2c2c2c;
+    border: none;
+    padding: 6px 0px;
+    font-family: "Segoe UI Variable","Segoe UI";
+    font-size: 12px;
+    color: #FFFFFF;
+     
+}
+.ai-chat-popup .context-menu::separator {
+    height: 1px;
+    background-color: #404040;
+    margin: 4px 8px;
+}
+
+.ai-chat-popup .context-menu::item {
+    background-color: transparent;
+    margin: 2px 8px;
+    border-radius: 4px;
+    min-width: 100px;
+ 
+}
+/* Context menu item styles for header dropdown */
+.ai-chat-popup .chat-header .context-menu::item {
+    min-width: 130px;
+    padding: 8px 12px
+}
+.ai-chat-popup .context-menu::item:disabled {
+    color: #666666;
+} 
+.ai-chat-popup .context-menu::item:selected {
+    background-color: #3a3a3a;
+    color: #FFFFFF;
+}
+.ai-chat-popup .context-menu::item:checked {
+    background-color: #2074d4;
+    color: #FFFFFF;
+}
+.ai-chat-popup .context-menu::item:pressed {
+    background-color: #3A3A3A;
+}
+.ai-chat-popup .chat-content {
+    background-color: rgba(206, 10, 10, 0);
+    border: none;
+}
+.ai-chat-popup .chat-content .empty-chat .greeting,
+.ai-chat-popup .chat-content .empty-chat .message {
+    color: rgba(255, 255, 255, 0.8);
+    font-family: "Segoe UI Variable","Segoe UI";
+    font-size: 48px;
+    font-weight: 600;
+}
+.ai-chat-popup .chat-content .empty-chat .message {
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 24px;
+    padding-top: 8px;
+    
+}
+.ai-chat-popup .chat-content .user-message,
+.ai-chat-popup .chat-content .assistant-message {
+    padding: 12px;
+    border-radius: 8px;
+    margin: 4px 0
+}
+
+.ai-chat-popup .chat-content .user-message .text,
+.ai-chat-popup .chat-content .assistant-message .text {
+    font-family: "Segoe UI Variable","Segoe UI";
+    font-size: 14px;
+    color: #e4ebee;
+}
+.ai-chat-popup .chat-content .user-message {
+    margin-left: 26px;
+ 
+}
+.ai-chat-popup .chat-content .assistant-message {
+    background-color: #222222;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+ 
+.ai-chat-popup .chat-content .assistant-icon {
+    font-size: 24px;
+    color: #8c8d92;
+    margin-right: 8px;
+    font-family: "JetBrainsMono NFP";
+}
+
+ .ai-chat-popup .chat-footer .chat-input-wrapper {
+    background-color: rgba(37, 37, 37, 0.4);
+    border: 1px solid #3f3f3f;
+    border-radius: 8px;
+    max-height: 64px;
+    min-height: 32px;
+    padding: 5px 8px 3px 8px;
+}
+ 
+.ai-chat-popup .chat-footer .chat-input {
+    font-family: "Segoe UI Variable","Segoe UI";
+    font-size: 14px;
+    color: #ffffff;
+}
+
+.ai-chat-popup .chat-footer .chat-input-wrapper.focused {
+    border-color: #0078d7;
+}
+ 
+.ai-chat-popup .chat-footer .clear-button,
+.ai-chat-popup .chat-footer .send-button,
+.ai-chat-popup .chat-footer .stop-button,
+.ai-chat-popup .chat-footer .attach-button {
+    color: #ffffff;
+    font-size: 16px;
+    max-width: 30px;
+    min-width: 30px;
+    max-height: 30px;
+    min-height: 30px;
+    border-radius: 4px;
+    border: none;
+    font-family: "JetBrainsMono NFP";
+}
+.ai-chat-popup .chat-footer .stop-button {
+    background-color: #0078d7;
+}
+.ai-chat-popup .chat-footer .clear-button:hover,
+.ai-chat-popup .chat-footer .send-button:hover,
+.ai-chat-popup .chat-footer .stop-button:hover,
+.ai-chat-popup .chat-footer .attach-button:hover {
+    background-color: #333333;
+}
+.ai-chat-popup .chat-footer .clear-button:disabled,
+.ai-chat-popup .chat-footer .send-button:disabled,
+.ai-chat-popup .chat-footer .stop-button:disabled,
+.ai-chat-popup .chat-footer .attach-button:disabled {
+    color: #818181;
+}
+.ai-chat-popup .attachment-chip {
+    background-color: #10233f;
+    border: 1px solid #1c3253;
+    border-radius: 6px;
+    min-height: 28px;
+ 
+} 
+.ai-chat-popup .attachment-chip .attachment-label {
+    font-family: "Segoe UI Variable","Segoe UI";
+    color: #95a4b9;
+    font-size: 12px;
+    padding: 0 4px;
+}
+.ai-chat-popup .attachment-chip .attachment-remove-button {
+    font-size: 12px;
+    font-family: "Segoe UI Variable","Segoe UI";
+    background-color: transparent;
+    border: none;
+}
+
+/* ==================== */
+/* ===  pomodoro === */
+/* ==================== */
+
+.pomodoro-menu {
+    background-color:  #1e1e2e;
+
+}
+
+/* ==================== */
+/* === Github === */
+/* ==================== */
+
+.github-menu    {
+   /* background-color:  rgba(17, 17, 27, 0.2); */
+    background-color:  #1e1e2e;
+    max-height: 500px;
+    min-height: 500px;
+    min-width: 420px;
+}
+.github-menu .header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    font-size: 15px;
+    font-weight: 400;
+    font-family: 'Segoe UI';
+    padding: 8px;
+    color: white;
+    background-color: rgba(17, 17, 27, 0.75);
+}
+.github-menu .footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 4px 8px 6px 8px;
+    background-color: rgba(17, 17, 27, 0.75);
+}
+.github-menu .footer .label{
+    font-size: 12px;
+    font-family: 'Segoe UI';
+   /* color: #9399b2; */
+}
+.github-menu .contents {
+    background-color:  rgba(17, 17, 27, 0.2);
+}
+.github-menu .contents .item {
+    min-height: 40px;
+    padding: 6px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.075);
+}
+.github-menu .contents .item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid rgba(255, 255, 255, 0);
+}
+.github-menu .contents .item .title,
+.github-menu .contents .item .description {
+     /*color: #9399b2; */
+    font-family: Segoe UI;
+}
+.github-menu .contents .item .title {
+    font-size: 14px;
+    font-weight: 600; 
+}
+.github-menu .contents .item .description {
+    font-size: 12px;
+    font-weight: 500
+}
+.github-menu .contents .item.new .title,
+.github-menu .contents .item.new .description {
+    color: #ffffff
+}
+.github-menu .contents .item .icon {
+    font-size: 16px;
+    padding-right: 0;
+    padding-left: 8px;
+    padding-right: 4px;
+    /* color: #9399b2; */
+}
+.github-menu .contents .item.new .icon {
+    color: #3fb950;
+}
+
+
+/* ==================== */
+/* === language=== */
+/* ==================== */
+.language-widget .icon:hover .label:hover .label.alt:hover{
+    color: rgba(230, 84, 171, 0.903);
+}
+
+.language-menu {
+    /* background-color: rgba(17, 17, 27, 0.4); */
+    min-width: 300px;
+    background-color:  #1e1e2e;
+}
+
+.language-menu .header {
+    font-family: 'Segoe UI';
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    padding: 12px;
+    background-color: rgba(17, 17, 27, 0.6);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.language-menu .footer {
+    font-family: 'Segoe UI';
+    font-size: 12px;
+    font-weight: 600;
+    padding: 12px;
+    margin-top: 2px;
+    color: #9399b2;
+    background-color: rgba(17, 17, 27, 0.6);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+.language-menu .footer:hover {
+    background-color: rgba(36, 36, 51, 0.6);
+    color: #fff;
+}
+.language-menu .language-item {
+    padding: 6px 12px;
+    margin: 2px 4px;
+}
+.language-menu .language-item.active {
+    background-color:rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+.language-menu .language-item:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+.language-menu .language-item.active:hover {
+    background-color:rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+.language-menu .language-item .code {
+    font-weight: 900;
+    font-size: 14px;
+    min-width: 40px;
+    text-transform: uppercase;
+}
+.language-menu .language-item .icon {
+    font-size: 16px;
+    margin-right: 8px;
+    color: #fff;
+}
+.language-menu .language-item .name {
+    font-weight: 600;
+    font-family: 'Segoe UI';
+    font-size: 14px;
+}
+.language-menu .language-item .layout {
+    font-weight: 600;
+    font-family: 'Segoe UI';
+    font-size: 12px;
+}
+
+/* ==================== */
+/* === grouper extras === */
+/* ==================== */
+
+.grouper-extras .container { /* The name of the css class is the name given in the config */
+    background-color: rgba(108, 82, 165, 0.171);
+    margin: 4px 4px;
+    border-radius: 4px;
+    box-shadow: 0 4px 24px 0 rgba(24, 24, 37, 0.25);
+    /* padding: 4px 2px; */
+}
+
+.grouper-extras .grouper-button {
+    font-size: 12px;
+    /* color: #ffffff; */
+    padding: 0 8px;
+    background-color: transparent;
+    border: none;
+}
+
+.grouper-extras .grouper-button:hover {
+    color: #88c0d0;
+}
+
+
+/* ==================== */
+/* === notes === */
+/* ==================== */
+.notes-widget {
+    padding: 0;
+    background-color:  #1e1e2e;
+}
+.notes-widget .label {
+    font-size: 14px;
+    /* color: #dbfeb4; */
+}
+.notes-widget .icon {
+    font-size: 16px;
+    color: #dbfeb4;
+}
+.notes-widget .icon:hover {
+    color: var(--red);
+}
+/* Notes Widget Menu */
+.notes-menu {
+    min-width: 400px;
+    max-width: 400px;
+    background-color:  #1e1e2e;
+    /* background-color: rgba(17, 17, 27, 0.4); */
+}
+.notes-menu .note-item {
+    background-color:transparent;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+.notes-menu .note-item:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.notes-menu .note-item .icon {
+    font-size: 16px;
+    padding: 0 4px;
+}
+.notes-menu .delete-button {
+    color: #ff6b6b;
+    background: transparent;
+    border: none;
+    font-size: 8px;
+    padding: 7px 8px;
+    border-radius: 3px;
+}
+.notes-menu .delete-button:hover {
+    background-color: rgba(128, 128, 128, 0.5);
+}
+.notes-menu .copy-button {
+    color: #babfd3;
+    background: transparent;
+    border: none;
+    font-size: 16px;
+    padding: 4px 8px;
+    border-radius: 3px;
+}
+.notes-menu .copy-button:hover {
+    background-color: rgba(128, 128, 128, 0.5);
+}
+.notes-menu .copy-button:pressed {
+    color: #ffffff;
+}
+.notes-menu .note-item .title {
+    font-size: 13px;
+    font-family: 'Segoe UI'
+}
+.notes-menu .note-item .date {
+    font-size: 12px;
+    font-family: 'Segoe UI';
+    color: rgba(255, 255, 255, 0.4);
+}
+.notes-menu .empty-list {
+    font-family: 'Segoe UI';
+    color: rgba(255, 255, 255, 0.2);
+    font-size: 24px;
+    font-weight: 600;
+    padding: 10px 0 20px 0;     
+}
+.notes-menu .add-button,  
+.notes-menu .cancel-button {
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: 4px;
+    color: white;
+    font-family: 'Segoe UI'
+}
+.notes-menu .cancel-button {
+    margin-left: 4px;
+}
+.notes-menu .add-button:hover,
+.notes-menu .cancel-button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+.notes-menu .scroll-area {
+    background: transparent; 
+    border: none; 
+    border-radius:0;
+}
+.notes-menu .note-input {
+    background-color:rgba(17, 17, 27, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    font-family: 'Segoe UI';
+    font-size: 14px;
+    max-height: 30px;
+    padding: 4px;
+    border-radius: 6px;
+}
+.note-input:focus {
+    border: 1px solid #89b4fa;
+}
+
+/* ==================== */
+/* === launchpad === */
+/* ==================== */
+
+/* Widget style */
+.launchpad-widget {
+    padding: 0 6px 0 6px;
+    background-color:  #1e1e2e;
+}
+/* .launchpad-widget .label {} */
+.launchpad-widget .icon {
+    font-size: 16px;
+    color: #89b4fa;
+}
+
+/* Launchpad context menu style */
+.launchpad .context-menu {
+    /* background-color: #202020; */
+    background-color:  #1e1e2e;
+    border: none;
+    border-radius: 6px;
+    padding: 4px 0px;
+    font-family: 'Segoe UI';
+    font-size: 12px;
+    color: #FFFFFF;
+    font-weight: 600
+}
+.launchpad .context-menu::item {
+    /* background-color: transparent; */
+    padding: 6px 12px;
+    margin: 2px 6px;
+    border-radius: 4px;
+    min-width: 100px;
+}
+.launchpad .context-menu::item:selected {
+    background-color: #3a3a3a;
+    color: #FFFFFF;
+}
+.launchpad .context-menu::item:pressed {
+    background-color: #3A3A3A;
+}
+.launchpad .context-menu::separator {
+    height: 1px;
+    background-color: #404040;
+    margin: 4px 8px;
+}
+.launchpad .context-menu::item:disabled {
+    color: #666666;
+    background-color: transparent;
+}
+
+/* Launchpad App dialog style */
+.launchpad .app-dialog {
+    font-family: 'Segoe UI';
+    background-color: #202020;
+}
+.launchpad .app-dialog .buttons-container {
+    background-color: #171717;
+    margin-top: 16px;
+    border-top: 1px solid #000;
+    max-height: 80px;
+    min-height: 80px;
+    padding: 0 20px 0 20px;
+}
+.launchpad .app-dialog .message {
+    color: #FFFFFF;
+    font-family: 'Segoe UI';
+    font-size: 12px;
+    font-weight: 600;
+    padding: 10px 0
+}
+.launchpad .app-dialog .title-field,
+.launchpad .app-dialog .path-field,
+.launchpad .app-dialog .icon-field,
+.launchpad .app-dialog .group-field{
+    background-color: #181818;
+    border: 1px solid #303030;
+    border-radius: 4px;
+    padding: 0 6px;
+    font-family: 'Segoe UI';
+    font-size: 12px;
+    font-weight: 600;
+    color: #FFFFFF;
+    margin: 10px 0px 5px 0;
+    min-height: 30px;
+}
+.launchpad .app-dialog .title-field:focus,
+.launchpad .app-dialog .path-field:focus,
+.launchpad .app-dialog .icon-field:focus {
+    border-bottom-color: #4cc2ff;
+}
+.launchpad .app-dialog .button {
+    background-color: #2d2d2d;
+    border: none;
+    border-radius: 4px;
+    font-family: 'Segoe UI';
+    font-size: 12px;
+    font-weight: 600;
+    color: #FFFFFF;
+    min-width: 80px;
+    padding: 0 6px;
+    margin: 10px 0 5px 6px;
+    min-height: 28px;
+    outline: none;
+}
+.launchpad .app-dialog .buttons-container .button {
+    margin: 10px 0 5px 0px;
+    font-size: 13px;
+}
+.launchpad .app-dialog .button:focus {
+    border: 2px solid #adadad;
+}
+.launchpad .app-dialog .button:focus,
+.launchpad .app-dialog .button:hover {
+    background-color: #4A4A4A;
+}
+.launchpad .app-dialog .button:pressed {
+    background-color: #3A3A3A;
+}
+.launchpad .app-dialog .button.add,
+.launchpad .app-dialog .button.save {
+    background-color: #0078D4;
+}
+.launchpad .app-dialog .button.add:focus,
+.launchpad .app-dialog .button.save:focus,
+.launchpad .app-dialog .button.add:hover,
+.launchpad .app-dialog .button.save:hover {
+    background-color: #0066B2;
+}
+.launchpad .app-dialog .button.add:pressed,
+.launchpad .app-dialog .button.save:pressed {
+    background-color: #00509E;
+}
+.launchpad .app-dialog .button.delete {
+    background-color: #bd2d14;
+}
+.launchpad .app-dialog .button.delete:focus,
+.launchpad .app-dialog .button.delete:hover {
+    background-color: #b30f00;
+}
+.launchpad .app-dialog .button.delete:pressed {
+    background-color: #a00b00;
+}
+.launchpad .app-dialog .warning-message {
+    background-color: #2b0b0e;
+    border: 1px solid #5a303c;
+    border-radius: 4px;
+    color: #cc9b9f;
+    font-family: 'Segoe UI';
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 12px;
+    margin: 4px 0px;
+}
+/* Launchpad popup style */
+.launchpad .drop-overlay {
+    background-color: rgba(24, 25, 27, 0.8);
+    border:4px dashed #3c80ff;
+}
+.launchpad .drop-overlay .text {
+    color: #ffffff;
+    font-family: 'Segoe UI';
+    font-size: 64px;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+.launchpad .launchpad-container {
+    /* background-color: rgba(24, 25, 27, 0.8); */
+    background-color:  #1e1e2e; 
+}
+.launchpad .search-container {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+    background-color:rgba(0, 0, 0, 0.3);
+    /* background-color:  #1e1e2e; */
+    min-height: 80px;
+    margin: 0;
+    padding: 0
+}
+.launchpad .search-input {
+    max-width: 400px;
+    padding: 8px 12px;
+    font-size: 14px;
+    min-height: 24px;
+    max-height: 24px;
+    font-family: 'Segoe UI';
+    border-radius: 20px;
+    border: 2px solid rgb(53, 54, 56);
+    background-color: rgba(0, 0, 0, 0.507);
+    /* background-color:  #1e1e2e; */
+    color: #a6adc8;
+}
+.launchpad .search-input:focus  {
+    border: 2px solid rgb(22, 114, 190);
+    background-color: rgba(255, 255, 255, 0.05);
+}
+.launchpad .launchpad-scroll-area {
+    background-color: transparent;
+    border: none;
+}
+.launchpad .app-icon {
+    background-color: rgba(102, 10, 10, 0);
+    border-radius: 12px;
+    border: 2px solid rgba(112, 76, 32, 0);
+    padding-top: 10px;
+    margin: 24px 6px 6px 6px;
+    max-width: 110px;
+    min-width: 110px;
+    min-height: 110px;
+    max-height: 110px; 
+}
+.launchpad .app-icon:focus {
+    border: 2px solid #89b4fa;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+.launchpad .app-icon:hover {
+    border: 2px solid #89b4fa;
+    background-color: rgba(255, 255, 255, 0.13);
+}
+.launchpad .app-icon .title {
+    color: #a6adc8;
+    font-family: 'Segoe UI';
+    font-size: 14px;
+    margin-top: 2px;
+    font-weight: 600
+}
+/* App icon .launchpad .app-icon or URL icon .launchpad .app-icon.url */
+.launchpad .app-icon.url .title{
+    color: #52f1d2;
+}
+.launchpad .app-icon .icon {
+    padding: 0;
+    margin: 0
+}
+
+/* Group icon styling */
+.launchpad .group-icon {
+    background-color: rgba(102, 10, 10, 0);
+    border-radius: 12px;
+    border: 2px solid rgba(112, 76, 32, 0);
+    padding-top: 10px;
+    margin: 24px 6px 6px 6px;
+    max-width: 110px;
+    min-width: 110px;
+    min-height: 110px;
+    max-height: 110px;
+}
+.launchpad .group-icon:focus {
+    border: 2px solid #89b4fa;
+    background-color: rgba(255, 255, 255, 0.06);
+}
+.launchpad .group-icon:hover {
+    border: 2px solid #89b4fa;
+    background-color: rgba(255, 255, 255, 0.13);
+}
+.launchpad .group-icon .group-icon-container {
+    background-color: rgb(39, 40, 43);
+    border: 1px solid rgb(47, 49, 53);
+    border-radius: 8px;
+}
+.launchpad .group-icon .title {
+    color: #a6adc8;
+    font-family: 'Segoe UI';
+    font-size: 14px;
+    margin-top: 2px;
+    font-weight: 600;
+}
+
+/* Per-group styling
+   Each group gets a class based on its group name:
+   - Lowercase conversion
+   - Spaces replaced with hyphens
+   Examples:
+   - "Browsers" group → .browsers
+   - "My Apps" group → .my-apps
+   - "Work Tools" group → .work-tools
+*/
+.launchpad .group-icon .group-icon-container.browser {
+    background-color: rgb(33, 47, 71);
+    border-color: rgb(34, 57, 94);
+}
+
+/* Back button when inside a group */
+.launchpad .group-back-button {
+    background-color: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 18px;
+    font-family: "Segoe UI";
+    font-weight: 400;
+    text-align: left;
+    padding: 0 32px;
+}
+.launchpad .group-back-button:hover {
+    color: #ffffff;
+}
+
+/* ==================== */
+/* === taskbar === */
+/* ==================== */
+
+.taskbar-widget .app-container {
+    margin: 4px 2px;
+    border-radius: 4px;
+    padding: 0 4px;
+}
+.taskbar-widget .app-container.foreground {
+    background-color: rgba(255, 255, 255, 0.253);
+}
+.taskbar-widget .app-container.flashing {
+    background-color: rgba(255, 106, 106, 0.63);
+}
+.taskbar-widget .app-container.running {
+    background-color: rgba(108, 82, 165, 0.171);
+}
+.taskbar-widget .app-container:hover {
+    background-color: var(--overlay0);
+}
+.taskbar-widget .app-container .app-title {
+    padding-left: 4px;
+}
+/* Taskbar preview popup is very limited in styling options, do not use margins/paddings here */
+.taskbar-preview {
+    border-radius: 8px; 
+    background-color: #2b2c2d; 
+}
+.taskbar-preview.flashing { 
+    background-color: #7f434a;
+}
+.taskbar-preview .header {
+    padding-bottom: 12px;
+    padding-top: 4px;
+}
+.taskbar-preview .header .title {
+    color: #d6d6d6;
+    font-family: "Segoe UI";
+    font-weight: 600;
+    font-size: 13px;
+}
+.taskbar-preview .close-button {
+    color: #999;
+    font-size: 20px;
+    background-color: transparent;
+    border: none;
+    min-width: 20px;
+    border-radius: 4px;
+    min-height: 20px;
+}
+.taskbar-preview .close-button:hover {
+    color: rgb(255, 255, 255);
+    background-color: rgb(226, 0, 0);
+}
+
+
+/* ==================== */
+/* === taskbar === */
+/* ==================== */
+
+
+/* Quick Launch Widget */
+.quick-launch-widget .icon {
+	font-size: 0.5px;
+    color: var(--base);
+	padding: 0 0 0 0;
+	margin: 0 0 0 0;
+}
+.quick-launch-widget .icon:hover {
+	color: var(--red);
+}
+
+/* Quick Launch Popup - main window */
+.quick-launch-popup .container {
+	 background-color: var(--base);
+}
+/* Search bar container */
+.quick-launch-popup .search {
+	padding: 12px 16px;
+	background-color: transparent;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+}
+/* Search loader line color */
+.quick-launch-popup .search .loader-line {
+	color: #449bff;
+}
+.quick-launch-popup .search .search-icon {
+	font-family: "Segoe Fluent Icons";
+	font-size: 18px;
+	color: rgba(255, 255, 255, 0.6);
+	padding-right: 8px;
+	min-width: 18px;
+}
+.quick-launch-popup .search .search-submit-icon {
+	font-family: "Segoe Fluent Icons";
+	font-size: 18px;
+	color: rgba(255, 255, 255, 0.6);
+	min-width: 18px;
+}
+.quick-launch-popup .search .search-input {
+	background: transparent;
+	border: none;
+	color: #ffffff;
+	font-size: 16px;
+	font-family: "Segoe UI";
+	font-weight: 400;
+	padding: 4px 0;
+}
+/* Search prefix styling (e.g., ">" for commands) */
+.quick-launch-popup .search .prefix {
+	background: #2167d8;
+	border-radius: 6px;
+	color: #ffffff;
+	padding: -2px 8px 0px 8px;
+	margin-top: 2px;
+	margin-right: 4px;
+	font-size: 13px;
+	font-weight: 600;
+	font-family: "Segoe UI";
+	max-height: 28px;
+}
+
+/* Results list */
+.quick-launch-popup .results {
+	background: transparent;
+	padding: 8px;
+}
+/* Individual result item here you can set font szie for title */
+.quick-launch-popup .results-list-view {
+	font-size: 16px;
+	font-family: "Segoe UI";
+	font-weight: 600;
+	color: #ffffff;
+}
+.quick-launch-popup .results-list-view .description {
+	color: rgba(255, 255, 255, 0.6);
+	font-size: 11px;
+	font-family: "Segoe UI";
+	font-weight: 600;
+}
+/* Result item hover and selected states */
+.quick-launch-popup .results-list-view::item {
+	padding: 12px;
+	border-radius: 8px;
+}
+.quick-launch-popup .results-list-view::item:hover,
+.quick-launch-popup .results-list-view::item:selected {
+	background-color: rgba(128, 130, 158, 0.1);
+}
+/* Empty state when no results found */
+.quick-launch-popup .results-empty-text {
+	font-size: 24px;
+	font-family: "Segoe UI";
+	color: rgb(255, 255, 255);
+	padding-top: 8px;
+}
+
+/* Preview Pane */
+.quick-launch-popup .preview {
+	background: rgba(0, 0, 0, 0);
+	border-left: 1px solid rgba(255, 255, 255, 0.06);
+}
+.quick-launch-popup .preview .preview-text {
+	font-size: 13px;
+	color: rgba(255, 255, 255, 0.85);
+	padding: 8px 12px;
+	font-family: "Segoe UI";
+	background-color: rgba(255, 255, 255, 0.03);
+	border: none;
+}
+.quick-launch-popup .preview .preview-image {
+	background-color: rgba(255, 255, 255, 0.03);
+	padding: 8px 12px;
+}
+.quick-launch-popup .preview .preview-meta {
+	padding: 6px 12px;
+	border-top: 1px solid rgba(255, 255, 255, 0.06);
+	font-family: "Segoe UI";
+}
+.quick-launch-popup .preview .preview-meta .preview-title {
+	font-size: 14px;
+	font-weight: 600;
+	color: rgb(255, 255, 255);
+	font-family: "Segoe UI";
+	margin-bottom: 10px;
+	margin-left: -2px;
+}
+
+.quick-launch-popup .preview .preview-meta .preview-subtitle {
+	font-size: 12px;
+	color: rgba(255, 255, 255, 0.8);
+	font-family: "Segoe UI";
+	padding-bottom: 1px;
+}
+
+/* Preview inline edit form (.preview.edit) */
+.quick-launch-popup .preview.edit .preview-title {
+	font-size: 13px;
+	font-family: "Segoe UI";
+	font-weight: 600;
+	color: #ffffff;
+	padding: 8px 12px 4px 12px;
+}
+.quick-launch-popup .preview.edit .preview-line-edit {
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 4px;
+	color: #ffffff;
+	font-size: 13px;
+	font-family: "Segoe UI";
+	padding: 6px 8px;
+	margin: 0 12px;
+}
+.quick-launch-popup .preview.edit .preview-line-edit:focus {
+	border-color: rgba(255, 255, 255, 0.3);
+}
+.quick-launch-popup .preview.edit .preview-text-edit {
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 4px;
+	color: #ffffff;
+	font-size: 13px;
+	font-family: "Segoe UI";
+	padding: 6px 8px;
+	margin: 0 12px;
+}
+.quick-launch-popup .preview.edit .preview-text-edit:focus {
+	border-color: rgba(255, 255, 255, 0.3);
+}
+.quick-launch-popup .preview.edit .preview-actions {
+	padding: 8px 12px;
+}
+.quick-launch-popup .preview.edit .preview-btn {
+	background: rgb(45, 46, 48);
+	border: none;
+	border-radius: 4px;
+	color: rgba(255, 255, 255, 0.8);
+	font-size: 12px;
+	font-family: "Segoe UI";
+	font-weight: 600;
+	padding: 4px 16px;
+}
+.quick-launch-popup .preview.edit .preview-btn:hover {
+	background: rgb(59, 60, 63);
+}
+.quick-launch-popup .preview.edit .preview-btn.save {
+	background: rgb(12, 81, 190);
+	color: #ffffff;
+}
+.quick-launch-popup .preview.edit .preview-btn.save:hover {
+	background: rgb(19, 90, 204);
+}

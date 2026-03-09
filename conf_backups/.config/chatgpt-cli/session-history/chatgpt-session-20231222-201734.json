@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "Vector3.normalized in unity"
+        },
+        {
+            "role": "assistant",
+            "content": "In Unity, the `Vector3.normalized` property is used to return a normalized version of a `Vector3` object. In other words, it returns a vector with the same direction as the original vector but with a magnitude of 1.\n\nHere is an example of how to use it:\n\n```csharp\nVector3 originalVector = new Vector3(2, 0, 2);\nVector3 normalizedVector = originalVector.normalized;\n\nDebug.Log(\"Original Vector: \" + originalVector);\nDebug.Log(\"Normalized Vector: \" + normalizedVector);\n```\n\nThe output will be:\n\n```\nOriginal Vector: (2.0, 0.0, 2.0)\nNormalized Vector: (0.7071, 0.0, 0.7071)\n```\n\nAs you can see, the `normalizedVector` has the same direction as the `originalVector` but with a magnitude of approximately 1."
+        }
+    ],
+    "prompt_tokens": 38,
+    "completion_tokens": 189
+}

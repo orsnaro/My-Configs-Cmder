@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "whats yarn"
+        },
+        {
+            "role": "assistant",
+            "content": "Yarn is a package manager for JavaScript, similar to npm (Node Package Manager). It was created by Facebook to address some limitations of npm and provide faster and more consistent package installations.\n\nYarn uses a different algorithm for calculating dependency resolutions, which often leads to more efficient and deterministic installations. It also has caching mechanisms that help in faster installations, especially when dealing with large projects or slow internet connections.\n\nTo use Yarn, you need to have it installed on your computer. You can download and install it from the Yarn website (https://yarnpkg.com). Once installed, you can use Yarn commands to manage packages in your JavaScript projects.\n\nSome common Yarn commands include:\n\n- `yarn init` – initializes a new JavaScript project by creating a `package.json` file.\n- `yarn add <package>` – adds a package as a dependency to your project.\n- `yarn remove <package>` – removes a package dependency from your project.\n- `yarn install` – installs all the dependencies listed in the `package.json` file.\n- `yarn update <package>` – updates a specific package to the latest version.\n\nYarn also supports workspaces, which allows managing multiple related packages within a single project. Workspaces help with interdependent packages and provide a streamlined development experience.\n\nOverall, Yarn provides an alternative package management solution for JavaScript projects, offering improved performance, reliability, and flexibility."
+        }
+    ],
+    "prompt_tokens": 36,
+    "completion_tokens": 288
+}

@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "python os lib code to get all files in a specific dir "
+        },
+        {
+            "role": "assistant",
+            "content": "To get all the files in a specific directory using the `os` library in Python, you can use the `os.listdir()` function. Here is an example code snippet:\n\n```python\nimport os\n\ndef get_all_files(directory):\n    all_files = []\n    for root, directories, files in os.walk(directory):\n        for file in files:\n            file_path = os.path.join(root, file)\n            all_files.append(file_path)\n    return all_files\n\n# Example usage\ndirectory_path = '/path/to/directory'\nfiles_list = get_all_files(directory_path)\nfor file in files_list:\n    print(file)\n```\n\nThis code uses the `os.walk()` function, which generates the file names in a directory tree by walking down from the root directory. The file paths are appended to the `all_files` list, which is returned at the end.\n\nReplace `'/path/to/directory'` with the actual path to the directory you want to get the files from."
+        }
+    ],
+    "prompt_tokens": 46,
+    "completion_tokens": 198
+}

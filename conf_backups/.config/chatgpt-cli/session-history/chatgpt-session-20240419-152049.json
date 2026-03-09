@@ -1,0 +1,27 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "boring means"
+        },
+        {
+            "role": "assistant",
+            "content": "I am not sure what you are asking for. Could you please provide more context or details so I can better assist you?"
+        },
+        {
+            "role": "user",
+            "content": "boring word means?"
+        },
+        {
+            "role": "assistant",
+            "content": "If you are asking for the definition of the word \"boring\", it means causing feelings of uninterest or dullness, lacking in excitement or stimulation."
+        }
+    ],
+    "prompt_tokens": 110,
+    "completion_tokens": 56
+}

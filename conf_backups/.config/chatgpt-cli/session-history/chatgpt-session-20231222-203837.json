@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "what does editor tiles and pans adn window lock option doe?"
+        },
+        {
+            "role": "assistant",
+            "content": "The editor tiles and pans feature allows users to customize the layout of their code editor by splitting it into multiple tiles or pans. This can be particularly useful when working with a large codebase or multiple files simultaneously.\n\nBy dividing the editor into tiles or pans, users can view and edit different parts of their code side by side, making it easier to compare and navigate between sections. This feature enhances productivity and allows for a more efficient coding experience.\n\nOn the other hand, the window lock option is used to lock the layout of the code editor. When the window lock is enabled, it prevents accidental changes to the layout, such as accidental resizing or closing of tiles or pans. This is helpful if you have a preferred layout and want to avoid unintentional modifications.\n\nOverall, these features provide flexibility in organizing and managing your code editor layout, improving code readability and facilitating multitasking."
+        }
+    ],
+    "prompt_tokens": 46,
+    "completion_tokens": 174
+}

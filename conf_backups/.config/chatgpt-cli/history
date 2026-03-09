@@ -1,0 +1,3558 @@
+
+# 2023-12-18 19:25:13.389539
++hi gpt
+
+# 2023-12-18 19:25:37.134628
++are you ok
+
+# 2023-12-18 19:26:03.757487
++give me code example for making pandas df
+
+# 2023-12-18 19:26:19.004917
++exit()
+
+# 2023-12-18 19:26:28.366976
++cls
+
+# 2023-12-18 19:26:36.990652
++
+
+# 2023-12-18 19:31:24.295390
++c
+
+# 2023-12-18 20:02:59.138311
++in database field what does granularity of fact table means
+
+# 2023-12-18 20:03:43.472705
++is this a problem?
+
+# 2023-12-18 22:45:36.849247
++what is sox in data qualirty maneging 
+
+# 2023-12-18 22:46:22.504186
++I mean in databases field and cs sox is a feature used to manage data quality explain it in brieft words please
+
+# 2023-12-18 22:47:38.994088
++in database filed what is sarbones exley and garbage in garbage ou ?
+
+# 2023-12-18 22:47:56.891220
++what is sox ( sarbones exley)?
+
+# 2023-12-18 22:48:52.835547
++dcls
+
+# 2023-12-19 00:12:55.987487
++what is varacity means?
+
+# 2023-12-19 00:13:02.828310
++هل تتكلم العربية؟
+
+# 2023-12-19 00:14:14.155908
++this error happend when i tried othher than english ```
++Traceback (most recent call last):
++  File "C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py", line 555, in <module>
++
++    main()
++  File "C:\Python311\Lib\site-packages\click\core.py", line 1130, in __call__
++    return self.main(*args, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python311\Lib\site-packages\click\core.py", line 1055, in main
++    rv = self.invoke(ctx)
++         ^^^^^^^^^^^^^^^^
++  File "C:\Python311\Lib\site-packages\click\core.py", line 1404, in invoke
++    return ctx.invoke(self.callback, **ctx.params)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Python311\Lib\site-packages\click\core.py", line 760, in invoke
++    return __callback(*args, **kwargs)
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py", line 547, in main
++    start_prompt(session, config, copyable_blocks)
++  File "C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py", line 356, in start_prompt
++
++    save_history(config["model"], messages, prompt_tokens, completion_tokens)
++  File "C:\Users\OmarPc\others_repo_GptCli\src\chatgpt.py", line 141, in save_history
++
++    json.dump(
++  File "C:\Python311\Lib\json\__init__.py", line 180, in dump
++    fp.write(chunk)
++  File "C:\Python311\Lib\encodings\cp1252.py", line 19, in encode
++    return codecs.charmap_encode(input,self.errors,encoding_table)[0]
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++UnicodeEncodeError: 'charmap' codec can't encode characters in position 1-2: character maps to <undefined>
++```
+
+# 2023-12-19 00:16:35.774183
++اه
+
+# 2023-12-19 00:16:44.795598
++do you speak enlgish
+
+# 2023-12-19 00:16:50.108135
++هل تتكلم العربية
+
+# 2023-12-19 00:17:32.334431
++D
+
+# 2023-12-19 00:19:26.693276
++give me some spanish character
+
+# 2023-12-19 00:19:32.382735
++á, é, í, ó, ú, ü, ñ, ¡, ¿
+
+# 2023-12-19 00:19:48.661360
++give me some korens  characters
+
+# 2023-12-19 00:20:03.893431
++give some emojie characters'
+
+# 2023-12-19 00:21:18.229697
++give me some emojie characters
+
+# 2023-12-19 00:21:49.525328
++give me some emojie character
+
+# 2023-12-19 00:22:51.757888
++give me more those dont show
+
+# 2023-12-19 00:23:05.885817
++try using diff encoding maybe they will show
+
+# 2023-12-19 00:23:29.984984
++\U+1F680
+
+# 2023-12-19 00:23:51.755239
++give me some emojie characters
+
+# 2023-12-19 00:44:32.821065
++gi
+
+# 2023-12-19 00:54:13.488236
++ explain python charmap error pleas (hint it hapends for open() as well as many other places)
+
+# 2023-12-19 00:56:45.841860
++is charmao 1:1 with ascii at leas in part of the characters? which one is bigger ascii or cp1252
+
+# 2023-12-19 01:00:48.266292
++what does varacity means 
+
+# 2023-12-19 01:01:35.665541
++so in database field there concept called the 5 V's in big data volume ... and varacity what is varacity here then?
+
+# 2023-12-19 01:34:01.068713
++what  is PR in githb
+
+# 2023-12-19 02:03:32.029848
++gpt
+
+# 2023-12-19 02:03:46.669180
++what does erp stand for
+
+# 2023-12-19 17:25:44.386887
++functions in python called functions or methods?
+
+# 2023-12-19 17:51:11.289198
++send me rocket emojie!
+
+# 2023-12-19 17:51:50.665064
++send me a rocket!
+
+# 2023-12-19 17:52:25.196267
++send me smiley face!
+
+# 2023-12-19 18:13:00.866344
++hi
+
+# 2023-12-19 18:19:59.564930
++what was our last chat
+
+# 2023-12-19 18:20:12.365585
++what was my last 2 promts
+
+# 2023-12-19 18:20:37.484279
++give me smiley face
+
+# 2023-12-19 18:20:48.635830
++as an emojie
+
+# 2023-12-19 18:21:41.972280
++good bye
+
+# 2023-12-19 18:22:04.934067
++what was my last prompt
+
+# 2023-12-19 18:22:22.326937
++do you remember my last prompt
+
+# 2023-12-19 18:28:28.645969
++d
+
+# 2023-12-19 18:28:45.992609
++send me a rocket emojie
+
+# 2023-12-19 18:28:50.062063
++thanks bye
+
+# 2023-12-19 18:32:47.958716
++hi gpt
+
+# 2023-12-19 18:32:59.054554
++what was  my last prompt to you
+
+# 2023-12-19 18:33:16.342906
++the last 3 prompts to you was?
+
+# 2023-12-19 18:33:33.494005
++whats the romts i send to you in this chat session
+
+# 2023-12-20 15:04:25.229269
++what was your last prompt
+
+# 2023-12-20 15:09:37.726054
++hi
+
+# 2023-12-20 15:09:50.245689
++hy this only happens at night of an exam? 
++just caught two bugs then fixed one in 2 diff tools
++ heavily starred tools! one of them I  use daily! and one of the bugs crashes the tool completely (mostly he only tested it in linux) due to other similar tools  made only to work on linux os !
+
+# 2023-12-20 19:56:03.761876
++what is jira app used for
+
+# 2023-12-20 20:47:42.904421
++unity Input.GetAxis()
+
+# 2023-12-20 20:59:38.888061
++NullReferenceException: Object reference not set to an instance of an object
++playerControl.Awake () (at 
+
+# 2023-12-20 21:05:02.313241
++whtas alter to cpp this in csharp class
+
+# 2023-12-20 21:06:24.682277
++i cpp we have `this` to point to the class how to use same concept in scharp class
+
+# 2023-12-20 21:10:05.921717
++how to make nullable object in csharp
+
+# 2023-12-20 23:27:10.420678
++in coming c# code line what y: projspeed mean ?  transform.position += new Vector3(0, y: projSpeed, 0);
+
+# 2023-12-20 23:27:50.444201
++so i dont use y= projSpeed like in python for function named args ?
+
+# 2023-12-21 01:01:55.152340
++whats wrong here   GameObject[] foodProjectile = new GameObject();
+
+# 2023-12-21 01:02:30.160491
++can i use diff conatainer that works without const size?
+
+# 2023-12-21 01:06:34.169241
++get size of list
+
+# 2023-12-21 16:43:00.115553
++ways to acess last elemtn in c# list
+
+# 2023-12-22 19:08:39.408667
++WHAT IS POSITIONAL DRIFT IN FULL BODY TRACKER AND MOTION CAPTURES?
+
+# 2023-12-22 19:50:23.498928
++Vector3.Lerp() explain this function in unity
+
+# 2023-12-22 19:51:09.475400
++ cls
+
+# 2023-12-22 20:17:40.680797
++Vector3.normalized in unity
+
+# 2023-12-22 20:38:49.227775
++what does editor tiles and pans adn window lock option doe?
+
+# 2023-12-22 20:39:13.588612
++waht does unity editor pans & tiles & windows lock option does?
+
+# 2023-12-22 20:44:53.542732
++why i can move them after clicking on small lock icon on a specific window in unity editor
+
+# 2023-12-22 23:36:42.307337
++using (var stream = File.Open("htcvive_data", FileMode.Create)) explain this c# line of code specially the using keyword
+
+# 2023-12-22 23:39:22.651352
++unsafe leyword in c#
+
+# 2023-12-22 23:39:38.098519
++also explaind  fixed (byte* b = SendBuffer)
+
+# 2023-12-22 23:54:04.471953
++s undaown game
+
+# 2023-12-23 00:16:24.427195
++What is the goal of semantic segmentation in computer vision?
++A) Detecting objects and their boundaries
++B) Classifying objects in an image
++C) Assigning a label to each pixel in an image
++D) Estimating depth information
+
+# 2023-12-23 00:16:33.747261
++ty
+
+# 2023-12-23 00:16:49.979231
++What is the Region Proposal Network (RPN) used for in object detection?
++A) Proposing candidate regions for objects
++B) Extracting features from objects
++C) Classifying objects
++D) Regressing bounding box coordinates
+
+# 2023-12-23 00:16:55.795095
++explain in to lines
+
+# 2023-12-23 01:06:27.664579
++cls
+
+# 2023-12-23 01:34:25.949049
++#$#
+
+# 2023-12-23 02:20:35.624217
++stat
+
+# 2023-12-23 17:20:33.443053
++whats solidwords iClone
+
+# 2023-12-23 17:25:10.763739
++ty
+
+# 2023-12-24 02:10:24.451988
++d
+
+# 2023-12-24 02:10:31.106899
++d
+
+# 2023-12-24 02:10:33.474999
++dd
+
+# 2023-12-26 20:46:17.414940
++in python is await keyword same as c sharps yeilds ?
+
+# 2023-12-26 23:46:15.148306
++thisis  in shaprpublic string MyProperty { get; set; } how to set default value
+
+# 2023-12-26 23:48:29.993312
++error the name 'get' does not exist in current context
+
+# 2023-12-27 01:02:25.705468
++cls
+
+# 2023-12-27 01:02:30.350825
++clear context
+
+# 2023-12-27 20:36:20.040341
++how to see multiple overloads in nvisual studio ? using Csharp code
+
+# 2023-12-27 20:46:39.485315
++what is Ienumarate in c#
+
+# 2023-12-27 21:53:55.959240
++in unity engine TextMeshProUGUI how to set text to hidden or enactive via scripts
+
+# 2023-12-27 23:20:22.179718
++can i do this in c# : foo(arg1= 1);
+
+# 2023-12-27 23:21:00.123185
++can i do this in c++ then? if yes please provied example as well as other ways to pass args inn c++ and in c#
+
+# 2023-12-27 23:21:58.115290
++python does have this right?
+
+# 2023-12-28 10:02:32.353239
++d
+
+# 2023-12-28 15:33:32.632067
++ARE NEMA17 STEPPER MOTORS A 3PHASE MOTORS?
+
+# 2023-12-28 15:33:57.984924
++some of nema motors are 3 phase ? if so give some models examples
+
+# 2023-12-28 16:06:20.287244
++CURRENT A/2-PHASE 3.8 EXPLAIN PLEASE
+
+# 2023-12-28 16:07:06.039912
++CURRENT A/2-PHASE = 3.8A 
+
+# 2023-12-28 16:07:38.559155
++let me give you more info in order to get finanl accurate answer 
+
+# 2023-12-28 16:08:35.582345
++so its a nema 23 motor 3phase and voltage is 2.77v i know need to now is driver with max of 2.5a per channel eough to drive this `CURRENT: A/2-PHASE= 3.8A`
+
+# 2023-12-28 16:09:23.041260
++so it needs 2.8 per one channel or per 2 channel
+
+# 2023-12-28 16:15:15.134993
++how manny amepere does it needs per coil
+
+# 2023-12-31 01:46:13.143082
++botorfg
+
+# 2024-01-02 16:13:43.287120
++remotes
+
+# 2024-01-03 00:25:27.715673
++in database field regardinng full star schema can a fact table have a non key attribute? give the why with the answer please
+
+# 2024-01-03 00:28:38.506137
++cls
+
+# 2024-01-03 21:17:02.071746
++what is odbc ad jdbs
+
+# 2024-01-03 22:20:51.472372
++cool whats SOAP then>
+
+# 2024-01-03 23:07:30.349613
++ what is SOA
+
+# 2024-01-03 23:20:19.744820
++internnal apis vs partnter apis in only one line please
+
+# 2024-01-03 23:20:45.398348
++clear context please gpt
+
+# 2024-01-03 23:21:00.903702
++clear our chat context please gpt
+
+# 2024-01-04 17:38:42.578839
++gpt message roles are system and what and what?
+
+# 2024-01-04 17:44:07.106896
++give me simpole python code
+
+# 2024-01-04 17:45:02.306682
++which module does have Console() in python
+
+# 2024-01-04 18:59:05.324208
++hi gpt
+
+# 2024-01-04 19:01:28.428756
++am using `prompt_toolkit` python module and i have this error "          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++  File "C:\Users\OmarPc\py_envs\others_repo_GptCli_venv\Lib\site-packages\prompt_toolkit\styles\base.py", line 179, in invalidation_hash
++    return (self.get_style() or self._dummy).invalidation_hash()
++           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
++AttributeError: 'str' object has no attribute 'invalidation_hash'"
+
+# 2024-01-04 19:21:13.609508
++what color is this `#ff0066`
+
+# 2024-01-04 19:21:25.009043
++give me hexa for black
+
+# 2024-01-04 19:23:22.026076
++give me green
+
+# 2024-01-04 19:23:50.682347
++How are you?
+
+# 2024-01-04 19:24:14.553966
++other shades of blue ? provide multiple values please
+
+# 2024-01-04 19:25:06.075547
++fsdladsjfjsld;
+
+# 2024-01-04 19:27:47.691485
++k;'
+
+# 2024-01-04 19:33:57.687747
++other shades of blue ? provide multiple values pleasecls
+
+# 2024-01-04 19:40:02.854470
++is this teal blue ? #1e90ff
+
+# 2024-01-04 19:40:13.502246
++what about this #008080
+
+# 2024-01-04 19:40:33.486329
++what is this called #1e90ff
+
+# 2024-01-04 19:42:06.047314
++please give me some shades of blue (but them in a table withtheir hexa values)
+
+# 2024-01-04 19:42:22.110634
++whats the most bright one of them?
+
+# 2024-01-04 19:43:11.209382
++whats the most lite one of them ?
+
+# 2024-01-04 19:43:47.794306
++dasdsfsdfsdfds
+
+# 2024-01-04 19:43:54.039328
++cls
+
+# 2024-01-04 19:46:33.744424
++Hi how are  you?
+
+# 2024-01-04 20:07:04.493131
++class method vs class method in python class
+
+# 2024-01-04 20:07:32.292996
++class method vs static method in python
+
+# 2024-01-04 20:43:12.608309
++in an class method it those two equivalant? 
+
+# 2024-01-04 20:44:03.390437
++in an class method it those two equivalant? let class name is `FOO`   cls(new_usr) and FOO(new_user) will work?
+
+# 2024-01-04 20:45:48.831079
++give me table with hex values of shades of green color
+
+# 2024-01-04 20:48:02.713541
++give me table with diff green colors (in hex value)
+
+# 2024-01-04 20:50:12.359377
++what is #87CEEB color
+
+# 2024-01-04 20:52:42.448858
++sdafdffsdfssf
+
+# 2024-01-05 19:39:21.506071
++most cpu intensive settings in last of us 1 pc game?
+
+# 2024-01-05 19:40:11.316570
++ok thanks
+
+# 2024-01-06 21:08:17.676880
++whats singularity in robotics explai in simple words !
+
+# 2024-01-06 21:08:54.375522
++does singularity have any relations to gimble lock
+
+# 2024-01-07 12:09:43.959859
++e.
+
+# 2024-01-07 17:23:33.254541
++ensembles meaning in arabic?
+
+# 2024-01-07 18:38:10.638930
++what does negative cnn netowrk class score mean?
+
+# 2024-01-07 18:59:55.489026
++explain this python code : `var = [500]*10
+
+# 2024-01-07 19:00:57.401794
++np.random.rand vs random.rand
+
+# 2024-01-07 19:08:05.731431
++what exactly are parameters in cnn are they weights or what how to calc them give very small example
+
+# 2024-01-07 19:51:03.101442
++euclidean distance between two vectors?
+
+# 2024-01-07 19:52:07.728006
++d
+
+# 2024-01-07 19:54:25.606643
++is this also called L1 distance or L2 and what the other one called (please be short)
+
+# 2024-01-07 19:55:14.639874
++give simple example on on manhatten distance also
+
+# 2024-01-07 19:55:57.631227
++not a coding example i mean show simply the L1 formula with simple example
+
+# 2024-01-07 20:12:27.498372
++`def __init__(self, source, *, data, volume=0.5):
++        super().__init__(source, volume)
++
++        self.data = data
++
++        self.title = data.get('title')
++        self.url = data.get('url')` explaion the super() code line
+
+# 2024-01-07 20:13:21.182491
++what happends if i didnt use super()?
+
+# 2024-01-07 20:17:51.019996
++FFmpegPCMAudio(FFmpegAudio): control volume?
+
+# 2024-01-07 20:22:58.741597
++ffmpeg -i input.wav -f s16le -ar 48000 -ac 2 -loglevel warning    (where to ad -filter -filter:a "volume=0.5" here)
+
+# 2024-01-08 16:14:31.085336
++purpose of forget cells in in LSTM 
+
+# 2024-01-08 18:05:22.677998
++from now on answers need to be short unless I asked for longer answers
+
+# 2024-01-08 18:05:47.416541
++what does 'heoristc' mean give general meaning + in regards to CS field
+
+# 2024-01-09 00:44:07.758375
++ما هي النصرة في اللغة العربية
+
+# 2024-01-09 01:00:37.430467
++On the first Convolutional Layer, it used neurons with receptive field size F=11, stride S=4 and no zero padding P=0.( WHAT IS F HERE?)
+
+# 2024-01-09 16:34:18.494640
++explain more the regressing box cordinates in object detectors neural network
+
+# 2024-01-09 16:36:42.870761
++whats the last time gpt 3.5 database got updated is it uptodate with 2023 news?
+
+# 2024-01-09 16:37:17.781938
++what happend in 7th of october?
+
+# 2024-01-09 16:37:50.790577
++I mean tell me the most big events that happend last 7th of october?
+
+# 2024-01-09 16:38:17.696061
++yes am asking about 7-oct-2020
+
+# 2024-01-09 16:39:08.767213
++what is todyas date?
+
+# 2024-01-09 16:39:31.047662
++it's 9th of jan
+
+# 2024-01-09 16:39:41.175637
++its 9th of jan 2023
+
+# 2024-01-09 16:39:48.408640
++it's 9th of jan 2023
+
+# 2024-01-09 16:49:58.128758
++hi
+
+# 2024-01-09 16:50:15.681432
++ok
+
+# 2024-01-10 00:33:04.783220
++l1 distance is called manhaten distance?
+
+# 2024-01-10 00:45:36.959740
++xrange() vs range() in python
+
+# 2024-01-10 01:49:54.959985
++thhe area between my thighs is very itchy and red does using vaseline with it help making it better
+
+# 2024-01-10 03:24:41.979444
++what is normally te number of biase in each layer of convnets and fcs?
+
+# 2024-01-10 22:03:53.174477
++For a convolutional layer with 8 filters of size 3×3 and a depth of 3, calculate the total number of parameters, including biases.
+
+# 2024-01-10 22:32:35.419803
++how exactly non linearity(actv_fn) helps in ml neural nets
+
+# 2024-01-10 23:08:44.001529
++what is MSE in ml
+
+# 2024-01-10 23:09:35.596412
++MSE vs cross entropy loss vs SVM in table comparison please 
+
+# 2024-01-10 23:11:13.322485
++                  
++                  
++   Maximize the   
++   margin between 
++   decision       
++   boundary and   
++   support        
++   vectors        explain this objective using svm loss in simple terms please
+
+# 2024-01-10 23:11:46.902633
++what is other names for softmax loss
+
+# 2024-01-10 23:13:39.019881
++so softmax is type of cross entropy loss while svm is not
+
+# 2024-01-10 23:14:58.932173
++now when you was talking about svm margina do you mean the `+1` in multiclass svm fromula `L = max(0, s_i - s_{y} +1)`
+
+# 2024-01-10 23:17:05.228787
++so higher margins in multiclass makes better performance and what about if I increased the +1 to like +4 or decreased it to like +0.1
+
+# 2024-01-11 00:29:58.493720
++epxlain this code in very simple terms `model = keras.sequential()`
+
+# 2024-01-11 00:30:47.835090
++what othher ttpes than sequential is there? + is sequential a MLP
+
+# 2024-01-11 00:32:21.195456
++if i have paralel layers or branching what to use then ? provide one example via tensorflow and another via keras
+
+# 2024-01-11 00:39:13.360475
++i know sigmoid,relu,tanh activation funcs put what about softmax activation ? i thought is used in loss calculations only? explain 
+
+# 2024-01-11 00:40:48.054645
++formula of cross entropy loss with soft max 
+
+# 2024-01-11 00:58:08.410931
++choose one : loss function purpose it to : calc accuracy of the model's preditions OR measure how compatible a given set of parameters is with respect to  the ground truth tables
+
+# 2024-01-11 02:23:49.308552
++parameter sharing and recpetive field in convnets
+
+# 2024-01-11 02:51:53.900020
++`deviding by` VS `devided by`
+
+# 2024-01-11 02:52:36.798523
++deviding by standard deviation now the STD will be on numerator or ?
+
+# 2024-01-11 03:08:36.929320
++std reletion with variance
+
+# 2024-01-11 03:10:07.761886
++sqrt(var) is what
+
+# 2024-01-11 03:22:44.029168
++purpose of batc normalizing when its needed
+
+# 2024-01-11 04:21:13.632831
++يخثس هةشلثس اشرث ؤخىفهىعثس ىعةثقهؤشم بثشعفثقس
+
+# 2024-01-11 04:21:37.621804
++does images considered continuas numerical features?
+
+# 2024-01-11 04:23:13.534549
++How does the choice of the margin in multiclass SVM affect the model's sensitivity to misclassifications?
++a) Higher margin increases sensitivity
++b) Lower margin increases sensitivity
++c) Margin has no impact on sensitivity
++d) Margin makes the model insensitive to misclassifications
++
+
+# 2024-01-12 23:48:53.991471
++stube is instruction list same as assignment list in plc and ladder programming
+
+# 2024-01-12 23:49:17.909276
++sources to learn how to build and assignment list
+
+# 2024-01-13 18:26:35.285273
++what does momentary normally close sw means
+
+# 2024-01-13 22:17:56.014498
++COMPACT  PLC VS MODULAR PLC IS SHORT SENTENCES OR TABLE PLEASE
+
+# 2024-01-13 22:20:16.879860
++is common pin the ground pin?
+
+# 2024-01-13 22:22:13.609761
++in s7 200 siemens plc what are M and L+
+
+# 2024-01-13 22:28:01.450432
++what is N and H in allen bradley micro 1000 plc
+
+# 2024-01-13 23:29:16.295631
++genereate simple index.html
+
+# 2024-01-14 13:08:38.354081
++من القائل لا يتعلمه مستحي لا مستكبر
+
+# 2024-01-14 13:08:56.398789
++اعطني عنه بعض المعلومات
+
+# 2024-01-14 22:46:34.896763
++on timers in plc explain in very short answer i/p s,tv,r and o/p Q B BCD
+
+# 2024-01-14 23:42:26.313144
++in ladder diagram q is output i is input what is M
+
+# 2024-01-15 01:22:17.075870
++consider s_pulse timer in ladder what is T0 represeents?\
+
+# 2024-01-15 01:23:18.153659
++when T0 is high and when its low i know that for pulse timer Q(ouput of timer) goes hight for time t as long as input stays high at time t
+
+# 2024-01-16 18:25:20.436641
++potluck in arabic means?
+
+# 2024-01-16 19:18:11.297896
++acl stands for
+
+# 2024-01-16 19:21:23.645206
++tcp stands for
+
+# 2024-01-16 19:23:47.125709
++172.16.3.0/24 how did you get '/24' exolain the fortumla in simple terms
+
+# 2024-01-16 19:25:36.342809
++give example
+
+# 2024-01-16 19:27:48.373717
++how to calc
+
+# 2024-01-16 19:31:51.910770
++are 0 in decimal alwQAYS MEANS HOST DEVICE
+
+# 2024-01-16 19:32:21.552891
++EXAMPLE OF HOST DEVICE VS NORMAL DEVICE ON SAME NETWORK
+
+# 2024-01-16 19:33:08.981536
++IS THERE DEFAULT IP FOR HOSTS DEVICES
+
+# 2024-01-16 19:37:55.952156
++ACL? 
++access-list 101 deny tcp 172.16.3.0                 0.0.0.255 any      eq 20
+
+# 2024-01-16 19:41:13.649554
++- Which statements are true regarding the following ACL? 
++access-list 101 deny tcp 172.16.3.0                 0.0.0.255 any      eq 20 explain in simple terms
+
+# 2024-01-16 19:44:56.086608
++named acl vs numbered acl in simple terms
+
+# 2024-01-16 19:45:47.358610
++the ability to specify source and destination addresses to use when identifying traffic is this feature of numberd acl
+
+# 2024-01-16 20:09:32.615556
++hot to get right subnet mask given subnet 172.16.16.0/21
+
+# 2024-01-16 20:11:54.207287
++a.   172.16.0.0             , 0.0.255.255
++b.   127.16.16.0            , 0.0.0.255
++c.   172.16.16.0          , 0.0.7.255
++d.   172.16.16.0              , 0.0.15.255 (choose one answer)
+
+# 2024-01-16 20:12:55.615653
++0.0.7.255 conv to binary
+
+# 2024-01-16 20:14:37.362931
++00000000.00000000.00000000.11111111 conv to decimal
+
+# 2024-01-16 20:19:37.345305
++named acl with host arg in it ?
+
+# 2024-01-16 20:20:54.335636
++172.16.16.0/0 get the subnet mask
+
+# 2024-01-16 20:21:12.624621
++in networking regarding ACL 172.16.16.0/0 get me the subnet mask
+
+# 2024-01-16 20:39:24.386702
++in networking RF signal means?
+
+# 2024-01-16 20:39:46.384808
++home modem does use RF
+
+# 2024-01-16 20:42:01.728621
++what is congestioon in netwroking?
+
+# 2024-01-16 20:46:15.492694
++dsl stands for
+
+# 2024-01-16 20:52:48.586910
++NAT stands for 
+
+# 2024-01-16 20:54:06.794391
++rip stands for
+
+# 2024-01-16 21:10:21.816678
++in networking how many octets foes ipv6 have?
+
+# 2024-01-16 21:13:59.393677
++osi stands for
+
+# 2024-01-16 21:14:20.275669
++give 2 lines brief in it (be concise)
+
+# 2024-01-16 21:14:43.451670
++thanks 
+
+# 2024-01-16 21:15:52.192690
++via `.md` table explain the 7 layers of osi 
+
+# 2024-01-16 21:17:30.844673
++25- information about which OSI layers of connected devices can be verified with the (Cisco Discovery Protocol) neighbors command?
++a.   All layers
++b.   Layer 1, Layer 2,  
++c.   Layer 1, Layer 2, Layer 3, and Layer 4
++d.   Layer 6 and Layer 7 (what abuot the other three)
+
+# 2024-01-16 21:18:00.400991
++why not C?
+
+# 2024-01-16 21:18:20.257682
++usless this time
+
+# 2024-01-16 21:18:39.337389
++what about the other 3 layers (5-7)
+
+# 2024-01-16 21:36:42.866283
++27- What combination of IP address should be used to specify only the last 8 addresses in the subnet
++192.168.3.32/28?
++a.   192.168.3.32    0.0.0.7
++b.   192.168.3.32    0.0.0.15
++c.   192.168.3.4      0 0.0.0.7
++d.   192.168.3.40        0.0.0.15 (answer and explain )
+
+# 2024-01-16 21:37:04.453682
++192.168.3.32 in binary
+
+# 2024-01-16 21:40:26.780554
++240 in binary?
+
+# 2024-01-16 21:43:18.826614
++NOT 240(binary) ORED 32(binary) answer in binary
+
+# 2024-01-16 21:43:43.805557
++in dcimal?
+
+# 2024-01-16 21:54:57.875116
++examples on logical networking models
+
+# 2024-01-16 21:57:24.069674
++VC stands for?
+
+# 2024-01-16 21:57:51.788535
++ty
+
+# 2024-01-16 21:59:08.483650
++ARP stands for
+
+# 2024-01-16 21:59:21.092773
++dlci stands for
+
+# 2024-01-16 22:04:15.052608
++31- When configuring a Frame Relay connection, what is instance when a static Frame Relay map should be used?  in two lines 
+
+# 2024-01-16 22:08:01.579401
++a.   when the remote router does not support Inverse ARP
++b.   when the local router is using IOS Release earlier
++c.   when broadcast traffic and multicast traffic over the PVC must be controlled
++d.   when globally significant rather than locally significant DLC are being used(regarding prev question which is true ?)
+
+# 2024-01-16 22:13:29.755668
++wan stand for
+
+# 2024-01-16 22:13:44.734612
++wlan stand fro
+
+# 2024-01-16 22:14:54.102265
++dte stands for
+
+# 2024-01-16 22:15:35.684669
++dce stands for
+
+# 2024-01-16 22:19:33.212558
++trojan vs worm in simple terms 
+
+# 2024-01-16 22:20:30.940702
++           
+
+# 2024-01-16 22:33:11.145672
++dos stands for
+
+# 2024-01-16 22:33:25.685802
++reconnaissance access explain in one line !
+
+# 2024-01-16 22:33:49.262226
++reconnaissance leteral meaning?
+
+# 2024-01-16 22:51:29.640134
++frame relay switch explain in one line !
+
+# 2024-01-16 22:51:49.039164
++please answer in exactly one line !
+
+# 2024-01-16 22:51:54.381636
++goood
+
+# 2024-01-16 22:52:28.373671
++ethernet switch vs frame relay switch
+
+# 2024-01-16 22:52:58.926677
++in a table please and be short in answer
+
+# 2024-01-16 22:57:26.850037
++what are most famoous types of wan be very consice
+
+# 2024-01-16 22:57:56.454683
++what about pstn ? 
+
+# 2024-01-16 23:00:15.551570
++those acrynoms stands for? (CSU/DSU/ISDN)
+
+# 2024-01-16 23:01:19.711597
++table to compare between them be concise!
+
+# 2024-01-16 23:05:31.502632
++pvc stands for
+
+# 2024-01-16 23:06:48.054408
++ptn reliese stands for
+
+# 2024-01-16 23:08:04.167670
++which has higher BW lan or wan
+
+# 2024-01-16 23:11:05.026664
++in networking what is isdn pri
+
+# 2024-01-16 23:22:51.919555
++ HDLC stands for?
+
+# 2024-01-16 23:25:27.431667
++higherst wan connection type is? (short ans)
+
+# 2024-01-16 23:25:44.752889
++what about the atm
+
+# 2024-01-16 23:27:23.729282
++isdn pri max rate ? also x.25 max rate 
+
+# 2024-01-16 23:38:05.538193
++TTL stands for
+
+# 2024-01-16 23:41:01.953656
++convergence time in RIP 
+
+# 2024-01-16 23:43:50.608843
++EIGRP
+
+# 2024-01-16 23:46:30.024671
++load balance famouse algorithm
+
+# 2024-01-17 00:38:32.884671
++in networking  CSMA/CD stand for?
+
+# 2024-01-17 18:41:02.288626
++what are others model than client-server mode (in netwroking field)
+
+# 2024-01-17 18:44:08.733860
++pop stands dor
+
+# 2024-01-17 18:44:58.886521
++in osi model in networking (what are the moost famous protocols in app layer)
+
+# 2024-01-17 19:07:11.216691
++imap prootocol in one line
+
+# 2024-01-17 19:07:42.391690
++what about pop
+
+# 2024-01-17 19:08:12.592791
++pop3 ?
+
+# 2024-01-17 19:33:02.129818
++115- Why is flow control used for TCP data transfer?
++a.   to synchronize speed for the sent data
++b.   to synchronize and sent data in complete numerical order
++c.   to prevent the receiver from being congested by incoming data
++d.   to synchronize window size on the server
+
+# 2024-01-17 19:34:46.945718
++destination logical address port or ip
+
+# 2024-01-17 19:39:25.531665
++how is the udp conectinoless (be short)
+
+# 2024-01-17 19:41:22.404975
++three way handshake 
+
+# 2024-01-17 19:51:52.901564
++Which three features allow TCP to track the transmission of data from source to destination? 
+
+# 2024-01-17 19:52:33.075626
++explain flow control
+
+# 2024-01-17 19:56:00.148037
++what tcp errors that only can be caught and what that can be caught and fixed in reciving side
+
+# 2024-01-17 20:15:28.213244
++172.16.4.127 conv to binary
+
+# 2024-01-17 20:16:14.636490
++193 coonv to binary
+
+# 2024-01-17 20:21:09.324496
++ Which IPv4 subnet addresses represent valid host addresses?
++a.   172.16.4.127 /26
++b.   172.16.4.193 /26
++c.   172.16.4.95 /27
++d.   172.16.4.159 /27
+
+# 2024-01-17 20:38:04.830661
++172.16.4.159 conv to binary (dont explain)
+
+# 2024-01-17 20:39:32.287685
++172.16.4.95 conv to binary dont explain
+
+# 2024-01-17 20:44:26.879812
++172.16.4.193 do the same
+
+# 2024-01-17 21:41:46.118119
++189- How many subnets are required to address a topology with 20 hosts?
++a.   1
++b.   3
++c.   4
++d.   5 ( explain in two lines)
+
+# 2024-01-17 22:25:23.442977
++what is straight-through
+
+# 2024-01-17 22:27:58.001653
++what causes crosstalk within the cable pairs? very short reply
+
+# 2024-01-17 22:28:53.395686
++does fiber cable have EMI?
+
+# 2024-01-17 22:40:27.514700
++CSMA/CD stands for
+
+# 2024-01-17 22:43:44.466688
++full duplex producews collisions?
+
+# 2024-01-17 22:54:23.396706
++job of sublayer in osi data link layer
+
+# 2024-01-17 22:57:57.524285
++utp stands for
+
+# 2024-01-17 22:58:17.189133
++are there other acrynoms for it ?
+
+# 2024-01-17 23:00:45.515691
++put them in a table 
+
+# 2024-01-17 23:01:06.259909
++give methem as md code
+
+# 2024-01-17 23:04:10.908694
++dce and dte stands for
+
+# 2024-01-17 23:21:19.965889
++pdu stands for
+
+# 2024-01-17 23:22:36.461837
++2Select the statements that are correct concerning network protocols. (Choose three.) 
++ 
++define the structure of layer specific PDU's 
++ 
++dictate how to accomplish layer functions 
++ 
++outline the functions necessary for communications between layers 
++ 
++limit the need for hardware compatibility 
++ 
++require layer dependent encapsulations 
++ 
++eliminate standardization among vendors 
++
++
++
+
+# 2024-01-17 23:37:23.447675
++What is the primary purpose of Layer 4 port assignment? 
++ 
++to identify devices on the local media 
++ 
++to identify the hops between source and destination 
++ 
++to identify to the intermediary devices the best path through the network 
++ 
++to identify the source and destination end devices that are communicating 
++ 
++to identify the processes or services that are communicating within the end devices 
++
+
+# 2024-01-17 23:37:46.098994
++choose by letter a ,b ,c ..
+
+# 2024-01-17 23:38:10.742687
++in table app layer vs transport layer in OSI
+
+# 2024-01-18 00:18:48.770686
++egrp stands for
+
+# 2024-01-18 00:19:18.451310
++igrp vs bgrp
+
+# 2024-01-18 20:07:26.052092
++python os lib code to get all files in a specific dir 
+
+# 2024-01-19 12:59:38.297781
++pycryptodomex is used for what in python
+
+# 2024-01-19 13:07:26.194051
++pip 
+
+# 2024-01-19 18:15:36.300069
++until further news so long jack (explain  this english sentence)
+
+# 2024-01-19 18:38:16.329928
++thun
+
+# 2024-01-20 02:03:31.696166
++CODE USING TENSOR FLOW OR PY TORCH TO DEFFRENTIATE BETWEEN DOGS AND CATS
+
+# 2024-01-20 02:05:36.861543
++HOW TOW PREDICT AFTER ITS BEING TRAINED? + WHAT ARE THE DIFF WAYS TO SAVE THE MODEL AFTER TRAINIG
+
+# 2024-01-20 02:15:52.175604
++thun
+
+# 2024-01-20 23:36:15.074788
++what a merry go round
+
+# 2024-01-20 23:38:12.944741
++imu stands for?
+
+# 2024-01-20 23:38:50.432933
++normally what components make a simple IMU ?
+
+# 2024-01-20 23:39:51.866046
++explain simply how accelerometer and magnetometers work
+
+# 2024-01-21 00:52:03.726104
++in simple terms what are MEMS elements
+
+# 2024-01-22 00:31:01.455110
++esp266 is microcontroller of wifi module
+
+# 2024-01-22 00:36:09.306483
++which of following is not subfield of ai : robotics , nlp , ml , data analysis
+
+# 2024-01-22 02:03:46.105292
++regression technique is used with what type of data
+
+# 2024-01-22 02:04:30.869797
++which data mining taks has finding patterns over time : association or time series analysis
+
+# 2024-01-22 02:06:24.120997
++in a table explain classification , clusterin , assosiation , regression
+
+# 2024-01-22 02:08:29.805609
++structured vs un structured data
+
+# 2024-01-22 02:09:49.742986
++is clustering descriptive data mining
+
+# 2024-01-26 02:49:04.719645
++info on (KUKA KR6 R700-2)
+
+# 2024-01-26 02:50:25.420036
++in  a table md
+
+# 2024-01-26 03:29:39.549751
++two lines on robotics field 
+
+# 2024-01-26 03:29:55.900895
++importance of robotics in one line
+
+# 2024-01-26 03:32:23.214752
++orginzer robot arm in one line
+
+# 2024-01-26 03:32:41.488889
++pick and place robot arm
+
+# 2024-01-26 03:34:53.477902
++RoboDK software in one line
+
+# 2024-01-26 03:35:00.981271
++shorter
+
+# 2024-01-26 17:03:10.408925
++prevalant means?
+
+# 2024-01-27 19:56:35.451971
++serialzie vs deserialize in programming? (i always confuse them do you have simple way to differ them?)
+
+# 2024-01-27 20:00:46.493496
++in C# whats the usage of /// <summary> and ///<param...> ??
+
+# 2024-01-27 20:12:35.206295
++so its an alternative to python docstring
+
+# 2024-01-27 21:34:09.975386
++why somtimes we double integrate IMU sensors ouput
+
+# 2024-01-27 21:35:09.920424
++so raw ouput of imu is acceleration or velocity?
+
+# 2024-01-28 21:50:18.279812
++8 kg.cm torque nema 23 is enough to force feedback move an elbow?  is there any mis spelling in this question?
+
+# 2024-01-31 17:13:41.259725
++in CO2 articles i face two metrics called EE and EC can you explain them breifly!
+
+# 2024-01-31 19:11:07.263432
++SO I HAVE OIL HEATER IN HOUSE AND IT HAS TWO BUTTONS L AND m WHAT ARE THOSE FOR ?
+
+# 2024-01-31 20:17:31.711402
++IN MOTORS WHAT POSITIVE DRIVE MEANS?
+
+# 2024-01-31 22:21:20.455942
++explain the command `wt $COMMAND`
+
+# 2024-01-31 23:03:49.771212
++transform.Translate vs transform.Position in unity enginen
+
+# 2024-01-31 23:06:47.371263
++but i can use them interchangably too move objects right ? 
+
+# 2024-02-01 00:18:30.495248
++thunderbird remote server means the gmail itself or what?
+
+# 2024-02-01 00:55:10.149262
++whats compact optioin in thunderbird
+
+# 2024-02-01 01:01:03.085484
++converte int to string in c#
+
+# 2024-02-01 23:12:46.656075
++whats yarn
+
+# 2024-02-02 04:41:41.212222
++  HingeJoint hinge = otherGameObject.GetComponent("HingeJoint") as HingeJoint; explain as in this c# code
+
+# 2024-02-03 04:11:56.507122
++what is spotligt in figma
+
+# 2024-02-05 18:00:28.475073
++public class customClass : base <var , var2> {} is this eqvuivalant to public class customClass : bas { customClass(var, var2);
+
+# 2024-02-05 20:43:13.602240
++i mean is the first one acts as consturctor ? short cut for making a generic constuctor 
+
+# 2024-02-05 20:44:42.544968
++how to make similar customclass using consturctor and not angular brackets '<'
+
+# 2024-02-05 21:02:15.166166
++`TriggeredEvent(Component sender, object data? = null)` VS `TriggeredEvent(Component sender, object data = null) `
+
+# 2024-02-05 21:03:32.813128
++TriggeredEvent(Component sender, object data?) expect ','
+
+# 2024-02-06 00:54:29.564491
++ls
+
+# 2024-02-07 00:26:08.844200
++`foo(x => another_foo());` explain this C# syntax
+
+# 2024-02-07 00:27:32.250195
++why this solves passing wrong arg type? to foo
+
+# 2024-02-08 03:03:18.892040
++wc commmand in terminal is for? 
+
+# 2024-02-08 03:03:42.106384
++and it stand for word count?
+
+# 2024-02-08 03:52:07.564659
++clink vs cmder vs ConEmu tools in table please and be short
+
+# 2024-02-08 03:52:41.211361
++can you but line between each row in the .md table you wrote?
+
+# 2024-02-09 21:09:52.603319
++tele
+
+# 2024-02-10 03:13:34.549415
++private @SimplePccontrollerMap m_Wrapper; this a C# line explain the `@`
+
+# 2024-02-10 03:14:47.031682
++give other simple usages examples of using `@` in c#
+
+# 2024-02-10 04:35:26.464420
++@"string" what is `@` here before c# literal string doing?
+
+# 2024-02-10 05:43:21.328100
++when do i need override keyword in c# and when not ? for example in unity monobehaviour class  i just use void Update() directly withouot override keyword?
+
+# 2024-02-10 06:00:52.810447
++tele
+
+# 2024-02-10 20:04:57.347784
++shortstele
+
+# 2024-02-10 21:23:43.429456
++'we're just taking it as is' what does this line means?
+
+# 2024-02-11 01:19:12.020273
++constructor of calss derived from abstract class error
+
+# 2024-02-11 01:31:55.549138
++MAKE A CLASS PRPERTY FRO THIS VAR ' private static Vector3 _moveTo '
+
+# 2024-02-12 16:25:05.669565
++fun
+
+# 2024-02-12 20:12:59.088377
++game
+
+# 2024-02-12 23:44:20.791489
++shorts
+
+# 2024-02-13 00:16:20.329889
++statements between [] in c# ?
+
+# 2024-02-13 00:17:59.491961
++more on this atrributes and their internal how to make my own atribute []>
+
+# 2024-02-13 00:19:58.379336
++are they like python decorators?
+
+# 2024-02-13 19:07:32.178922
++A trustworthy person, who enjoys new Working Methods, with good Communication skills, is Presentable, has excellent Time keeping and work under stress, Enjoy finding solutions and working on development Plans, and is active, helpful, intelligent, and ambitious. Like Challenges and always Fight for achieving my Targets. (make previous paragraph shorter)
+
+# 2024-02-13 19:08:20.717695
++make it much shorter please
+
+# 2024-02-13 19:13:17.302936
++shorter please
+
+# 2024-02-13 19:16:51.502563
++make it only two lines
+
+# 2024-02-14 19:46:44.051020
++what is vector of shortsin c#
+
+# 2024-02-14 19:59:19.001367
++what is Xinput in win
+
+# 2024-02-14 22:34:51.195015
++in this code explain the usage of `new` keyword here then provide another simpler example for same use case of `new` keyword. The code to explain `new` in: `InputSystem.AddDevice(new InputDeviceDescription {  /* rest of code */ });`
+
+# 2024-02-14 22:49:16.244728
++so what will happend if i  just do this with out new keyworD: 
+
+# 2024-02-14 22:50:02.077416
++i mean here  what will happend if i  just do this with out new keyworD: InputSystem.AddDevice( InputDeviceDescription {  /* rest of code */ });
+
+# 2024-02-15 19:53:52.521538
++can i put default null value to a c# method args ? like this public Camera UpdateFollowerCamPos(Vector3 EulerRotOffset? = null ) {}
+
+# 2024-02-15 20:02:45.908957
++    public PcControlUtility(Vector3? CamPosOffset = new Vector3(0, 0, -0.89f) ) {
++         _moveTo = Vector3.zero;
++         _lookTo = Vector3.zero;
++         _jumpVal = new Vector3(0, 1, 0);
++         _isJump = false;
++         _isInteract = false;
++         _isPause = false;
++
++
++        if ( _ControlMapPCcls == null ) _ControlMapPCcls = new PCSimpleControlMap();
++
++
++}   error:CS1736 default `CamPosOffset` must be compile time constant
+
+# 2024-02-15 20:04:57.008008
++how to check and assign value if not fast in good way
+
+# 2024-02-15 21:37:45.588290
++s
+
+# 2024-02-17 19:11:04.685235
++what does plus sign on unity prefarb means?
+
+# 2024-02-18 00:13:54.548446
++csharp trenary if operation exmpale
+
+# 2024-02-18 02:34:00.666650
++ return (readState, Data); is i used this in C# what is the returned variral data type
+
+# 2024-02-18 02:34:54.213911
++how to return list
+
+# 2024-02-18 02:37:11.347317
++can i have list of two diff datatypes
+
+# 2024-02-18 02:59:45.857748
++ int[,] int var; what the comma here means
+
+# 2024-02-22 21:42:38.281937
++in python explain keyboard.record() suppress arg
+
+# 2024-02-22 21:44:43.948418
++explain this one also keyboard.unhook_all()
+
+# 2024-02-22 21:55:59.510896
++explain this also win32gui.IsWindowVisible(hwnd)
+
+# 2024-02-22 21:57:38.519656
++explain thos two lines : wparam = vk_code #WPARAM = WORD PARAMETER but 32bit actually XD use .bit_length()
++lparam = (scan_code << 16) | 1
+
+# 2024-02-22 22:02:31.669051
++give binary example?
+
+# 2024-02-22 22:06:44.805404
++is this 1 in LMB or RMB and woes little or big endian effedct that?
+
+# 2024-02-22 22:09:25.853517
++LMB means left most bit and RMB means right most bit
+
+# 2024-02-22 22:21:26.676914
++keyboard.add_abbreviation("@", "john@stackabuse.com")
+
+# 2024-02-22 22:24:57.355676
++in python explain this keyboard.add_abbreviation("@", "john@stackabuse.com")
+
+# 2024-02-22 22:26:46.224059
++where will it save this new abbrevtiatoin can i store those abbrevtiations in my lis?
+
+# 2024-02-22 22:28:24.306543
++how to tell keyboard.add_abbreviation() to store new abreviation in this dict by default so i can dump it to json later
+
+# 2024-02-22 22:48:52.984688
++simple try except block in pythono
+
+# 2024-02-22 23:21:31.851666
++in python explain this keyboard.add_abbreviation("@", "john@stackabuse.com") can i use space bar instead of @
+
+# 2024-02-23 00:58:43.313005
++keyboard.KeyboardEvent.to_json() in python
+
+# 2024-02-24 04:06:22.779218
++piece meaning?
+
+# 2024-02-25 00:08:16.801995
++mata * matB vs mata.dot(matb)
+
+# 2024-02-25 00:14:58.313561
++what is block=false does in plt.show(block=false)
+
+# 2024-02-25 00:22:06.177114
++len of an np.ndarray() is what?
+
+# 2024-02-25 00:28:03.483663
++np.linspace(-5.12, 5.12, 100) print me the output
+
+# 2024-02-25 00:31:12.320144
++plt.axes(projection='3d') can i change the orientation ? cna i rotate it a bit?
+
+# 2024-02-25 01:13:06.873678
++ax= fig.add_subplot(111, projection='3d') what 111 means here
+
+# 2024-02-25 01:42:24.590650
++ax.plot_surface() does have alpha?
+
+# 2024-02-25 01:50:21.239500
++why rastrigin ranges from -5.12 to 5.12
+
+# 2024-02-25 01:58:47.619109
++ax.scatter3D(xdata, ydata, zdata, c=zdata, cmap='Greens');what is c arg here
+
+# 2024-02-25 02:10:29.388419
++x^2 +y^2  is  called?
+
+# 2024-02-25 02:11:20.762311
++x^2 +y^2 + 1
+
+# 2024-02-25 02:11:47.993000
++but it shows prabole like shape in 3d
+
+# 2024-02-25 02:22:35.111763
++ax.scatter3D(solutionsX, solutionsY, solutionsZ, c=solutionsZ, cmap='Reds')how to make the cmap works in inverse the low depth is more red and high alpha?
+
+# 2024-02-25 02:34:03.774849
++make 3rd axis y and x tics between -5.12 and 5.12
+
+# 2024-02-25 23:52:35.935500
++explain this in python : for x in 1000, 1500, 700, 0:
+
+# 2024-02-26 01:51:58.048582
++keyorgbin
+
+# 2024-02-26 17:25:16.773093
++do i dettected pso algorithm stagnation via comparing old and new paricle positinos or comparing old and new best_poosiions array
+
+# 2024-02-26 17:29:32.925892
++Step Function (unimodal function) as a python method
+
+# 2024-02-26 17:30:18.283889
++
++Schewefel’s Problem 2.22 (unimodal function) as python code
+
+# 2024-02-26 18:46:49.764075
++  plot3D(solution[0], solution[1], fitness, showTime= -1, isFinal= True, plotRef= True, rotate_deg1=40, rotate_deg2=20, refEq= used_eq)
++           ~~~~~~~~^^^
++IndexError: invalid index to scalar variable.
++explain
+
+# 2024-02-26 18:50:31.164400
++pso best stagnation itertaion limit is?
+
+# 2024-02-26 18:58:43.967694
++E:\omar-work\PSO algorithm in Action.py:23: RuntimeWarning: overflow encountered in double_scalars
++  return (3*(1-X)**2 * np.exp(X**2 - (Y+1)**2)  - 10*(X/5 - X**3 - Y**5) * np.exp(-X**2 - Y**2) - 1/3 * np.exp(-(X+1)**2 - Y**2))
+
+# 2024-02-26 19:10:06.553396
++fig = plt.figure()
++   ax: plt.Axes | Axes3D = fig.add_subplot(111, projection='3d') how to increase axes size
++
++
++ho
+
+# 2024-02-26 20:46:31.144394
++nearZeroCount.count() what will ths do if its ndarray
+
+# 2024-02-26 20:47:14.015590
++how to get number of elements in np array
+
+# 2024-02-28 18:43:47.468966
++INIT_LR = 1e-4 in machin learning what dores this var do
+
+# 2024-03-04 21:05:54.047685
++[[nodiscard]] virtual std::unique_ptr<IConnection> Accept() = 0; explain the no discard in this cPp code 
+
+# 2024-03-04 21:06:46.663210
++explain vritual key word in cpp with simple example
+
+# 2024-03-04 21:09:48.936403
++inline int SysCall(TFn&& func, TArgs&&... args) waht are the 3 dots used for in this function delaratioon
+
+# 2024-03-04 21:26:53.611723
++ sockaddr_un_t serverAddr{}; what does this line do
+
+# 2024-03-04 21:27:28.908132
++ serverAddr.sun_family = AF_UNIX; explain this also
+
+# 2024-03-04 21:28:18.533110
++   const auto [serverAddr, addrSize] = CreateAddress(path); explain this also
+
+# 2024-03-04 21:29:45.263181
++more on structrued binindg is it and array or what?
+
+# 2024-03-04 21:39:20.999805
++const int socketFD = SysCall(::socket, AF_UNIX, SOCK_SEQPACKET, 0); what is socket fd what does it hold?
+
+# 2024-03-04 21:53:44.601374
++ipc file in c source code usualyy is for ip and sockets or what?
+
+# 2024-03-05 01:22:29.426338
++std::make_unique<WindowsNamedPipe>(driverPath) explain
+
+# 2024-03-07 16:24:26.415811
++write me SIMPLE aws lambda function
+
+# 2024-03-07 23:52:23.285123
++cmd command to copy directoryt to a specific place and replace if needed
+
+# 2024-03-08 20:54:46.018760
++explain A - B in boolean elgebra
++
+
+# 2024-03-08 20:58:40.013509
++A/B means
+
+# 2024-03-08 22:11:49.458576
++asdsadasd
+
+# 2024-03-09 16:42:28.585928
++what is clang tidy
+
+# 2024-03-09 17:26:11.415246
++fork  a repo using github cli
+
+# 2024-03-09 17:30:23.072111
++list branches using git in cli
+
+# 2024-03-09 17:30:47.998844
++other branch subcommands ?
+
+# 2024-03-09 17:31:15.383620
++ty
+
+# 2024-03-09 17:37:22.800798
++search env variabled using cmd 
+
+# 2024-03-09 17:38:49.064306
++this searches path env. variables ? are you sure  no other way to do thatt?
+
+# 2024-03-09 17:38:59.063898
++cls
+
+# 2024-03-09 17:39:05.920935
++clear yes
+
+# 2024-03-09 19:04:31.332863
++in visual studio ide 2022 how to open retarget projects window ?
+
+# 2024-03-09 19:14:48.787428
++how to check if my vs code ide is the preview version?
+
+# 2024-03-09 19:14:57.571287
++also what is vcpkg ? 
+
+# 2024-03-09 19:21:10.644011
++choco --version
+
+# 2024-03-09 19:41:31.974532
++git clone https://github.com/microsoft/vcpkg this by default clones in currentt dir  or creates new dir to clone in?
+
+# 2024-03-09 20:04:50.607754
++Orsnaro sends his regards and says farewell✨, what does this mean?
+
+# 2024-03-09 20:05:02.031030
++is tthere any gramatical erros in it
+
+# 2024-03-09 20:05:37.441539
++so the final sentence is?
+
+# 2024-03-09 20:21:00.339018
++how to use python class static method
+
+# 2024-03-09 20:21:23.225540
++if class was in other python file ?
+
+# 2024-03-09 20:21:46.017817
++what if it was class method ? must i init the class first and make att least one instance of it?
+
+# 2024-03-09 21:03:56.934786
++check if python dict is empty ( by empty i meand its inited like this dict1= {} ))
+
+# 2024-03-09 22:19:18.664952
++disable top level statment in vs 2022 console app template
+
+# 2024-03-09 22:44:56.948362
++msbuild run ? wahts wrong here/
+
+# 2024-03-09 22:45:10.859842
++how to run after build
+
+# 2024-03-09 22:46:36.101999
++who is newer msbuild or dotnet
+
+# 2024-03-09 23:01:22.909764
++when i try `dotnet --version` this appears The command could not be loaded, possibly because:
++  
++You intended to execute a .NET application:
++    The application '--version' does not exist.
++You intended to execute a .NET SDK command:
++  No .NET SDKs were found.
+
+# 2024-03-09 23:32:10.162460
++why vsstudio doesnt use X64
+
+# 2024-03-10 15:50:49.644924
++bASIX WXWIDGET CPP CODE EXAMPLE?
+
+# 2024-03-10 16:00:42.726234
++explain each line pleases
+
+# 2024-03-10 16:54:18.627846
++now when to use new keywrd and when to not  ? 
+
+# 2024-03-10 16:55:12.395918
++ok ty
+
+# 2024-03-10 17:14:55.285680
++what is friend key word with simple example
+
+# 2024-03-10 17:24:38.981611
++example for a friend class not a friend function
+
+# 2024-03-10 17:25:02.069122
++what is an opaque pointer in cpp
+
+# 2024-03-10 17:26:21.844970
++what thins i can't do in .h files ?
+
+# 2024-03-10 17:30:52.961364
++define vs prototype vs body of a function
+
+# 2024-03-10 17:44:39.795863
++what is inline fucntions?
+
+# 2024-03-10 17:47:00.263729
++real use cases when it's prefered to use inline functions?
+
+# 2024-03-10 17:54:40.123740
++what is pch.hpp?
+
+# 2024-03-10 17:57:57.894266
++what is ps3eye
+
+# 2024-03-10 18:02:10.389641
++optional() in cpp
+
+# 2024-03-10 18:03:12.086330
++what is noexcept keyword?
+
+# 2024-03-10 18:06:45.793828
++REFLECTABLE_FIELD in cpp?
+
+# 2024-03-10 18:07:32.176895
++examplle with and without REFLECTABLE_FIELD
+
+# 2024-03-10 18:08:21.698630
++what is serializable() in cpp
+
+# 2024-03-10 18:08:56.392976
++ATT_seiral ?? 
+
+# 2024-03-10 18:12:39.252090
++introspection meaning and REFLECTABLE_FIELD in python could be ?
+
+# 2024-03-10 18:13:30.788662
++std::move() in cpp
+
+# 2024-03-10 18:15:51.558453
++simple exmpale with and without std::move()
+
+# 2024-03-10 18:17:10.965420
++class UserConfig : public serial::Serializable<UserConfig>
++{
++public:
++    UserConfig() : Serializable(utils::GetConfigDir() / "config.yaml") {} explain last lien
+
+# 2024-03-10 18:20:14.199772
++default keyword in cpp
+
+# 2024-03-10 18:22:23.361911
++serialize vs deserialize in file system i/o
+
+# 2024-03-10 18:25:44.962528
++what acrynom ATT poossibly refer to in cs and networking and cpp>
+
+# 2024-03-10 21:45:49.240253
++regex to replace `*100LE` to only the number in this example 100
+
+# 2024-03-10 21:46:07.150426
++in google sheets
+
+# 2024-03-10 21:47:59.454916
++no i want to replace *100LE with the 100 
+
+# 2024-03-10 21:50:28.706671
++=REGEXREPLACE(E4, "\*(\d+)LE", "$1") how to but the digit in group then catch it?
+
+# 2024-03-10 21:52:02.959866
++replace any comma , with empty string then replace the result with the first captured group
+
+# 2024-03-10 21:55:58.891138
++how to replace multiple cells ? 
+
+# 2024-03-10 21:58:30.651542
++refrence currnet cell that formula is in
+
+# 2024-03-10 22:15:06.247599
++sum all colm in google sheet
+
+# 2024-03-10 22:52:49.180732
++=$C3=”Dairy” I WANNA MAKE IT DIARY OR STORY
+
+# 2024-03-10 22:55:40.837334
++IS THERE OR OPERATOR IN GOOGLE SHEETS FORMMULA
+
+# 2024-03-11 16:14:26.358800
++what is scoop buckets?
+
+# 2024-03-11 16:15:03.669903
++scoop is win package manager and it has something called bucket what is it?
+
+# 2024-03-11 21:25:37.142870
++translate this turkish to english : 
++
++Merhaba maceracılar!
++
++ 
++
++Şu an kullanmakta olduğunuz Black Desert hesabını, daha sonra çok daha kolay olan Pearl Abyss ID olarak kullanabilmeniz için Pearl Abyss ID Birleştirmesi hazırlığı içerisindeyiz.
++
++ 
++
++Hesap birleştirme aşamasında, maceracıların rahatsız olabileceği durumları en aza indirgemek için mevcut Kullanıcı Sözleşmesi’ni, Black Desert Hizmet Kullanım Sözleşmesi ve Pearl Abyss Hizmet Kullanım Sözleşmesi olarak ayırarak uygulamayı planlıyoruz.
++
++ 
++
++Lütfen uygulama tarihi ve yenilenen durumları aşağıdan kontrol ediniz.
++
++▶ [Bildirim] Kullanıcı Sözleşmesi'nin Yenilenmesi (Göz At)
++
++▶ [Bildirim] Pearl Abyss ID Birleştirme Hakkında Planlanan İyileştirmeler (Göz At)
++
++ 
++
++
++Kullanıcı Sözleşmesi’nin Yenilenmesi
++
++ 
++Uygulama Hedefi
++Kullanıcı Sözleşmesi
++
++Uygulama Tarihi (Yürürlük Tarihi)
++27 Mart 2024 (Çar)
++
++Yenilenen Başlıca Konular
++
++- Mevcut Kullanıcı Sözleşmesi’nin adının “Black Desert Hizmet Kullanım Sözleşmesi” olarak değiştirilmesi
++
++- Mevcut Kullanıcı Sözleşmesi’nin içeriğinin bir kısmının “Pearl Abyss Hizmet Kullanım Sözleşmesi” olarak ayrılarak yayınlanması
++
++> “Madde 10 (Üye Hesabı (ID) ve Şifre)”, “Madde 17 (Gönderi Yönetimi)”
++
++- Madde 21 (Test Amaçlı Hizmet) içeriğinin silinmesi
++
++- Madde 12 (Oyun Bilgilerinin Sunulması) içeriğinin silinmesi
++
++- Madde 24 (Kullanımın Kısıtlanması Nedenleri ve Usulü) ve Madde 25’in, Madde 18 (Yaptırımlar Hakkında Bildirim ve İtiraz Başvurusu) olarak birleştirilmesi
++
++- “Ek” kısmındaki sözleşmenin uygulanma tarihinin değiştirilmesi
++
++- Maddelerin numaralarının değiştirilmesi ve içeriklerinin düzeltilmesi
++
++- Bunlar dışında yazım hatalarının düzeltilmesi ve sözleşme içerisinde kelimelerin eşitlenmesi
++
++* Kullanıcı Sözleşmesi içerisinde madde numaralarının değişmesine bağlı olarak, mevcut “Operasyon Politikası”nda bahsi geçen Hizmet Kullanım Sözleşmesi madde numaraları da birlikte yenilenecektir.
++Yenilenmeden Önceki Kullanıcı Sözleşmesi Pearl Abyss Hizmet Kullanım Sözleşmesi Black Desert Hizmet Kullanım Sözleşmesi
++[Tüm içeriği görüntüle.] [Tüm içeriği görüntüle.] [Tüm içeriği görüntüle.]
++
++ 
++
++※ Yenilenen sözleşmelerin yürürlüğe girme tarihi olan 27 Mart 2024 (Çar) tarihine kadar reddetme niyetinizi ifade etmediğiniz takdirde bu yenilenmeyi onaylamış sayılırsınız.
++
++※ Hizmet Kullanım Sözleşmesi’ni onaylamadığınız takdirde, Hizmet Kullanım Sözleşmesi’ni feshetme başvurusu veya [Oyuncu Destek] aracılığıyla itiraz başvurusu yapabilirsiniz. Ancak Hizmet Kullanım Sözleşmesi feshedildiğinde lütfen, mevcut karakterleriniz, eşyalarınız vb. tüm oyun bilgilerinizin silineceğini ve bu durumun geri alınamayacağını göz önünde bulundurunuz.
++
++※ Kullanıcı Sözleşmesi’nin yenilenmesi ile ilgili sorularınızı [Oyuncu Destek] aracılığıyla iletebilirsiniz.
++
++Teşekkür ederiz.
++
++
++Greetings Adventurer.
++
++ 
++
++We are currently preparing Black Desert account integration to Pearl Abyss ID to provide you with a more comfortable service environment.
++
++ 
++
++To minimize inconveniences during the account integration process, Terms of Service documents will now be separated for Black Desert and Pearl Abyss.
++
++ 
++
++Please read below for the changes and effective date.
++
++▶ [Notice] Terms of Service Revision (Link)
++
++▶ [Notice] Pearl Abyss ID Integration Improvements (Link)
++
++ 
++
++Terms of Service Revision
++
++
++Revised Document
++
++Terms of Service
++
++ 
++
++Effective Date
++March 27, 2024 (Wed)
++
++ 
++
++Main Revision
++
++- Existing Terms of Service title changed to Black Desert Terms of Service
++
++- Parts of the existing Terms of Service renamed and used as Pearl Abyss Terms of Service
++
++> Article 10 (Member Account (ID) and Password), Article 17 (Management of Posts)
++
++- Deleted Article 12 (Provision of Game Information)
++
++- Deleted Article 21 (Service for Testing purpose)
++
++- Integrated Article 24 (Reasons and Procedure for Restriction of Use) and Article 25 into Article 18 (Collection of Information, etc.)
++
++- Changed the effective date under Addendum.
++
++- Adjusted numbers of Articles
++
++- Fixed typos and unified terms
++
++* Changes in the numbers of certain Articles in the Terms of Service will be reflected to those in the Operational Policy.
++
++ 
++Previous Version Pearl Abyss Terms of Service Black Desert Terms of Service
++[Link] [Link] [Link]
++
++ 
++
++* If you do not express your objection by March 27, 2024 (Wed), the effective date of the revised Terms of Service, you will be deemed to have agreed to the contents of this revision.
++
++* If you do not agree with the revision of the Terms of Service, you may apply for termination of the service use contract or raise objections through [Support]. However, please note that all game information, including characters and items you hold, will be deleted upon termination of the service use contract, and this cannot be recovered.
++
++* For inquiries regarding the revision of the Terms of Service, please contact [Support].
++
++ 
++
++Thank you.
++
++Pearl Abyss HQ
++48 Gwacheon-daero 2-gil, Gwacheon-si, Gyeonggi-do, 13824, Rep. of Korea
++E-mail : bdtr-cs@tr.playblackdesert.com
++© Pearl Abyss Corp. All Rights Reserved.
++
++Bu e-posta adresi yalnızca giden postalar içindir. Sorularınız veya endişeleriniz için lütfen Oyuncu Destek ile iletişime geçin.
++
+
+# 2024-03-12 13:35:32.584321
++explain this git command `git push --force-with-lease`
+
+# 2024-03-12 16:36:11.625855
++what does the wise saying : fixing bugs requires forest ! means?
+
+# 2024-03-12 19:03:46.916567
++what is possibly this data would be for? Start TimestampEnd TimestampMeanMaxStandard DeviationRMSKurtosisSkewnessPeak-to-PeakAbs Diff SignalAlpha PowerBeta PowerGamma PowerDelta PowerTheta PowerLabelFFT_0FFT_1FFT_2FFT_3FFT_4FFT_5FFT_6FFT_7FFT_8FFT_9FFT_10FFT_11FFT_12FFT_13FFT_14FFT_15FFT_16FFT_17FFT_18FFT_19FFT_20FFT_21FFT_22FFT_23FFT_24FFT_25FFT_26FFT_27FFT_28FFT_29FFT_30FFT_31FFT_32FFT_33FFT_34FFT_35FFT_36FFT_37FFT_38FFT_39FFT_40FFT_41FFT_42FFT_43FFT_44FFT_45FFT_46FFT_47FFT_48FFT_49FFT_50FFT_51FFT_52FFT_53FFT_54FFT_55FFT_56FFT_57FFT_58FFT_59FFT_60FFT_61FFT_62FFT_63FFT_64FFT_65FFT_66FFT_67FFT_68FFT_69FFT_70FFT_71FFT_72FFT_73FFT_74FFT_75FFT_76FFT_77FFT_78FFT_79FFT_80FFT_81FFT_82FFT_83FFT_84FFT_85FFT_86FFT_87FFT_88FFT_89FFT_90FFT_91FFT_92FFT_93FFT_94FFT_95FFT_96FFT_97FFT_98FFT_99FFT_100FFT_101FFT_102FFT_103FFT_104FFT_105FFT_106FFT_107FFT_108FFT_109FFT_110FFT_111FFT_112FFT_113FFT_114FFT_115FFT_116FFT_117FFT_118FFT_119FFT_120FFT_121FFT_122FFT_123FFT_124
++
+
+# 2024-03-12 19:05:00.819784
++this are colm names Start TimestampEnd TimestampMeanMaxStandard DeviationRMSKurtosisSkewnessPeak-to-PeakAbs Diff SignalAlpha PowerBeta PowerGamma PowerDelta PowerTheta PowerLabelFFT_0FFT_1FFT_2FFT_3FFT_4FFT_5FFT_6FFT_7FFT_8FFT_9FFT_10FFT_11FFT_12FFT_13FFT_14FFT_15FFT_16FFT_17FFT_18FFT_19FFT_20FFT_21FFT_22FFT_23FFT_24FFT_25FFT_26FFT_27FFT_28FFT_29FFT_30FFT_31FFT_32FFT_33FFT_34FFT_35FFT_36FFT_37FFT_38FFT_39FFT_40FFT_41FFT_42FFT_43FFT_44FFT_45FFT_46FFT_47FFT_48FFT_49FFT_50FFT_51FFT_52FFT_53FFT_54FFT_55FFT_56FFT_57FFT_58FFT_59FFT_60FFT_61FFT_62FFT_63FFT_64FFT_65FFT_66FFT_67FFT_68FFT_69FFT_70FFT_71FFT_72FFT_73FFT_74FFT_75FFT_76FFT_77FFT_78FFT_79FFT_80FFT_81FFT_82FFT_83FFT_84FFT_85FFT_86FFT_87FFT_88FFT_89FFT_90FFT_91FFT_92FFT_93FFT_94FFT_95FFT_96FFT_97FFT_98FFT_99FFT_100FFT_101FFT_102FFT_103FFT_104FFT_105FFT_106FFT_107FFT_108FFT_109FFT_110FFT_111FFT_112FFT_113FFT_114FFT_115FFT_116FFT_117FFT_118FFT_119FFT_120FFT_121FFT_122FFT_123FFT_124
++
+
+# 2024-03-12 19:06:40.002676
++so know what is it possible for?
+
+# 2024-03-12 19:12:16.173135
++what is BME
+
+# 2024-03-12 19:24:25.848032
++X = taskPd.drop(labels="Lable", axis=1) explain this and axis= 1
+
+# 2024-03-12 19:28:01.119178
++taskDf.drop(labels="Lable", axis=1) prevent it ffom modify orignal df
+
+# 2024-03-12 19:28:53.901966
++how to select lable colm only 
+
+# 2024-03-12 19:30:23.477766
++X = taskDf.drop(labels="Lable", axis=1, inplace=False)
++Y = taskDf[['Lable']]
++print(Y) what is wrong here
+
+# 2024-03-12 20:55:04.316047
++from sklearn import tree what is this tree? 
+
+# 2024-03-12 20:55:36.895871
++is this diff than random orest?
+
+# 2024-03-12 21:01:12.344269
++random_forest = RandomForestClassifier() good paramteres to tune random forest classifer
+
+# 2024-03-12 21:07:16.337622
++grid search vs random forest
+
+# 2024-03-12 21:07:31.196228
++are grid args heuristic values?
+
+# 2024-03-12 21:08:22.032943
++so how to use grid search params in random forest again
+
+# 2024-03-12 23:02:38.608789
++what is safe repo in git
+
+# 2024-03-12 23:03:44.022690
++i mean safe dir in git ?
+
+# 2024-03-12 23:50:41.428071
++read-tree -m -u 6bce9ad4c595a817fb1f227661c5bc955b177754 explain prev git command
+
+# 2024-03-13 00:20:33.252156
++grip max word in all files in currnet dir? give me the right grep command for that
+
+# 2024-03-13 00:22:18.995707
++how to show where is the match? like in what file at what line
+
+# 2024-03-13 00:23:51.004641
++show only file name for each match of the word 'omar'
+
+# 2024-03-14 01:22:00.747868
++simple cin cut code in cpp
+
+# 2024-03-14 01:32:03.676822
++in cpp cv::Point3d vs cv::Vec3d
+
+# 2024-03-14 01:32:42.492805
++what is diff between them
+
+# 2024-03-14 17:15:24.961188
++#else
++#    error WindowsNamedPipe.cpp only compiled on windows would this directive stop whoole code or what (c+=
+
+# 2024-03-14 17:17:23.252507
++how is that it compiles with ut error in linux ? are you sure is stops the cmopilationo
+
+# 2024-03-14 17:17:55.218639
++cls
+
+# 2024-03-14 22:16:12.822640
++in cpp code what does this block do ? inline std::ostream& operator<<(std::ostream& os, const Pose& pose)
++{
++    return os << pose.position.x << ' '
++              << pose.position.y << ' '
++              << pose.position.z << ' '
++              << pose.rotation.w << ' '
++              << pose.rotation.x << ' '
++              << pose.rotation.y << ' '
++              << pose.rotation.z;
++}
++
+
+# 2024-03-14 22:48:14.634304
++explain this two cmake lines 
++# Add source to this project's executable.
++add_executable (example "example.cpp" "example.h" "../libraries/ipc/Ipc.hpp" "../libraries/ipc/Ipc.cpp")
++target_include_directories(example PUBLIC "../libraries/ipc")
++
+
+# 2024-03-14 22:50:48.232700
++explain step 2 part two more what is include dirs ? do you mean #include in cpp?
+
+# 2024-03-14 22:52:11.864543
++in this case what is diff between #include <foo.h> and #include "foo.h" ? which is included in inlcude dir?
+
+# 2024-03-14 23:21:18.824621
++class Client
++{
++public:
++    Client(std::string name);
++
++    // Copying not allowed
++    Client(const Client&) = delete;
++    Client& operator=(const Client&) = delete;
++explain this last lin operator=
+
+# 2024-03-14 23:46:04.074950
++for /F %%A in (%localappdata%\openvr\openvrpaths.vrpath) do explain this batch file for loop
+
+# 2024-03-14 23:46:52.702013
++ if %%A=="runtime" set /a line = count+2 epxlain this
+
+# 2024-03-14 23:48:31.104894
++for /F "tokens=*" %%A in (%localappdata%\openvr\openvrpaths.vrpath) do (
++ if !count!==!line! set VRPATH=%%A
++ set /a count += 1
++)
+
+# 2024-03-15 00:04:53.037821
++explain this function for /F "tokens=*" %%A in (%localappdata%\openvr\openvrpaths.vrpath) do (
++ if !count!==!line! set VRPATH=%%A
++ set /a count += 1
++)
+
+# 2024-03-15 00:56:47.463867
++sorry i meant explain this cpp function std::string BuildCommand(std::string_view name, const TArgs&... args)
++{
++    std::ostringstream ss;
++    ss << ' ' << name
++       << std::fixed << std::setprecision(6);
++    ((ss << ' ' << args), ...);
++    return ss
+
+# 2024-03-15 01:32:03.181546
++where to learn more on the expansion of for each argument
+
+# 2024-03-15 20:45:52.111660
++init list in cpp constuctior simple exmplae
+
+# 2024-03-15 20:46:26.870862
++init list with ints not vector
+
+# 2024-03-15 20:46:57.598085
++with multiple varibale like int x, inty
+
+# 2024-03-15 20:47:42.790252
++is there fast init list to init vars to zero
+
+# 2024-03-15 21:02:06.313346
++very simple example on operator overloading in cpp
+
+# 2024-03-15 21:02:45.777041
++overloading >> operator
+
+# 2024-03-15 23:10:01.035126
++#ifdef ATT_OS_WINDOWS this macro in cpp chekc if it's defined or if it does has value of true?
+
+# 2024-03-15 23:11:45.191564
++#if defined(__linux) || defined(__linux__) || defined(linux) this is deferent than #ifdef ?
+
+# 2024-03-15 23:13:27.232319
++#if defined(ATT_OS_WINDOWS) && !defined(FORCED_OSC) cna i use not '!' in macros?
+
+# 2024-03-15 23:29:50.493002
++cna i put things before #if macor ? like include files before it in same file?
+
+# 2024-03-15 23:37:01.332244
++target_compile_definitions(${target} PRIVATE
++    ATT_OS_${os_name}
++    ATT_COMP_${comp_name}
++    FORCE_OSC
++)is this ok in .cmake file?
+
+# 2024-03-16 04:34:42.692470
++explain this git command git restore --staged <file>
+
+# 2024-03-18 21:30:02.021748
++check if os.environ() exist first 
+
+# 2024-03-18 21:32:24.933398
++os.environ['BARD_APIKEY2'] if os.environ['BARD_APIKEY2']  else None yields error
+
+# 2024-03-19 17:51:39.459113
++#if defined(ATT_OS_WINDOWS) && defined(FORCE_OSC)
++
++#    pragma once
++#    include <array>
++#    include <iostream>
++#    include <string>
++#    include <string_view>
++
++///TODO: to be used Later to refactor and in decoupling
++auto dummy = false;
++
++#else
++#    error OSC_IPC.cpp only compiled when defined(ATT_OS_WINDOWS) && defined(FORCE_OSC)
++#endif (why says red line on line 13 error keyword?)
+
+# 2024-03-19 17:53:06.690408
++i still dont know here is the code #if defined(ATT_OS_WINDOWS) && defined(FORCE_OSC)
++
++#    pragma once
++#    include <array>
++#    include <iostream>
++#    include <string>
++#    include <string_view>
++
++///TODO: to be used Later to refactor and in decoupling
++auto dummy = false;
++
++#else
++#    error OSC_IPC.cpp only compiled when defined(ATT_OS_WINDOWS) && defined(FORCE_OSC)
++#endif
+
+# 2024-03-19 23:52:25.769822
++what is cmake -G switch?
+
+# 2024-03-19 23:53:03.887892
++what is 16 in visual studio name
+
+# 2024-03-20 14:16:06.792542
++مراكز اعادة التاهيل والعلاج الطبيعي والمستشفيات بالانجليبزية
+
+# 2024-03-20 14:17:40.822217
++مركز تدريب وتأهيل ذوي الاحتياجات
+
+# 2024-03-20 14:35:22.650752
++ممرض
+
+# 2024-03-20 22:16:02.973775
++explain this c lang function body
+
+# 2024-03-20 22:16:09.380247
++printf("pattern handler matched: %s\n\n", path);
++fflush(stdout);
++
++// Let the dispatcher continue by returning non-zero, so
++// quit_handler can also catch the message
++return 1;printf("pattern handler matched: %s\n\n", path);
++fflush(stdout);
++
++// Let the dispatcher continue by returning non-zero, so
++// quit_handler can also catch the message
++return 1;
+
+# 2024-03-20 22:16:36.884398
++printf("pattern handler matched: %s\n\n", path);
++fflush(stdout);
++
++// Let the dispatcher continue by returning non-zero, so
++// quit_handler can also catch the message
++return 1;explain line by line
+
+# 2024-03-21 00:24:33.936863
++explain the cpp class in next coming message line by line !
+
+# 2024-03-21 00:24:39.116458
++class Method
++     {
++       public:
++         Method(lo_method m) : method(m) {}
++         operator lo_method() const
++             { return method; }
++       protected:
++         lo_method method;
++     };
+
+# 2024-03-21 00:25:37.987532
++explain more the conversion operator
+
+# 2024-03-21 13:45:00.380357
++explain this in cpp  std::string result(s?s:"");
+
+# 2024-03-21 13:49:07.387432
++1#ifdef LO_USE_EXCEPTIONS
++    struct Invalid {};
++    struct Error {};
++#define LO_CHECK_BEFORE if (!is_valid()) throw Invalid();
++#define LO_CHECK_AFTER if (!is_valid()) throw Error();
++#else
++#define LO_CHECK_BEFORE assert(is_valid());
++#define LO_CHECK_AFTER
++#endif
+
+# 2024-03-21 13:49:28.547418
++how does it call is_invalid() in global scope while its defined in a class? 
+
+# 2024-03-21 14:09:44.911014
++does pointers alocates in heap?
+
+# 2024-03-21 14:10:07.310920
++char* s(lo_address_get_url(address));
++std::string result(s?s:"");
++free(s);
+
+# 2024-03-21 14:12:36.031542
++is ther a chance that result string uses same s pointer so freeing it cuases result to be null or empy or sth?
+
+# 2024-03-21 14:13:22.294494
++keeping the free(s) line cuases code to silently terminate!
+
+# 2024-03-21 14:20:22.616863
++is this ok char* s = new (lo_address_get_url(address));
+
+# 2024-03-21 14:21:24.168316
++replace it with unique pointer
+
+# 2024-03-21 14:23:37.751663
++and then delete s to delete it right?
+
+# 2024-03-21 14:24:12.920427
++but using delete will not cause an error
+
+# 2024-03-21 14:47:27.460503
++explain the comming cpp code
+
+# 2024-03-21 14:51:12.870790
++#define LO_ADD_METHOD(ht, argtypes, args)                         \
++    LO_ADD_METHOD_RT(ht, argtypes, args,                          \
++                     RT_INT(argtypes), int, return,);             \
++    LO_ADD_METHOD_RT(ht, argtypes, args,                          \
++                     RT_VOID(argtypes), void, , return 0)
+
+# 2024-03-21 15:03:03.918266
++explain this coming typdef cpp code 
+
+# 2024-03-21 15:03:07.454015
++typedef int (*lo_method_handler) (const char *path, const char *types,
++                                  lo_arg ** argv, int argc,
++                                  struct _lo_message * msg,
++                                  void *user_data);
+
+# 2024-03-21 15:03:50.416992
++is this with out a name can i give it a name?
+
+# 2024-03-21 15:04:47.598968
++so in code i can use this name as return type of my function and its actually a int?
+
+# 2024-03-21 15:13:59.399335
++ int (*func)(int, int); explain this function pointer step by step 
+
+# 2024-03-21 15:29:38.076004
++explain          #define RT_INT(argtypes) \
++    typename std::enable_if<std::is_same<decltype(h argtypes), int>::value, void>::type
+
+# 2024-03-21 15:31:24.658914
++how come i cane pass return key word as an argument here ? 
+
+# 2024-03-21 15:31:31.844660
++#define LO_ADD_METHOD(ht, argtypes, args)                         \
++    LO_ADD_METHOD_RT(ht, argtypes, args,                          \
++                     RT_INT(argtypes), int, return,);             \
++    LO_ADD_METHOD_RT(ht, argtypes, args,                          \
++                     RT_VOID(argtypes), void, , return 0)
+
+# 2024-03-21 17:31:16.634099
++explain the return type and how to use it lo_arg **argv()
+
+# 2024-03-21 22:30:50.453513
++unorderd map of string and vector 
+
+# 2024-03-22 00:55:18.479672
++gatewayBuffer buffer{}; given t hat gatewayBuffer is struct will this init it with emptpy?
+
+# 2024-03-22 00:57:07.716590
++what is static struct
+
+# 2024-03-23 16:58:10.464091
++hi
+
+# 2024-03-23 16:59:45.752818
++how to get modules using pip
+
+# 2024-03-23 17:00:53.192569
++sadfadsf
+
+# 2024-03-25 15:27:17.890243
++get size of a string in cpp
+
+# 2024-03-25 15:38:30.325818
++why this prints nothing const time_t* now = reinterpret_cast<const time_t*> (time(0) + 1);
++std::string datetime_str = '[' + ctime(now) +']';
++std::string k = "yes";
++std::string txt_time_stamped = k +" "+ datetime_str;
++int sz = txt_time_stamped.size();
++cout << txt_time_stamped << " " << sz << ctime(now);
+
+# 2024-03-25 20:53:06.534904
++triager means?
+
+# 2024-03-26 06:22:53.735947
++suceed ?
+
+# 2024-03-26 15:24:19.128710
++cmake -B vs cmake --build ?
+
+# 2024-03-26 15:24:51.741127
++successfully is this how it's written
+
+# 2024-03-26 15:54:51.491479
++how to get power shell am usin version
+
+# 2024-03-26 20:39:20.746000
++send me a close emojie for a todo ilst
+
+# 2024-03-26 20:41:24.876583
++colord emojie
+
+# 2024-03-26 20:41:35.459867
++alters?
+
+# 2024-03-27 00:57:24.546977
++explain unity subscriptable class
+
+# 2024-03-27 01:05:55.842512
++constructor in c#
+
+# 2024-03-27 01:12:35.412630
++write way to do enum class in c#
+
+# 2024-03-27 01:19:12.811777
++struct in c#
+
+# 2024-03-27 04:01:12.557207
++default value in csharp constructor
+
+# 2024-03-27 04:25:48.877540
++most used collections in csharp are
+
+# 2024-03-27 20:30:14.281437
++is using keyword in C# similar to with keyword in python?
+
+# 2024-03-27 21:13:53.376286
++ yield return new WaitForSeconds(10); explain prev c# line of code
+
+# 2024-03-27 21:16:03.822639
++ _socket.ReceiveTimeout = 100;
++
+
+# 2024-03-28 01:26:03.058774
++explain '?' in OscServerUnity?.Dispose();
+
+# 2024-03-29 15:57:48.993517
++is there a bit data type in csharp or like cpp bitsit<> ? 
+
+# 2024-03-29 16:03:39.184142
++ty , I meant  biset<> btw.
+
+# 2024-03-29 16:04:11.193805
++now how to use concurrent dictionary in csharp is it like the generic dectionary?
+
+# 2024-03-29 16:05:24.977989
++how to initialize it with maltiple values at once/
+
+# 2024-03-29 16:18:09.935169
++how to use enums in csharp
+
+# 2024-03-29 16:49:29.401946
++how to access states here ? new Dictionary<string, (PathData, States)>{
+
+# 2024-03-29 16:56:30.972969
++share static instance of a member  between classes
+
+# 2024-03-29 17:10:27.878020
++simple csharp delegate syntax
+
+# 2024-03-29 17:13:03.553765
++unity subscriptable class
+
+# 2024-03-29 17:29:17.225459
++e.
+
+# 2024-03-30 15:44:30.834240
++in c# is this a tuple ?   (new PathData(), States.PENDING)
+
+# 2024-03-30 21:39:27.734145
++for each in c# with dicts
+
+# 2024-03-30 21:40:45.938627
++3 diff ways to add elements to a dict
+
+# 2024-03-30 21:42:28.838466
++try catch in csharp
+
+# 2024-03-30 21:43:40.262690
++is it recomended to use try catch in csharP? any other way to catch excpetion with out terminating
+
+# 2024-03-30 21:56:19.367485
++when static class in csharp calles it't destructor /? explain knowing am using unity 
+
+# 2024-03-30 23:18:55.876153
++is this valid struct in C# 9 :  it's huge.. 
++     
++     public PathData(Vector3 pos = new Vector3(), Quaternion quat = new Quaternion(), float _single= .0f ) {
++         this.position = pos;
++         this.rotation = quat;
++         this.single = _single;
++     }
++
++     public Vector3? position;
++     public Quaternion? rotation;
++     public float? single; //for paths that sends only single value else remains not used
++ }
+
+# 2024-03-30 23:26:43.598854
++varibale of tye object can take any other type variable?
+
+# 2024-03-30 23:27:32.221753
++so do i use dynamic or object keyword?
+
+# 2024-03-31 02:01:14.266178
++explain this .gitignore /[Ll]ibrary/
+
+# 2024-03-31 02:01:52.673681
++this means any library file in root or nested also?
+
+# 2024-04-02 16:06:47.388881
++in csharp is coroutines only a unity feature of language feature?
+
+# 2024-04-02 16:07:10.941062
++simple example to do that with out unity libraries in csharp
+
+# 2024-04-03 23:49:12.821411
++simple usage example of csharp Queue collection
+
+# 2024-04-03 23:53:35.713459
++how to chekc itt its empty?
+
+# 2024-04-04 22:06:35.175773
++hi
+
+# 2024-04-04 22:06:41.624549
++اهلا
+
+# 2024-04-05 17:27:30.782994
++conv from integer to string  in c# (keep in mind that the int is stored in dynamic variable)
+
+# 2024-04-05 17:28:16.908810
++tosafe string vs to short string vs to srting
+
+# 2024-04-05 17:29:34.029639
++dynamic . ConvertTo
+
+# 2024-04-05 22:51:48.317506
++in unity c# script how to get the pose?
+
+# 2024-04-05 22:53:35.511921
++units in unity are in meters?
+
+# 2024-04-05 22:59:28.928923
++std::chrono::duration<double>;
+
+# 2024-04-05 23:08:44.006395
++  const double frameTimeBeforeDetect = duration_cast<utils::FSeconds>(stampBeforeDetect - frame.timestamp).count(); explain this for example and the result time is in secs or ms
+
+# 2024-04-05 23:12:51.421418
++using FSeconds = std::chrono::duration<double>; herese the Fseconds def
+
+# 2024-04-06 01:12:21.479361
++error CS0656: Missing compiler required member 'Microsoft.CSharp.RuntimeBinder.CSharpArgumentInfo.Create'
+
+# 2024-04-06 18:30:03.046717
++set size to csharp dict
+
+# 2024-04-06 23:49:43.495640
++in a unity script when exactly Awake() get called ?
+
+# 2024-04-06 23:50:34.666914
++public class Singleton<T> : MonoBehaviour where T : MonoBehaviour explain this line of code specially the T thing?
+
+# 2024-04-07 16:58:54.763223
++OscPathsInfo.instance?.linkingState != null what does the '?' here measn (note: its csharp)
+
+# 2024-04-08 16:48:21.519846
++ GC.SuppressFinalize(this); explain this in csharp
+
+# 2024-04-08 16:53:48.754199
++ public static int Align4(int length)
++ {
++     return (length + 3) & ~3;
++ }
+
+# 2024-04-08 17:08:44.291745
++10010 & ~3 equals? in binary in decimal please
+
+# 2024-04-08 17:09:18.403565
++so this equaled in smaller multiple of 4 actual number 10010 was 18
+
+# 2024-04-08 17:10:15.083885
++dont we round up so round up to 20
+
+# 2024-04-08 17:51:55.719437
++ var len = data.Length;
++ for (var i = 0; i < len; i++)
++     _buffer[_length++] = (Byte)data[i];
++
++ var len4 = OscDataTypes.Align4(len + 1);
++ for (var i = len; i < len4; i++)
++     _buffer[_length++] = 0; why we do allign with this all bytes?
+
+# 2024-04-08 17:53:57.951930
++  Byte[] _buffer = new Byte[4096]; so why putting zeroies isnt it already inited with zerores?
+
+# 2024-04-08 17:55:48.485798
++15 in binary is
+
+# 2024-04-08 17:56:02.245085
++1100 is ?
+
+# 2024-04-09 02:45:08.583248
++give me warning emoji
+
+# 2024-04-09 02:45:49.733099
++tip emoi
+
+# 2024-04-09 02:45:54.546848
++another 
+
+# 2024-04-09 02:45:59.221119
++acii one?
+
+# 2024-04-12 19:04:24.786604
++ std::vector<std::string&> _loadInto {&mIpAprilSideOSC, &mPortAprilSideOSC, &mPathAprilOSC, &mPathAprilOSC}; why a gettin error those are all string variables
+
+# 2024-04-12 19:06:30.891321
++std has no instance of reference wrpper
+
+# 2024-04-12 19:39:07.373067
++try catch example in cpp
+
+# 2024-04-12 20:22:24.585083
++does std::ofstream make file if not exist  in cpp?
+
+# 2024-04-12 21:03:56.867321
++using protected when inheriting ? ex: child : protected Base
+
+# 2024-04-12 21:05:07.639655
++what about the public members in base class will they become protected in child class?
+
+# 2024-04-14 04:53:21.762001
++dict of string and float[7[ in c sharp
+
+# 2024-04-14 04:53:52.318033
++i want it to be array of float not just float
+
+# 2024-04-14 21:00:27.429759
++tell me how to reduce this boolean experssion : (C.T)+(H.C
+
+# 2024-04-14 21:10:28.566938
++when using indscernablitiy matrix how to get this without going back to table : U/IND(A) != U/IND(A-{a}) how to check this?
+
+# 2024-04-14 21:28:33.730333
++given A = { {1},{2},{3}} and c = {{1}, {2,3}} how to get A-{c}
+
+# 2024-04-14 21:29:44.000932
++get the U/IND(A-{c})
+
+# 2024-04-14 21:30:44.396902
++does U/IND(A) == U/IND(A-{c})
+
+# 2024-04-15 00:06:18.507426
++Q = (A + B) + (A.C)
++
++Becomes as an expanded product-of-sum expession:
++
++Q = (A + B + A)(A + B + C) explain how this become thsi
+
+# 2024-04-15 22:06:29.325253
++consensus means ?
+
+# 2024-04-15 23:19:31.202916
++ثز
+
+# 2024-04-16 04:50:45.479817
++given only vector clock (2,8,4) how to know which of the other vector clocks is concurrent withit?
+
+# 2024-04-18 01:00:49.303635
++what is arduino dev module in arduino
+
+# 2024-04-18 01:01:01.471007
++i meants arduino esp dev module board
+
+# 2024-04-19 19:18:03.588805
++boring means
+
+# 2024-04-19 19:18:15.137386
++boring word means?
+
+# 2024-04-19 20:52:58.776955
++desouk city in egypt longitude and latitude
+
+# 2024-04-19 20:56:02.897301
++where os operagx data folder located
+
+# 2024-04-19 20:57:49.026435
++does operagx use chromium?
+
+# 2024-04-21 01:49:05.159537
++wxwidgets .add inputtext() explain
+
+# 2024-04-21 01:50:15.650380
++i mean IN FORM.InputText()
+
+# 2024-04-21 01:52:59.019286
++so when inputtext will get triggerd will it be triggered each time i change text?
+
+# 2024-04-21 02:17:29.342759
++wxwidget main frame will keep working? looping?
+
+# 2024-04-21 02:31:30.488980
++typeof in cpp
+
+# 2024-04-21 02:32:45.569290
++friend function example
+
+# 2024-04-21 02:34:06.439995
++how can i return this or a pointer to this instance
+
+# 2024-04-21 02:34:53.664348
++interpret cast pointer  to reference
+
+# 2024-04-21 02:36:39.307768
++using this keyword in a static function in class
+
+# 2024-04-21 02:54:09.240074
++Tracker(const Tracker&) = delete;
+
+# 2024-04-21 03:35:26.476044
++init reference to null in cpp .h
+
+# 2024-04-21 03:39:12.372350
++i meant int& ptr = null;
+
+# 2024-04-21 03:39:37.213507
++pointer vs reference 
+
+# 2024-04-22 19:27:56.715040
++how to get diff between two commits using git in cli
+
+# 2024-04-22 19:28:47.642178
++how to go back after checking out to a commit
+
+# 2024-04-22 20:24:05.254206
++ OSC_noSteamGateway(std::string portTargetOSC = "9000", std::string ipTargetOSC = "192.168.1.4"); i wanna use this constructor would it work like this  OSC_noSteamGateway(); or will it call the default ?
+
+# 2024-04-22 21:50:44.888515
++change .hpp file name breaks the cmake build 
+
+# 2024-04-22 21:58:39.225160
++cmake -B build vs cmake --build build ... 
+
+# 2024-04-22 21:59:55.783421
++e.
+
+# 2024-04-22 22:01:31.119558
++cl : command line  warning D9025: overriding '/Ob2' with '/Ob3' [C:\VS2022_repos\April-Tag-VR-FullBody-Tracker\build\AprilTagTrackers\AprilTagTrackers.vcxproj]
+
+# 2024-04-22 23:24:31.413938
++RefPtr how to declare it with empty val
+
+# 2024-04-22 23:25:39.709023
++what lib  i need to use this refPtr
+
+# 2024-04-25 17:48:25.515374
++how two delete a dict in c#
+
+# 2024-04-25 17:48:54.281435
++settingg it to null well delete the actual data or will lead to memory leak?
+
+# 2024-04-25 17:51:09.218226
++when using a call setting it to null will auto call my custom constructor?
+
+# 2024-04-25 17:54:19.202686
++when code calls my customclass constructor
+
+# 2024-04-25 17:54:46.290217
++when code calls my customclass destructor
+
+# 2024-04-25 17:58:49.589404
++best C# container to hold a large amount of data (vaectors
+
+# 2024-04-25 17:59:54.364218
++dict with key that is a Vector3
+
+# 2024-04-25 18:04:27.095018
++get the current time using unity time 
+
+# 2024-04-25 18:31:54.125691
++can i do arithmatic on datetime?
+
+# 2024-04-25 18:37:27.443779
++make new unity transform object and fill it with mock data position and rotation
+
+# 2024-04-25 18:42:56.556807
++get set exmpale in a c#  class
+
+# 2024-04-25 18:44:31.151554
++is their a fast way to wrie temp get and set
+
+# 2024-04-25 19:25:58.762094
++vritual vs abstract
+
+# 2024-04-25 19:26:49.551156
++so in abstract i must implement but can i add new members and methods to derived class?
+
+# 2024-04-25 19:27:00.168163
++abstract vs virtual vs interface
+
+# 2024-04-25 19:36:17.772674
++why i cant make abstract method privte in derrived ?
+
+# 2024-04-25 19:38:32.469275
++can o make protected member in base public in derived?
+
+# 2024-04-25 20:30:12.578476
++how to donot serialze public field in unity cs
+
+# 2024-04-25 20:59:42.229688
++interpolate point value at given time given multiple points before and after it (equation has 7 variables)
+
+# 2024-04-25 21:02:22.715853
++now including multiple points before and after is better than just one before and one after right?
+
+# 2024-04-25 21:33:03.544396
++explain this cpp snippit  std::array<cv::Point2d, 2> projected;
++ {
++     const cv::Vec3d unusedRVec{}; // used to perform change of basis
++     const cv::Vec3d unusedTVec{};
++     const std::array<cv::Point3d, 2> points{pose.position, unit.GetEstimatedPose().position};
++     cv::projectPoints(points, unusedRVec, unusedTVec, camCalib->cameraMatrix, camCalib->distortionCoeffs, projected);
++ }
+
+# 2024-04-25 21:58:54.732496
++duration_cast<utils::FSeconds>(utils::SteadyTimer::Now() - frame.timestamp) what is the return type of this ?
+
+# 2024-04-25 21:59:36.850429
++using FSeconds = std::chrono::duration<double>;
+
+# 2024-04-25 22:00:05.697854
++so what .count() will do to this return
+
+# 2024-04-25 22:00:59.548081
++so what is output if print without count ?
+
+# 2024-04-25 22:39:44.339869
++ add tracker id to april tracker
+
+# 2024-04-25 22:54:23.542666
++define a function the takes undetermined number of args in c#
+
+# 2024-04-25 22:55:28.631126
++must the variable argument be of same type like ints only?
+
+# 2024-04-25 23:07:28.385794
++what is hiding in c# inheritance
+
+# 2024-04-25 23:56:16.139140
++small tutorial on sets in c# (init , copy , sort , loop etc..
+
+# 2024-04-26 02:30:13.633848
++linq where() example in c#
+
+# 2024-04-26 02:31:45.905343
++loop on dictiornay by index not key
+
+# 2024-04-26 02:32:19.059018
++link where with dictionray
+
+# 2024-04-26 02:35:36.218156
++top 10 linq methods
+
+# 2024-04-26 02:36:53.074434
++select and take example
+
+# 2024-04-26 02:37:47.771183
++is link ofr each?
+
+# 2024-04-26 02:38:23.421020
++sodict dont have for each? if so can i convert to list ?
+
+# 2024-04-26 02:50:05.078077
++icomparer can be used with sortedset?
+
+# 2024-04-26 15:38:44.762411
++get float with specific precision in c#
+
+# 2024-04-26 15:39:21.807404
++i want to save it in new float with precision 2
+
+# 2024-04-26 15:39:37.113432
++is there better way?
+
+# 2024-04-26 15:42:26.359946
++lRec.position[0]  givern lRec is a unity Pose object isthis ok syntax
+
+# 2024-04-26 15:42:56.233646
++can i zxess position wint index?
+
+# 2024-04-26 15:44:15.760921
++is ther a size or length funciton in c#
+
+# 2024-04-26 16:08:14.388580
++round int method?
+
+# 2024-04-26 16:40:47.962962
++can i define a class in a method in c$
+
+# 2024-04-26 16:41:02.425373
++can i define a class in a method in csharp
+
+# 2024-04-26 16:41:36.546613
++i mean declare a whole class in a method to be used later inside same method
+
+# 2024-04-27 15:20:45.581693
++in c# str1.Replace() replaces on place or i must save new string in a new variable?
+
+# 2024-04-28 01:11:01.428626
++لتعلن في الارض مرتين اكمل الاية
+
+# 2024-04-28 19:49:24.933677
++i want to make constant vairable that i can assign one time at start() in unity script
+
+# 2024-04-28 23:52:23.842362
++csharp list.ForEach() example
+
+# 2024-04-28 23:52:54.598832
++dictionary does have ForEach() ?
+
+# 2024-04-28 23:53:17.062345
++ToList() time complexity is?
+
+# 2024-04-29 00:06:29.754730
++can I acess list of keypair values by key or must by index?
+
+# 2024-04-29 00:13:43.703058
++can i acess dict by index?
+
+# 2024-04-29 00:39:54.684031
++for each loop that i can edit content of dict in it with out errors in csharp?
+
+# 2024-04-29 01:18:42.283952
++in unity can I acess Quaternions by index?
+
+# 2024-04-29 01:24:54.313410
++new float[]
+
+# 2024-04-29 01:26:07.921373
++finalOffsetRotation = new float[]( finalOffsetRotation.x, finalOffsetRotation.y, finalOffsetRotation.z, finalOffsetRotation.w ); doesnt work knowing that this varable was a quaternion and i wnna make it float []
+
+# 2024-05-01 23:19:14.586983
++who is george hotz
+
+# 2024-05-02 17:39:46.398628
++gebrish means
+
+# 2024-05-02 17:40:09.710044
++he talks with gebrish words
+
+# 2024-05-02 18:55:06.944987
++ nc -l 33
++local listen fuxored: INVAL
+
+# 2024-05-02 20:19:19.439930
++spi speed effect on flash in esp8266?
+
+# 2024-05-02 20:21:44.401374
++is it only for flash or all operations of esp after flashing
+
+# 2024-05-02 20:34:37.891264
++get new remote branch to local new branch
+
+# 2024-05-02 20:45:34.946055
++esp8266 read right limit to its flash
+
+# 2024-05-02 20:57:02.785697
++normal git push bandwidth is? (and does 24kb/s a high speed?)
+
+# 2024-05-02 20:57:35.792862
++increasing git push buffer
+
+# 2024-05-02 21:00:23.320958
++higher baud rate but more load on eSP? do i lower it?
+
+# 2024-05-02 23:01:42.690072
++git lfs track new file example
+
+# 2024-05-05 03:46:40.358230
++ new branch in local
+
+# 2024-05-06 19:32:30.097364
++6 &  ~3 
+
+# 2024-05-06 19:36:10.369824
++6 and not 3
+
+# 2024-05-06 21:02:00.577555
++ecplain SocketType..Dgram
+
+# 2024-05-06 21:07:24.607902
++c# Socket.recieve
+
+# 2024-05-06 23:17:52.148610
++maximum write and read times to ardunio mega ram
+
+# 2024-05-08 02:44:34.192818
++ascii of 48
+
+# 2024-05-08 13:58:00.037289
++movnig hands while sleeping?
+
+# 2024-05-11 12:50:26.916258
++asd
+
+# 2024-05-11 13:05:23.786531
++hi
+
+# 2024-05-11 13:14:35.365572
++hi 
+
+# 2024-05-11 13:26:21.678716
++hui
+
+# 2024-05-11 13:26:23.792280
++hi
+
+# 2024-05-14 01:43:53.848353
++asds
+
+# 2024-05-14 01:44:05.727002
++int8_T max is 
+
+# 2024-05-14 01:44:29.632768
++in ardunio int8_t max is 
+
+# 2024-05-14 23:38:38.870868
++dont fell in the trap of don't fall in the trap
+
+# 2024-05-14 23:38:50.917877
++dont fell in the trap or don't fall in the trap?
+
+# 2024-05-15 21:18:41.505251
++deleting windows.old files
+
+# 2024-05-16 21:28:08.232853
++pa nvs lan vs  man vs wan
+
+# 2024-05-16 21:28:32.969916
++layers of osi model
+
+# 2024-05-16 21:30:10.920590
++the word steganography word comes from ?
+
+# 2024-05-16 21:31:22.491139
++After a message is encrypted, it is called?
+
+# 2024-05-16 21:32:56.608895
++Which of the following options doesn’t belong to the category of the hacker?
++A. White Hat Hackers
++B. Grey Hat Hackers
++C. Red Hat Hackers
++D. Black hat Hackers
++20. Which of the following does not help to protect your comput
+
+# 2024-05-16 21:37:08.737847
++ecb in cryptography
+
+# 2024-05-16 21:38:26.865559
++what is phreadking hacking technique
+
+# 2024-05-16 21:46:38.123844
++vpn stands for
+
+# 2024-05-16 21:47:05.132410
++what is sso service
+
+# 2024-05-16 21:48:12.980025
++In computer security , ___________ is the term used in computer security to protect the data
++from being modified by the unauthorized user.
+
+# 2024-05-16 21:51:47.383190
++dormant means
+
+# 2024-05-16 21:52:07.445338
++. Select the correct order for the different phases of virus execution.
++i) Propagation phase ii) Dormant phase iii) Execution phase iv) Triggering phase
+
+# 2024-05-16 21:57:48.388970
++macro vs micro virus
+
+# 2024-05-16 21:59:28.128136
++dis
+
+# 2024-05-16 22:01:55.783533
++The RSA signature uses which hash algorithm?
++*
+
+# 2024-05-16 22:26:59.748538
++opn using interrups and isr in ardunio mega'
+
+# 2024-05-16 22:29:53.973081
++in how to write inline function in arduino
+
+# 2024-05-16 22:30:11.924354
++beneifits in usign inline
+
+# 2024-05-16 22:30:52.676502
++drawbacka of inline ?
+
+# 2024-05-16 22:34:12.768702
++ardunio mega 2560 int pins
+
+# 2024-05-16 22:34:55.287280
++which of those have interrupts
+
+# 2024-05-16 23:03:46.171505
++imaeily is written rigth?
+
+# 2024-05-16 23:03:53.061906
++imdeiately
+
+# 2024-05-17 00:06:40.041904
++ardunio pin default is OUPUT or INPUT
+
+# 2024-05-17 00:07:18.721760
++otput vs input
+
+# 2024-05-17 19:48:36.839138
++average us income for people is
+
+# 2024-05-17 19:49:17.764701
++how much of this is gone by taxes?
+
+# 2024-05-17 19:55:21.972864
++how to know if arduino pin is now high or low using the code
+
+# 2024-05-17 21:03:25.114835
++would this owrk in ardunio String getStepMode(uint8_t motId){
++  String _mode = "";
++  uint8_t modePinsCnt = 3;
++  for(int i = 0; i < modePinsCnt; i++){
++  digitalRead(stepperModePinsArr[motId]) == LOW ? _mode+"L" : _mode+"H";
++  }
++
++}
+
+# 2024-05-17 22:03:43.773463
++witt arduino String.toInt() work with "0001"
+
+# 2024-05-17 22:44:31.370850
++human elbow maximum degree can move?
+
+# 2024-05-17 23:16:29.872924
++#define oneStep 1.8F is t his valid
+
+# 2024-05-20 01:43:23.187795
++add microsoft binder runtime via nuget
+
+# 2024-05-20 14:34:49.746405
++how to clone new branch in remote to new branch in local uing git
+
+# 2024-05-20 14:35:25.135463
++another way to create a new local branch from remote branch
+
+# 2024-05-20 15:01:46.534403
++xxxxxxxxxxxxxxxxxxxx   xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+# 2024-05-20 15:24:39.079513
++what model are u using
+
+# 2024-05-20 15:24:49.060926
++cls
+
+# 2024-05-20 15:39:26.522641
++hi how to clone the new remote branch to a new locla branch using git command in one line?
+
+# 2024-05-20 16:05:43.934715
++how to nuget package restore
+
+# 2024-05-20 16:05:58.893320
++how to restore alll
+
+# 2024-05-20 16:06:37.619964
++what does this restoer do exactly?
+
+# 2024-05-20 16:06:54.685587
++does it check or edit to .csproj files?
+
+# 2024-05-20 16:08:10.395273
++nuget: The term 'nuget' is not recognized as a name of a cmdlet, function, script file, or executable program.
++Check the spelling of the name, or if a path was included, verify that the path is correct and try again.
+
+# 2024-05-20 17:34:39.690751
++explain this public class SceneRepository : GenericRepository<Scene>
++{
++    public SceneRepository(ExoSuitDbContext context) : base(context)
++    {
++    }
++
+
+# 2024-05-20 17:42:44.368256
++public class GenericRepository<T> where T : class
++{
+
+# 2024-05-21 00:26:07.568765
++ public class SceneRepository : GenericRepository<Scene>, ISceneRepository {
++/*
++your `SceneRepository` class logic
++*/
++} does this seem ok in c#? i can inherit only one class maximum but multipl interfaces or multiple interfaces only
+
+# 2024-05-21 00:35:37.586743
++how to run a sql server project made in visual studio using visual studio connect to server 
+
+# 2024-05-21 00:36:40.968059
++what does deploy step do
+
+# 2024-05-21 00:47:47.907648
++sql quesry to insert
+
+# 2024-05-21 00:56:19.957958
++ does Ef Core framework create the db or only does connect and dal and bll
+
+# 2024-05-22 15:36:01.746822
++give me an example on therapeutic instruments
+
+# 2024-05-22 15:36:22.974916
++what is the def. of therapeutic instruments?
+
+# 2024-05-22 15:36:49.057088
++prostheses are considered one of them?
+
+# 2024-05-22 15:37:09.314125
++can they be considered assistive instruments?
+
+# 2024-05-22 15:37:22.879169
++assistive vs therapeutic?
+
+# 2024-05-22 15:37:42.344053
++ok ty
+
+# 2024-05-22 15:40:35.100198
++9.
++What type of instruments enhance functional capabilities for individuals with disabilities,
++like hearing aids and prosthetic limbs?
++A
++Diagnostic Instruments B.Therapeutic Instruments
++C.Assistive Devices
++C.Assistive Devices D.Monitoring InstrumentsD.Monitoring Instruments
+
+# 2024-05-22 15:49:30.731145
++is mri and biomedical instrument?
+
+# 2024-05-22 15:49:48.173457
++so is it considered a biomedical instrument?
+
+# 2024-05-22 17:52:00.633385
++36
++. Which component of a biosensor specifically recognizes and binds to the target
++analyte?
++a) Biorecognition Element
++b) Transducer c) Signal Processing Unit d) Enzymes
+
+# 2024-05-22 22:08:53.091646
++what non invasive biomedical sensor?
+
+# 2024-05-22 22:09:12.691178
++define this sensors category
+
+# 2024-05-22 22:09:40.601450
++a) Pacemaker
++b) Implantable glucose sensor
++c) Blood pressure cuff
++d) Intravenous catheter
+
+# 2024-05-22 22:10:08.625154
++your answer is missing all cateogries
+
+# 2024-05-22 22:10:21.969113
++what is blodd pressure cuff
+
+# 2024-05-22 22:10:55.352385
++67.
++What is the main benefit of remote patient monitoring using biomedical sensors?
++a) Real
++time data collection b) Improved accuracy of measurements
++c) Enhanced patient privacy
++d) Reduced cost of healthcare
++68.
+
+# 2024-05-22 22:13:16.538537
++prognosis vs diagnosis
+
+# 2024-05-23 01:43:30.577905
++7. Biosensors cannot:
++a) Detect specific molecules
++b) Convert biological signals into electrical
++signals
++c) Be used for continuous monitoring
++d) Identify fingerprints
+
+# 2024-05-23 01:45:16.302555
++a) Patient medical history
++b) medical images (X-rays, mammograms,
++etc.)
++c) Blood test results
++d) All of the above
+
+# 2024-05-23 01:45:30.509726
++20. What type of data does CAD typically
++analyze?
++a) Patient medical history
++b) medical images (X-rays, mammograms,
++etc.)
++c) Blood test results
++d) All of the above
+
+# 2024-05-23 01:47:52.464981
++3. What is the purpose of signal conditioning in biomedical signal processing?
++a) To amplify the signal strength b) To remove noise and artifacts
++c) To convert analog signals to digital format d) To store and transmit signals
+
+# 2024-05-23 07:13:15.744831
++ثز
+
+# 2024-05-24 10:48:29.766170
++what is vrs in video settings of metro exodus
+
+# 2024-05-28 23:44:29.205998
++hello
+
+# 2024-05-29 01:16:40.833801
++give example on insomina api terster body json 
+
+# 2024-05-29 15:33:13.269115
++thrice means
+
+# 2024-05-29 16:56:26.185971
++e.
+
+# 2024-05-29 19:48:58.512415
++tcp/ip layers
+
+# 2024-05-29 20:44:07.695171
++abbreviation vs accrynom
+
+# 2024-05-29 20:45:30.243999
++rest vs restfull api
+
+# 2024-05-29 20:48:33.597658
++how to make my http work https ok?
+
+# 2024-05-29 20:49:24.245212
++tls vs ssl vs ssh
+
+# 2024-05-29 20:56:00.639201
++ursl stands for
+
+# 2024-05-29 20:56:20.959913
++uri vs url
+
+# 2024-05-29 20:57:27.992330
++ssl vs sslv3
+
+# 2024-05-29 21:24:37.102575
++eplain the handshake protocol?
+
+# 2024-05-29 21:26:11.910992
++md5 vs sha-1 
+
+# 2024-05-29 21:27:13.646874
++is there better than sha 256
+
+# 2024-05-29 21:29:18.182354
++rsa stands for?
+
+# 2024-05-29 21:29:31.658504
++rsa vs sha1
+
+# 2024-05-29 22:07:56.411758
++what is ip and ipsec
+
+# 2024-05-29 22:15:08.907124
++tls stands for
+
+# 2024-05-29 22:16:49.698580
++in tunnel mode ipsec header is but where in the sent packet?
+
+# 2024-05-30 00:56:00.663452
++pgp stands for
+
+# 2024-05-30 00:56:22.573629
++what protcols used to provide security to emails
+
+# 2024-05-30 00:56:48.318804
++smtp stands for
+
+# 2024-05-30 00:57:08.607077
++snmp stands for
+
+# 2024-05-30 01:01:28.950781
++virus phases like propgation feed
+
+# 2024-05-30 01:09:06.794165
++epxlain logic bomb ?
+
+# 2024-05-30 01:17:15.773339
++now forensics means what?
+
+# 2024-05-30 01:25:45.661748
++sso stands for?
+
+# 2024-05-30 01:40:29.322862
++In the asymmetric-key method used for confidentiality, which key is publicly known?
+
+# 2024-05-30 01:41:08.304642
++so the one publicly known is the encryption key
+
+# 2024-05-30 01:56:42.406594
++pan vs man vs lan vs wan
+
+# 2024-05-30 02:26:27.205864
++is the term used in computer security that only the authorized users are allowed to access the information.    answer
+
+# 2024-05-30 02:27:52.636738
++  In the digital signature technique when the whole message is signed using an asymmetric key, the sender of the message uses _______ to sign the message.   
++*\
++
++1 point
++his or her own symmetric key
++his or her own public key
++his or her own private key
++None of the choices are correct.
+
+# 2024-05-30 02:36:52.800397
++HTTPS stands for Hypertext Transfer Protocol over TLS.  
++*true of flase
+
+# 2024-05-30 02:37:42.617213
++are used in denial of service attacks, typically against targeted web sites.   
++*
++1 point
++Virus
++Zombie
++Trojan horse
++Worm
+
+# 2024-05-30 02:40:08.280717
++ VPN technology uses two simultaneous techniques to guarantee privacy for an organization: ________ and ___________.   
+
+# 2024-05-30 02:40:32.424929
++PN technology uses two simultaneous techniques to guarantee privacy for an organization: ________ and ___________.   
++*
++1 point
++IPSec; SSL
++SSL; tunneling
++IPSec; tunneling
++None of the choices are correct.
+
+# 2024-05-30 02:41:29.409464
++  In computer security , _______________ is the term used in computer security to protect your data from getting disclosed.( only accessible for reading by authorized parities)  
++*
++1 point
++Integrity
++Availability
++Confidentiality
++Authentication
+
+# 2024-05-30 02:42:13.896718
++In the Phase 2 of the Handshake Protocol Action, the step server_key_exchange is not needed for which of the following cipher systems?   
+
+# 2024-05-30 02:42:40.457310
++ In the Phase 2 of the Handshake Protocol Action, the step server_key_exchange is not needed for which of the following cipher systems?   
++*
++1 point
++Anonymous Diffie-Hellman
++Fortezza
++Fixed Diffie-Hellman
++RSA
+
+# 2024-05-30 03:11:45.121485
++~ ______________ means concealing the message by covering it with something else.  
++*
++1 point
++Compressing
++Cryptography
++Steganography
++None of the choices are correct
+
+# 2024-05-30 03:12:47.720798
++ ______________ means concealing the message by covering it with something else.  
++*
++1 point
++Compressing
++Cryptography
++Steganography
++None of the choices are correct
+
+# 2024-05-31 16:48:34.796546
++in cpp can i do arithamitc in #define like #define var1 var2+var3
+
+# 2024-06-02 13:06:49.467006
++HI
+
+# 2024-06-04 13:50:37.301654
++hi gpt
+
+# 2024-06-05 20:34:39.865814
++;
+
+# 2024-06-05 20:34:49.831775
++
+
+# 2024-06-06 01:18:47.437356
++gpt
+
+# 2024-06-09 20:53:42.768671
++what is a dcs vs plc
+
+# 2024-06-18 16:09:49.061710
++اه
+
+# 2024-06-22 04:37:18.625677
++hi
+
+# 2024-06-22 04:44:31.960353
++dds
+
+# 2024-06-24 09:31:12.591950
++jjh
+
+# 2024-07-11 10:23:32.472183
++hi
+
+# 2024-07-11 10:23:35.227193
++qqasdc
+
+# 2024-07-25 13:45:38.849761
++hi
+
+# 2024-07-25 13:45:40.886321
++cls
+
+# 2024-08-15 09:16:45.321164
++asdd
+
+# 2024-09-30 02:05:21.941853
++hi

@@ -1,0 +1,7 @@
+api-key: INSERT API KEY HERE
+easy_copy: true
+json_mode: false
+markdown: true
+model: gpt-3.5-turbo
+non_interactive: false
+temperature: 1

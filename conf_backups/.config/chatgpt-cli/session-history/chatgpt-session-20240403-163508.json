@@ -1,0 +1,27 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "simple usage example of csharp Queue collection"
+        },
+        {
+            "role": "assistant",
+            "content": "```csharp\nusing System;\nusing System.Collections;\n\nclass Program\n{\n    static void Main()\n    {\n        Queue numbers = new Queue();\n\n        // Enqueue items to the Queue\n        numbers.Enqueue(1);\n        numbers.Enqueue(2);\n        numbers.Enqueue(3);\n\n        // Peek at the first item in the Queue\n        Console.WriteLine(\"Peek first item: \" + numbers.Peek());\n\n        // Dequeue items from the Queue\n        Console.WriteLine(\"Dequeue: \" + numbers.Dequeue());\n        Console.WriteLine(\"Dequeue: \" + numbers.Dequeue());\n\n        // Check if the Queue is empty\n        Console.WriteLine(\"Is the Queue empty? \" + (numbers.Count == 0 ? \"Yes\" : \"No\"));\n    }\n}\n```\nThis C# code snippet demonstrates a simple usage of the `Queue` collection."
+        },
+        {
+            "role": "user",
+            "content": "how to chekc itt its empty?"
+        },
+        {
+            "role": "assistant",
+            "content": "```csharp\n// Check if the Queue is empty\nConsole.WriteLine(\"Is the Queue empty? \" + (numbers.Count == 0 ? \"Yes\" : \"No\"));\n```"
+        }
+    ],
+    "prompt_tokens": 270,
+    "completion_tokens": 208
+}

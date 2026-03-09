@@ -1,0 +1,544 @@
+general:
+
+
+  # Commands to run when the WM has started (e.g. to run a script or launch
+  # another application). Here we are running a batch script to start Zebar.
+
+  #startup_commands: ['shell-exec  C:\Program Files\glzr.io\Zebar\zebar.exe']
+  #startup_commands: ['shell-exec  C:\Program Files\YASB\yasb.exe']
+  startup_commands: ['shell-exec  C:\Users\OmarPc\py_envs\repo_Yasb_voicemeeter_venv\Scripts\pythonw.exe C:\Users\OmarPc\repo_Yasb_voicemeeter\src\main.pyw']
+
+
+
+  
+
+
+  #whetehr to show all windows in task bar or only current showed workspaces
+  show_all_in_taskbar: true
+
+  # Whether to automatically focus windows underneath the cursor. (not workin)
+  focus_follows_cursor: false
+  
+ # Whether to jump the cursor between windows focused by the WM. (not working)
+  cursor_follows_focus: false 
+  
+  # Whether to switch back and forth between the previously focused workspace
+  # when focusing the current workspace.
+  toggle_workspace_on_refocus: false
+
+  # Whether to show floating windows as always on top.
+  show_floating_on_top: true 
+
+  # Amount to move floating windows by (eg. when using `alt+<ijkl>` on a floating window)
+  floating_window_move_amount: "15%"
+
+  # Whether to center new floating windows.
+  center_new_floating_windows: false
+
+  # *Strongly* recommended to set to 'false'. Whether to globally enable/disable
+  # window transition animations (on minimize, close, etc). Set to 'unchanged'
+  # to make no setting changes.
+  window_animations: false
+
+  cursor_jump:
+    # Whether to automatically move the cursor on the specified trigger.
+    enabled: false
+
+    # Trigger for cursor jump:
+    # - 'monitor_focus': Jump when focus changes between monitors.
+    # - 'window_focus': Jump when focus changes between windows.
+    trigger: 'window_focus'
+
+gaps:
+  # Gap between adjacent windows.
+  inner_gap: '10px'
+
+  # Gap between windows and the screen edge.
+  outer_gap:
+    top: '6px'
+    right: '6px'
+    bottom: '6px'
+    left: '6px'
+    
+window_effects:
+  # Visual effects to apply to the focused window.
+  focused_window:
+    # Highlight the window with a colored border.
+    # ** Exclusive to Windows 11 due to API limitations.
+    border:
+      enabled: true
+      color: '#16ffa1'
+
+  # Visual effects to apply to non-focused windows.
+  other_windows:
+    border:
+      enabled: true
+      color: '#b3bdfc'
+
+window_behavior:
+  # New windows are created in this state whenever possible.
+  # Allowed values: 'tiling', 'floating'.
+  initial_state: 'tiling'
+
+  # Sets the default options for when a new window is created. This also
+  # changes the defaults for when the state change commands, like
+  # `set-floating`, are used without any flags.
+  state_defaults:
+    floating:
+      # Whether to center floating windows by default.
+      centered: false
+
+      # Whether to show floating windows as always on top.
+      shown_on_top: true
+
+    fullscreen:
+      # Maximize the window if possible. If the window doesn't have a
+      # maximize button, then it'll be fullscreen'ed normally instead.
+      maximized: true
+
+      # Whether to show fullscreen windows as always on top.
+      shown_on_top: true
+
+workspaces:
+  - name: "1"
+    display_name: "1:Work"
+    bind_to_monitor: 1
+    keep_alive: true
+
+  - name: "2"
+    display_name: "2:Work++"
+    bind_to_monitor: 0
+    keep_alive: true
+
+  - name: "3"
+    display_name: "3:Search"
+    bind_to_monitor: 0
+    keep_alive: true
+
+  - name: "4"
+    display_name: "4:Chat"
+    bind_to_monitor: 0
+    keep_alive: true
+
+  - name: "5"
+    display_name: "5:Notes"
+    bind_to_monitor: 0
+    keep_alive: false 
+  
+  - name: "6"
+    display_name: "6:Mail"
+    bind_to_monitor: 0
+    keep_alive: false 
+
+  - name: "7"
+    display_name: "7:Back&Obs"
+    bind_to_monitor: 0
+    keep_alive: false
+
+  - name: "8"
+    display_name: "8:VM"
+    bind_to_monitor: 1
+    keep_alive: true
+
+
+window_rules:
+  
+  - commands: ['ignore']
+    match:
+
+      # - window_process: { equals: 'WindowsTerminal'}
+
+      # Ignores any Zebar windows.
+      - window_process: { equals: 'zebar' }
+      
+      # ignore ms word (TESTING)
+      - window_process: { equals: 'WINWORD'}
+        
+      # ignore core keeper game 
+      - window_process: { equals: 'CoreKeeper' }
+
+      - window_process: { equals: 'Super Sus'}
+      
+      - window_process: { equals: 'MetroExodus' }
+
+      # Ignores picture-in-picture windows for browsers.
+      - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
+        #  window_class: { regex: 'Chrome_WidgetWin_1|MozillaDialogClass' }
+
+      # Ignore rules for various 3rd-party apps.
+      - window_process: { equals: 'PowerToys.PowerAccent' }
+      - window_process: { equals: 'Lively' }
+        window_class: { regex: 'HwndWrapper*' }
+
+  - commands: ["move --workspace 1", "focus --workspace 1"]    
+    match:
+      - window_process: { equals: 'devenv' }
+      - window_process: { equals: 'Arduino IDE' }
+      
+  - commands: ["move --workspace 2", "focus --workspace 2"]
+    match:
+      - window_process: { regex: '/notepad.*/' }
+      - window_process: { equals: 'Code' }
+      #- window_process: {equals: 'WindowsTerminal'}
+
+      
+  - commands: ["move --workspace 4", "focus --workspace 4"]
+    match:
+      - window_title: { equals: 'chatGPT' }
+      - window_process: { regex: 'Telegram|Teams|ms-teams|Discord|Texts' }
+
+  - commands: ["move --workspace 3", "focus --workspace 3"]
+    match:
+      - window_process: { regex: 'brave|opera|chrome|msedge|vivaldi|floorp' }
+      - window_title: { equals: 'Samsung Notes' } 
+  
+  - commands: ["move --workspace 1"]
+    match:
+   #    - window_process: {equals: 'WindowsTerminal'}
+
+
+  - commands: ["move --workspace 5"]
+    match:
+      - window_process: { regex: 'Notion|Obsidian' } 
+
+  - commands: ["move --workspace 6"]
+    match:
+      - window_process: { regex: 'thunderbird' } 
+
+  - commands: ["move --workspace 7"]
+    match:
+      - window_title: { regex: 'Form|Spotify Free|C:\\WINDOWS\\system32\\cmd.exe - setup_vbox_ubuntu.bat' }  
+
+      - window_process: { regex: 'Launcher|obs64|Spotify|cmd' }  
+
+      - window_process: { regex: 'voicemeeterpro' }
+  
+      - window_process: { regex: 'voicemeeterpro_x64'}
+
+
+
+  - commands: ["move --workspace 8"]
+    match:
+      - window_process: { regex: 'VirtualBoxVM' }  
+      
+      
+   
+   
+  
+  - commands: ["ignore"]
+    match:
+
+      #  - window_process: { equals: 'WindowsTerminal'}
+
+      - window_title: { regex: '[Pp]icture.in.[Pp]icture' }
+        window_class: { regex: 'Chrome_WidgetWin_1|MozillaDialogClass' }
+        
+      # Task Manager requires admin privileges to manage and should be ignored unless running
+      # the WM as admin.
+      - window_process: { regex: '/Taskmgr|ScreenClippingHost/'} 
+      
+      - window_process: { regex: '/HD-Player|RobloxPlayerBeta/'}
+
+      - window_title: {equals: 'Roblox'}
+
+      - window_process: {equals: 'Fallout4'}
+
+      - window_process: { equals: ' left4dead2'}
+  
+      - window_process: { equals: 'zebar' }
+      
+      - window_process: { equals: 'Rainmeter' }
+      
+      - window_process: { equals: 'ApplicationFrameHost' }
+      
+      - window_process: { equals: 'Snipping Tool' }
+      
+      - window_process: { equals: 'Riot Client' }
+      
+      - window_process: { equals: 'VALORANT-Win64-Shipping' }
+      
+      - window_process: { equals: 'VALORANT' }
+      
+      - window_process: { equals: 'explorer' }
+        window_class: { equals: 'Shell_TrayWnd' }        
+        
+      - window_process: { equals: 'DungeonCrawler' }
+      
+      - window_process: { equals: 'VritualBoxVM' }
+      
+      - window_process: { equals: 'ConEmu64' }
+        window_title: { regex: '*Cmder' }
+        window_class: { equals: 'VirtualConsoleClass' }
+      
+      - window_process: { equals: 'ConEmuC64' }
+      
+      - window_process: { equals: 'NucleusCoop' }
+      
+      - window_process: { equals: 'SonsOfTheForest' }
+      
+      - window_process: { equals: 'RocketLeague' }
+      
+      
+  - commands: ["set-floating"]
+    match:
+       
+      - window_process: { equals: 'steamwebhelper' }
+
+      - window_process: { equals: 'devenv' }
+        window_title: { equals : 'Search everywhere' }
+        
+      - window_title: { regex: '.*google_oauth2.*' }
+      
+      - window_title: { regex: '.*Sign in - Google Accounts.*' }
+      
+      - window_process: { equals: 'devenv' }
+      - window_title: { regex: '.*Sign in - Google Accounts.*' }
+      
+      - window_process: { equals: 'devenv' }
+        window_title: { regex: '^(?! - Microsoft Visual Studio)([a-z0-9]+)$' }
+        
+      - window_title: { regex: '.*Gmail.*' }
+      
+      - window_title: { regex: '.*popup.*' }
+      
+      - window_title: { equals: 'LoadingBayInstaller' }
+      
+      - window_process: { equals: 'Flow.Launcher' }
+      
+      - window_title: { equals: 'AutoHotkey  64-bit' }
+        window_process: { equals: 'AutoHotkeyUX' }
+      
+      - window_title: { equals: 'Unity Hub' }
+      
+      - window_process: { equals: 'qbittorrent' }
+      
+        #- window_process: { equals: 'obs64' }
+      
+      - window_title: { equals: 'Window Spy for AHKv2' }
+      
+      - window_process: { equals: 'ApplicationFrameHost' }
+      
+      - window_process: { equals: 'Windows Explorer' }
+      
+      - window_process: { equals: 'explorer' }
+        window_class: { equals: 'CabinetWClass' }
+        
+      - window_class: { equals: 'CabinetWClass' }
+      
+      - window_process: { equals: 'mmc' }
+        window_title: { equals: 'Task Scheduler' }
+
+      - window_process: { equals: 'AvastUI' }
+        window_title: { equals: 'Avast Free Antivirus' }
+        
+      - window_class: { equals: '#32770' }
+
+  
+
+  - commands: ["set-tiling"]
+    match:
+      - window_process: { equals: 'WINWORD' }
+      
+      - window_process: { equals: 'AsdaStory' }
+      
+      - window_process: { equals: 'thunderbird'}
+
+      - window_process: { equals: 'Discord' }
+      
+      - window_process: { equals: 'WindowsTerminal'}
+binding_modes:
+  # When enabled, the focused window can be resized via arrow keys or HJKL.
+  - name: 'resize'
+    keybindings:
+      - commands: ['resize --width -2%']
+        bindings: ['L', 'left']
+      - commands: ['resize --width +2%']
+        bindings: ['J', 'right']
+      - commands: ['resize --height +2%']
+        bindings: ['K', 'up']
+      - commands: ['resize --height -2%']
+        bindings: ['I', 'down']
+      # Press enter/escape to return to default keybindings.
+      - commands: ['wm-disable-binding-mode --name resize']
+        bindings: ['escape', 'enter']
+
+  # When enabled, all keybindings are disabled except for alt+shift+p which
+  # returns to default keybindings.
+  - name: 'pause'
+    keybindings:
+      - commands: ['wm-disable-binding-mode --name pause']
+        bindings: ['alt+shift+p']
+
+keybindings:
+  # Shift focus in a given direction.
+  - commands: ['focus --direction left']
+    bindings: ['alt+J', 'alt+J']
+  - commands: ['focus --direction right']
+    bindings: ['alt+L', 'alt+L']
+  - commands: ['focus --direction up']
+    bindings: ['alt+I', 'alt+I']
+  - commands: ['focus --direction down']
+    bindings: ['alt+K', 'alt+K']
+
+  # Move focused window in a given direction.
+  - commands: ['move --direction left']
+    bindings: ['alt+shift+J', 'alt+shift+left']
+  - commands: ['move --direction right']
+    bindings: ['alt+shift+L', 'alt+shift+right']
+  - commands: ['move --direction up']
+    bindings: ['alt+shift+I', 'alt+shift+up']
+  - commands: ['move --direction down']
+    bindings: ['alt+shift+K', 'alt+shift+down']
+
+  # Resize focused window by a percentage or pixel amount.
+  - commands: ['resize --width -2%']
+    bindings: ['alt+u']
+  - commands: ['resize --width +2%']
+    bindings: ['alt+p']
+  - commands: ['resize --height +2%']
+    bindings: ['alt+o']
+  - commands: ['resize --height -2%']
+    bindings: ['alt+h']
+
+  # As an alternative to the resize keybindings above, resize mode enables
+  # resizing via arrow keys or HJKL. The binding mode is defined above with
+  # the name 'resize'.
+  - commands: ['wm-enable-binding-mode --name resize']
+    bindings: ['alt+r']
+
+  # Disables all keybindings until alt+shift+p is pressed again.
+  - commands: ['wm-enable-binding-mode --name pause']
+    bindings: ['alt+shift+p']
+
+  # Change tiling direction. This determines where new tiling windows will
+  # be inserted.
+  - commands: ['toggle-tiling-direction']
+    bindings: ['alt+v']
+
+  # Change focus from tiling windows -> floating -> fullscreen.
+  #- commands: ['wm-cycle-focus']
+    #bindings: ['alt+space']
+
+  # Change the focused window to be floating.
+  - commands: ['toggle-floating --centered']
+    bindings: ['alt+shift+space']
+
+  # Change the focused window to be tiling.
+  - commands: ['toggle-tiling']
+    bindings: ['alt+shift+space']
+
+  # Change the focused window to be fullscreen.
+  - commands: ['toggle-fullscreen']
+    bindings: ['alt+x']
+
+  # Minimize focused window.
+  - commands: ['toggle-minimized']
+    bindings: ['alt+m']
+
+  # Close focused window.
+  - commands: ['close']
+    bindings: ['alt+shift+q']
+
+  # Kill GlazeWM process safely.
+  - commands: ['wm-exit']
+    bindings: ['alt+shift+e']
+
+  # Re-evaluate configuration file.
+  - commands: ['wm-reload-config']
+    bindings: ['alt+shift+r']
+
+  # Redraw all windows.
+  - commands: ['wm-redraw']
+    bindings: ['alt+shift+w']
+
+  # Launch CMD terminal. Alternatively, use `shell-exec wt` or
+  # `shell-exec %ProgramFiles%/Git/git-bash.exe` to start Windows
+  # Terminal and Git Bash respectively.
+#  - commands: ['shell-exec cmder']
+#   bindings: ['alt+shift+enter']
+
+    #Focus the next/previous workspace defined in `workspaces` config.
+  #- commands: ['focus --next-workspace']
+   # bindings: ['alt+s']
+  #- commands: ['focus --prev-workspace']
+   # bindings: ['alt+a']
+
+  # Focus the workspace that last had focus.
+ # - commands: ['focus --recent-workspace']
+  #  bindings: ['alt+d']
+
+  # Change focus to a workspace defined in `workspaces` config.
+  - commands: ['focus --workspace 1']
+    bindings: ['alt+1']
+  - commands: ['focus --workspace 2']
+    bindings: ['alt+2']
+  - commands: ['focus --workspace 3']
+    bindings: ['alt+3']
+  - commands: ['focus --workspace 4']
+    bindings: ['alt+4']
+  - commands: ['focus --workspace 5']
+    bindings: ['alt+5']
+  - commands: ['focus --workspace 6']
+    bindings: ['alt+6']
+  - commands: ['focus --workspace 7']
+    bindings: ['alt+7']
+  - commands: ['focus --workspace 8']
+    bindings: ['alt+8']
+  - commands: ['focus --workspace 9']
+    bindings: ['alt+9']
+
+  # Move the focused window's parent workspace to a monitor in a given
+  # direction.
+  - commands: ['move-workspace --direction left']
+    bindings: ['alt+a']
+  - commands: ['move-workspace --direction right']
+    bindings: ['alt+e']
+  - commands: ['move-workspace --direction up']
+    bindings: ['alt+w']
+  - commands: ['move-workspace --direction down']
+    bindings: ['alt+s']
+
+  # Move focused window to a workspace defined in `workspaces` config.
+  - commands: ['move --workspace 1', 'focus --workspace 1']
+    bindings: ['alt+shift+1']
+  - commands: ['move --workspace 2', 'focus --workspace 2']
+    bindings: ['alt+shift+2']
+  - commands: ['move --workspace 3', 'focus --workspace 3']
+    bindings: ['alt+shift+3']
+  - commands: ['move --workspace 4', 'focus --workspace 4']
+    bindings: ['alt+shift+4']
+  - commands: ['move --workspace 5', 'focus --workspace 5']
+    bindings: ['alt+shift+5']
+  - commands: ['move --workspace 6', 'focus --workspace 6']
+    bindings: ['alt+shift+6']
+  - commands: ['move --workspace 7', 'focus --workspace 7']
+    bindings: ['alt+shift+7']
+  - commands: ['move --workspace 8', 'focus --workspace 8']
+    bindings: ['alt+shift+8']
+  - commands: ['move --workspace 9', 'focus --workspace 9']
+    bindings: ['alt+shift+9']
+flamingo: &flamingo "#f2cdcd"
+pink: &pink "#f5c2e7"
+mauve: &mauve "#cba6f7"
+red: &red "#f38ba8"
+maroon: &maroon "#eba0ac"
+peach: &peach "#fab387"
+yellow: &yellow "#f9e2af"
+green: &green "#a6e3a1"
+teal: &teal "#94e2d5"
+sky: &sky "#89dceb"
+sapphire: &sapphire "#74c7ec"
+blue: &blue "#89b4fa"
+lavender: &lavender "#b4befe"
+text: &text "#cdd6f4"
+subtext1: &subtext1 "#bac2de"
+subtext0: &subtext0 "#a6adc8"
+overlay2: &overlay2 "#9399b2"
+overlay1: &overlay1 "#7f849c"
+overlay0: &overlay0 "#6c7086"
+surface2: &surface2 "#585b70"
+surface1: &surface1 "#45475a"
+surface0: &surface0 "#313244"
+base: &base "#1e1e2e"
+mantle: &mantle "#181825"
+crust: &crust "#11111b"

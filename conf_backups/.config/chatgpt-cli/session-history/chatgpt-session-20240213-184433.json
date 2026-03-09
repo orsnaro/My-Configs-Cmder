@@ -1,0 +1,43 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "A trustworthy person, who enjoys new Working Methods, with good Communication skills, is Presentable, has excellent Time keeping and work under stress, Enjoy finding solutions and working on development Plans, and is active, helpful, intelligent, and ambitious. Like Challenges and always Fight for achieving my Targets. (make previous paragraph shorter)"
+        },
+        {
+            "role": "assistant",
+            "content": "A trustworthy person, with good communication skills, who embraces new working methods, has excellent time management skills, and thrives under stress. Enjoys finding solutions and working on development plans. Active, helpful, intelligent, ambitious, and enjoys challenges while always striving to achieve targets."
+        },
+        {
+            "role": "user",
+            "content": "make it much shorter please"
+        },
+        {
+            "role": "assistant",
+            "content": "A trustworthy person with good communication, time management, and problem-solving skills. Enjoys working on development plans, and is active, helpful, intelligent, ambitious, and thrives on challenges while consistently achieving targets."
+        },
+        {
+            "role": "user",
+            "content": "shorter please"
+        },
+        {
+            "role": "assistant",
+            "content": "Trustworthy, communicative, adaptable individual with excellent time management, problem-solving skills, and ambition. Enjoys working on development plans, embraces challenges, and consistently meets targets."
+        },
+        {
+            "role": "user",
+            "content": "make it only two lines"
+        },
+        {
+            "role": "assistant",
+            "content": "Trustworthy and adaptable with excellent communication and time management skills. Thrives on challenges, consistently meets targets, and enjoys working on development plans."
+        }
+    ],
+    "prompt_tokens": 752,
+    "completion_tokens": 163
+}

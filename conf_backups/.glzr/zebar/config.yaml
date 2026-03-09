@@ -1,0 +1,524 @@
+ 
+
+
+###
+# Define a new window with an id of 'bar'. This window can then be opened
+# via the Zebar cli by running 'zebar open bar --args <ARGS...>'.
+#
+# Docs regarding window: https://some-future-docs-link.com
+window/bar:
+  providers: ['self']
+  # Width of the window in physical pixels.
+  width: '{{ self.args.MONITOR_WIDTH }}'
+  # Height of the window in physical pixels.
+  #height: '{{ 35 * self.args.MONITOR_SCALE_FACTOR }}'
+  height: '8'
+  # X-position of the window in physical pixels.
+  position_x: '{{ self.args.MONITOR_X }}'
+  # Y-position of the window in physical pixels.
+  position_y: '{{ self.args.MONITOR_Y }}'
+  # Whether to show the window above/below all others.
+  # Allowed values: 'always_on_top', 'always_on_bottom', 'normal'.
+  # z_order: 'always_on_bottom'
+  z_order: 'always_on_top'
+  # Whether the window should be shown in the taskbar.
+  shown_in_taskbar: false
+  # Whether the window should have resize handles.
+  resizable: false
+  # Styles to apply globally within the window. For example, we can use
+  # this to import the Nerdfonts icon font. Ref https://www.nerdfonts.com/cheat-sheet
+  # for a cheatsheet of available Nerdfonts icons.
+  global_styles: |
+    @import "https://www.nerdfonts.com/assets/css/webfont.css";
+
+    @keyframes rubberBand {
+      from { transform: scale3d(1, 1, 1); }
+      30% { transform: scale3d(1.25, 0.75, 1); }
+      40% { transform: scale3d(0.75, 1.25, 1); }
+      50% { transform: scale3d(1.15, 0.85, 1); }
+      65% { transform: scale3d(0.95, 1.05, 1); }
+      75% { transform: scale3d(1.05, 0.95, 1); }
+      to { transform: scale3d(1, 1, 1); }
+    }
+
+    @keyframes tada {
+      from { transform: scale3d(1, 1, 1); }
+      10%, 20% { transform: scale3d(0.9, 0.9, 0.9) rotate3d(0, 0, 1, -3deg); }
+      30%, 50%, 70%, 90% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, 3deg); }
+      40%, 60%, 80% { transform: scale3d(1.1, 1.1, 1.1) rotate3d(0, 0, 1, -3deg); }
+      to { transform: scale3d(1, 1, 1); }
+    }
+
+    @keyframes flash {
+      from, 50%, to { opacity: 1; }
+      25%, 75% { opacity: 0; }
+    }
+
+    @keyframes pulse-test {
+      from {
+        transform: scale(0);
+        opacity: 1;
+      }
+      to {
+        opacity: 0;
+        transform: scale(2);
+      }
+    }
+
+    @keyframes pulse-size {
+      from,
+      20%,
+      53%,
+      to {
+        animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+        transform: translate3d(0, 0, 0);
+      }
+
+      40%,
+      43% {
+        animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+        transform: translate3d(0, -30px, 0) scaleY(1.1);
+      }
+
+      70% {
+        animation-timing-function: cubic-bezier(0.755, 0.05, 0.855, 0.06);
+        transform: translate3d(0, -15px, 0) scaleY(1.05);
+      }
+
+      80% {
+        transition-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+        transform: translate3d(0, 0, 0) scaleY(0.95);
+      }
+
+      90% {
+        transform: translate3d(0, -4px, 0) scaleY(1.02);
+      }
+    }
+
+    @keyframes shine {
+        0%{background-position:0% 100%}
+        100%{}
+    }
+  # CSS styles to apply to the root element within the window. Using CSS
+  # nesting, we can also target nested elements (e.g. below we set the
+  # color and margin-right of icons).
+  styles: |
+    // fonts
+
+    --font-body: ui-monospace, monospace;
+
+    // colors (catppuccin mocha)
+
+    --rosewater: #f5e0dc;
+    --flamingo: #f2cdcd;
+    --pink: #f5c2e7;
+    --mauve: #cba6f7;
+    --red: #f38ba8;
+    --maroon: #eba0ac;
+    --peach: #fab387;
+    --yellow: #f9e2af;
+    --green: #a6e3a1;
+    --teal: #94e2d5;
+    --sky: #89dceb;
+    --sapphire: #74c7ec;
+    --blue: #89b4fa;
+    --lavender: #b4befe;
+    --text: #cdd6f4;
+    --subtext1: #bac2de;
+    --subtext0: #a6adc8;
+    --overlay2: #9399b2;
+    --overlay1: #7f849c;
+    --overlay0: #6c7086;
+    --surface2: #585b70;
+    --surface1: #45475a;
+    --surface0: #313244;
+    --base: #1e1e2e;
+    --mantle: #181825;
+    --crust: #11111b;
+    
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    align-items: center;
+    height: 100%;
+    color: #f5e0dc;
+    font-family: ui-monospace, monospace;
+    font-size: 12px;
+    padding: 0 24px;
+    border-bottom: 1px solid #313244;
+    background: #1e1e2e;
+
+    i {
+      color: var(--text);
+      margin-right: 7px;
+    }
+
+  group/left:
+    styles: |
+      display: flex;
+      align-items: center;
+      gap: 20px;
+
+    template/glazewm_workspaces:
+      styles: |
+        display: flex;
+        align-items: center;
+        gap: 5px;
+
+        .workspace {
+          background-color: var(--overlay0);
+          padding: 0;
+          color: #11111b;
+          border: 2px solid var(--overlay0);
+          border: 0;
+          border-radius: 1rem;
+          cursor: pointer;
+          position: relative;
+
+          font-size: 10px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+
+          width: 14px;
+          height: 14px;
+
+          transition: width 0.5s ease, 
+                     height 0.5s ease, 
+                     background-color 0.3s ease,
+                     border-color 0.3s ease;
+          transition-behavior: allow-discrete;
+
+          &.displayed {
+            border-color: var(--lavender);
+
+            .labels {
+              transform: translate(-50%, -50%) scale(1);
+              opacity: 1;
+              pointer-events: none;
+            }
+
+            &:hover {
+              .id {
+                display: block;
+              }
+              .display-name {
+                display: none;
+              }
+            }
+          }
+
+          &.displayed,
+          &.focused,
+          &:hover {
+            background: var(--lavender);
+            border-color: var(--lavender);
+            color: var(--crust);
+            width: 70px;
+            height: 14px;
+          }
+
+          .labels {
+            position: absolute;
+            text-align: center;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            .workspace:not(:hover) & {
+              opacity: 1;
+            }
+          }
+          .id {
+            display: none;
+            .workspace:not(:hover):not(.displayed):not(.focused) & {
+             display: block;
+            }
+          }
+          .display-name {
+            display: block;
+            .workspace:not(:hover):not(.displayed):not(.focused) & {
+              display: none;
+            }
+          }
+        }
+      providers: ['glazewm']
+      events:
+        - type: 'click'
+          fn_path: 'script.js#focusWorkspace'
+          selector: '.workspace'
+      template: |
+        @for (workspace of glazewm.currentWorkspaces) {
+          <button
+            class="workspace {{ workspace.hasFocus ? 'focused' : '' }} {{ workspace.isDisplayed ? 'displayed' : '' }}"
+            id="{{ workspace.name }}"
+          >
+            <span class="labels">
+              <span class="id">{{ workspace.name }}</span>
+              <span class="display-name">
+                {{ workspace.displayName ?? workspace.displayName }}
+              </span>
+            </span>
+          </button>
+        }
+
+  group/center:
+    styles: |
+      justify-self: center;
+
+    template/glazewm_current_window:
+      providers: ['glazewm']
+      styles: |
+        .current-window {
+          color: white;
+          white-space: nowrap;
+          max-width: 80px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .time {
+          color: #bac2de;
+        }
+      template: |
+        @if (glazewm.focusedContainer?.type === 'window') {
+          <span class="current-window">
+            {{ glazewm.focusedContainer.title.length > 80 ? glazewm.focusedContainer.title.slice(0, 80) + '...' : glazewm.focusedContainer.title }}
+          </span>
+        } @else {
+          <span class="empty-title">
+          ...
+          </span>
+        }
+
+  group/right:
+    styles: |
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      height: 100%;
+      gap: 5px;
+
+    template/glazewm_other:
+      providers: ['glazewm']
+      styles: |
+        display: flex;
+        gap: 5px;
+
+        .binding-mode,
+        .tiling-direction {
+          background: var(--surface0);
+          color: var(--text);
+          border-radius: 2px;
+          padding: 4px 6px;
+          margin: 0;
+        }
+
+        .binding-mode {
+          font-size: 10px;
+          display: flex;
+          align-items: center;
+          line-height: 1;
+          color: var(--surface0);
+          background: var(--text);
+        }
+        .tiling-direction {
+          border: 0;
+          cursor: pointer;
+          span {
+            display: inline-block;
+            transform: rotate(0deg);
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+          }
+          &[data-direction="vertical"] span {
+            transform: rotate(90deg);
+          }
+        }
+      events:
+        - type: 'click'
+          fn_path: 'script.js#toggleTilingDirection'
+          selector: '.tiling-direction'
+      template: |
+        @for (bindingMode of glazewm.bindingModes) {
+          <span class="binding-mode">
+            {{ bindingMode.displayName ?? bindingMode.name }}
+          </span>
+        }
+        <button class="tiling-direction" data-direction="{{ glazewm.tilingDirection === 'horizontal' ? 'horizontal' : 'vertical' }}">
+          <span class="nf nf-md-swap_horizontal"></span>
+        </button>
+
+    template/cpu:
+      providers: ['cpu']
+      styles: |
+        display: flex;
+        align-items: center;
+
+        .cpu-bar {
+          display: inline-block;
+          height: 0.5rem;
+          width: 2rem;
+          border-radius: 1rem;
+          overflow: hidden;
+          background: var(--surface0);
+
+          span {
+            display: block;
+            background: var(--text);
+            border-radius: 0.1rem;
+            height: 100%;
+            width: 0;
+            transition: width 0.3s ease, background-color 0.3s ease;
+
+            &.mid-usage {
+              background: var(--yellow);
+            }
+
+            &.high-usage {
+              background: var(--red);
+            }
+          }
+        }
+      template: |
+        <i class="nf nf-oct-cpu"></i>
+        <span class="cpu-bar">
+          <span class="
+              @switch (true) {
+                @case (cpu.usage > 80) {high-usage}
+                @case (cpu.usage > 40 && cpu.usage < 79) {mid-usage}
+              }
+           "
+           style="width: {{ Math.round(cpu.usage) }}%"
+          />
+        </span>
+
+    template/memory:
+      providers: ['memory']
+      styles: |
+        display: flex;
+        align-items: center;
+        position: relative;
+
+        &:hover {
+          .mem-bar {
+            transform: translateY(200%);
+            opacity: 0;
+          }
+          .labels {
+            transform: translateY(0%);
+            opacity: 1;
+          }
+        }
+
+        .mem-bar {
+          display: inline-block;
+          height: .5rem;
+          width: 2rem;
+          border-radius: 1rem;
+          overflow: hidden;
+          background: var(--surface0);
+          transform: translateY(0%);
+          opacity: 1;
+          transition: transform 0.3s ease, opacity 0.3s ease;
+
+          span {
+            display: block;
+            background: var(--text);
+            border-radius: 0.1rem;
+            height: 100%;
+            width: 0;
+            
+            &.mid-usage {
+              background: var(--yellow);
+            }
+
+            &.high-usage {
+              background: var(--red);
+            }
+          }
+        }
+        .labels {
+          position: absolute;
+          right: 0;
+          display: flex;
+          flex-direction: column;
+          opacity: 0;
+          transform: translateY(-100%);
+          transition: transform 0.3s ease, opacity 0.3s ease;
+          user-select: none;
+        }
+        .label {
+          display: flex;
+          gap: 3px;
+          justify-content: space-between;
+          font-size: 8px;
+          color: var(--text);
+          span {
+            color: var(--subtext0);
+          }
+        }
+      template: |
+        <i class="nf nf-fae-chip"></i>
+        <div class="labels">
+            <span class="label total">
+              <span>USED</span>
+              {{ Math.round(memory.usedMemory / 1024 / 1024 / 1024) }}G
+            </span>
+            <span class="label total">
+              <span>TOT</span>
+              {{ Math.round(memory.totalMemory / 1024 / 1024 / 1024) }}G
+            </span>
+          </div>
+          <span class="mem-bar">
+            <span class="
+                @if (memory.usage > 40 && memory.usage < 79) {mid-usage}
+                @if (memory.usage > 80) {high-usage}
+              "
+              style="width: {{ Math.round(memory.usage) }}%"
+            />
+          </span>
+
+    template/weather:
+      providers: ['weather']
+      template: |
+        @switch (weather.status) {
+          @case ('clear_day') {<i class="nf nf-weather-day_sunny"></i>}
+          @case ('clear_night') {<i class="nf nf-weather-night_clear"></i>}
+          @case ('cloudy_day') {<i class="nf nf-weather-day_cloudy"></i>}
+          @case ('cloudy_night') {<i class="nf nf-weather-night_alt_cloudy"></i>}
+          @case ('light_rain_day') {<i class="nf nf-weather-day_sprinkle"></i>}
+          @case ('light_rain_night') {<i class="nf nf-weather-night_alt_sprinkle"></i>}
+          @case ('heavy_rain_day') {<i class="nf nf-weather-day_rain"></i>}
+          @case ('heavy_rain_night') {<i class="nf nf-weather-night_alt_rain"></i>}
+          @case ('snow_day') {<i class="nf nf-weather-day_snow"></i>}
+          @case ('snow_night') {<i class="nf nf-weather-night_alt_snow"></i>}
+          @case ('thunder_day') {<i class="nf nf-weather-day_lightning"></i>}
+          @case ('thunder_night') {<i class="nf nf-weather-night_alt_lightning"></i>}
+        }
+        {{ weather.celsiusTemp }}°
+    
+    template/datetimecrnt:
+      providers: ['date']
+      styles: |
+        .current-window {
+          color: white;
+          white-space: nowrap;
+          max-width: 300px;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .time {
+          color: #bac2de;
+        }
+      template: |
+          <span class="time">
+             | 
+            {{ date.toFormat(date.now, 'EEE	d MMM t') }}
+          </span>
+
+

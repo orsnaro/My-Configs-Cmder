@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "in networking  CSMA/CD stand for?"
+        },
+        {
+            "role": "assistant",
+            "content": "CSMA/CD stands for Carrier Sense Multiple Access with Collision Detection."
+        }
+    ],
+    "prompt_tokens": 43,
+    "completion_tokens": 14
+}

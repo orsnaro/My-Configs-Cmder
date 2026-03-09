@@ -1,0 +1,35 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "set size to csharp dict"
+        },
+        {
+            "role": "assistant",
+            "content": "```csharp\nDictionary<string, int> dict = new Dictionary<string, int>();\n```"
+        },
+        {
+            "role": "user",
+            "content": "in a unity script when exactly Awake() get called ?"
+        },
+        {
+            "role": "assistant",
+            "content": "In Unity, the `Awake()` method is called when a script instance is loaded, which allows you to initialize variables or state before the game starts. `Awake()` is called on all scripts before any `Start()` methods are called. It is used for setting up variables or game state that you want to initialize before the game starts running."
+        },
+        {
+            "role": "user",
+            "content": "public class Singleton<T> : MonoBehaviour where T : MonoBehaviour explain this line of code specially the T thing?"
+        },
+        {
+            "role": "assistant",
+            "content": "In the provided line of code:\n\n```csharp\npublic class Singleton<T> : MonoBehaviour where T : MonoBehaviour\n```\n\n- The `public class Singleton<T> : MonoBehaviour` part defines a generic class named `Singleton` with a type parameter `T`. This means you can create a Singleton class that can work with any type specified when you use the class.\n\n- The `where T : MonoBehaviour` part is a constraint on the generic type `T`. It specifies that the type `T` must be or derive from `MonoBehaviour`. This ensures that the type specified for `T` must be a subclass of `MonoBehaviour`.\n\nOverall, this line of code defines a generic class `Singleton` that can be used with any type that is or derives from `MonoBehaviour`."
+        }
+    ],
+    "prompt_tokens": 290,
+    "completion_tokens": 245
+}

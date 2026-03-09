@@ -1,0 +1,43 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "fork  a repo using github cli"
+        },
+        {
+            "role": "assistant",
+            "content": "To fork a repository using the GitHub CLI, you can use the following command:\n\n```bash\ngh repo fork owner/repo\n```\n\nReplace `owner` with the GitHub username of the repository owner and `repo` with the name of the repository you want to fork.\n\nMake sure you have the GitHub CLI installed and configured with your GitHub account before running this command."
+        },
+        {
+            "role": "user",
+            "content": "list branches using git in cli"
+        },
+        {
+            "role": "assistant",
+            "content": "To list branches in a Git repository using the command line interface, you can use the following command:\n\n```bash\ngit branch\n```\n\nThis command will list all the branches in the repository. The current branch will be indicated with an asterisk (*).\n\nIf you want to see remote branches as well, you can use the following command:\n\n```bash\ngit branch -a\n```\n\nThis command will list both local and remote branches.\n\nIf you want a more compact view, you can use the `--list` option as well:\n\n```bash\ngit branch --list\n```"
+        },
+        {
+            "role": "user",
+            "content": "other branch subcommands ?"
+        },
+        {
+            "role": "assistant",
+            "content": "Git provides several subcommands related to branches that you can use in the command line interface. Here are some commonly used branch subcommands:\n\n1. **Create a new branch:** To create a new branch and switch to it, you can use the following command:\n   ```bash\n   git checkout -b new-branch-name\n   ```\n\n2. **Switch to an existing branch:** To switch to an existing branch, you can use the `checkout` command followed by the branch name:\n   ```bash\n   git checkout branch-name\n   ```\n\n3. **Delete a branch:** To delete a branch, you can use the following command. Be cautious as this operation is irreversible.\n   ```bash\n   git branch -d branch-name\n   ```\n\n4. **Merge branches:** To merge another branch into your current branch, you can use the following command:\n   ```bash\n   git merge branch-name\n   ```\n\n5. **Rename a branch:** To rename the current branch, you can use the following commands:\n   ```bash\n   git branch -m new-branch-name\n   ```\n\n6. **List remote branches:** To list remote branches, you can use the following command:\n   ```bash\n   git branch -r\n   ```\n\n7. **Track a remote branch:** To create and start tracking a remote branch in Git, you can use the following commands:\n   ```bash\n   git checkout --track origin/branch-name\n   ```\n\nThese are some of the common branch subcommands in Git that you can use in the command line interface."
+        },
+        {
+            "role": "user",
+            "content": "ty"
+        },
+        {
+            "role": "assistant",
+            "content": "You're welcome! If you have any more questions or need further assistance in the future, feel free to ask. Happy coding!"
+        }
+    ],
+    "prompt_tokens": 1015,
+    "completion_tokens": 539
+}

@@ -1,0 +1,51 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "hi gpt"
+        },
+        {
+            "role": "assistant",
+            "content": "Hello! How can I assist you today?"
+        },
+        {
+            "role": "user",
+            "content": "are you ok"
+        },
+        {
+            "role": "assistant",
+            "content": "Thank you for asking! As an AI, I don't have personal feelings, but I'm functioning well and ready to help you with any questions or tasks you have. How can I assist you today?"
+        },
+        {
+            "role": "user",
+            "content": "give me code example for making pandas df"
+        },
+        {
+            "role": "assistant",
+            "content": "Certainly! Here's an example of how to create a pandas DataFrame in Python:\n\n```python\nimport pandas as pd\n\n# Creating a DataFrame from a dictionary\ndata = {'Name': ['John', 'Emma', 'Michael', 'Olivia'],\n        'Age': [25, 28, 32, 24],\n        'City': ['New York', 'London', 'Paris', 'Sydney']}\ndf = pd.DataFrame(data)\n\n# Creating a DataFrame from a list of lists\ndata = [['John', 25, 'New York'],\n        ['Emma', 28, 'London'],\n        ['Michael', 32, 'Paris'],\n        ['Olivia', 24, 'Sydney']]\ndf = pd.DataFrame(data, columns=['Name', 'Age', 'City'])\n\n# Creating an empty DataFrame\ndf = pd.DataFrame()\n\n# Adding columns to an existing DataFrame\ndf['Name'] = ['John', 'Emma', 'Michael', 'Olivia']\ndf['Age'] = [25, 28, 32, 24]\ndf['City'] = ['New York', 'London', 'Paris', 'Sydney']\n```\n\nIn the first example, we created a DataFrame from a dictionary. In the second example, we created a DataFrame from a list of lists. And in the third example, we created an empty DataFrame and added columns to it.\n"
+        },
+        {
+            "role": "user",
+            "content": "exit()"
+        },
+        {
+            "role": "assistant",
+            "content": "Sure, feel free to ask if you have any more questions in the future. Have a great day!"
+        },
+        {
+            "role": "user",
+            "content": "cls"
+        },
+        {
+            "role": "assistant",
+            "content": "I apologize for any confusion, but I am an AI language model and do not have access to terminal commands or the ability to clear the console. If you have any further questions or need assistance with anything else, feel free to ask!"
+        }
+    ],
+    "prompt_tokens": 1041,
+    "completion_tokens": 398
+}

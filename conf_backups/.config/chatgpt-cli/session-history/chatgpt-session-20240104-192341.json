@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "How are you?"
+        },
+        {
+            "role": "assistant",
+            "content": "I'm an AI language model, so I don't have feelings, but I'm here to assist you with any questions or problems you have. How can I help you today?"
+        }
+    ],
+    "prompt_tokens": 37,
+    "completion_tokens": 36
+}

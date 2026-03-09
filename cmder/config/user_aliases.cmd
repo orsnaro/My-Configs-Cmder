@@ -427,7 +427,6 @@ sgxcog=opera --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8
 sgx=opera https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 gxcog=opera --incognito $*  
 gx=opera $*  
-ocd=cd $*  
 jptopdf=jupyter-nbconvert --to pdf $*  
 twtdisorg= cdv C:\Users\%USERNAME%\repo_Tweet_discord\  
 mongo=mongosh $*  
@@ -442,7 +441,6 @@ csaddtodo=add_todo_prob.bat cs
 csdoneprob=save_N_push_solved_prob.bat cs  
 pyaddtodo=add_todo_prob.bat py  
 calc_lines=git ls-files -z | xargs -0 wc -l
-flip=py C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\flip_screen.py  
 ngrp=grep  -v -i -n -H -G  $* --color  
 thun=thunderbird.exe $*  
 pygraph='find . -iname "*.py"  
@@ -899,7 +897,6 @@ sgxcog=opera --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8
 sgx=opera https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 gxcog=opera --incognito $*  
 gx=opera $*  
-ocd=cd $*  
 jptopdf=jupyter-nbconvert --to pdf $*  
 twtdisorg= cdv C:\Users\%USERNAME%\repo_Tweet_discord\  
 mongo=mongosh $*  
@@ -914,7 +911,6 @@ csaddtodo=add_todo_prob.bat cs
 csdoneprob=save_N_push_solved_prob.bat cs  
 pyaddtodo=add_todo_prob.bat py  
 calc_lines=git ls-files -z | xargs -0 wc -l
-flip=py C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\flip_screen.py  
 ngrp=grep  -v -i -n -H -G  $* --color  
 thun=thunderbird.exe $*  
 pygraph='find . -iname "*.py"  
@@ -1378,7 +1374,6 @@ sgxcog=opera --incognito https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8
 sgx=opera https://www.google.com/search?q=$1+$2+$3+$4+$5+$6+$7+$8+$9  
 gxcog=opera --incognito $*  
 gx=opera $*  
-ocd=cd $*  
 jptopdf=jupyter-nbconvert --to pdf $*  
 twtdisorg= cdv C:\Users\%USERNAME%\repo_Tweet_discord\  
 twtdisorg= cdv C:\Users\%USERNAME%\repo_Tweet_discord\  
@@ -1394,8 +1389,6 @@ csaddtodo=add_todo_prob.bat cs
 csdoneprob=save_N_push_solved_prob.bat cs  
 pyaddtodo=add_todo_prob.bat py  
 calc_lines=git ls-files -z | xargs -0 wc -l
-flip=py C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\flip_screen.py  
-flip=py C:\Users\%USERNAME%\repo_My_configs_cmder\cmder\bin\flip_screen.py  
 ngrp=grep  -v -i -n -H -G  $* --color  
 thun=thunderbird.exe $*  
 pygraph='find . -iname "*.py"  
@@ -1479,7 +1472,6 @@ homepublic=ssh ors@41.196.252.205 $*
 glzconf=nvim C:\Users\OmarPc\.glzr\glazewm\config.yaml  
 wakeserver=WakeMeOnLan.exe /wakeup 192.168.1.12  
 zeconf=nvim c:\Users\OmarPc\.glzr\zebar\config.yaml  
-tskbar=c:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\TaskbarToggle.exe  
 remotes=start https://github.com/orsnaro/  
 outai=start https://app.outlier.ai/playground  
 deep=deepseek.exe  
@@ -1492,6 +1484,9 @@ g=git $*
 yasbconf=nvim c:\Users\OmarPc\.config\yasb\config.yaml  
 cprn=g++ cp.cpp -o CP.exe $t @echo  CP.exe is running .. $t CP.exe  $t del CP.exe  
 csrn2= dotnet build C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\TestProject.csproj $t C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\bin\Debug\net8.0\TestProject.exe $t rm C:\Users\OmarPc\repo_CPP_COMP_study\csharp_basics\TestProject\bin\Debug\net8.0\TestProject.exe  
-cd=cdv $*  
-reglz=taskkill /im "glaze*" /f $t "C:\Program Files\glzr.io\GlazeWM\cli\glazewm.exe"$t taskkill /im "yasb*" /f $t taskkill /im pythonw.exe /f  
 com=com.bat $*  
+flip=python c:\Users\OmarPc\repo_My_configs_cmder\cmder\bin\flip_screen.py  
+ai="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://claude.ai/chat/  
+cd=cdv $*  
+ai2="C:\Program Files\BraveSoftware\Brave-Browser\Application\brave.exe" --app=https://gemini.google.com/app  
+reglz=taskkill /im "glaze*" /f $t taskkill /im "yasb*" /f $t taskkill /im pythonw.exe /f $t "C:\Program Files\glzr.io\GlazeWM\cli\glazewm.exe" $t clear  

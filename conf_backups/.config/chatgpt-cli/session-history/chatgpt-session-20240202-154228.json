@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "what is spotligt in figma"
+        },
+        {
+            "role": "assistant",
+            "content": "In Figma, the \"Spotlight\" feature allows you to focus on a specific area of your design while dimming the rest of the canvas. It is available in the viewport as a circle with a handle in the center. By dragging the handle, you can adjust the size and position of the spotlight.\n\nThis feature is particularly useful when you want to focus on a specific portion of your design, such as when presenting or working on intricate details. By highlighting a particular area, you can reduce distractions from the rest of the canvas and make it easier to concentrate on the desired elements.\n\nTo use Spotlight in Figma:\n1. Select the \"Spotlight\" tool from the toolbar or press the \"S\" key.\n2. Click and drag on the canvas to create a spotlight circle around the area you want to focus on.\n3. You can resize and reposition the spotlight by dragging the handle in the center or adjusting the circle's boundaries.\n4. To exit the Spotlight mode, simply click anywhere outside the spotlight circle or press the \"Esc\" key.\n\nBy utilizing the Spotlight feature in Figma, you can enhance your design workflow and presentation capabilities."
+        }
+    ],
+    "prompt_tokens": 40,
+    "completion_tokens": 232
+}

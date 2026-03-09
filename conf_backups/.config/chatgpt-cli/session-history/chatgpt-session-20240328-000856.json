@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "explain '?' in OscServerUnity?.Dispose();"
+        },
+        {
+            "role": "assistant",
+            "content": "In C#, the question mark `?` is used as part of the null conditional operator. This operator is used to access members of an object if the object is not null. \n\nIn the expression `OscServerUnity?.Dispose();`, if `OscServerUnity` is not null, then `Dispose()` method will be called on the `OscServerUnity` object. If `OscServerUnity` is null, then nothing will happen and no exception will be thrown. It is a way to safely call a method on an object without needing to explicitly check if the object is null."
+        }
+    ],
+    "prompt_tokens": 42,
+    "completion_tokens": 122
+}

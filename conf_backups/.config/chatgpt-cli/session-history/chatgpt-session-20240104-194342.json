@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "dasdsfsdfsdfds"
+        },
+        {
+            "role": "assistant",
+            "content": "It seems like you have entered some random characters. Is there anything specific you need assistance with?"
+        }
+    ],
+    "prompt_tokens": 39,
+    "completion_tokens": 19
+}

@@ -1,0 +1,81 @@
+[
+  {
+    "title": "Claude Chat",
+    "path": "\"C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe\" --app=\"https://claude.ai/chat/\"",
+    "icon": "C:\\Users\\OmarPc\\.config\\yasb\\launchpad\\icons\\claude_chat_1771860810190.svg",
+    "type": "app",
+    "group": null,
+    "id": 1771860797076
+  },
+  {
+    "title": "Gemini Pro",
+    "path": "\"C:\\Program Files\\BraveSoftware\\Brave-Browser\\Application\\brave.exe\" --app=https://gemini.google.com/app",
+    "icon": "C:\\Users\\OmarPc\\.config\\yasb\\launchpad\\icons\\gemini_pro_1772111528070.png",
+    "type": "app",
+    "group": null,
+    "id": 1772111528074
+  },
+  {
+    "title": "Voicemeeter Banana x64",
+    "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\VB Audio\\VoiceMeeter\\Voicemeeter Banana x64.LNK",
+    "icon": "C:\\Users\\OmarPc\\.config\\yasb\\launchpad\\icons\\voicemeeter_banana_x64_1771762581362.png",
+    "type": "app",
+    "id": 1771762581364
+  },
+  {
+    "title": "Brave",
+    "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\Brave.lnk",
+    "icon": "C:\\Users\\OmarPc\\.config\\yasb\\launchpad\\icons\\brave_1771762597558.png",
+    "type": "app",
+    "id": 1771762597559
+  },
+  {
+    "title": "Obsidian",
+    "path": "C:\\Users\\OmarPc\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\Startup\\Obsidian.lnk",
+    "icon": "C:\\Users\\OmarPc\\.config\\yasb\\launchpad\\icons\\obsidian_1771762621298.png",
+    "type": "app",
+    "id": 1771762621299
+  },
+  {
+    "title": "OBS Studio (64bit)",
+    "path": "C:\\ProgramData\\Microsoft\\Windows\\Start Menu\\Programs\\OBS Studio\\OBS Studio (64bit).lnk",
+    "icon": "C:\\Users\\OmarPc\\.config\\yasb\\launchpad\\icons\\obs_studio_64bit_1771762643723.png",
+    "type": "app",
+    "id": 1771762643724
+  },
+  {
+    "title": "x360ce.exe - Shortcut",
+    "path": "C:\\Users\\OmarPc\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\x360ce.exe - Shortcut.lnk",
+    "icon": "C:\\Users\\OmarPc\\.config\\yasb\\launchpad\\icons\\x360ceexe_-_shortcut_1771762660428.png",
+    "type": "app",
+    "id": 1771762660429
+  },
+  {
+    "title": "File Explorer",
+    "path": "C:\\Users\\OmarPc\\AppData\\Roaming\\Microsoft\\Windows\\Start Menu\\Programs\\File Explorer.lnk",
+    "icon": "C:\\Users\\OmarPc\\.config\\yasb\\launchpad\\icons\\file_explorer_1771763443588.ico",
+    "type": "app",
+    "id": 1771763443589
+  },
+  {
+    "title": "Anime",
+    "path": "explorer E:\\video\\Anime\\",
+    "icon": "C:\\Users\\OmarPc\\.config\\yasb\\launchpad\\icons\\anime_1771774140184.ico",
+    "type": "app",
+    "id": 1771774140185
+  },
+  {
+    "title": "Movie & Series",
+    "path": "explorer \"E:\\video\\Movie  & Series\\\"",
+    "icon": "C:\\Users\\OmarPc\\.config\\yasb\\launchpad\\icons\\movie__series_1771774173033.ico",
+    "type": "app",
+    "id": 1771774173033
+  },
+  {
+    "title": "Games Fast",
+    "path": "explorer C:\\Users\\OmarPc\\Documents\\game_fast",
+    "icon": "C:\\Users\\OmarPc\\.config\\yasb\\launchpad\\icons\\games_fast_1771840828763.ico",
+    "type": "app",
+    "id": 1771840828767
+  }
+]

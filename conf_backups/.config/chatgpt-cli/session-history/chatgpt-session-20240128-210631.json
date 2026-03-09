@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "8 kg.cm torque nema 23 is enough to force feedback move an elbow?  is there any mis spelling in this question?"
+        },
+        {
+            "role": "assistant",
+            "content": "Your question is clear and there are no misspellings. \n\nIn terms of the torque required to move an elbow using force feedback, it depends on several factors such as the weight and resistance of the elbow joint, the desired speed and range of motion, and the mechanical design of the system. While 8 kg.cm torque from a NEMA 23 motor may be sufficient for some applications, it is not possible to determine if it would be enough without more information about the specific requirements of the system."
+        }
+    ],
+    "prompt_tokens": 60,
+    "completion_tokens": 101
+}

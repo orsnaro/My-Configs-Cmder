@@ -1,0 +1,239 @@
+{
+	"editor.mouseWheelZoom": true,
+	"apc.imports": [
+		"/C:/Users/NgenX/AppData/Roaming/Code/User/settings.css",
+		"/C:/Users/NgenX/AppData/Roaming/Code/User/explorerTitleHandler.js",
+		"file:///c:/Users/NgenX/.vscode/extensions/brandonkirbyson.vscode-animations-2.0.3/dist/updateHandler.js"
+	],
+	"apc.electron": {
+		"titleBarStyle": "hidden",
+	},
+	"apc.font.family": "JetBrainsMono Nerd Font",
+	"editor.rulers": [
+		120
+	],
+	"workbench.colorCustomizations": {
+		"editorRuler.foreground": "#9a9a9a"
+	},
+	"search.mode": "reuseEditor",
+	"breadcrumbs.enabled": true,
+	"window.titleBarStyle": "custom",
+	"window.title": "~\\${activeFolderMedium}",
+	"workbench.tree.indent": 20,
+	"workbench.sideBar.location": "right",
+	"workbench.list.smoothScrolling": true,
+	"workbench.editor.enablePreview": false,
+	"workbench.tree.enableStickyScroll": false,
+	"workbench.tree.renderIndentGuides": "always",
+	"editor.fontSize": 14,
+	"editor.glyphMargin": false,
+	"editor.fontLigatures": true,
+	"editor.indentSize": "tabSize",
+	"editor.smoothScrolling": true,
+	"editor.inlineSuggest.enabled": true,
+	"editor.showFoldingControls": "never",
+	"editor.scrollbar.vertical": "auto",
+	"editor.scrollbar.horizontal": "hidden",
+	"editor.cursorSmoothCaretAnimation": "on",
+	"editor.fontFamily": "JetBrainsMono Nerd Font",
+	"explorer.confirmDelete": false,
+	"git.path": "C:\\Program Files\\Git\\cmd",
+	"python.defaultInterpreterPath": "C:\\Users\\OmarPc\\py_envs\\repo_Discord_bot_ai_venv",
+	"explorer.compactFolders": false,
+	"explorer.fileNesting.expand": false,
+	"explorer.autoReveal": "focusNoScroll",
+	"debug.inlineValues": "on",
+	"debugpy.debugJustMyCode": true,
+	"debug.toolBarLocation": "hidden",
+	"debug.internalConsoleOptions": "neverOpen",
+	"terminal.integrated.smoothScrolling": true,
+	"telemetry.telemetryLevel": "off",
+	"dotnetAcquisitionExtension.enableTelemetry": false,
+	"files.exclude": {
+		"**/.git": true,
+		"**/.vscode": true,
+		"**/.plastic": true,
+	},
+	"animations.Smooth-Mode": false,
+	"color-highlight.matchWords": true,
+	"color-highlight.markerType": "dot-before",
+	"workbench.iconTheme": "gruvbox-material-icon-theme",
+	"animations.Install-Method": "Apc Customize UI++",
+	"files.hotExit": "onExitAndWindowClose",
+	"window.restoreWindows": "folders",
+	"files.autoSave": "onFocusChange",
+	"git.enableSmartCommit": true,
+	"terminal.integrated.defaultProfile.windows": "Cmd",
+	"workbench.startupEditor": "none",
+	"terminal.integrated.profiles.windows": {
+		"Cmder": {
+			"path": "${env:windir}\\System32\\cmd.exe",
+			"args": [
+				"/k",
+				"C:\\Users\\${env:USERNAME}\\repo_MY_configs_cmder\\cmder\\vendor\\init.bat"
+			]
+		}
+	},
+	"editor.renderWhitespace": "none",
+	"terminal.integrated.copyOnSelection": true,
+	"terminal.integrated.cursorBlinking": true,
+	"terminal.integrated.cwd": "C:\\Users\\${env:USERNAME}\\repo_MY_configs_cmder",
+	"terminal.integrated.cursorWidth": 2,
+	"terminal.integrated.cursorStyle": "line",
+	"terminal.external.windowsExec": "C:\\Users\\${env:USERNAME}\\repo_MY_configs_cmder\\cmder\\vendor\\init.bat",
+	"[c]": {
+		"editor.defaultFormatter": "xaver.clang-format",
+	},
+	"[cpp]": {
+		"editor.defaultFormatter": "xaver.clang-format",
+	},
+	"[java]": {
+		"editor.defaultFormatter": null
+	},
+	"java.configuration.runtimes": [
+		{
+			"name": "JavaSE-19",
+			"path": "C:\\Program Files\\Java\\jdk-19",
+			"default": false
+		}
+	],
+	"[python]": {
+		"editor.defaultFormatter": "ms-python.black-formatter",
+		"editor.tabSize": 3,
+		"editor.insertSpaces": true,
+		"editor.detectIndentation": true
+		// "editor.defaultFormatter": "ms"
+	},
+	"clang-format.language.cpp.enable": true,
+	"clang-format.language.cpp.style": "{UseTab: Always ,IndentWidth: 3 }",
+	"code-runner.runInTerminal": true,
+	"code-runner.saveFileBeforeRun": true,
+	"terminal.integrated.enableMultiLinePasteWarning": "auto",
+	"debug.onTaskErrors": "showErrors",
+	"terminal.integrated.tabs.location": "left",
+	"editor.unicodeHighlight.ambiguousCharacters": false,
+	"editor.unicodeHighlight.allowedCharacters": {
+		" ": true
+	},
+	"notebook.lineNumbers": "on",
+	"hexeditor.columnWidth": 16,
+	"hexeditor.showDecodedText": true,
+	"hexeditor.defaultEndianness": "little",
+	"hexeditor.inspectorType": "aside",
+	"security.workspace.trust.untrustedFiles": "open",
+	"notebook.output.textLineLimit": 1000,
+	"[cmake]": {},
+	"cmake.configureOnOpen": true,
+	"C_Cpp.default.cStandard": "gnu17",
+	"C_Cpp.default.cppStandard": "c++17",
+	"editor.detectIndentation": true,
+	"editor.tabSize": 3,
+	"prettier.useTabs": true,
+	"terminal.integrated.defaultProfile.linux": "bash",
+	"editor.insertSpaces": true,
+	"tabnine.experimentalAutoImports": true,
+	"[jsonc]": {
+		"editor.defaultFormatter": "vscode.json-language-features"
+	},
+	"[markdown]": {
+		"editor.defaultFormatter": "DavidAnson.vscode-markdownlint"
+	},
+	"grammarly.files.include": [
+		"**/readme.md",
+		"**/README.md",
+		"**/*.txt",
+		"**/*.ipynb"
+	],
+	"grammarly.selectors": [],
+	"python.languageServer": "Default",
+	"python.linting.pylintArgs": [
+		"--load-plugins",
+		"pylint_django"
+	],
+	"pylint.importStrategy": "fromEnvironment",
+	"pylint.showNotifications": "onError",
+	"pylint.interpreter": [
+		"C:\\Python311\\python.exe",
+		"C:\\Users\\OmarPc\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe"
+	],
+	"[css]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"[json]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"workbench.editorAssociations": {
+		"*.html": "default"
+	},
+	"[html]": {
+		"editor.defaultFormatter": "vscode.html-language-features"
+	},
+	"[php]": {
+		"editor.defaultFormatter": "bmewburn.vscode-intelephense-client"
+	},
+	"gitlens.views.branches.files.layout": "list",
+	"[javascript]": {
+		"editor.defaultFormatter": "esbenp.prettier-vscode"
+	},
+	"workbench.layoutControl.enabled": false,
+	"markdown-preview-enhanced.previewTheme": "monokai.css",
+	"files.associations": {
+		"*.cpp": "cpp"
+	},
+	"terminal.integrated.fontWeight": "normal",
+	"settingsSync.ignoredExtensions": [],
+	"[csharp]": {
+		"editor.maxTokenizationLineLength": 2500,
+		"editor.inlineSuggest.suppressSuggestions": false
+	},
+	"vscode-pets.throwBallWithMouse": true,
+	"bitoAI.codeCompletion.enableAutoCompletion": true,
+	"bitoAI.codeCompletion.enableCommentToCode": true,
+	"editor.inlineSuggest.showToolbar": "always",
+	"editor.stickyScroll.enabled": false,
+	"json.schemas": [
+		{
+			"fileMatch": [
+				"komorebi.json"
+			],
+			"url": "https://raw.githubusercontent.com/LGUG2Z/komorebi/master/schema.json"
+		}
+	],
+	"git.openRepositoryInParentFolders": "always",
+	"cmake.showOptionsMovedNotification": false,
+	"explorer.confirmDragAndDrop": false,
+	"diffEditor.ignoreTrimWhitespace": false,
+	"errorLens.excludePatterns": [
+		"{**/*.md}"
+	],
+	"workbench.colorTheme": "Monokai",
+	"markdown-preview-enhanced.enablePreviewZenMode": false,
+	"vscode-pets.petType": "cockatiel",
+	"vscode-pets.petSize": "small",
+	"vscode-pets.petColor": "magical",
+	"markdown-preview-enhanced.codeBlockTheme": "xonokai.css",
+	"markdown-preview-enhanced.revealjsTheme": "moon.css",
+	"markdown-pdf.breaks": true,
+	"open-php-html-js-in-browser.selectedBrowser": "Edge",
+	"workbench.activityBar.location": "bottom",
+	"liveServer.settings.donotShowInfoMsg": true,
+	"open-php-html-js-in-browser.customHost": "localhost:8081",
+	"remote.SSH.remotePlatform": {
+		"41.196.252.205": "linux",
+		"192.168.1.12": "linux",
+		"ors.strangled.net": "linux"
+	},
+	"codesnap.showWindowTitle": true,
+	"codesnap.shutterAction": "copy",
+	"codesnap.realLineNumbers": true,
+	"window.menuStyle": "native",
+	"window.controlsStyle": "hidden",
+	"window.density.editorTabHeight": "compact",
+	"workbench.editor.editorActionsLocation": "titleBar",
+	"window.menuBarVisibility": "compact",
+	"chat.commandCenter.enabled": false,
+	"window.commandCenter": false,
+	"editor.minimap.enabled": false,
+	"git.blame.editorDecoration.enabled": false,
+	
+}

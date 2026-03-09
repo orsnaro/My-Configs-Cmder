@@ -1,0 +1,27 @@
+[Unit]
+Description=Gunicorn serving Home-Server-API (WHAT!?: Gunicorn is a Python WSGI HTTP server that runs your Flask or Django app in multiple worker processes for better performance and reliability in production.)
+After=network.target
+
+
+[Service]
+User=ors
+Group=www-data
+WorkingDirectory=/home/ors/repos/Home_server_api/
+Environment="PATH=/home/ors/pyenvs/home_server_api/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin"
+EnvironmentFile=/etc/systemd/system/API_home_server.service.env
+#Environment="PRINTER_IP=192.168.1.11"
+#Environment="OMAR_PC_IP=192.168.1.0"
+#Environment="PRINTER_API_KEY=scrypt:32768:8:1$pcfgtp5rAwDVOhyB$3351c41e29972994afa4a2d0f5d9a9c5aeb6ee0ba1125434bc062a3eb248a83edce904f4d6a5c6210b5958d248ed6c9c822705e5fac10702d23103c3cea8b7e3"
+ExecStart=/home/ors/pyenvs/home_server_api/bin/gunicorn \
+          --workers 3 \
+          --bind unix:/home/ors/repos/Home_server_api/home_server_gunicorn.sock \
+          --access-logfile - \
+          --error-logfile - \
+          wsgi:app
+Restart=on-failure
+RestartSec=5s
+ProtectSystem=full
+PrivateTmp=true
+
+[Install]
+WantedBy=multi-user.target

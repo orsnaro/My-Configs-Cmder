@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "WHAT IS POSITIONAL DRIFT IN FULL BODY TRACKER AND MOTION CAPTURES?"
+        },
+        {
+            "role": "assistant",
+            "content": "Positional drift in full body tracking and motion capture refers to the error or discrepancy that can occur over time between the actual position of a tracked object or body part and its recorded position in the tracking system.\n\nSeveral factors can contribute to positional drift, including sensor noise, calibration errors, marker or sensor occlusion, and the accumulation of small measurement errors over time. These factors can introduce inaccuracies in the tracking data, causing the recorded position to slowly deviate from the true position.\n\nPositional drift can be more noticeable in long-duration tracking sessions or when there are limitations in the tracking system's hardware or software. It can affect the accuracy and reliability of motion capture data, particularly for applications where precise positioning is crucial, such as virtual reality, animation, sports analysis, or biomechanics research.\n\nTo mitigate positional drift, it is important to employ proper calibration techniques, maintain a clear line of sight between sensors and markers, periodically recalibrate the tracking system during longer sessions, and utilize algorithms or post-processing techniques to correct for drift."
+        }
+    ],
+    "prompt_tokens": 51,
+    "completion_tokens": 206
+}

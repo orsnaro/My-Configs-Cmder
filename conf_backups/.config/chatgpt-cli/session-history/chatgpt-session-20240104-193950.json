@@ -1,0 +1,35 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "is this teal blue ? #1e90ff"
+        },
+        {
+            "role": "assistant",
+            "content": "Yes, the hexadecimal color code #1e90ff represents a shade of teal blue."
+        },
+        {
+            "role": "user",
+            "content": "what about this #008080"
+        },
+        {
+            "role": "assistant",
+            "content": "The hexadecimal color code #008080 represents a shade of teal. It is often referred to as \"teal green\" or \"dark teal.\""
+        },
+        {
+            "role": "user",
+            "content": "what is this called #1e90ff"
+        },
+        {
+            "role": "assistant",
+            "content": "The hexadecimal color code #1e90ff is commonly referred to as \"Dodger Blue.\""
+        }
+    ],
+    "prompt_tokens": 239,
+    "completion_tokens": 66
+}

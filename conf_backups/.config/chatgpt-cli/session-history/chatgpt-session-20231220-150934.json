@@ -1,0 +1,91 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "d"
+        },
+        {
+            "role": "assistant",
+            "content": "It seems like your message got cut off. Can you please provide more information or clarify what you need assistance with?"
+        },
+        {
+            "role": "user",
+            "content": "send me a rocket emojie"
+        },
+        {
+            "role": "assistant",
+            "content": "Certainly! Here's a rocket emoji for you: ðŸš€"
+        },
+        {
+            "role": "user",
+            "content": "thanks bye"
+        },
+        {
+            "role": "assistant",
+            "content": "You're welcome! If you have any more questions in the future, feel free to ask. Goodbye!"
+        },
+        {
+            "role": "user",
+            "content": "hi gpt"
+        },
+        {
+            "role": "assistant",
+            "content": "Hello! How can I assist you today?"
+        },
+        {
+            "role": "user",
+            "content": "what was  my last prompt to you"
+        },
+        {
+            "role": "assistant",
+            "content": "Your last prompt to me was \"hi gpt\". How can I help you further?"
+        },
+        {
+            "role": "user",
+            "content": "the last 3 prompts to you was?"
+        },
+        {
+            "role": "assistant",
+            "content": "I apologize for any confusion earlier. Unfortunately, I don't have the capability to retrieve the history of prompts beyond the current conversation. As an AI language model, I can only generate responses based on the most recent prompt given. Is there something specific I can assist you with now?"
+        },
+        {
+            "role": "user",
+            "content": "whats the romts i send to you in this chat session"
+        },
+        {
+            "role": "assistant",
+            "content": "Here is the history of prompts in this chat session:\n\n1. \"hi gpt\"\n2. \"what was my last prompt to you\"\n3. \"the last 3 prompts to you was?\"\n\nPlease let me know how I can further assist you!"
+        },
+        {
+            "role": "user",
+            "content": "what was your last prompt"
+        },
+        {
+            "role": "assistant",
+            "content": "My last prompt was \"the last 3 prompts to you was?\""
+        },
+        {
+            "role": "user",
+            "content": "hi"
+        },
+        {
+            "role": "assistant",
+            "content": "Hello! How can I assist you today?"
+        },
+        {
+            "role": "user",
+            "content": "hy this only happens at night of an exam? \njust caught two bugs then fixed one in 2 diff tools\n heavily starred tools! one of them I  use daily! and one of the bugs crashes the tool completely (mostly he only tested it in linux) due to other similar tools  made only to work on linux os !"
+        },
+        {
+            "role": "assistant",
+            "content": "It's not uncommon to encounter bugs or issues during critical times, such as right before an exam. Sometimes, these situations can be frustrating. However, finding and fixing bugs in tools is an essential part of software development and improvement.\n\nIt's great that you were able to identify and fix one of the bugs in the tools you use. Bugs can sometimes cause tools to crash, especially when they are not properly tested on certain operating systems.\n\nTo minimize the chances of encountering such issues in the future, it's important for developers to thoroughly test their tools on various operating systems and environments. Additionally, reporting any bugs or issues you come across to the tool developers can help them address these problems and make their tools more robust.\n\nGood luck with your exams, and I hope your tools work smoothly for you!"
+        }
+    ],
+    "prompt_tokens": 2077,
+    "completion_tokens": 375
+}

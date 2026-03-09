@@ -1,0 +1,27 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "dont fell in the trap of don't fall in the trap"
+        },
+        {
+            "role": "assistant",
+            "content": "```plaintext\ndon't fell in the trap of don't fall in the trap\n```"
+        },
+        {
+            "role": "user",
+            "content": "dont fell in the trap or don't fall in the trap?"
+        },
+        {
+            "role": "assistant",
+            "content": "```plaintext\nDon't fall in the trap. \n```"
+        }
+    ],
+    "prompt_tokens": 129,
+    "completion_tokens": 30
+}

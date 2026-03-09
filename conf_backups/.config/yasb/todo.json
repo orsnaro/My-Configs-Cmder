@@ -1,0 +1,38 @@
+[
+  {
+    "id": 1771674958,
+    "title": "(4~6 h) daily technology: study docker, .net and db",
+    "description": "friday off\n\ndocker: from bigdata in arabic channel\ndb: from famous iti instructor\n.net : ???",
+    "category": "important",
+    "created_at": "2026-02-21T13:55:58.652597",
+    "completed": false,
+    "order": 3
+  },
+  {
+    "id": 1771894692,
+    "title": "coding my tools yasb fork",
+    "description": "- DONE 🟢 bump yasb fork to v1.8.9 at least\n- fix: hot reload stopped working (likely due to vm update thread ending issue (try multi processing(failed))\n- DONE 🟢py fetal error that cuases status bar to totally crash (when changing sound device and also likely due to thread violation issue)",
+    "category": "important",
+    "created_at": "2026-02-24T02:58:12.336900",
+    "completed": true,
+    "order": 2
+  },
+  {
+    "id": 1771170589,
+    "title": "coding my tools CDV",
+    "description": "- CDV tool: complete feat branch (see thread discord for more)",
+    "category": "default",
+    "created_at": "2026-02-15T17:49:49.106200",
+    "completed": true,
+    "order": 1
+  },
+  {
+    "id": 1771674904,
+    "title": "(2h) daily: problem solving",
+    "description": "friday is off",
+    "category": "important",
+    "created_at": "2026-02-21T13:55:04.897230",
+    "completed": false,
+    "order": 0
+  }
+]

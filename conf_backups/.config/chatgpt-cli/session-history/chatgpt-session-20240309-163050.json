@@ -1,0 +1,19 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "what is clang tidy"
+        },
+        {
+            "role": "assistant",
+            "content": "`clang-tidy` is a tool that is part of the Clang project (a C/C++ compiler) and is used for static analysis of C and C++ code. It helps developers to find bugs and improve the code quality by suggesting fixes for specific coding style guidelines, potential bugs, or performance issues. By running `clang-tidy` on your codebase, you can enforce coding standards and catch potential issues early in the development process."
+        }
+    ],
+    "prompt_tokens": 37,
+    "completion_tokens": 90
+}

@@ -1,0 +1,16 @@
+[Unit]
+Description=Discord Bot Wizy
+After=network.target
+
+[Service]
+Type=simple
+User=ors
+WorkingDirectory=/home/ors/
+ExecStart=/bin/bash /home/ors/crons/discord_bot_startup_job.sh
+Restart=always
+RestartSec=5s
+StandardOutput=append:/home/ors/repos/Discord_bot_ai/std.log
+StandardError=append:/home/ors/repos/Discord_bot_ai/std.log
+
+[Install]
+WantedBy=multi-user.target

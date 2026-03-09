@@ -1,0 +1,27 @@
+{
+    "model": "gpt-3.5-turbo",
+    "messages": [
+        {
+            "role": "system",
+            "content": "Always use code blocks with the appropriate language tags. If asked for a table always format it using Markdown syntax."
+        },
+        {
+            "role": "user",
+            "content": "whats solidwords iClone"
+        },
+        {
+            "role": "assistant",
+            "content": "SolidWorks and iClone are two different software programs used in different industries:\n\n1. SolidWorks: SolidWorks is a 3D computer-aided design (CAD) software used primarily for mechanical design and modeling. It is widely used by engineers and designers to create and modify 3D models of products, parts, and assemblies. SolidWorks provides a range of tools and features to help with design, simulation, animation, documentation, and collaboration.\n\n2. iClone: iClone is a real-time 3D animation software used primarily for character animation and virtual production. It is commonly used in the fields of filmmaking, game development, and virtual reality. With iClone, users can create realistic and dynamic animations by manipulating and animating digital characters, objects, and scenes in real-time. It offers various tools for character customization, motion capture, facial animation, physics simulation, and rendering.\n\nIn summary, SolidWorks is a CAD software used for mechanical design, while iClone is a 3D animation software used for character animation and virtual production."
+        },
+        {
+            "role": "user",
+            "content": "ty"
+        },
+        {
+            "role": "assistant",
+            "content": "You're welcome! If you have any more questions, feel free to ask."
+        }
+    ],
+    "prompt_tokens": 300,
+    "completion_tokens": 229
+}
