@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 :: --- CONFIGURATION ---
 :: Note: No quotes here, we add them later in the commands
-set "SOURCE_DIR=C:\Users\OmarPc\AppData\Local\Microsoft\Edge\User Data\Default"
+set "SOURCE_DIR=C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\Default"
 set "DEST_DIR=D:\EdgeBackups\profile"
 set "LOG_FILE=D:\EdgeBackups\sync.log"
 

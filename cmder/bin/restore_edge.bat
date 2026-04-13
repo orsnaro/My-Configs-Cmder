@@ -3,7 +3,7 @@ setlocal enabledelayedexpansion
 
 :: 1. Define paths (Text only, no internal quotes)
 set "SOURCE_DIR=D:\EdgeBackups\profile"
-set "DEST_DIR=C:\Users\OmarPc\AppData\Local\Microsoft\Edge\User Data\Default"
+set "DEST_DIR=C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\Default"
 set "LOG_FILE=D:\EdgeBackups\restore.log"
 
 :: 2. Check if D: drive/Backup folder exists

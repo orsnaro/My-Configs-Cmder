@@ -1,16 +1,18 @@
 #!/bin/bash
 
 # 1. Define paths
+WIN_USER=$(cmd.exe /c "echo %USERNAME%" 2>/dev/null | tr -d '\r')
+
 # BACKUP_SOURCE: Your backup folder on the D: drive
-BACKUP_SOURCE="/mnt/d/EdgeBackups/profile/"
+RESTORE_SOURCE="/mnt/d/EdgeBackups/profile"
 
 # BROWSER_DEST: The live Edge folder on your C: drive
-BROWSER_DEST="/mnt/c/Users/OmarPC/AppData/Local/Microsoft/Edge/User Data/Default/"
+RESTORE_DISTNATION="/mnt/c/Users/$WIN_USER/AppData/Local/Microsoft/Edge/User Data/Default"
 
 LOG_FILE="/mnt/d/EdgeBackups/restore.log"
 
 # 2. Check if D: drive is even mounted
-if [ ! -d "$BACKUP_SOURCE" ]; then
+if [ ! -d "$RESTORE_DISTNATION" ]; then
     echo "$(date): ERROR - D: drive backup folder not found. Is the drive plugged in?" >> "$LOG_FILE"
     exit 1
 fi
@@ -24,6 +26,6 @@ sleep 3
 
 # 4. Restore the data
 # Using -a (archive) to preserve the structure and --delete to wipe any corrupted files in the destination
-sudo rsync -av --delete "$BACKUP_SOURCE" "$BROWSER_DEST"
+sudo rsync -av --delete "$RESTORE_SOURCE" "$RESTORE_DISTNATION"
 
 echo "$(date): Edge Restore from D: drive COMPLETED." >> "$LOG_FILE"
