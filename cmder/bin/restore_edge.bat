@@ -13,7 +13,13 @@ if not exist "%BACKUP_ROOT%" (
     exit /b
 )
 
-:: 3. Selection Menu
+:: 3. Selection Menu / Auto-restore check
+if "%~1"=="latest" (
+    echo [i] Auto-restore mode triggered. Selecting latest backup...
+    set "choice=1"
+    goto :SKIP_MENU
+)
+
 echo.
 echo ===========================================
 echo   EDGE RESTORE - SELECT BACKUP VERSION
@@ -25,6 +31,7 @@ echo [Q] Quit
 echo ===========================================
 set /p "choice=Select a version to restore (1/2/3): "
 
+:SKIP_MENU
 if "%choice%"=="1" set "SOURCE_DIR=%BACKUP_ROOT%\profile.1"
 if "%choice%"=="2" set "SOURCE_DIR=%BACKUP_ROOT%\profile.2"
 if "%choice%"=="3" set "SOURCE_DIR=%BACKUP_ROOT%\profile.3"

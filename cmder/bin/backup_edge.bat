@@ -93,9 +93,9 @@ goto :FINISHED
 :ABORT_BACKUP
 echo %DATE% %TIME%: WARNING - Data check failed (Size Drop Detected). Aborted. >> "%LOG_FILE%"
 echo [!] Safety check failed. Possible data loss detected.
-echo [i] Initiating restore process...
+echo [i] Initiating automatic restore of the latest backup...
 echo.
-call "%~dp0restore_edge.bat"
+call "%~dp0restore_edge.bat" latest
 
 :FINISHED
 echo Done.
