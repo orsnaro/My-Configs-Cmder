@@ -1,20 +1,50 @@
 @echo off
 setlocal enabledelayedexpansion
 
-:: 1. Define paths (Text only, no internal quotes)
-set "SOURCE_DIR=D:\EdgeBackups\profile"
-set "DEST_DIR=C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\Default"
-set "LOG_FILE=D:\EdgeBackups\restore.log"
+:: 1. Define paths
+set "BACKUP_ROOT=D:\EdgeBackups\batch"
+set "DEST_DIR=C:\Users\%USERNAME%\AppData\Local\Microsoft\Edge\User Data\Profile 7"
+set "LOG_FILE=%BACKUP_ROOT%\restore.log"
 
-:: 2. Check if D: drive/Backup folder exists
-if not exist "%SOURCE_DIR%" (
-    echo [%DATE% %TIME%] ERROR: Backup folder not found on D: >> "%LOG_FILE%"
+:: 2. Check if D: drive/Backup root exists
+if not exist "%BACKUP_ROOT%" (
     echo [!] ERROR: Backup folder not found. Is the D: drive connected?
     pause
     exit /b
 )
 
-:: 3. Kill the Windows Edge process 
+:: 3. Selection Menu
+echo.
+echo ===========================================
+echo   EDGE RESTORE - SELECT BACKUP VERSION
+echo ===========================================
+if exist "%BACKUP_ROOT%\profile.1" echo [1] Latest Backup (profile.1)
+if exist "%BACKUP_ROOT%\profile.2" echo [2] Previous Backup (profile.2)
+if exist "%BACKUP_ROOT%\profile.3" echo [3] Oldest Backup (profile.3)
+echo [Q] Quit
+echo ===========================================
+set /p "choice=Select a version to restore (1/2/3): "
+
+if "%choice%"=="1" set "SOURCE_DIR=%BACKUP_ROOT%\profile.1"
+if "%choice%"=="2" set "SOURCE_DIR=%BACKUP_ROOT%\profile.2"
+if "%choice%"=="3" set "SOURCE_DIR=%BACKUP_ROOT%\profile.3"
+if /i "%choice%"=="Q" exit /b
+
+if not defined SOURCE_DIR (
+    echo Invalid choice.
+    pause
+    exit /b
+)
+
+if not exist "%SOURCE_DIR%" (
+    echo [%DATE% %TIME%] ERROR: Selected backup version %choice% not found on D: >> "%LOG_FILE%"
+    echo [!] ERROR: Selected backup version does not exist.
+    pause
+    exit /b
+)
+
+:: 4. Kill the Windows Edge process 
+echo.
 echo Closing Edge to release file locks...
 taskkill /F /IM msedge.exe /T >nul 2>&1
 taskkill /F /IM MicrosoftEdgeUpdate.exe /T >nul 2>&1
