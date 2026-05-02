@@ -60,7 +60,8 @@ timeout /t 3 /nobreak >nul
 :: 4. Restore the data
 echo Restoring data from D: edge backup TO C: edge location...
 :: /MIR makes the C: drive folder exactly match the D: backup
-robocopy "%SOURCE_DIR%" "%DEST_DIR%" /MIR /MT:8 /R:0 /W:0 /XF Cookies* "Safe Browsing Cookies" /LOG+:"%LOG_FILE%" /NP /TEE
+@REM robocopy "%SOURCE_DIR%" "%DEST_DIR%" /MIR /MT:8 /R:0 /W:0 /XF Cookies* "Safe Browsing Cookies" /LOG+:"%LOG_FILE%" /NP /TEE
+robocopy "%SOURCE_DIR%" "%DEST_DIR%" /E /ZB /IS /IT /MT:128 /R:3 /W:3 /LOG+:"%LOG_FILE%" /NP /TEE
 
 echo [%DATE% %TIME%] SUCCESS: Edge Restore from D: Drive COMPLETED. >> "%LOG_FILE%"
 echo.

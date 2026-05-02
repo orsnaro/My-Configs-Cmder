@@ -79,8 +79,8 @@ if exist "%BACKUP_ROOT%\profile.1" ren "%BACKUP_ROOT%\profile.1" profile.2
 
 echo Starting Robocopy to profile.1...
 rem Execute Robocopy to profile.1
-robocopy "%SOURCE_DIR%" "%BACKUP_ROOT%\profile.1" /MIR /MT:8 /R:0 /W:0 /XF Cookies* "Safe Browsing Cookies" /XD "Cache" "Code Cache" "GPUCache" /LOG+:"%LOG_FILE%" /NP /TEE
-
+@REM robocopy "%SOURCE_DIR%" "%BACKUP_ROOT%\profile.1" /MIR /MT:8 /R:0 /W:0 /XF Cookies* "Safe Browsing Cookies" /XD "Cache" "Code Cache" "GPUCache" /LOG+:"%LOG_FILE%" /NP /TEE
+robocopy "%SOURCE_DIR%" "%BACKUP_ROOT%\profile.1" /MIR /MT:4 /ZB /R:3 /W:3 /IT /IS
 :: Save new sizes for next time
 echo HIST_SIZE=%HIST_SIZE%> "%SIZE_FILE%"
 echo LOGIN_SIZE=%LOGIN_SIZE%>> "%SIZE_FILE%"
