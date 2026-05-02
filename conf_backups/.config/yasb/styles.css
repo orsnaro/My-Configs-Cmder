@@ -44,7 +44,7 @@
 /* === BASE STYLES === */
 /* ================= */
 * {
-    font-size: 12px;
+    font-size: 16px;
     color: var(--subtext0);
     font-weight: 700;
     font-family: "JetBrainsMono NFP";
@@ -56,6 +56,13 @@
 /* === BAR LAYOUT === */
 /* ================= */
 .yasb-bar {
+    padding: 0;
+    margin: 1px 0;
+    background: var(--base);
+    border-radius: 6px;
+}
+.yasb-bar2 {
+	font-size: 12px;
     padding: 0;
     margin: 1px 0;
     background: var(--base);
@@ -87,8 +94,17 @@
     padding: 0px 2px;
 }
 
-.icon {
-    font-size: 14px;
+.yasb-bar .icon {
+    font-size: 16px;
+    margin: 0 4px 0 0;
+}
+
+.yasb-bar2 .label {
+    font-size: 12px;
+    margin: 0 4px 0 0;
+}
+.yasb-bar2 .icon {
+    font-size: 12px;
     margin: 0 4px 0 0;
 }
 
@@ -131,7 +147,12 @@
 
 .power-menu-widget .label {
     color: var(--red);
-    font-size: 14px;
+    font-size: 16px;
+}
+
+.yasb-bar2 .power-menu-widget .label {
+    color: var(--red);
+    font-size: 12px;
 }
 
 .power-menu-popup .button {
@@ -202,6 +223,15 @@
     margin-right: 4px;
     letter-spacing: -1px;
 }
+
+.yasb-bar2 .media-widget .label {
+    font-size: 10px;
+    background-color: transparent;
+    margin-left: 6px;
+    margin-right: 4px;
+    letter-spacing: -1px;
+}
+
 .media-widget .btn {
     background: transparent;
     border: none;
@@ -398,6 +428,17 @@ Example: "Windows Media" becomes "windows-media" */
     background: transparent;
 }
 
+.yasb-bar2 .voicemeeter-widget .label {
+    font-size: 9px;
+    color: var(--subtext0);
+    font-weight: 700;
+    font-family: "JetBrainsMono NFP";
+    background: transparent;
+}
+.yasb-bar2 .voicemeeter-widget .icon {
+    font-size: 12px;
+}
+
 .audio-container .device {
     font-size: 10px;
     background-color: transparent;
@@ -461,11 +502,11 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .disk-group-label {
-    font-size: 13px;
+    font-size: 16px;
 }
 
 .disk-group-label-size {
-    font-size: 12px;
+    font-size: 16px;
     color: rgba(205, 214, 244, 0.5);
 }
 
@@ -474,11 +515,22 @@ Example: "Windows Media" becomes "windows-media" */
 /* ================= */
 
 .clock-widget .icon {
-    font-size: 12px;
+    font-size: 16px;
     color: var(--sky)
 }
 
 .clock-widget .label {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--subtext0);
+}
+
+.yasb-bar2 .clock-widget .icon {
+    font-size: 12px;
+    color: var(--sky)
+}
+
+.yasb-bar2 .clock-widget .label {
     font-size: 12px;
     font-weight: 700;
     color: var(--subtext0);
@@ -562,6 +614,19 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .weather-widget .label {
+    font-size: 16px;
+    color: var(--subtext0);
+    font-weight: 700;
+    font-family: "JetBrainsMono NFP";
+    background: transparent;
+}
+.yasb-bar2 .weather-widget .icon {
+    font-size: 12px;
+    margin: 0 2px 1px 0;
+    color: var(--maroon);
+}
+
+.yasb-bar2 .weather-widget .label {
     font-size: 12px;
     color: var(--subtext0);
     font-weight: 700;
@@ -587,7 +652,7 @@ Example: "Windows Media" becomes "windows-media" */
     box-shadow: 0 2px 8px 0 rgba(195, 159, 241, 0.10);
 }
 .weather-card-today .label {
-    font-size: 13px;
+    font-size: 16px;
     color: var(--subtext1);
 }
 .weather-card-today .label.location {
@@ -597,7 +662,7 @@ Example: "Windows Media" becomes "windows-media" */
     letter-spacing: 1px;
 }
 .weather-card-today .label.alert {
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 700;
     background-color: rgba(250, 179, 135, 0.10);
     border: 1px solid rgba(250, 179, 135, 0.18);
@@ -614,7 +679,7 @@ Example: "Windows Media" becomes "windows-media" */
     transition: background 0.15s, border 0.15s;
 }
 .weather-card-day .label {
-    font-size: 12px;
+    font-size: 16px;
     color: var(--subtext0);
 }
 .weather-card-day:hover {
@@ -634,6 +699,14 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .glazewm-workspaces .ws-btn {
+    font-size: 16px;
+    border: none;
+    color: var(--overlay2);
+    padding: 0 5px;
+    cursor: pointer;
+}
+
+.yasb-bar2 .glazewm-workspaces .ws-btn {
     font-size: 12px;
     border: none;
     color: var(--overlay2);
@@ -665,6 +738,14 @@ Example: "Windows Media" becomes "windows-media" */
     color: var(--yellow);
 }
 .wifi-widget .label {
+    font-size: 16px;
+    color: var(--subtext0);
+    font-weight: 700;
+    font-family: "JetBrainsMono NFP";
+    background: transparent;
+}
+
+.yasb-bar2 .wifi-widget .label {
     font-size: 12px;
     color: var(--subtext0);
     font-weight: 700;
@@ -689,7 +770,7 @@ Example: "Windows Media" becomes "windows-media" */
 
 .battery-widget .label {
     color: var(--subtext0);
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 700;
     font-family: "JetBrainsMono NFP";
     background: transparent;
@@ -703,7 +784,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .memory-widget .label {
-    font-size: 12px;
+    font-size: 16px;
     color: var(--subtext0);
     font-weight: 700;
     font-family: "JetBrainsMono NFP";
@@ -714,7 +795,7 @@ Example: "Windows Media" becomes "windows-media" */
 /* === UPTIME WIDGET === */
 /* ================= */
 .uptime {
-    font-size: 14px;
+    font-size: 16px;
     margin-bottom: 10px;
     color: var(--subtext0);
     font-weight: 600;
@@ -728,7 +809,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .home-widget .icon {
-    font-size: 18px;
+    font-size: 24px;
     color: var(--subtext1);
 }
 
@@ -779,6 +860,15 @@ Example: "Windows Media" becomes "windows-media" */
     transition: background 0.15s, color 0.15s;
     font-size: 16px;
 }
+.yasb-bar2 .systray .button {
+    /* border-radius: 12px; */
+    /* padding: 1px; */
+    /* /* background: transparent; */
+    color: var(--text);
+    margin: 1px 0.5px;
+    transition: background 0.15s, color 0.15s;
+    font-size: 12px;
+}
 
 .systray .button:hover {
     background: var(--og);
@@ -797,7 +887,7 @@ Example: "Windows Media" becomes "windows-media" */
     color: var(--crust);
     border: 1px solid transparent;
     margin: 7px 0.5px;
-    font-size: 17px;
+    font-size: 12px;
 }
 
 .systray .unpinned-visibility-btn.active {
@@ -812,7 +902,7 @@ Example: "Windows Media" becomes "windows-media" */
 
 .libre-monitor-widget .widget-container .label {
     color: var(--subtext0);
-    font-size: 10px;
+    font-size: 12px;
     font-family: "JetBrainsMono NFP";
     font-weight: 700;
     background: transparent;
@@ -820,7 +910,20 @@ Example: "Windows Media" becomes "windows-media" */
 
 .libre-monitor-widget .widget-container .icon {
     color: var(--mauve);
-    font-size: 14px;
+    font-size: 16px;
+    background: transparent;
+}
+.yasb-bar2 .libre-monitor-widget .widget-container .label {
+    color: var(--subtext0);
+    font-size: 12px;
+    font-family: "JetBrainsMono NFP";
+    font-weight: 700;
+    background: transparent;
+}
+
+.yasb-bar2 .libre-monitor-widget .widget-container .icon {
+    color: var(--mauve);
+    font-size: 12px;
     background: transparent;
 }
 
@@ -839,7 +942,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .libre-menu .header {
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     color: var(--og);
     font-family: "JetBrainsMono NFP", "Segoe UI", sans-serif;
@@ -876,7 +979,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .libre-menu .sensor-name {
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     font-family: "JetBrainsMono NFP", "Segoe UI", sans-serif;
     color: var(--surface0);
@@ -886,7 +989,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .libre-menu .sensor-value {
-    font-size: 12px;
+    font-size: 14px;
     font-family: "JetBrainsMono NFP", "Segoe UI", sans-serif;
     font-weight: 700;
     color: var(--surface0);
@@ -912,7 +1015,12 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .notification-widget .icon {
-    font-size: 14px;
+    font-size: 16px;
+    color: var(--rosewater);
+    margin-right: 0px;
+}
+.yasb-bar2 .notification-widget .icon {
+    font-size: 12px;
     color: var(--rosewater);
     margin-right: 0px;
 }
@@ -952,7 +1060,7 @@ Example: "Windows Media" becomes "windows-media" */
 
 .vscode-menu .header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.075);
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 400;
     padding: 8px;
     color: var(--text);
@@ -969,7 +1077,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .vscode-menu .contents .item .title {
-    font-size: 12px;
+    font-size: 16px;
     margin-right: 5px;
     color: var(--text);
 }
@@ -1011,7 +1119,7 @@ Example: "Windows Media" becomes "windows-media" */
     background: rgba(100, 67, 157, 0.171);
     color: var(--text);
     border: 1px solid var(--og);
-    font-size: 13px;
+    font-size: 16px;
     padding: 10px 0;
     border-radius: 8px;
     margin: 0 10px 14px 10px;
@@ -1051,6 +1159,10 @@ Example: "Windows Media" becomes "windows-media" */
     padding: 0;
 }
 .todo-widget .label {
+    font-size: 16px;
+    padding: 0;
+}
+.yasb-bar2 .todo-widget .label {
     font-size: 12px;
     padding: 0;
 }
@@ -1058,10 +1170,10 @@ Example: "Windows Media" becomes "windows-media" */
 .todo-menu {
     /* background-color: rgba(24, 25, 27, 0.8); */
     background-color: #1e1e2e;
-    min-width: 400px;
-    max-width: 400px;
-    min-height: 500px;
-    max-height: 500px;
+    min-width: 500px;
+    max-width: 500px;
+    min-height: 600px;
+    max-height: 600px;
 }
 .todo-menu .header {
     margin: 16px 10px
@@ -1072,14 +1184,14 @@ Example: "Windows Media" becomes "windows-media" */
     border-radius: 13px;
     /* color: #ffffff; */
     padding: 4px 8px;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 600;
     margin: 0px;
     font-family: 'Segoe UI', 'JetBrainsMono NFP';
 }
 .todo-menu .header .tab-buttons {
     margin: 0;
-    font-size: 12px;
+    font-size: 16px;
 }
 .todo-menu .header .add-task-button:hover {
     background-color: #0f91e7;
@@ -1111,7 +1223,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .todo-menu .no-tasks {
     font-family: 'Segoe UI';
-    font-size: 18px;
+    font-size: 14px;
     color: #979fa0;
     font-weight: 400;
     margin-top: 16px;
@@ -1144,7 +1256,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .todo-menu .task-item .title {
     color: #ebebeb;
-    font-size: 13px;
+    font-size: 12px;
     font-weight: 600;
     font-family: 'Segoe UI';
     padding: 0 8px 8px 8px;
@@ -1185,7 +1297,7 @@ Example: "Windows Media" becomes "windows-media" */
     font-family: 'Segoe UI';
     font-weight: 600;
     color: #7e7f88;
-    font-size: 13px;
+    font-size: 16px;
     padding-left: 0px;
     margin-right: 12px;
 }
@@ -1193,7 +1305,7 @@ Example: "Windows Media" becomes "windows-media" */
 .todo-menu .task-info-row .category-icon {
     font-weight: 400;
     color: #a7a8b3;
-    font-size: 14px;
+    font-size: 16px;
     font-family: 'JetBrainsMono NFP';
     margin-top: 1px;
 }
@@ -1218,7 +1330,7 @@ Example: "Windows Media" becomes "windows-media" */
     color: #000000;
     font-family: 'Segoe UI';
     font-weight: 600;
-    font-size: 12px;
+    font-size: 16px;
     padding: 0 8px;
     border-radius: 10px;
     min-height: 20px;
@@ -1247,7 +1359,7 @@ Example: "Windows Media" becomes "windows-media" */
     border-radius: 4px;
     padding: 0 6px;
     font-family: 'Segoe UI';
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
     color: #FFFFFF;
     margin: 10px 0px 5px 0;
@@ -1265,7 +1377,7 @@ Example: "Windows Media" becomes "windows-media" */
     border: none;
     border-radius: 4px;
     font-family: 'Segoe UI';
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
     color: #FFFFFF;
     min-width: 80px;
@@ -1276,7 +1388,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .todo-menu .app-dialog .buttons-container .button {
     margin: 10px 0 5px 0px;
-    font-size: 13px;
+    font-size: 16px;
 }
 .todo-menu .app-dialog .button:focus {
     border: 2px solid #adadad;
@@ -1304,7 +1416,7 @@ Example: "Windows Media" becomes "windows-media" */
     border-radius: 4px;
     color: #cc9b9f;
     font-family: 'Segoe UI';
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
     padding: 8px 12px;
     margin: 4px 0px;
@@ -1314,7 +1426,7 @@ Example: "Windows Media" becomes "windows-media" */
     border: none;
     border-radius: 4px;
     font-family: 'Segoe UI';
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 700;
     color: #afafaf;
     padding: 0 6px;
@@ -1336,11 +1448,11 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .ai-chat-widget .icon {
     /* color: white; */
-    font-size: 16px;
+    font-size: 18px;
 }
 .ai-chat-widget .icon:hover {
     color: rgba(230, 84, 171, 0.903);
-    font-size: 16px;
+    font-size: 18px;
 }
 
 .ai-chat-popup {
@@ -1391,7 +1503,7 @@ Example: "Windows Media" becomes "windows-media" */
     font-family: "Segoe UI Variable","Segoe UI";
     background-color: #252525;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    font-size: 12px;
+    font-size: 16px;
     color: #ffffff;
     margin-right: 8px;
     min-width: 130px;
@@ -1422,7 +1534,7 @@ Example: "Windows Media" becomes "windows-media" */
     border: none;
     padding: 6px 0px;
     font-family: "Segoe UI Variable","Segoe UI";
-    font-size: 12px;
+    font-size: 16px;
     color: #FFFFFF;
      
 }
@@ -1515,7 +1627,7 @@ Example: "Windows Media" becomes "windows-media" */
  
 .ai-chat-popup .chat-footer .chat-input {
     font-family: "Segoe UI Variable","Segoe UI";
-    font-size: 14px;
+    font-size: 16px;
     color: #ffffff;
 }
 
@@ -1562,11 +1674,11 @@ Example: "Windows Media" becomes "windows-media" */
 .ai-chat-popup .attachment-chip .attachment-label {
     font-family: "Segoe UI Variable","Segoe UI";
     color: #95a4b9;
-    font-size: 12px;
+    font-size: 16px;
     padding: 0 4px;
 }
 .ai-chat-popup .attachment-chip .attachment-remove-button {
-    font-size: 12px;
+    font-size: 16px;
     font-family: "Segoe UI Variable","Segoe UI";
     background-color: transparent;
     border: none;
@@ -1659,6 +1771,10 @@ Example: "Windows Media" becomes "windows-media" */
     color: rgba(230, 84, 171, 0.903);
 }
 
+.yasb-bar2 .language-widget .label{
+	font-size: 12px;
+}
+
 .language-menu {
     /* background-color: rgba(17, 17, 27, 0.4); */
     min-width: 300px;
@@ -1676,7 +1792,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .language-menu .footer {
     font-family: 'Segoe UI';
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
     padding: 12px;
     margin-top: 2px;
@@ -1722,7 +1838,7 @@ Example: "Windows Media" becomes "windows-media" */
 .language-menu .language-item .layout {
     font-weight: 600;
     font-family: 'Segoe UI';
-    font-size: 12px;
+    font-size: 16px;
 }
 
 /* ==================== */
@@ -1738,7 +1854,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .grouper-extras .grouper-button {
-    font-size: 12px;
+    font-size: 16px;
     /* color: #ffffff; */
     padding: 0 8px;
     background-color: transparent;
@@ -1790,7 +1906,7 @@ Example: "Windows Media" becomes "windows-media" */
     color: #ff6b6b;
     background: transparent;
     border: none;
-    font-size: 8px;
+    font-size: 12px;
     padding: 7px 8px;
     border-radius: 3px;
 }
@@ -1884,7 +2000,7 @@ Example: "Windows Media" becomes "windows-media" */
     border-radius: 6px;
     padding: 4px 0px;
     font-family: 'Segoe UI';
-    font-size: 12px;
+    font-size: 16px;
     color: #FFFFFF;
     font-weight: 600
 }
@@ -1928,7 +2044,7 @@ Example: "Windows Media" becomes "windows-media" */
 .launchpad .app-dialog .message {
     color: #FFFFFF;
     font-family: 'Segoe UI';
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
     padding: 10px 0
 }
@@ -1941,7 +2057,7 @@ Example: "Windows Media" becomes "windows-media" */
     border-radius: 4px;
     padding: 0 6px;
     font-family: 'Segoe UI';
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
     color: #FFFFFF;
     margin: 10px 0px 5px 0;
@@ -1957,7 +2073,7 @@ Example: "Windows Media" becomes "windows-media" */
     border: none;
     border-radius: 4px;
     font-family: 'Segoe UI';
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
     color: #FFFFFF;
     min-width: 80px;
@@ -1968,7 +2084,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .launchpad .app-dialog .buttons-container .button {
     margin: 10px 0 5px 0px;
-    font-size: 13px;
+    font-size: 14px;
 }
 .launchpad .app-dialog .button:focus {
     border: 2px solid #adadad;
@@ -2010,7 +2126,7 @@ Example: "Windows Media" becomes "windows-media" */
     border-radius: 4px;
     color: #cc9b9f;
     font-family: 'Segoe UI';
-    font-size: 12px;
+    font-size: 16px;
     font-weight: 600;
     padding: 8px 12px;
     margin: 4px 0px;
@@ -2042,7 +2158,7 @@ Example: "Windows Media" becomes "windows-media" */
 .launchpad .search-input {
     max-width: 400px;
     padding: 8px 12px;
-    font-size: 14px;
+    font-size: 16px;
     min-height: 24px;
     max-height: 24px;
     font-family: 'Segoe UI';
@@ -2082,7 +2198,7 @@ Example: "Windows Media" becomes "windows-media" */
 .launchpad .app-icon .title {
     color: #a6adc8;
     font-family: 'Segoe UI';
-    font-size: 14px;
+    font-size: 16px;
     margin-top: 2px;
     font-weight: 600
 }
@@ -2123,7 +2239,7 @@ Example: "Windows Media" becomes "windows-media" */
 .launchpad .group-icon .title {
     color: #a6adc8;
     font-family: 'Segoe UI';
-    font-size: 14px;
+    font-size: 16px;
     margin-top: 2px;
     font-weight: 600;
 }
@@ -2166,6 +2282,7 @@ Example: "Windows Media" becomes "windows-media" */
     border-radius: 4px;
     padding: 0 4px;
 }
+
 .taskbar-widget .app-container.foreground {
     background-color: rgba(255, 255, 255, 0.253);
 }
@@ -2197,7 +2314,7 @@ Example: "Windows Media" becomes "windows-media" */
     color: #d6d6d6;
     font-family: "Segoe UI";
     font-weight: 600;
-    font-size: 13px;
+    font-size: 16px;
 }
 .taskbar-preview .close-button {
     color: #999;
@@ -2274,7 +2391,7 @@ Example: "Windows Media" becomes "windows-media" */
 	padding: -2px 8px 0px 8px;
 	margin-top: 2px;
 	margin-right: 4px;
-	font-size: 13px;
+	font-size: 16px;
 	font-weight: 600;
 	font-family: "Segoe UI";
 	max-height: 28px;
@@ -2294,7 +2411,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 .quick-launch-popup .results-list-view .description {
 	color: rgba(255, 255, 255, 0.6);
-	font-size: 11px;
+	font-size: 14px;
 	font-family: "Segoe UI";
 	font-weight: 600;
 }
@@ -2321,7 +2438,7 @@ Example: "Windows Media" becomes "windows-media" */
 	border-left: 1px solid rgba(255, 255, 255, 0.06);
 }
 .quick-launch-popup .preview .preview-text {
-	font-size: 13px;
+	font-size: 16px;
 	color: rgba(255, 255, 255, 0.85);
 	padding: 8px 12px;
 	font-family: "Segoe UI";
@@ -2338,7 +2455,7 @@ Example: "Windows Media" becomes "windows-media" */
 	font-family: "Segoe UI";
 }
 .quick-launch-popup .preview .preview-meta .preview-title {
-	font-size: 14px;
+	font-size: 16px;
 	font-weight: 600;
 	color: rgb(255, 255, 255);
 	font-family: "Segoe UI";
@@ -2347,7 +2464,7 @@ Example: "Windows Media" becomes "windows-media" */
 }
 
 .quick-launch-popup .preview .preview-meta .preview-subtitle {
-	font-size: 12px;
+	font-size: 14px;
 	color: rgba(255, 255, 255, 0.8);
 	font-family: "Segoe UI";
 	padding-bottom: 1px;
@@ -2355,7 +2472,7 @@ Example: "Windows Media" becomes "windows-media" */
 
 /* Preview inline edit form (.preview.edit) */
 .quick-launch-popup .preview.edit .preview-title {
-	font-size: 13px;
+	font-size: 16px;
 	font-family: "Segoe UI";
 	font-weight: 600;
 	color: #ffffff;
@@ -2366,7 +2483,7 @@ Example: "Windows Media" becomes "windows-media" */
 	border: 1px solid rgba(255, 255, 255, 0.12);
 	border-radius: 4px;
 	color: #ffffff;
-	font-size: 13px;
+	font-size: 16px;
 	font-family: "Segoe UI";
 	padding: 6px 8px;
 	margin: 0 12px;
@@ -2379,7 +2496,7 @@ Example: "Windows Media" becomes "windows-media" */
 	border: 1px solid rgba(255, 255, 255, 0.12);
 	border-radius: 4px;
 	color: #ffffff;
-	font-size: 13px;
+	font-size: 16px;
 	font-family: "Segoe UI";
 	padding: 6px 8px;
 	margin: 0 12px;
@@ -2395,7 +2512,8 @@ Example: "Windows Media" becomes "windows-media" */
 	border: none;
 	border-radius: 4px;
 	color: rgba(255, 255, 255, 0.8);
-	font-size: 12px;
+	font-size: 16
+    4px;
 	font-family: "Segoe UI";
 	font-weight: 600;
 	padding: 4px 16px;

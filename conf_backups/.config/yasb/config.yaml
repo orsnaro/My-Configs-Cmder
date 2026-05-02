@@ -8,7 +8,7 @@ komorebi:
 bars:
   primary-bar:
     enabled: true
-    screens: ['*']  # show on all UNASSIGNED SCREENS
+    screens: ['Mi Monitor']
     class_name: "yasb-bar"
     alignment:
       position: "top"
@@ -25,8 +25,8 @@ bars:
       windows_app_bar: true
       auto_hide: false
     dimensions:
-      width: 1360
-      height: 28
+      width: 2400
+      height: 36
     padding:
       top: 2
       left: 0
@@ -38,8 +38,7 @@ bars:
           "glazewm_workspaces",
           "taskbar",
           # "launchpad",
-          "quick_launch", 
-
+          #"quick_launch", 
           #"active_window",
           "media",
           
@@ -63,8 +62,8 @@ bars:
       ]
   bar-2:
     enabled: true
-    screens: ['\\.\DISPLAY1'] 
-    class_name: "yasb-bar"
+    screens: ['SAMSUNG'] 
+    class_name: "yasb-bar2"
     alignment:
       position: "top"
       center: true
@@ -76,12 +75,12 @@ bars:
       border_color: None
     window_flags:
       hide_on_fullscreen: false
-      always_on_top: true
+      always_on_top: false
       windows_app_bar: true
       auto_hide: false
     dimensions:
       width: 1360
-      height: 28
+      height: 32
     padding:
       top: 2
       left: 0
@@ -90,10 +89,10 @@ bars:
     widgets:
       left: [ 
           "home", 
-          "quick_launch",
+          #"quick_launch",
           "glazewm_workspaces", 
           #"komorebi_stack",
-          "taskbar",
+          "taskbar2",
           #"launchpad",
           #"active_window",
           "media",
@@ -121,6 +120,7 @@ bars:
           "network",
           "lang",
           "microphone",
+          "bluetooth",
           #"volume",
           "voicemeeter",
           #"battery",
@@ -129,7 +129,7 @@ bars:
       ]
   bar-3:
     enabled: true
-    screens: ['\\.\DISPLAY10']
+    screens: ['*'] #show on all unassigned monitors
     class_name: "yasb-bar"
     alignment:
       position: "top"
@@ -201,10 +201,10 @@ widgets:
       widgets: [
         "systray",
         "ai_chat",
-        "pomodoro",
         "notes",
-        "todo",
         "github",
+        "pomodoro",
+        "todo",
         "libre_gpu",
         "vscode",
         # "quick_launch", 
@@ -213,7 +213,7 @@ widgets:
       ]
       collapse_options:
         enabled: true
-        exclude_widgets: ["ai_chat", "todo"]
+        exclude_widgets: ["ai_chat", "github", "pomodoro"]
         expanded_label: "\uf054"
         collapsed_label: "\uf053"
         label_position: "right"
@@ -228,7 +228,7 @@ widgets:
         - { title: "🖼️ Pictures", path: "~/Pictures" }
         - { title: "🎬 Videos", path: "~/Videos" }
         - { title: "🎵 Music", path: "~/Music" }
-        - { title: "🗑️ Recycle Bin", path: 'C:\Scripts\Shortcuts\Recycle Bin.lnk' }
+        - { title: "🗑️ Recycle Bin", path: 'C:\$Recycle.Bin\S-1-5-21-556436327-3193782947-1691256332-1001' }
       system_menu: true
       power_menu: false
       blur: true
@@ -251,6 +251,32 @@ widgets:
     type: "yasb.taskbar.TaskbarWidget"
     options:
       icon_size: 16
+      tooltip: true
+      show_only_visible: false
+      strict_filtering: true
+      monitor_exclusive: false
+      hide_empty: true
+      animation:
+        enabled: true
+      preview:
+        enabled: true
+        width: 140
+        delay: 400
+        padding: 8
+        margin: 8
+      title_label:
+        enabled: false
+        show: "focused"
+        min_length: 10
+        max_length: 20
+      ignore_apps:
+        processes: []
+        titles: []
+        classes: []
+  taskbar2:
+    type: "yasb.taskbar.TaskbarWidget"
+    options:
+      icon_size: 12
       tooltip: true
       show_only_visible: false
       strict_filtering: true
@@ -344,8 +370,10 @@ widgets:
             max_attachment_size: 256
             instructions: "C:\\Users\\{Username}\\custom_ai_instruction_chatmode.md"
         - provider: "Gemini"
-          api_endpoint: "https://api.gemini.google.com/v1"
-          credential: "$env:GEMINI_YASB_KEY"
+          api_endpoint: "https://aiplatform.googleapis.com/v1/publishers/google/models/gemini-3-flash-preview:streamGenerateContent?key=%GEMINI_VERTEX_EXPRESS_API%"
+          #api_endpoint: "https://aiplatform.googleapis.com/v1"
+          #api_endpoint: "https://api.gemini.google.com/v1"
+          credential: "$env:GEMINI_VERTEX_EXPRESS_API"
           models:
           - name: "gemini-3-flash-preview"
             label: "Gemini Flash 3"
@@ -431,7 +459,7 @@ widgets:
                 show_description: true
             calculator:
                 enabled: true
-                prefix: "="
+                prefix: "*"
                 priority: 1
             clipboard_history:
                 enabled: true
@@ -473,8 +501,8 @@ widgets:
                 include_established: false
             file_search:
                 enabled: true
-                prefix: "/"
-                priority: 10
+                prefix: "*"
+                priority: 1
                 backend: "auto"
                 show_path: true
             unit_converter:
@@ -689,7 +717,7 @@ widgets:
     options:
       label: "<span>\uf4bc</span> {info[percent][total]}%"
       label_alt: "<span>\uf437</span> {info[histograms][cpu_percent]}"
-      update_interval: 2000
+      update_interval: 10000
       histogram_icons:
         - '\u2581' # 0%
         - '\u2581' # 10%
@@ -714,8 +742,8 @@ widgets:
       label: "<span>\uf2db</span> {info[value]}{info[unit]}"
       sensor_id: "/intelcpu/0/temperature/1"
       label_alt: ""
-      update_interval: 2
-      precision: 0
+      update_interval: 10
+      precision: 2
       class_name: "libre-monitor-widget"
       callbacks:
         on_left: "toggle_menu"
@@ -751,6 +779,8 @@ widgets:
             name: "GPU Load"
           - id: "/gpu-amd/0/power/3"
             name: "GPU Power"
+          - id: "/ram/data/0"
+            name: "Used Memory"
           - id: "/nic/%7B2F75B022-BCA1-41F3-B83C-0C47EE038B56%7D/throughput/7"
             name: "Ethernet Upload"
           - id: "/nic/%7B2F75B022-BCA1-41F3-B83C-0C47EE038B56%7D/throughput/8"
@@ -864,6 +894,7 @@ widgets:
       show_battery: false
       show_volume: false
       show_network: false
+      use_hook: false
       icon_size: 14
       label_collapsed: "\uf053"
       label_expanded: "\uf054"
@@ -872,7 +903,7 @@ widgets:
     type: "yasb.memory.MemoryWidget"
     options:
       label: "<span>\ue266</span> {virtual_mem_used}"
-      update_interval: 10000
+      update_interval: 100000
       callbacks:
         on_left: "do_nothing"
         on_right: "exec start ms-settings:about"
@@ -1016,7 +1047,7 @@ widgets:
       ethernet_label: "<span>{wifi_icon}</span>"
       ethernet_label_alt: "<span>{wifi_icon}</span> {wifi_name}"
       ethernet_icon: "\uf108"
-      update_interval: 5000
+      update_interval: 10000
       callbacks:
         on_left: "exec quick_settings"
         on_right: "exec start ms-settings:network"
@@ -1056,7 +1087,7 @@ widgets:
       label: "<span>{icon}</span> {level}"
       tooltip: false
       label_alt: "{<span>{icon}</span>}"
-      vmcli_exe_path: "c:\\Users\\OmarPc\\repo_My_configs_cmder\\cmder\\bin\\vmcli.exe"
+      vmrcli_exe_path: "c:\\Users\\OmarPc\\repo_My_configs_cmder\\cmder\\bin\\vmrcli.exe"
       main_output_bus: 0
       synced_outputs_count: 2
       volume_icons:
@@ -1076,9 +1107,9 @@ widgets:
         show_app_icons: true
         show_app_labels: false
       callbacks:
-        on_middle: "toggle_mute" #win11 mixer
-        #on_middle: "exec vmcli.exe !Bus[0].Mute  !Bus[1].Mute "#voicemeeter sofware mixer via vmcli app
-        on_right: "exec cmd /c mmsys.cpl"
+        on_middle: "toggle_mute"
+        #on_right: "exec cmd /c mmsys.cpl"
+        on_right: "exec c:\\Users\\OmarPc\\repo_My_configs_cmder\\cmder\\bin\\vmrcli.exe command.restart=1"
       label_shadow:
         enabled: true
         color: "black"
@@ -1141,7 +1172,7 @@ widgets:
     options:
       label: "\ueab4 {download_speed} | \ueab7 {upload_speed}"
       label_alt: "Download {download_speed} | Upload {upload_speed}"
-      update_interval: 5000 # Icon for download
+      update_interval: 10000 # Icon for download
       callbacks:
         on_left: "toggle_label"
         on_right: "exec cmd /c Taskmgr"
