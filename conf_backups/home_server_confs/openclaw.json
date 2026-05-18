@@ -1,0 +1,439 @@
+{
+  "channels": {
+    "discord": {
+      "enabled": true,
+      "token": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX",
+      "groupPolicy": "open",
+      "guilds": {
+        "797143628215877672": {
+          "requireMention": true,
+          "users": [
+            "726888595754844202"
+          ]
+        }
+      }
+    },
+    "telegram": {
+      "enabled": true
+    },
+    "whatsapp": {
+      "selfChatMode": true,
+      "dmPolicy": "allowlist",
+      "allowFrom": [
+        "+201025152103"
+      ],
+      "enabled": true,
+      "groupAllowFrom": [
+        "+201025152103"
+      ]
+    }
+  },
+  "meta": {
+    "lastTouchedVersion": "2026.5.3-1",
+    "lastTouchedAt": "2026-05-18T21:03:53.285Z"
+  },
+  "agents": {
+    "list": [
+      {
+        "id": "career",
+        "workspace": "/home/ors/.openclaw/workspace-career",
+        "agentDir": "/home/ors/.openclaw/agents/career/agent"
+      },
+      {
+        "id": "ops",
+        "workspace": "/home/ors/.openclaw/workspace-ops",
+        "agentDir": "/home/ors/.openclaw/agents/ops/agent"
+      },
+      {
+        "id": "dev",
+        "workspace": "/home/ors/.openclaw/workspace-dev",
+        "agentDir": "/home/ors/.openclaw/agents/dev/agent"
+      },
+      {
+        "id": "general",
+        "workspace": "/home/ors/.openclaw/workspace-general",
+        "default": true
+      },
+      {
+        "id": "job-scout",
+        "workspace": "/home/ors/.openclaw/workspace-job-scout"
+      },
+      {
+        "id": "resume-wizard",
+        "workspace": "/home/ors/.openclaw/workspace-resume-wizard"
+      },
+      {
+        "id": "interview-coach",
+        "workspace": "/home/ors/.openclaw/workspace-interview-coach"
+      }
+    ],
+    "defaults": {
+      "workspace": "/home/ors/.openclaw/workspace",
+      "models": {
+        "deepseek/deepseek-v4-flash": {
+          "alias": "V4 Flash",
+          "params": {
+            "temperature": 0.8
+          }
+        },
+        "deepseek/deepseek-v4-flash-thinking": {
+          "alias": "V4 Flash (Thinking)",
+          "params": {
+            "temperature": 0.8
+          }
+        },
+        "deepseek/deepseek-v4-pro": {
+          "alias": "V4 Pro",
+          "params": {
+            "temperature": 0.8
+          }
+        },
+        "deepseek/deepseek-chat": {
+          "alias": "DeepSeek Chat (deprecated)",
+          "params": {
+            "temperature": 0.8
+          }
+        },
+        "deepseek/deepseek-reasoner": {
+          "alias": "DeepSeek Reasoner (deprecated)",
+          "params": {
+            "temperature": 0.8
+          }
+        }
+      },
+      "model": {
+        "primary": "deepseek/deepseek-v4-flash",
+        "fallbacks": [
+          "deepseek/deepseek-v4-flash-thinking",
+          "deepseek/deepseek-v4-pro"
+        ]
+      },
+      "memorySearch": {
+        "enabled": true,
+        "provider": "ollama",
+        "model": "all-minilm"
+      }
+    }
+  },
+  "gateway": {
+    "mode": "local",
+    "auth": {
+      "mode": "token",
+      "token": {
+        "source": "env",
+        "provider": "default",
+        "id": "OPENCLAW_GATEWAY_TOKEN"
+      }
+    },
+    "port": 18789,
+    "bind": "loopback",
+    "tailscale": {
+      "mode": "serve",
+      "resetOnExit": true
+    },
+    "controlUi": {
+      "allowedOrigins": [
+        "https://orshserver.tail909568.ts.net"
+      ]
+    }
+  },
+  "wizard": {
+    "lastRunAt": "2026-05-18T21:03:53.222Z",
+    "lastRunVersion": "2026.5.18",
+    "lastRunCommand": "doctor",
+    "lastRunMode": "local"
+  },
+  "models": {
+    "mode": "merge",
+    "providers": {
+      "deepseek": {
+        "baseUrl": "https://api.deepseek.com",
+        "api": "openai-completions",
+        "models": [
+          {
+            "id": "deepseek-v4-flash",
+            "name": "DeepSeek V4 Flash",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "contextWindow": 100000,
+            "maxTokens": 384000,
+            "cost": {
+              "input": 0.14,
+              "output": 0.28,
+              "cacheRead": 0.0028,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsUsageInStreaming": true
+            },
+            "api": "openai-completions"
+          },
+          {
+            "id": "deepseek-v4-flash-thinking",
+            "name": "DeepSeek V4 Flash (Thinking)",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "contextWindow": 100000,
+            "maxTokens": 384000,
+            "cost": {
+              "input": 0.14,
+              "output": 0.28,
+              "cacheRead": 0.0028,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsUsageInStreaming": true
+            },
+            "api": "openai-completions"
+          },
+          {
+            "id": "deepseek-v4-pro",
+            "name": "DeepSeek V4 Pro",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "contextWindow": 100000,
+            "maxTokens": 384000,
+            "cost": {
+              "input": 0.435,
+              "output": 0.87,
+              "cacheRead": 0.003625,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsUsageInStreaming": true
+            },
+            "api": "openai-completions"
+          },
+          {
+            "id": "deepseek-chat",
+            "name": "DeepSeek Chat (deprecated)",
+            "reasoning": false,
+            "input": [
+              "text"
+            ],
+            "contextWindow": 131072,
+            "maxTokens": 8192,
+            "cost": {
+              "input": 0.28,
+              "output": 0.42,
+              "cacheRead": 0.028,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsUsageInStreaming": true
+            },
+            "api": "openai-completions"
+          },
+          {
+            "id": "deepseek-reasoner",
+            "name": "DeepSeek Reasoner (deprecated)",
+            "reasoning": true,
+            "input": [
+              "text"
+            ],
+            "contextWindow": 131072,
+            "maxTokens": 65536,
+            "cost": {
+              "input": 0.28,
+              "output": 0.42,
+              "cacheRead": 0.028,
+              "cacheWrite": 0
+            },
+            "compat": {
+              "supportsUsageInStreaming": true
+            },
+            "api": "openai-completions"
+          }
+        ]
+      }
+    }
+  },
+  "auth": {
+    "profiles": {
+      "deepseek:default": {
+        "provider": "deepseek",
+        "mode": "api_key"
+      }
+    }
+  },
+  "tools": {
+    "web": {
+      "search": {
+        "provider": "ollama",
+        "enabled": true,
+        "openaiCodex": {}
+      },
+      "fetch": {
+        "enabled": true
+      }
+    },
+    "deny": [
+      "canvas",
+      "nodes",
+      "tts",
+      "whatsapp_login",
+      "agents_list"
+    ]
+  },
+  "browser": {
+    "enabled": true,
+    "executablePath": "/home/ors/.cache/ms-playwright/chromium-1217/chrome-linux64/chrome",
+    "headless": true,
+    "noSandbox": true,
+    "defaultProfile": "openclaw",
+    "color": "#FF4500",
+    "extraArgs": [
+      "--disable-gpu",
+      "--disable-software-rasterizer"
+    ],
+    "attachOnly": false
+  },
+  "plugins": {
+    "entries": {
+      "discord": {
+        "enabled": true
+      },
+      "ollama": {
+        "enabled": true
+      },
+      "deepseek": {
+        "enabled": true
+      },
+      "browser": {
+        "enabled": true
+      }
+    }
+  },
+  "messages": {
+    "groupChat": {
+      "visibleReplies": "message_tool"
+    }
+  },
+  "skills": {
+    "entries": {
+      "1password": {
+        "enabled": false
+      },
+      "apple-notes": {
+        "enabled": false
+      },
+      "apple-reminders": {
+        "enabled": false
+      },
+      "bear-notes": {
+        "enabled": false
+      },
+      "blogwatcher": {
+        "enabled": false
+      },
+      "blucli": {
+        "enabled": false
+      },
+      "bluebubbles": {
+        "enabled": false
+      },
+      "camsnap": {
+        "enabled": false
+      },
+      "clawhub": {
+        "enabled": false
+      },
+      "coding-agent": {
+        "enabled": false
+      },
+      "eightctl": {
+        "enabled": false
+      },
+      "gifgrep": {
+        "enabled": false
+      },
+      "gog": {
+        "enabled": false
+      },
+      "goplaces": {
+        "enabled": false
+      },
+      "himalaya": {
+        "enabled": false
+      },
+      "imsg": {
+        "enabled": false
+      },
+      "mcporter": {
+        "enabled": false
+      },
+      "model-usage": {
+        "enabled": false
+      },
+      "nano-pdf": {
+        "enabled": false
+      },
+      "notion": {
+        "enabled": false
+      },
+      "obsidian": {
+        "enabled": false
+      },
+      "openai-whisper": {
+        "enabled": false
+      },
+      "openai-whisper-api": {
+        "enabled": false
+      },
+      "openhue": {
+        "enabled": false
+      },
+      "oracle": {
+        "enabled": false
+      },
+      "ordercli": {
+        "enabled": false
+      },
+      "peekaboo": {
+        "enabled": false
+      },
+      "sag": {
+        "enabled": false
+      },
+      "sherpa-onnx-tts": {
+        "enabled": false
+      },
+      "slack": {
+        "enabled": false
+      },
+      "songsee": {
+        "enabled": false
+      },
+      "sonoscli": {
+        "enabled": false
+      },
+      "spotify-player": {
+        "enabled": false
+      },
+      "summarize": {
+        "enabled": false
+      },
+      "things-mac": {
+        "enabled": false
+      },
+      "trello": {
+        "enabled": false
+      },
+      "voice-call": {
+        "enabled": false
+      },
+      "wacli": {
+        "enabled": false
+      },
+      "xurl": {
+        "enabled": false
+      }
+    }
+  }
+}
