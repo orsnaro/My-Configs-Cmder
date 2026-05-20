@@ -17,6 +17,7 @@ if not exist "%BACKUP_ROOT%" (
 if "%~1"=="latest" (
     echo [i] Auto-restore mode triggered. Selecting latest backup...
     set "choice=1"
+    set "AUTO_MODE=1"
     goto :SKIP_MENU
 )
 
@@ -39,14 +40,14 @@ if /i "%choice%"=="Q" exit /b
 
 if not defined SOURCE_DIR (
     echo Invalid choice.
-    pause
+    if not defined AUTO_MODE pause
     exit /b
 )
 
 if not exist "%SOURCE_DIR%" (
     echo [%DATE% %TIME%] ERROR: Selected backup version %choice% not found on D: >> "%LOG_FILE%"
     echo [!] ERROR: Selected backup version does not exist.
-    pause
+    if not defined AUTO_MODE pause
     exit /b
 )
 
@@ -59,11 +60,17 @@ timeout /t 3 /nobreak >nul
 
 :: 4. Restore the data
 echo Restoring data from D: edge backup TO C: edge location...
-:: /MIR makes the C: drive folder exactly match the D: backup
-@REM robocopy "%SOURCE_DIR%" "%DEST_DIR%" /MIR /MT:8 /R:0 /W:0 /XF Cookies* "Safe Browsing Cookies" /LOG+:"%LOG_FILE%" /NP /TEE
-robocopy "%SOURCE_DIR%" "%DEST_DIR%" /E /ZB /IS /IT /MT:128 /R:3 /W:3 /LOG+:"%LOG_FILE%" /NP /TEE
+:: Removed /ZB to avoid permission errors
+robocopy "%SOURCE_DIR%" "%DEST_DIR%" /E /IS /IT /MT:16 /R:3 /W:3 /LOG+:"%LOG_FILE%" /NP /TEE
 
-echo [%DATE% %TIME%] SUCCESS: Edge Restore from D: Drive COMPLETED. >> "%LOG_FILE%"
-echo.
-echo Restore Finished. 
-pause
+if %ERRORLEVEL% GEQ 8 (
+    echo [%DATE% %TIME%] ERROR: Edge Restore FAILED with code %ERRORLEVEL%. >> "%LOG_FILE%"
+    echo.
+    echo [!] RESTORE FAILED. Check restore.log for details.
+) else (
+    echo [%DATE% %TIME%] SUCCESS: Edge Restore from D: Drive COMPLETED. >> "%LOG_FILE%"
+    echo.
+    echo Restore Finished Successfully.
+)
+
+if not defined AUTO_MODE pause

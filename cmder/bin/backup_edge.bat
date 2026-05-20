@@ -51,7 +51,7 @@ if %PREFS_SIZE% LSS 10240 ( echo [!] Preferences are below absolute minimum. & g
 :: 7. Delta/Drop Checks (Compare against last successful backup)
 set "SIZE_FILE=%BACKUP_ROOT%\last_sizes.txt"
 if exist "%SIZE_FILE%" (
-    for /f "tokens=1,2 delims==" %%A in (%SIZE_FILE%) do set "LAST_%%A=%%B"
+    for /f "tokens=1,2 delims==" %%A in ("%SIZE_FILE%") do set "LAST_%%A=%%B"
 
     rem Calculate 80% of last size (allowing a 20% drop)
     rem Note: Batch math is limited to 32-bit integers (~2GB max).
@@ -66,7 +66,21 @@ if exist "%SIZE_FILE%" (
     if !PREFS_SIZE! LSS !MIN_PREFS! ( echo [!] Preferences shrank by more than 20%%. & goto :ABORT_BACKUP )
 )
 
-echo Data looks healthy. Rotating old backups...
+echo Data looks healthy. Preparing backup to staging folder ^(profile.new^)...
+
+echo Starting Robocopy to profile.new...
+rem Execute Robocopy to profile.new (Staging)
+:: Older attempts:
+:: robocopy "%SOURCE_DIR%" "%BACKUP_ROOT%\profile.1" /MIR /MT:8 /R:0 /W:0 /XF Cookies* "Safe Browsing Cookies" /XD "Cache" "Code Cache" "GPUCache" /LOG+:"%LOG_FILE%" /NP /TEE
+:: robocopy "%SOURCE_DIR%" "%BACKUP_ROOT%\profile.1" /MIR /MT:4 /ZB /R:3 /W:3 /IT /IS
+robocopy "%SOURCE_DIR%" "%BACKUP_ROOT%\profile.new" /MIR /MT:4 /R:3 /W:3 /IT /IS /XF Cookies* "Safe Browsing Cookies" /LOG+:"%LOG_FILE%" /NP /NDL
+
+if %ERRORLEVEL% GEQ 8 (
+    echo %DATE% %TIME%: ERROR - Robocopy failed with code %ERRORLEVEL%. Rotation aborted to protect old backups. >> "%LOG_FILE%"
+    goto :FINISHED
+)
+
+echo Robocopy successful. Rotating backups...
 
 rem 1. Delete oldest backup (3)
 if exist "%BACKUP_ROOT%\profile.3" rd /s /q "%BACKUP_ROOT%\profile.3"
@@ -77,10 +91,9 @@ if exist "%BACKUP_ROOT%\profile.2" ren "%BACKUP_ROOT%\profile.2" profile.3
 rem 3. Shift 1 -> 2
 if exist "%BACKUP_ROOT%\profile.1" ren "%BACKUP_ROOT%\profile.1" profile.2
 
-echo Starting Robocopy to profile.1...
-rem Execute Robocopy to profile.1
-@REM robocopy "%SOURCE_DIR%" "%BACKUP_ROOT%\profile.1" /MIR /MT:8 /R:0 /W:0 /XF Cookies* "Safe Browsing Cookies" /XD "Cache" "Code Cache" "GPUCache" /LOG+:"%LOG_FILE%" /NP /TEE
-robocopy "%SOURCE_DIR%" "%BACKUP_ROOT%\profile.1" /MIR /MT:4 /ZB /R:3 /W:3 /IT /IS
+rem 4. Finalize new backup
+ren "%BACKUP_ROOT%\profile.new" profile.1
+
 :: Save new sizes for next time
 echo HIST_SIZE=%HIST_SIZE%> "%SIZE_FILE%"
 echo LOGIN_SIZE=%LOGIN_SIZE%>> "%SIZE_FILE%"
@@ -91,11 +104,11 @@ echo %DATE% %TIME%: Edge Backup SUCCESS ^(profile.1^). >> "%LOG_FILE%"
 goto :FINISHED
 
 :ABORT_BACKUP
-echo %DATE% %TIME%: WARNING - Data check failed (Size Drop Detected). Aborted. >> "%LOG_FILE%"
+echo %DATE% %TIME%: WARNING - Data check failed ^(Size Drop Detected^). Aborted. >> "%LOG_FILE%"
 echo [!] Safety check failed. Possible data loss detected.
-echo [i] Initiating automatic restore of the latest backup...
-echo.
-call "%~dp0restore_edge.bat" latest
+@REM echo [i] Initiating automatic restore of the latest backup...
+@REM echo.
+@REM call "%~dp0restore_edge.bat" latest
 
 :FINISHED
 echo Done.
