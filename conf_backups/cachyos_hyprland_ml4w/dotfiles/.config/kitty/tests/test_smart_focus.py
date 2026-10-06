@@ -486,8 +486,13 @@ class SmartFocusMapsTest(unittest.TestCase):
             "map --allow-fallback=shifted,ascii ctrl+alt+i remote_control_script absolute-resize.py up",
             "map --allow-fallback=shifted,ascii ctrl+alt+k remote_control_script absolute-resize.py down",
         ])
-        self.assertEqual([line for line in lines if line.startswith("geninclude ")],
-                         ["geninclude /home/narol/.config/kitty/native-resize-maps.py"])
+        generators = [line.split(maxsplit=1)[1] for line in lines
+                      if line.startswith("geninclude ")]
+        self.assertEqual(len(generators), 1)
+        generator = Path(generators[0])
+        if not generator.is_absolute():
+            generator = CONFIG.parent / generator
+        self.assertEqual(generator.resolve(), CONFIG.with_name("native-resize-maps.py").resolve())
 
 
 def run_loader_smoke() -> None:
