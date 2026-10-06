@@ -43,9 +43,8 @@ hl.bind("ALT + SHIFT + M", hl.dsp.exec_cmd("~/.local/bin/glaze-minimize restore-
 
 -- Alt+J/K/L/I everywhere: Kitty panes own these keys when a Kitty
 -- window is focused (original event passes through, no reinjection); otherwise they focus
--- Hyprland windows like ALT+SHIFT+letters, but stop at the edge instead
--- of cycling (Hyprland movefocus wraps monitor edges, which ping-pongs
--- against Kitty's own edge fallthrough on held keys).
+-- Hyprland windows first, then adjacent monitors (including empty desktops).
+-- Stop at the outer monitor edge instead of cycling.
 local function visible_workspaces()
     local mons = hl.get_monitors()
     if mons == nil then return nil end
@@ -90,20 +89,26 @@ local function window_in_direction(from, letter)
     return false
 end
 -- Single gate for outward moves (Hyprland binds and kitty's edge
--- fallthrough alike): move only toward a visible candidate, never cycle.
+-- fallthrough alike): windows first, adjacent monitors second, never cycle.
 function checked_focus(direction, expected_pid, expected_address)
     local letters = { left = "J", right = "L", up = "I", down = "K" }
+    local monitor_directions = { left = "l", right = "r", up = "u", down = "d" }
     local letter = letters[direction]
     if letter == nil then return end
     local w = hl.get_active_window()
-    if w == nil then return end
     if expected_pid ~= nil then
-        if w.pid ~= expected_pid then return end
+        if w == nil or w.pid ~= expected_pid then return end
         if w.class ~= "kitty" and w.class ~= "quake-kitty" then return end
     end
-    if expected_address ~= nil and w.address ~= expected_address then return end
-    if window_in_direction(w, letter) then
+    if expected_address ~= nil and (w == nil or w.address ~= expected_address) then return end
+    if w ~= nil and window_in_direction(w, letter) then
         hl.dispatch(hl.dsp.focus({ direction = direction }))
+        return
+    end
+    -- Native directional lookup returns nil at the edge; it never wraps.
+    local monitor = hl.get_monitor(monitor_directions[direction])
+    if monitor ~= nil then
+        hl.dispatch(hl.dsp.focus({ monitor = monitor.id }))
     end
 end
 for _, pair in ipairs({

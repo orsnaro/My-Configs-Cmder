@@ -1,6 +1,7 @@
 local root = os.getenv("HOME") .. "/.config/hypr/"
 local bindings, workspaces, rules, unbound = {}, {}, {}, {}
 local dispatched = {}
+local adjacent_monitors, monitor_queries = {}, {}
 local active_window, all_windows, all_monitors = nil, {}, { { active_workspace = { id = 8 } } }
 
 local function operation(name)
@@ -20,6 +21,10 @@ hl = {
     get_active_window = function() return active_window end,
     get_windows = function() return all_windows end,
     get_monitors = function() return all_monitors end,
+    get_monitor = function(selector)
+        monitor_queries[#monitor_queries + 1] = selector
+        return adjacent_monitors[selector]
+    end,
     exec_cmd = operation("exec"),
     workspace_rule = function(rule) workspaces[rule.workspace] = rule end,
     window_rule = function(rule) rules[rule.name] = rule end,
@@ -194,6 +199,53 @@ bindings["ALT + J"].action()
 assert(#dispatched == 0, "nil active window must stay silent")
 checked_focus("left")
 assert(#dispatched == 0, "checked_focus with nil window must stay silent")
+-- Empty desktops must remain navigable, even through another empty monitor.
+for _, spec in ipairs({ {"J", "left", "l"}, {"L", "right", "r"},
+    {"I", "up", "u"}, {"K", "down", "d"} }) do
+    local target = { id = 0 }
+    adjacent_monitors = { [spec[3]] = target }
+    active_window, all_windows = nil, {}
+    dispatched, monitor_queries = {}, {}
+    bindings["ALT + " .. spec[1]].action()
+    assert(#dispatched == 1 and dispatched[1].name == "focus"
+        and dispatched[1].arg.monitor == target.id,
+        "empty desktop must focus adjacent monitor " .. spec[2])
+    assert(#monitor_queries == 1 and monitor_queries[1] == spec[3],
+        "monitor lookup must use native direction " .. spec[3])
+    dispatched, monitor_queries = {}, {}
+    checked_focus(spec[2], 100, "0xaaa")
+    checked_focus(spec[2], nil, "0xaaa")
+    assert(#dispatched == 0 and #monitor_queries == 0,
+        "stale guarded Kitty requests must never escape an empty desktop")
+    active_window = fake_window("brave-browser", 200, 200, 100, 100, 8)
+    all_windows = { active_window }
+    dispatched, monitor_queries = {}, {}
+    bindings["ALT + " .. spec[1]].action()
+    assert(#dispatched == 1 and dispatched[1].arg.monitor == target.id,
+        "window edge must permit moving to adjacent empty monitor " .. spec[2])
+    local candidate = dir_candidate[spec[2]]
+    all_windows = { active_window,
+        fake_window("brave-browser", candidate[1], candidate[2], 100, 100, 8) }
+    dispatched, monitor_queries = {}, {}
+    checked_focus(spec[2])
+    assert(#dispatched == 1 and dispatched[1].arg.direction == spec[2]
+        and #monitor_queries == 0, "window neighbor must win over monitor fallback")
+    active_window = fake_window("kitty", 200, 200, 100, 100, 8, 100, "0xaaa")
+    all_windows = { active_window }
+    dispatched = {}
+    checked_focus(spec[2], 999, "0xaaa")
+    checked_focus(spec[2], 100, "0xbbb")
+    assert(#dispatched == 0, "caller guards must also protect monitor fallback")
+    checked_focus(spec[2], 100, "0xaaa")
+    assert(#dispatched == 1 and dispatched[1].arg.monitor == target.id,
+        "valid Kitty edge request may focus an empty neighbor monitor")
+    adjacent_monitors = {}
+    active_window, all_windows = nil, {}
+    dispatched = {}
+    checked_focus(spec[2])
+    assert(#dispatched == 0, "outer monitor edge must not wrap " .. spec[2])
+end
+adjacent_monitors, monitor_queries = {}, {}
 dispatched = {}
 active_window = fake_window("brave-browser", 200, 200, 100, 100, 8)
 all_windows = { active_window, fake_window("brave-browser", 200, 400, 100, 100, 8) }

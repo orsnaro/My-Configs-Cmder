@@ -1,4 +1,4 @@
-# CachyOS Hyprland ML4W configs — backup 2026-10-06
+# CachyOS Hyprland ML4W configs — navigation update 2026-10-07
 
 Base: CachyOS + ML4W dotfiles stable 2.16 + kitty 0.49.2
 Repo: https://github.com/orsnaro/My-Configs-Cmder.git, folder `cachyos_hyprland_ml4w/`
@@ -21,6 +21,18 @@ Matugen regen (do not fight): `hypr/colors.conf`, `hypr/colors.lua`, `kitty/colo
 
 Restore: `./RESTORE.sh [--dry-run]` — copies back, `chmod +x *.sh/*.py`, prompts for kitty sudo patch, then `hyprctl reload`.
 Re-backup: `./BACKUP.sh`
+
+## Directional navigation
+
+Physical keys: J=left, L=right, I=up, K=down (US and Arabic layouts).
+
+- `Alt+J/L/I/K`: Kitty panes first; at a pane edge, focus desktop windows, then adjacent monitors, including empty active workspaces. At the outer monitor edge, stop without wrapping.
+- `Shift+Alt+J/L/I/K`: move desktop windows.
+- `Ctrl+Shift+Alt+J/L/I/K`: focus desktop windows.
+- `Ctrl+Alt+J/L/I/K`: resize Kitty panes; native resize mappings and the Python fallback remain unchanged.
+- `Shift+Alt+arrows`: desktop window focus, unchanged.
+
+Kitty receives the original event, not a synthetic forwarded shortcut. Its no-UI `smart-focus.py` focuses pane groups in-process and uses bounded local Hyprland IPC only at an edge. `checked_focus` also handles empty desktops; PID/address guards reject stale Kitty requests. No watcher, polling, parity filter or navigation subprocess is needed.
 
 ## Caveats
 
