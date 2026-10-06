@@ -21,3 +21,11 @@ Matugen regen (do not fight): `hypr/colors.conf`, `hypr/colors.lua`, `kitty/colo
 
 Restore: `./RESTORE.sh [--dry-run]` — copies back, `chmod +x *.sh/*.py`, prompts for kitty sudo patch, then `hyprctl reload`.
 Re-backup: `./BACKUP.sh`
+
+## Caveats
+
+- Restore targets `$HOME` only (no alternate target dir); base required: CachyOS + ML4W dotfiles stable 2.16.
+- `hypr/monitors.conf` + `custom.lua` workspaces hardcode a 3-monitor layout (DP-2/HDMI-A-2/DP-1) — adjust for single-display machines.
+- Matugen overwrites `hypr/colors.*`, `kitty/colors-matugen.conf`, `ml4w-dock/colors.json` on theme change; these copies are a snapshot.
+- `kitty/patches/ors-*-tabs-before-no-neighbors.diff` is a superseded single-hunk iteration, kept for reference; the applier uses `tabs.diff` + `utils.diff` only.
+- Excluded on purpose: game/tool binaries (`albiondata-client`, `fetch`, `obsidian*`), `cemu-mousepad.py`, `*.bak` leftovers.

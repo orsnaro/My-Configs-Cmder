@@ -1,5 +1,5 @@
 kitty 0.49.2 created by Kovid Goyal
 tabs.py resize_divider count: 1
-/shared_across_des/repos/My-Configs-Cmder/cachyos_hyprland_ml4w/dotfiles/.config/kitty/patches/ors-resize-divider-kitty-0.49.1-tabs-before-no-neighbors.diff
-/shared_across_des/repos/My-Configs-Cmder/cachyos_hyprland_ml4w/dotfiles/.config/kitty/patches/ors-resize-divider-kitty-0.49.1-tabs.diff
-/shared_across_des/repos/My-Configs-Cmder/cachyos_hyprland_ml4w/dotfiles/.config/kitty/patches/ors-resize-divider-kitty-0.49.1-utils.diff
+ors-resize-divider-kitty-0.49.1-tabs-before-no-neighbors.diff
+ors-resize-divider-kitty-0.49.1-tabs.diff
+ors-resize-divider-kitty-0.49.1-utils.diff

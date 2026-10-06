@@ -4,8 +4,6 @@ dotfiles/.config/fastfetch/ascii/hyprland-mark.txt
 dotfiles/.config/fastfetch/ascii/ml4w.txt
 dotfiles/.config/fastfetch/config.gif.jsonc
 dotfiles/.config/fastfetch/config.jsonc
-dotfiles/.config/fastfetch/config.jsonc.2026-09-30.bak
-dotfiles/.config/fastfetch/config.jsonc.bak
 dotfiles/.config/fastfetch/config.jsonc.pre-rice-bak
 dotfiles/.config/fastfetch/config.ml.jsonc
 dotfiles/.config/fastfetch/images/arch.gif
@@ -504,7 +502,6 @@ local/.local/share/quickshell-overview/common/widgets/StyledText.qml
 local/.local/share/quickshell-overview/common/widgets/StyledToolTipContent.qml
 local/.local/share/quickshell-overview/common/widgets/StyledToolTip.qml
 local/.local/share/quickshell-overview/config.example.json
-local/.local/share/quickshell-overview/.github/FUNDING.yml
 local/.local/share/quickshell-overview/modules/overview/Overview.qml
 local/.local/share/quickshell-overview/modules/overview/OverviewWidget.qml
 local/.local/share/quickshell-overview/modules/overview/OverviewWindow.qml
