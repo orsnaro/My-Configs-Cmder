@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+set -euo pipefail
+axis=${1:-} percent=${2:-}
+if [[ $axis != width && $axis != height ]] || [[ ! $percent =~ ^-?[0-9]+$ ]]; then
+    echo 'Usage: glaze-resize-window width|height signed-percent' >&2
+    exit 2
+fi
+monitor_id=$(hyprctl activewindow -j | jq -r '.monitor // empty')
+[[ -n $monitor_id ]] || exit 0
+dimension=$(hyprctl monitors -j | jq -r --argjson id "$monitor_id" --arg axis "$axis" \
+    '.[] | select(.id == $id) | .[$axis]')
+[[ -n $dimension ]] || exit 0
+pixels=$(awk -v n="$dimension" -v p="$percent" 'BEGIN {printf "%.0f", n*p/100}')
+x=0 y=0
+if [[ $axis == width ]]; then x=$pixels; else y=$pixels; fi
+hyprctl dispatch "hl.dsp.window.resize({ x = $x, y = $y, relative = true })" >/dev/null

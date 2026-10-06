@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+# A hidden special workspace holds minimized windows, but is never shown over
+# normal tiles. Each new window's original workspace is kept for restore-all.
+set -euo pipefail
+mode=${1:-}
+[[ $mode == hide || $mode == restore-all ]] || { echo 'Usage: glaze-minimize hide|restore-all' >&2; exit 2; }
+
+runtime=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+umask 077
+exec 9>"$runtime/glaze-minimize.lock"
+flock 9
+state="$runtime/glaze-minimized.tsv"
+
+hide_visible_special() {
+    local monitors=$1 visible focused
+    visible=$(jq -r '.[] | select(.specialWorkspace.name == "special:minimized") | .name' <<< "$monitors" | head -n 1)
+    [[ -n $visible ]] || return 0
+    focused=$(jq -r '.[] | select(.focused == true) | .name' <<< "$monitors" | head -n 1)
+    hyprctl dispatch "hl.dsp.focus({ monitor = \"$visible\" })" >/dev/null
+    hyprctl dispatch 'hl.dsp.workspace.toggle_special("minimized")' >/dev/null
+    if [[ -n $focused && $focused != "$visible" ]]; then
+        hyprctl dispatch "hl.dsp.focus({ monitor = \"$focused\" })" >/dev/null
+    fi
+}
+
+monitors=$(hyprctl monitors -j)
+if [[ $mode == hide ]]; then
+    active=$(hyprctl activewindow -j)
+    address=$(jq -r '.address // empty' <<< "$active")
+    workspace=$(jq -r '.workspace.id // empty' <<< "$active")
+    [[ $address =~ ^0x[[:xdigit:]]+$ && $workspace =~ ^[1-9][0-9]*$ ]] || exit 0
+    hide_visible_special "$monitors"
+    printf '%s\t%s\n' "$address" "$workspace" >> "$state"
+    hyprctl dispatch "hl.dsp.window.move({ workspace = \"special:minimized\", follow = false, window = \"address:$address\" })" >/dev/null
+    exit 0
+fi
+
+hide_visible_special "$monitors"
+declare -A original
+if [[ -f $state ]]; then
+    while IFS=$'\t' read -r address workspace; do
+        [[ $address =~ ^0x[[:xdigit:]]+$ && $workspace =~ ^[1-9][0-9]*$ ]] || continue
+        original["$address"]=$workspace
+    done < "$state"
+fi
+
+while IFS=$'\t' read -r address monitor; do
+    [[ $address =~ ^0x[[:xdigit:]]+$ ]] || continue
+    workspace=${original[$address]:-}
+    if [[ -z $workspace ]]; then
+        # Pre-existing minimized windows have no recorded origin. Restore
+        # them to the normal workspace underneath their current monitor.
+        workspace=$(jq -r --argjson id "$monitor" \
+            '.[] | select(.id == $id) | .activeWorkspace.id // empty' <<< "$monitors")
+    fi
+    [[ $workspace =~ ^[1-9][0-9]*$ ]] || continue
+    hyprctl dispatch "hl.dsp.window.move({ workspace = \"$workspace\", follow = false, window = \"address:$address\" })" >/dev/null
+done < <(hyprctl clients -j | jq -r '.[] | select(.workspace.name == "special:minimized") | [.address, (.monitor | tostring)] | @tsv')
+: > "$state"

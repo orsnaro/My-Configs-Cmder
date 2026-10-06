@@ -8,6 +8,7 @@ DRY=""
 if [[ "${1:-}" == "--dry-run" ]]; then DRY="-n"; fi
 
 restore_one() { # $1=src $2=dest
+  if [[ -n "$DRY" ]]; then return 0; fi
   mkdir -p "$(dirname "$2")"
   if [[ -e "$1" ]]; then rsync -aL $DRY "$1/" "$2/"; fi
 }
@@ -23,13 +24,13 @@ restore_one "$DOT/ml4w-dock" ~/.config/ml4w-dock
 restore_one "$DOT/ml4w-statusbar" ~/.config/ml4w-statusbar
 restore_one "$DOT/fastfetch" ~/.config/fastfetch
 restore_one "$DOT/fish" ~/.config/fish
-mkdir -p ~/.local/bin
-cp -a $DRY "$LOC/bin/"* ~/.local/bin/ 2>/dev/null || true
-rsync -a $DRY "$LOC/share/ml4w-dock/" ~/.local/share/ml4w-dock/ 2>/dev/null || true
-rsync -a $DRY "$LOC/share/quickshell-overview/" ~/.local/share/quickshell-overview/ 2>/dev/null || true
-rsync -a $DRY "$LOC/share/ml4w-dotfiles-settings/" ~/.local/share/ml4w-dotfiles-settings/ 2>/dev/null || true
-mkdir -p ~/.local/share/applications
-cp -a $DRY "$LOC/share/applications/quake-kitty.desktop" ~/.local/share/applications/ 2>/dev/null || true
+if [[ -z "$DRY" ]]; then mkdir -p ~/.local/bin; fi
+if [[ -z "$DRY" ]]; then cp -a "$LOC/bin/"* ~/.local/bin/ 2>/dev/null || true; fi
+rsync -a --delete --exclude='.git/' $DRY "$LOC/share/ml4w-dock/" ~/.local/share/ml4w-dock/ 2>/dev/null || true
+rsync -a --delete --exclude='.git/' $DRY "$LOC/share/quickshell-overview/" ~/.local/share/quickshell-overview/ 2>/dev/null || true
+rsync -a --delete --exclude='.git/' $DRY "$LOC/share/ml4w-dotfiles-settings/" ~/.local/share/ml4w-dotfiles-settings/ 2>/dev/null || true
+if [[ -z "$DRY" ]]; then mkdir -p ~/.local/share/applications; fi
+if [[ -z "$DRY" ]]; then cp -a "$LOC/share/applications/quake-kitty.desktop" ~/.local/share/applications/ 2>/dev/null || true; fi
 
 if [[ -z "$DRY" ]]; then
   chmod +x ~/.config/kitty/*.py ~/.config/kitty/*.sh ~/.config/hypr/scripts/*.sh ~/.local/bin/hypr-* ~/.local/bin/qs-lazy-toggle 2>/dev/null || true

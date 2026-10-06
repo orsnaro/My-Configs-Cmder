@@ -1,0 +1,57 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+runtime=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+# v2 avoids the lock still inherited by a Kitty started before the FD fix.
+exec 9>"$runtime/glaze-quake-v2.lock"
+flock -n 9 || exit 0
+
+cursor=$(hyprctl cursorpos -j)
+monitors=$(hyprctl monitors -j)
+pointer_monitor=$(jq -r --argjson x "$(jq -r .x <<< "$cursor")" \
+    --argjson y "$(jq -r .y <<< "$cursor")" '
+    .[] | select(.x <= $x and $x < .x + .width and .y <= $y and $y < .y + .height) | .name
+' <<< "$monitors" | head -n 1)
+[[ -n $pointer_monitor ]] || exit 0
+
+# If visible anywhere, the key hides it. The next press shows it where the
+# pointer is, even when keyboard focus was previously on another monitor.
+visible_monitor=$(jq -r '.[] | select(.specialWorkspace.name == "special:quake") | .name' \
+    <<< "$monitors" | head -n 1)
+if [[ -n $visible_monitor ]]; then
+    focused_monitor=$(jq -r '.[] | select(.focused == true) | .name' <<< "$monitors" | head -n 1)
+    hyprctl dispatch "hl.dsp.focus({ monitor = \"$visible_monitor\" })" >/dev/null
+    hyprctl dispatch 'hl.dsp.workspace.toggle_special("quake")' >/dev/null
+    if [[ -n $focused_monitor && $focused_monitor != "$visible_monitor" ]]; then
+        hyprctl dispatch "hl.dsp.focus({ monitor = \"$focused_monitor\" })" >/dev/null
+    fi
+    exit 0
+fi
+
+quake_window=$(hyprctl clients -j | jq -c '[.[] | select(.class == "quake-kitty")][0] // {}')
+quake=$(jq -r '.address // empty' <<< "$quake_window")
+quake_workspace=$(jq -r '.workspace.name // empty' <<< "$quake_window")
+hyprctl dispatch "hl.dsp.focus({ monitor = \"$pointer_monitor\" })" >/dev/null
+if [[ -n $quake && $quake_workspace != special:quake ]]; then
+    hyprctl dispatch "hl.dsp.window.move({ workspace = \"special:quake\", follow = false, window = \"address:$quake\" })" >/dev/null
+fi
+hyprctl dispatch 'hl.dsp.workspace.toggle_special("quake")' >/dev/null
+if [[ -n $quake ]]; then
+    # Static window rules run only at creation: a window sized for the 2K
+    # monitor would otherwise spill beyond either smaller monitor.
+    read -r width height x y < <(jq -r --arg name "$pointer_monitor" '
+        .[] | select(.name == $name) |
+        [(.width*0.8|floor), (.height*0.54|floor), (.x+(.width*0.1|floor)), (.y+80)] | @tsv
+    ' <<< "$monitors")
+    hyprctl dispatch "hl.dsp.window.resize({ x = $width, y = $height, relative = false, window = \"address:$quake\" })" >/dev/null
+    hyprctl dispatch "hl.dsp.window.move({ x = $x, y = $y, relative = false, window = \"address:$quake\" })" >/dev/null
+    rm -f "$runtime/glaze-quake.pending"
+    exit 0
+fi
+
+# A quick double-press before Kitty maps must not create a second terminal.
+pending="$runtime/glaze-quake.pending"
+now=$(date +%s)
+if [[ -e $pending ]] && (( now - $(stat -c %Y "$pending") < 5 )); then exit 0; fi
+: > "$pending"
+kitty --class quake-kitty --title quake-terminal 9>&- >/dev/null 2>&1 &

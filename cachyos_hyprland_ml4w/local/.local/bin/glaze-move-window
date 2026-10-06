@@ -1,0 +1,54 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+mode=direction
+if [[ ${1:-} == monitor ]]; then mode=monitor; shift; fi
+direction=${1:-}
+case "$direction" in
+    left) code=l ;;
+    right) code=r ;;
+    up) code=u ;;
+    down) code=d ;;
+    *) echo 'Usage: glaze-move-window [monitor] left|right|up|down' >&2; exit 2 ;;
+esac
+
+active=$(hyprctl activewindow -j)
+monitor_id=$(jq -r '.monitor // empty' <<< "$active")
+[[ -n $monitor_id ]] || exit 0
+
+if [[ $mode == monitor ]]; then
+    target=$(hyprctl monitors -j | jq -r --argjson id "$monitor_id" --arg direction "$direction" '
+        def cx: .x + (.width / 2);
+        def cy: .y + (.height / 2);
+        . as $all | ($all[] | select(.id == $id)) as $current |
+        [$all[] | select(.id != $id) |
+            select(if $direction == "left" then .x + .width <= $current.x
+                elif $direction == "right" then .x >= $current.x + $current.width
+                elif $direction == "up" then .y + .height <= $current.y
+                else .y >= $current.y + $current.height end) |
+            {name, distance: (if ($direction == "left" or $direction == "right")
+                then ((. | cx) - ($current | cx) | abs) + (((. | cy) - ($current | cy) | abs) / 1000)
+                else ((. | cy) - ($current | cy) | abs) + (((. | cx) - ($current | cx) | abs) / 1000) end)}
+        ] | min_by(.distance) | .name // empty
+    ')
+    if [[ -n $target ]]; then
+        hyprctl dispatch "hl.dsp.window.move({ monitor = \"$target\", follow = true })" >/dev/null
+        exit 0
+    fi
+fi
+
+# No monitor in that direction: move the active window inside this workspace.
+if [[ $(jq -r '.floating' <<< "$active") == true ]]; then
+    read -r width height < <(hyprctl monitors -j | jq -r --argjson id "$monitor_id" \
+        '.[] | select(.id == $id) | "\(.width) \(.height)"')
+    x=0 y=0
+    case "$direction" in
+        left) x=$(awk -v n="$width" 'BEGIN {printf "%.0f", -n*0.15}') ;;
+        right) x=$(awk -v n="$width" 'BEGIN {printf "%.0f", n*0.15}') ;;
+        up) y=$(awk -v n="$height" 'BEGIN {printf "%.0f", -n*0.15}') ;;
+        down) y=$(awk -v n="$height" 'BEGIN {printf "%.0f", n*0.15}') ;;
+    esac
+    hyprctl dispatch "hl.dsp.window.move({ x = $x, y = $y, relative = true })" >/dev/null
+else
+    hyprctl dispatch "hl.dsp.window.move({ direction = \"$code\" })" >/dev/null
+fi

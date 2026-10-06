@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+# Open only the registered notes vault on the shared NTFS partition.
+# NATIVE build (pacman obsidian) — staged 2026-10-05, apply after install.
+set -euo pipefail
+
+MOUNT="/run/media/narol/shared_across_os"
+VAULT="$MOUNT/obsidians/notes"
+SHARED_UUID="75E52AA11AD75C2E"
+
+# Reject an unmounted path or a different device; never fall back to a stale vault.
+mounted_uuid=$(findmnt -rn --mountpoint "$MOUNT" -o UUID 2>/dev/null || true)
+if [[ "$mounted_uuid" != "$SHARED_UUID" ]]; then
+    printf 'Shared Obsidian partition is not mounted at %s\n' "$MOUNT" >&2
+    exit 1
+fi
+if [[ ! -d "$VAULT/.obsidian" || ! -w "$VAULT" ]]; then
+    printf 'Shared Obsidian notes vault unavailable: %s\n' "$VAULT" >&2
+    exit 1
+fi
+
+# Native binary handles the vault URI once it owns x-scheme-handler/obsidian.
+# (Fix vs old script: .obsidian-linux check corrected to .obsidian.)
+exec /usr/bin/obsidian 'obsidian://open?vault=63fa1db3e8c81041'

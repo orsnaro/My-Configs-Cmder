@@ -1,0 +1,48 @@
+#!/bin/bash
+# Watches for Albion Online game and starts/stops the data client with it.
+# Started once from Hyprland (ML4W) autostart; survives reloads via flock.
+LOG="$HOME/.local/share/albiondata-client/watch.log"
+CLIENT_START="$HOME/.local/bin/albion-data-start"
+CLIENT_BIN="$HOME/.local/bin/albiondata-client"
+GAME_RE="game_x64/Albion-Online( |$)"
+LOCK="$HOME/.cache/albion-data-watch.lock"
+mkdir -p "$(dirname "$LOG")" "$(dirname "$LOCK")"
+
+game_up() { pgrep -f "$GAME_RE" >/dev/null 2>&1; }
+client_up() { pgrep -f "^${CLIENT_BIN}( |$)" >/dev/null 2>&1; }
+
+once() {
+  if game_up; then
+    if client_up; then
+      echo "game up, client already running, no action"
+    else
+      echo "$(date -Is) game detected, starting client" >>"$LOG"
+      "$CLIENT_START" >/dev/null 2>&1 &
+      echo "game up, client was down, started it"
+    fi
+  else
+    if client_up; then
+      echo "$(date -Is) game closed, stopping client" >>"$LOG"
+      pkill -f "^${CLIENT_BIN}( |$)" || true
+      echo "game down, client was up, stopped it"
+    else
+      echo "game down, client down, no action"
+    fi
+  fi
+}
+
+if [ "${1:-}" = "--once" ]; then
+  once
+  exit 0
+fi
+
+# Single instance: flock fails if another watcher holds the lock.
+exec 9>"$LOCK"
+if ! flock -n 9; then
+  exit 0
+fi
+echo "$(date -Is) watcher started pid=$$" >>"$LOG"
+while true; do
+  once >/dev/null 2>&1
+  sleep 10
+done

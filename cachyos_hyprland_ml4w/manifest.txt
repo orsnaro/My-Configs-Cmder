@@ -449,6 +449,17 @@ dotfiles/.config/waybar/themes/starter/style.css
 dotfiles/.config/waybar/themeswitcher.sh
 dotfiles/.config/waybar/toggle.sh
 dotfiles/.config/waybar/waybar-quickshell.sh
+local/.local/bin/albion-data-watch
+local/.local/bin/glaze-discord
+local/.local/bin/glaze-gmail
+local/.local/bin/glaze-minimize
+local/.local/bin/glaze-move-window
+local/.local/bin/glaze-obsidian-notes
+local/.local/bin/glaze-quake
+local/.local/bin/glaze-reset
+local/.local/bin/glaze-resize-window
+local/.local/bin/glaze-show-desktop
+local/.local/bin/glaze-spotify
 local/.local/bin/hypr-current-xkblayout
 local/.local/bin/hypr-switch-xkblayout
 local/.local/bin/hypr-sysinfo

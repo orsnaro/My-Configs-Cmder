@@ -8,10 +8,10 @@ mkdir -p "$DOT" "$LOC/bin" "$LOC/share/applications"
 
 rsync -aL --delete --exclude='__pycache__/' ~/.config/hypr/ "$DOT/hypr/"
 rsync -aL --delete --exclude='__pycache__/' --exclude='*.pyc' --exclude='backup-*/' ~/.config/kitty/ "$DOT/kitty/"
-rsync -aL --delete ~/.config/quickshell/ "$DOT/quickshell/"
-rsync -aL --delete ~/.config/waybar/ "$DOT/waybar/"
-rsync -aL --delete ~/.config/rofi/ "$DOT/rofi/"
-rsync -aL --delete ~/.config/swaync/ "$DOT/swaync/"
+rsync -aL --delete --exclude='.git/' --exclude='__pycache__/' --exclude='*.pyc' ~/.config/quickshell/ "$DOT/quickshell/"
+rsync -aL --delete --exclude='.git/' --exclude='__pycache__/' --exclude='*.pyc' ~/.config/waybar/ "$DOT/waybar/"
+rsync -aL --delete --exclude='.git/' --exclude='__pycache__/' --exclude='*.pyc' ~/.config/rofi/ "$DOT/rofi/"
+rsync -aL --delete --exclude='.git/' --exclude='__pycache__/' --exclude='*.pyc' ~/.config/swaync/ "$DOT/swaync/"
 rsync -aL --delete --exclude='wallpapers/' ~/.config/ml4w/scripts/ "$DOT/ml4w/scripts/"
 rsync -aL --delete --exclude='wallpapers/' ~/.config/ml4w/settings/ "$DOT/ml4w/settings/"
 rsync -aL --delete ~/.config/ml4w-dock/ "$DOT/ml4w-dock/" 2>/dev/null || true
@@ -20,6 +20,9 @@ rsync -aL --delete ~/.config/fastfetch/ "$DOT/fastfetch/" 2>/dev/null || true
 rsync -aL --delete ~/.config/fish/ "$DOT/fish/" 2>/dev/null || true
 
 cp -a ~/.local/bin/hypr-switch-xkblayout ~/.local/bin/hypr-sysinfo ~/.local/bin/hypr-weather ~/.local/bin/hypr-current-xkblayout ~/.local/bin/qs-lazy-toggle "$LOC/bin/" 2>/dev/null || true
+cp -a ~/.local/bin/glaze-* "$LOC/bin/" 2>/dev/null || true
+cp -a ~/.local/bin/albion-data-watch "$LOC/bin/" 2>/dev/null || true
+rm -f "$LOC/bin/cemu-mousepad.py" 2>/dev/null || true
 rsync -a --delete --exclude='.git/' ~/.local/share/ml4w-dock/ "$LOC/share/ml4w-dock/" 2>/dev/null || true
 rsync -a --delete --exclude='.git/' ~/.local/share/quickshell-overview/ "$LOC/share/quickshell-overview/" 2>/dev/null || true
 rsync -a --delete --exclude='.git/' ~/.local/share/ml4w-dotfiles-settings/ "$LOC/share/ml4w-dotfiles-settings/" 2>/dev/null || true
