@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Fetch current Alexandria weather (Open-Meteo, no key) into ~/.cache/weather.json
+out="$HOME/.cache/weather.json"
+tmp="$out.tmp"
+curl -s --max-time 20 'https://api.open-meteo.com/v1/forecast?latitude=31.20176&longitude=29.91582&current=temperature_2m,weather_code,is_day&timezone=auto' \
+    | jq '{temp: (.current.temperature_2m | round), code: .current.weather_code, day: .current.is_day, updated: .current.time}' > "$tmp"
+mv "$tmp" "$out"
+cat "$out"

@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Quake Terminal
+GenericName=Dropdown terminal
+Comment=Quake-style dropdown terminal (kitty with class quake-kitty)
+TryExec=kitty
+Exec=kitty --class quake-kitty --title quake-terminal
+Icon=kitty
+Categories=System;TerminalEmulator;
+StartupWMClass=quake-kitty
+X-TerminalArgExec=--
+X-TerminalArgTitle=--title
+X-TerminalArgAppId=--class

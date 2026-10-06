@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# Show-desktop toggle (Windows-style): hide all normal windows to the hidden
+# special:minimized workspace, restore them on second click. Shares state with
+# glaze-minimize so single-window hides and show-desktop interoperate.
+set -euo pipefail
+mode=${1:-toggle}
+[[ $mode == toggle || $mode == hide || $mode == hide-all || $mode == restore-all ]] || { echo 'Usage: glaze-show-desktop [toggle|hide|restore-all]' >&2; exit 2; }
+
+runtime=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+umask 077
+exec 9>"$runtime/glaze-minimize.lock"
+flock 9
+state="$runtime/glaze-minimized.tsv"
+
+hide_visible_special() {
+    local monitors=$1 visible focused
+    visible=$(jq -r '.[] | select(.specialWorkspace.name == "special:minimized") | .name' <<< "$monitors" | head -n 1)
+    [[ -n $visible ]] || return 0
+    focused=$(jq -r '.[] | select(.focused == true) | .name' <<< "$monitors" | head -n 1)
+    hyprctl dispatch "hl.dsp.focus({ monitor = \"$visible\" })" >/dev/null
+    hyprctl dispatch 'hl.dsp.workspace.toggle_special("minimized")' >/dev/null
+    if [[ -n $focused && $focused != "$visible" ]]; then
+        hyprctl dispatch "hl.dsp.focus({ monitor = \"$focused\" })" >/dev/null
+    fi
+}
+
+restore_all() {
+    local monitors=$1
+    hide_visible_special "$monitors"
+    declare -A original
+    if [[ -f $state ]]; then
+        while IFS=$'\t' read -r address workspace; do
+            [[ $address =~ ^0x[[:xdigit:]]+$ && $workspace =~ ^[1-9][0-9]*$ ]] || continue
+            original["$address"]=$workspace
+        done < "$state"
+    fi
+    while IFS=$'\t' read -r address monitor; do
+        [[ $address =~ ^0x[[:xdigit:]]+$ ]] || continue
+        workspace=${original[$address]:-}
+        if [[ -z $workspace ]]; then
+            workspace=$(jq -r --argjson id "$monitor" \
+                '.[] | select(.id == $id) | .activeWorkspace.id // empty' <<< "$monitors")
+        fi
+        [[ $workspace =~ ^[1-9][0-9]*$ ]] || continue
+        hyprctl dispatch "hl.dsp.window.move({ workspace = \"$workspace\", follow = false, window = \"address:$address\" })" >/dev/null
+    done < <(hyprctl clients -j | jq -r '.[] | select(.workspace.name == "special:minimized") | [.address, (.monitor | tostring)] | @tsv')
+    : > "$state"
+}
+
+hide_all() {
+    local monitors=$1
+    hide_visible_special "$monitors"
+    # Record origins to avoid duplicate rows when already tracked.
+    declare -A known
+    if [[ -f $state ]]; then
+        while IFS=$'\t' read -r address workspace; do
+            [[ $address =~ ^0x[[:xdigit:]]+$ ]] || continue
+            known["$address"]=1
+        done < "$state"
+    fi
+    while IFS=$'\t' read -r address workspace; do
+        [[ $address =~ ^0x[[:xdigit:]]+$ && $workspace =~ ^[1-9][0-9]*$ ]] || continue
+        [[ -n ${known["$address"]:-} ]] || printf '%s\t%s\n' "$address" "$workspace" >> "$state"
+        known["$address"]=1
+        hyprctl dispatch "hl.dsp.window.move({ workspace = \"special:minimized\", follow = false, window = \"address:$address\" })" >/dev/null
+    done < <(hyprctl clients -j | jq -r '.[] | select(.workspace.name | test("^special:") | not) | [.address, (.workspace.id | tostring)] | @tsv')
+}
+
+monitors=$(hyprctl monitors -j)
+case "$mode" in
+    hide|hide-all) hide_all "$monitors" ;;
+    restore-all) restore_all "$monitors" ;;
+    toggle)
+        normal=$(hyprctl clients -j | jq -r '[.[] | select(.workspace.name | test("^special:") | not)] | length')
+        if [[ "$normal" -gt 0 ]]; then
+            hide_all "$monitors"
+        else
+            restore_all "$monitors"
+        fi
+        ;;
+esac

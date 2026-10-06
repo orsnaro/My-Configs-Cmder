@@ -1,0 +1,18 @@
+--- /usr/lib/kitty/kitty/options/utils.py	2026-09-25 17:20:19.000000000 +0300
++++ /tmp/opencode/kitty-ors/utils.py	2026-09-28 08:48:06.669386894 +0300
+@@ -325,6 +325,15 @@
+     return func, args
+ 
+ 
++@func_with_args('resize_divider')
++def resize_divider(func: str, rest: str) -> FuncArgsType:
++    rest = rest.strip().lower()
++    if rest not in ('left', 'right', 'up', 'down'):
++        log_error(f'Invalid resize_divider specification: {rest}')
++        rest = 'right'
++    return func, [rest]
++
++
+ @func_with_args('move_window')
+ def move_window(func: str, rest: str) -> FuncArgsType:
+     rest = rest.lower()

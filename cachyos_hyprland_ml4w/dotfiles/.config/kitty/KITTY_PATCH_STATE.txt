@@ -1,0 +1,5 @@
+kitty 0.49.2 created by Kovid Goyal
+tabs.py resize_divider count: 1
+ors-resize-divider-kitty-0.49.1-tabs-before-no-neighbors.diff
+ors-resize-divider-kitty-0.49.1-tabs.diff
+ors-resize-divider-kitty-0.49.1-utils.diff

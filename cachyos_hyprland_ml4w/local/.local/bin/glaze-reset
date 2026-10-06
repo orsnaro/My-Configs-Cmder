@@ -1,0 +1,39 @@
+#!/usr/bin/env bash
+# Explicit one-shot reset; never run from autostart or a repeating bind.
+set -euo pipefail
+
+hyprctl reload >/dev/null
+errors=$(hyprctl configerrors)
+if [[ -n ${errors//[[:space:]]/} ]]; then
+    echo "Hyprland reload reported errors; leaving existing windows alone: $errors" >&2
+    exit 1
+fi
+
+declare -A destination
+while IFS=$'\t' read -r class workspace; do
+    [[ -n ${class:-} && $class != \#* ]] || continue
+    destination["$class"]=$workspace
+done < "$HOME/.config/hypr/glaze-apps.tsv"
+
+while IFS=$'\t' read -r address class current floating fullscreen mapped pinned title; do
+    [[ $address =~ ^0x[[:xdigit:]]+$ ]] || continue
+    target=${destination[$class]:-}
+    [[ -n $target && $current =~ ^[0-9]+$ && $mapped == true && $pinned != true && $fullscreen == 0 ]] || continue
+    [[ $title != *Picture-in-Picture* && $title != *picture-in-picture* ]] || continue
+
+    # Only classes whose main windows are safe to retile until the floating
+    # application list has been agreed. Leave other floating dialogs alone.
+    if [[ $floating == true ]]; then
+        case "$class" in
+            kitty|konsole|org.kde.konsole|Alacritty|code|obsidian)
+                hyprctl dispatch "hl.dsp.window.float({ action = \"unset\", window = \"address:$address\" })" >/dev/null ;;
+            *) continue ;;
+        esac
+    fi
+    if [[ $current != "$target" ]]; then
+        hyprctl dispatch "hl.dsp.window.move({ workspace = \"$target\", follow = false, window = \"address:$address\" })" >/dev/null
+    fi
+done < <(hyprctl clients -j | jq -r '.[] | [
+    .address, .class, (.workspace.id | tostring), (.floating | tostring),
+    (.fullscreen | tostring), (.mapped | tostring), (.pinned | tostring), .title
+] | @tsv')

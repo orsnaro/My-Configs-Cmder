@@ -1,0 +1,4 @@
+# Restore pristine source each run so the effect never stacks (re-applying noise would double the grain)
+ORIG="$(cat "$CACHE_FILE")"
+[ -f "$ORIG" ] && cp "$ORIG" "$IMAGE_PATH"
+magick $IMAGE_PATH -attenuate 0.25 +noise Gaussian $IMAGE_PATH

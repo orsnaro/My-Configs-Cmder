@@ -1,0 +1,26 @@
+{
+    "dock": {
+        "enabled": true,
+        "launcherButton": true,
+        "autohide": false,
+        "iconSize": 22,
+        "spacing": 6,
+        "marginBottom": 11,
+        "monitor": "DP-2"
+    },
+    "pill": {
+        "radius": 11,
+        "padding": 8
+    },
+    "border": {
+        "width": 1
+    },
+    "apps": {
+        "pinned": [
+            "kitty",
+            "org.kde.plasma-systemmonitor",
+            "org.gnome.Nautilus",
+            "brave-browser"
+        ]
+    }
+}
