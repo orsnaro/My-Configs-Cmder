@@ -1,0 +1,71 @@
+--- a/kitty/tabs.py
++++ b/kitty/tabs.py
+@@ -701,6 +701,68 @@
+             if get_options().enable_audio_bell:
+                 ring_bell(self.os_window_id)
+ 
++    def _nearest_split_side(self, window_id: int, is_horizontal: bool) -> str | None:
++        """Which side ('one'/'two') of the nearest same-axis split owns the window."""
++        grp = self.windows.group_for_window(window_id)
++        if grp is None:
++            return None
++        group_id = grp.id
++
++        def search(node):
++            if isinstance(node, int):
++                return node == group_id, None
++            one, two = getattr(node, 'one', None), getattr(node, 'two', None)
++            for side, child in (('one', one), ('two', two)):
++                contains, nearest = search(child)
++                if contains:
++                    if nearest is not None:
++                        return True, nearest
++                    if getattr(node, 'horizontal', True) == is_horizontal and one is not None and two is not None:
++                        return True, side
++                    return True, None
++            return False, None
++
++        return search(self.current_layout.pairs_root)[1]
++
++    @ac(
++        'win',
++        """
++        Move the divider adjacent to the active window in the named direction
++
++        The key names the direction the DIVIDER moves, regardless of which
++        pane has focus. In nested splits the pane's nearest split on that
++        axis is moved. On layouts without that split the behavior falls back
++        to neighbor-based grow/shrink like :ac:`resize_window`.
++        """,
++    )
++    def resize_divider(self, direction: str) -> None:
++        w = self.active_window
++        if w is None:
++            return
++        layout = self.current_layout
++        if direction == 'left':
++            is_horizontal, edge = True, 'left'
++        elif direction == 'right':
++            is_horizontal, edge = True, 'right'
++        elif direction == 'up':
++            is_horizontal, edge = False, 'top'
++        elif direction == 'down':
++            is_horizontal, edge = False, 'bottom'
++        else:
++            return
++        if getattr(layout, 'name', '') == 'splits':
++            side = self._nearest_split_side(w.id, is_horizontal)
++            if side is None:
++                return
++            toward_first = direction in ('left', 'up')
++            inc = 6 if (side == 'two') == toward_first else -6
++        else:
++            neighbors = layout.neighbors_for_window(w, self.windows) or {}
++            inc = 6 if neighbors.get(edge) else -6
++        if self.resize_window_by(w.id, inc, is_horizontal) is not None:
++            if get_options().enable_audio_bell:
++                ring_bell(self.os_window_id)
++
+     @ac('win', 'Reset window sizes undoing any dynamic resizing of windows')
+     def reset_window_sizes(self) -> None:
+         if self.current_layout.remove_all_biases():

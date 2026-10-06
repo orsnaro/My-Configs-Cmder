@@ -1,0 +1,122 @@
+#!/usr/bin/env bash
+# qs-lazy-toggle <config-path> <ipc-target> <ipc-fn>
+#
+# Ensure-running + IPC toggle for on-demand Quickshell instances
+# (overview, dotfiles-settings). The dock and main shell keep autostarting.
+#
+# Usage:
+#   qs-lazy-toggle ~/.local/share/quickshell-overview overview toggle
+#   PROFILE=com.ml4w.dotfiles qs-lazy-toggle \
+#       ~/.local/share/ml4w-dotfiles-settings/quickshell settings toggle
+#
+# PROFILE is inherited for the ensure-start (settings needs it to load the
+# right profile). No daemons, no polling at idle: this process exits after
+# one IPC call. The waits below run only on cold start (broker ~6s bound,
+# QML load ~10s bound).
+set -u
+
+usage() { echo "usage: qs-lazy-toggle <config-path> <ipc-target> <ipc-fn>" >&2; exit 2; }
+CFG_RAW="${1:-}"; TARGET="${2:-}"; FN="${3:-}"
+[ -n "$CFG_RAW" ] && [ -n "$TARGET" ] && [ -n "$FN" ] || usage
+
+# Expand a leading ~ (Hyprland exec_cmd may pass it through literally).
+# HOME is only touched for ~/ paths; absolute paths work with HOME unset.
+case "$CFG_RAW" in
+    "~/"*)
+        [ -n "${HOME:-}" ] || { echo "qs-lazy-toggle: HOME is unset, cannot expand $CFG_RAW" >&2; exit 2; }
+        CFG="$HOME/${CFG_RAW#~/}" ;;
+    "~")
+        [ -n "${HOME:-}" ] || { echo "qs-lazy-toggle: HOME is unset, cannot expand $CFG_RAW" >&2; exit 2; }
+        CFG="$HOME" ;;
+    *) CFG="$CFG_RAW" ;;
+esac
+
+# The settings shell selects its profile from PROFILE (see shell.qml:
+# `property string profile: Quickshell.env("PROFILE")`). Autostart used
+# PROFILE=com.ml4w.dotfiles; default it here so a bare invocation cannot
+# silently start the server on the wrong profile.
+if [ "$TARGET" = "settings" ] && [ -z "${PROFILE:-}" ]; then
+    PROFILE="com.ml4w.dotfiles"
+    export PROFILE
+    echo "qs-lazy-toggle: PROFILE unset, defaulting to com.ml4w.dotfiles" >&2
+fi
+
+# True when a qs *server* for this config is alive. Short-lived
+# `qs ... ipc` clients also match "qs -p <path>", so exclude any
+# cmdline containing "ipc"; self (bash) can never match "qs -x".
+is_running() {
+    local pid cmd
+    for pid in $(pgrep -x qs 2>/dev/null); do
+        cmd=$(tr '\0' ' ' < /proc/"$pid"/cmdline 2>/dev/null) || continue
+        case "$cmd" in
+            *"$CFG"*ipc*) continue ;;
+            *"$CFG"*) return 0 ;;
+        esac
+    done
+    return 1
+}
+
+toggle_once() {
+    qs -p "$CFG" ipc call "$TARGET" "$FN" >/dev/null 2>&1
+}
+
+# Block until the config's broker entry appears (server process up and
+# registered). Condition wait, not a blind sleep; bounded at ~6s.
+wait_for_broker() {
+    local tries=0
+    until qs -p "$CFG" list >/dev/null 2>&1; do
+        tries=$((tries + 1))
+        if [ "$tries" -ge 30 ]; then
+            return 1
+        fi
+        sleep 0.2
+    done
+    return 0
+}
+
+# Block until the config's QML has finished loading ("Configuration
+# Loaded" in the server log). Toggling before this point races the
+# overview's focus-grab setup: the grab clears and the layer opens then
+# instantly closes (first ALT+Tab after a kill). Condition wait on the
+# server's own readiness signal, bounded at ~10s; on timeout the caller
+# proceeds anyway (old behavior) rather than failing a working server.
+wait_for_loaded() {
+    local tries=0 id log
+    while [ "$tries" -lt 50 ]; do
+        id=$(qs -p "$CFG" list -j 2>/dev/null | python3 -c "import json,sys; d=json.load(sys.stdin); print(d[0]['id'] if d else '')" 2>/dev/null)
+        log="/run/user/$(id -u)/quickshell/by-id/$id/log.qslog"
+        if [ -n "$id" ] && [ -f "$log" ] && grep -aq "Configuration Loaded" "$log" 2>/dev/null; then
+            return 0
+        fi
+        tries=$((tries + 1))
+        sleep 0.2
+    done
+    echo "qs-lazy-toggle: $CFG slow to load, toggling anyway" >&2
+    return 0
+}
+
+cold_start() {
+    # -n/--no-duplicate: no-op if a server raced us here.
+    qs -n -p "$CFG" >/dev/null 2>&1 &
+    wait_for_broker && wait_for_loaded
+}
+
+if ! is_running; then
+    cold_start || { echo "qs-lazy-toggle: $CFG did not register within ~6s" >&2; exit 1; }
+fi
+
+if toggle_once; then
+    exit 0
+fi
+
+# Hot-path IPC failed: server died between the check and the call, or a
+# stale registration pointed at a dead process. Restart once and retry;
+# a second failure is reported instead of looping forever.
+echo "qs-lazy-toggle: IPC failed, restarting $CFG once" >&2
+qs kill -p "$CFG" >/dev/null 2>&1 || true
+if ! cold_start; then
+    echo "qs-lazy-toggle: $CFG did not re-register within ~6s" >&2
+    exit 1
+fi
+toggle_once || { echo "qs-lazy-toggle: IPC to $CFG failed after restart" >&2; exit 1; }
+exit 0

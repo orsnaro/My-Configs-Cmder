@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# Switch all Hyprland keyboards to next layout (us <-> ara).
+# Keeps every keyboard in sync; resets to 0 if they disagree (e.g. new keyboard plugged in).
+if [ "$(hyprctl devices -j | jq -r '.keyboards[] | .active_keymap' | sort -u | wc -l)" -eq 1 ]; then
+  switch="next"
+else
+  switch="0"
+fi
+for device in $(hyprctl devices -j | jq -r '.keyboards[] | .name'); do
+  hyprctl switchxkblayout "$device" "$switch" >/dev/null
+done
+activeKeymap=$(hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) | .active_keymap' | head -n1)
+hyprctl notify -1 1200 0 "Layout: $activeKeymap" >/dev/null || true

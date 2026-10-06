@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Report the active layout of Hyprland's main keyboard for the status bar.
+index=$(hyprctl devices -j | jq -r '.keyboards | (map(select(.main == true))[0] // .[0]) | .active_layout_index // -1')
+case "$index" in
+    0) printf 'us\n' ;;
+    1) printf 'ar\n' ;;
+    *) printf '%s\n' '--' ;;
+esac

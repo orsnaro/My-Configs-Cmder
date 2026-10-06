@@ -1,0 +1,97 @@
+#!/usr/bin/env bash
+set -euo pipefail
+# System snapshot for the statusbar pills/panel -> ~/.cache/sysinfo.json
+out="$HOME/.cache/sysinfo.json"
+tmp="$out.tmp"
+
+cpu_line() { grep '^cpu ' /proc/stat; for n in $(seq 0 63); do grep "^cpu$n " /proc/stat || break; done; }
+mapfile -t before < <(cpu_line)
+sleep 0.5
+mapfile -t after < <(cpu_line)
+
+pct_of() { # $1 = before line, $2 = after line (without leading label)
+    local b=($1) a=($2) i idle_b idle_a tot_b tot_a
+    tot_b=0; tot_a=0
+    for i in "${!b[@]}"; do tot_b=$((tot_b + b[i])); tot_a=$((tot_a + a[i])); done
+    idle_b=$((b[3] + b[4])); idle_a=$((a[3] + a[4]))
+    local dt=$((tot_a - tot_b)) di=$((idle_a - idle_b))
+    if ((dt <= 0)); then echo 0; else echo $(( (100 * (dt - di)) / dt )); fi
+}
+
+cpu_pct=$(pct_of "${before[0]#cpu }" "${after[0]#cpu }")
+cores=$(for i in "${!before[@]}"; do
+    ((i == 0)) && continue
+    pct_of "${before[i]#cpu* }" "${after[i]#cpu* }"
+done | jq -R . | jq -cs 'map(tonumber)')
+
+ghz=$(awk '{f=$1; if(f>m)m=f} END{printf "%.1f", m/1000000}' /sys/devices/system/cpu/cpu[0-9]*/cpufreq/scaling_cur_freq 2>/dev/null || echo 0)
+read -r mem_pct mem_used mem_total swap_pct < <(python3 -c "
+import re
+m = dict((k, int(v)) for k, v in re.findall(r'(\w+):\s+(\d+)', open('/proc/meminfo').read()))
+t, a = m['MemTotal'], m['MemAvailable']
+st, sf = m.get('SwapTotal', 0), m.get('SwapFree', 0)
+print(round(100*(t-a)/t), round((t-a)/1048576, 1), round(t/1048576, 1), round(100*(st-sf)/st) if st else 0)")
+read -r l1 l5 l15 <<<"$(cut -d' ' -f1-3 /proc/loadavg)"
+uptime=$(awk '{s=int($1); printf "%dd %dh %dm", s/86400, s%86400/3600, s%3600/60}' /proc/uptime)
+top=$(ps -eo pcpu,comm --sort=-%cpu --no-headers | head -5 | awk '{printf "%s{\"cpu\":%s,\"name\":\"%s\"}", (NR>1?",":""), $1, $2}' | sed 's/^/[/;s/$/]/')
+read -r cpu_temp gpu_json < <(python3 - <<'PY'
+import json
+from pathlib import Path
+
+def number(path):
+    try:
+        return int(path.read_text().strip())
+    except (OSError, ValueError):
+        return None
+
+cpu_temp = None
+for hwmon in Path('/sys/class/hwmon').glob('hwmon*'):
+    try:
+        if (hwmon / 'name').read_text().strip() != 'coretemp':
+            continue
+    except OSError:
+        continue
+    for label in hwmon.glob('temp*_label'):
+        if label.read_text().strip().startswith('Package id'):
+            value = number(label.with_name(label.name.replace('_label', '_input')))
+            if value is not None:
+                cpu_temp = round(value / 1000)
+            break
+    break
+
+gpu = {'name': None, 'usage': None, 'temp': None,
+       'vram_used_gb': None, 'vram_total_gb': None}
+for card in Path('/sys/class/drm').glob('card[0-9]*/device'):
+    try:
+        if (card / 'vendor').read_text().strip() != '0x1002':
+            continue
+    except OSError:
+        continue
+    gpu['name'] = 'AMD Radeon'
+    gpu['usage'] = number(card / 'gpu_busy_percent')
+    for hwmon in (card / 'hwmon').glob('hwmon*'):
+        temp = number(hwmon / 'temp1_input')
+        if temp is not None:
+            gpu['temp'] = round(temp / 1000)
+            break
+    used = number(card / 'mem_info_vram_used')
+    total = number(card / 'mem_info_vram_total')
+    if used is not None:
+        gpu['vram_used_gb'] = round(used / 1024**3, 1)
+    if total is not None:
+        gpu['vram_total_gb'] = round(total / 1024**3, 1)
+    break
+
+print(json.dumps(cpu_temp), json.dumps(gpu, separators=(',', ':')))
+PY
+)
+
+cat > "$tmp" <<EOF
+{"cpu_pct": $cpu_pct, "cpu_ghz": $ghz, "cores": $cores,
+ "mem_pct": $mem_pct, "mem_used": $mem_used, "mem_total": $mem_total, "swap_pct": $swap_pct,
+ "load": "$l1 $l5 $l15", "uptime": "$uptime", "top": $top,
+ "cpu_temp": $cpu_temp, "gpu": $gpu_json}
+EOF
+python3 -c "import json;json.load(open('$tmp'))"
+mv "$tmp" "$out"
+cat "$out"

@@ -1,0 +1,6 @@
+# Restore pristine source each run so the effect never stacks (re-blur + re-darken -> black)
+ORIG="$(cat "$CACHE_FILE")"
+[ -f "$ORIG" ] && cp "$ORIG" "$IMAGE_PATH"
+magick $IMAGE_PATH -blur "47x28" $IMAGE_PATH
+magick $IMAGE_PATH -attenuate 0.15 +noise Gaussian $IMAGE_PATH
+magick $IMAGE_PATH -brightness-contrast "5x0" $IMAGE_PATH

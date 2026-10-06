@@ -1,0 +1,135 @@
+{
+    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+    "display": {
+        "color": {
+            "keys": "#ffffff"
+        },
+        "key": {
+            "width": 3
+        },
+        "separator": " ",
+        "duration": {
+            "abbreviation": true
+        }
+    },
+    "logo": {
+        "source": "~/.config/ml4w/assets/ml4w.png",
+        "type": "kitty",
+        "width": 32,
+        "height": 16,
+        "padding": {
+            "left": 2,
+            "right": 2,
+            "top": 1
+        }
+    },
+    "modules": [
+        {
+            "symbol": "circle",
+            "type": "colors"
+        },
+        {
+            "color": {
+                "at": "#666666",
+                "host": "#ff8a8a",
+                "user": "#ff8a8a"
+            },
+            "type": "title"
+        },
+        {
+            "format": "{pretty-name}",
+            "key": "",
+            "keyColor": "#71b7ff",
+            "type": "os"
+        },
+        {
+            "key": "󰌽",
+            "keyColor": "#d2a8ff",
+            "type": "kernel"
+        },
+        {
+            "format": "{all}",
+            "key": "󰏗",
+            "keyColor": "#71b7ff",
+            "type": "packages"
+        },
+        {
+            "format": "{pretty-name}",
+            "key": "",
+            "keyColor": "#8ddb8c",
+            "type": "shell"
+        },
+        {
+            "format": "{pretty-name}",
+            "key": "",
+            "keyColor": "#8ddb8c",
+            "type": "terminal"
+        },
+        {
+            "format": "{pretty-name}",
+            "key": "",
+            "keyColor": "#ff8a8a",
+            "type": "wm"
+        },
+        {
+            "format": "{name}",
+            "key": "",
+            "keyColor": "#ff8a8a",
+            "type": "terminalfont"
+        },
+        {
+            "key": "",
+            "keyColor": "#d2b45f",
+            "type": "uptime"
+        },
+        {
+            "key": "󰻠",
+            "keyColor": "#d2a8ff",
+            "text": "grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | sed -e 's/(R)//g' -e 's/(TM)//g' -e 's/[0-9]*th Gen //' -e 's/Core //' -e 's/ @ .*//' -e 's/^ *//'",
+            "type": "command"
+        },
+        {
+            "format": "{2}",
+            "hideType": "integrated",
+            "key": "󰍛",
+            "keyColor": "#d2a8ff",
+            "type": "gpu"
+        },
+        {
+            "format": "{used} / {total} ({percentage})",
+            "key": "",
+            "keyColor": "#71b7ff",
+            "type": "memory"
+        },
+        {
+            "key": "󰋊 1",
+            "keyColor": "#71b7ff",
+            "text": "df -B1 --output=source,used,size / /boot /run/media/narol/shared_across_os | awk '$1 ~ /^\\/dev\\/nvme0n1/ {u+=$2; t+=$3} END {printf \"free %.2f GiB (%d%%)\", (t-u)/1024/1024/1024, u/t*100}'",
+            "type": "command"
+        },
+        {
+            "folders": "/run/media/narol/system",
+            "format": "free {size-free} ({size-percentage})",
+            "key": "󰋊 2",
+            "keyColor": "#71b7ff",
+            "type": "disk"
+        },
+        {
+            "folders": "/run/media/narol/HDD",
+            "format": "free {size-free} ({size-percentage})",
+            "key": "󰋊 3",
+            "keyColor": "#71b7ff",
+            "type": "disk"
+        },
+        {
+            "key": "",
+            "keyColor": "#ff8a8a",
+            "text": "/usr/bin/vnstat --oneline -i eno1 | /usr/bin/awk -F';' '{split($9,a,\" \"); split($10,b,\" \"); printf \"↓ %.0f %s ↑ %.0f %s (resets 25th)\", a[1], a[2], b[1], b[2]}'",
+            "type": "command"
+        },
+        {
+            "symbol": "circle",
+            "type": "colors"
+        }
+    ]
+}

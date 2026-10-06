@@ -1,0 +1,16 @@
+{
+    "bar": {
+        "autohide": false,
+        "alwaysExpanded": true,
+        "enabled": true,
+        "marginTop": -2
+    },
+    "pill": {
+        "expandedWidth": 2520
+    },
+    "modules": {
+        "left": ["logo", "workspaces", "media"],
+        "center": ["weather", "clock", "pomo", "swaync"],
+        "right": ["cpu", "mem", "updates", "battery", "powerprofile", "systemtray", "keyboard", "mic", "volume", "power"]
+    }
+}
