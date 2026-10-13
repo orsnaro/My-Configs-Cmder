@@ -1,0 +1,3 @@
+# Exclude backed-up configs from language statistics, but retain actual tools.
+* linguist-vendored
+cmder/bin/** -linguist-vendored
