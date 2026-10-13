@@ -1,43 +1,35 @@
 #!/usr/bin/env bash
-# Restore backup to a fresh CachyOS + ML4W 2.16 install. Copies back, chmods, prompts for kitty sudo patch.
+# Merge into a fresh CachyOS + ML4W 2.16 install, preserving copied permissions.
 set -euo pipefail
 REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 DOT="$REPO_DIR/dotfiles/.config"
 LOC="$REPO_DIR/local/.local"
-DRY=""
-if [[ "${1:-}" == "--dry-run" ]]; then DRY="-n"; fi
+DRY_ARGS=()
+if [[ "${1:-}" == "--dry-run" ]]; then DRY_ARGS=(--dry-run); fi
 
 restore_one() { # $1=src $2=dest
-  if [[ -n "$DRY" ]]; then
-    if [[ -e "$1" ]]; then rsync -aLn --itemize-changes "$1/" "$2/" 2>/dev/null || true; fi
-    return 0
+  if [[ -d "$1" ]]; then
+    rsync -aL --mkpath --itemize-changes --exclude='.git/' "${DRY_ARGS[@]}" "$1/" "$2/"
   fi
-  mkdir -p "$(dirname "$2")"
-  if [[ -e "$1" ]]; then rsync -aL "$1/" "$2/"; fi
 }
-restore_one "$DOT/hypr" ~/.config/hypr
-restore_one "$DOT/kitty" ~/.config/kitty
-restore_one "$DOT/quickshell" ~/.config/quickshell
-restore_one "$DOT/waybar" ~/.config/waybar
-restore_one "$DOT/rofi" ~/.config/rofi
-restore_one "$DOT/swaync" ~/.config/swaync
-restore_one "$DOT/ml4w/scripts" ~/.config/ml4w/scripts
-restore_one "$DOT/ml4w/settings" ~/.config/ml4w/settings
-restore_one "$DOT/ml4w-dock" ~/.config/ml4w-dock
-restore_one "$DOT/ml4w-statusbar" ~/.config/ml4w-statusbar
-restore_one "$DOT/fastfetch" ~/.config/fastfetch
-restore_one "$DOT/fish" ~/.config/fish
-if [[ -z "$DRY" ]]; then mkdir -p ~/.local/bin; fi
-if [[ -z "$DRY" ]]; then cp -a "$LOC/bin/"* ~/.local/bin/ 2>/dev/null || true; fi
-if [[ -z "$DRY" ]]; then mkdir -p ~/.local/share/ml4w-dock ~/.local/share/quickshell-overview ~/.local/share/ml4w-dotfiles-settings; fi
-rsync -a --exclude='.git/' $DRY "$LOC/share/ml4w-dock/" ~/.local/share/ml4w-dock/ 2>/dev/null || true
-rsync -a --exclude='.git/' $DRY "$LOC/share/quickshell-overview/" ~/.local/share/quickshell-overview/ 2>/dev/null || true
-rsync -a --exclude='.git/' $DRY "$LOC/share/ml4w-dotfiles-settings/" ~/.local/share/ml4w-dotfiles-settings/ 2>/dev/null || true
-if [[ -z "$DRY" ]]; then mkdir -p ~/.local/share/applications; fi
-if [[ -z "$DRY" ]]; then cp -a "$LOC/share/applications/quake-kitty.desktop" ~/.local/share/applications/ 2>/dev/null || true; fi
+for name in hypr kitty quickshell waybar rofi swaync ml4w ml4w-dock ml4w-statusbar fastfetch fish matugen walker elephant ohmyposh hyprland-kde-overrides gtk-3.0 gtk-4.0 gcal; do
+  restore_one "$DOT/$name" "$HOME/.config/$name"
+done
+restore_one "$LOC/bin" "$HOME/.local/bin"
+for name in ml4w-dock quickshell-overview ml4w-dotfiles-settings applications; do
+  restore_one "$LOC/share/$name" "$HOME/.local/share/$name"
+done
+# Recreate the launcher without embedding this machine's absolute HOME path.
+if [[ -f "$LOC/share/ml4w-dock/bin/ml4w-dock" && ! -e "$HOME/.local/bin/ml4w-dock" && ! -L "$HOME/.local/bin/ml4w-dock" ]]; then
+  if [[ ${#DRY_ARGS[@]} -gt 0 ]]; then
+    echo 'Would create ~/.local/bin/ml4w-dock -> ../share/ml4w-dock/bin/ml4w-dock'
+  else
+    mkdir -p "$HOME/.local/bin"
+    ln -s ../share/ml4w-dock/bin/ml4w-dock "$HOME/.local/bin/ml4w-dock"
+  fi
+fi
 
-if [[ -z "$DRY" ]]; then
-  chmod +x ~/.config/kitty/*.py ~/.config/kitty/*.sh ~/.config/hypr/scripts/*.sh ~/.local/bin/* 2>/dev/null || true
+if [[ ${#DRY_ARGS[@]} -eq 0 ]]; then
   echo "--- kitty system patch (needs sudo, kitty 0.49.2) ---"
   cat "$DOT/kitty/KITTY_PATCH_STATE.txt" 2>/dev/null || true
   read -r -p "Re-apply kitty patch with sudo now? [y/N] " ans || ans="N"

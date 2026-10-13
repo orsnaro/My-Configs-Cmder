@@ -18,9 +18,11 @@
     "apps": {
         "pinned": [
             "kitty",
+            "org.kde.dolphin",
             "org.kde.plasma-systemmonitor",
-            "org.gnome.Nautilus",
-            "brave-browser"
+            "brave-browser",
+            "brave-gmail",
+            "obsidian"
         ]
     }
 }

@@ -107,7 +107,7 @@
         {
             "key": "",
             "keyColor": "#ff8a8a",
-            "text": "/usr/bin/vnstat --oneline -i eno1 | /usr/bin/awk -F';' '{split($9,a,\" \"); split($10,b,\" \"); printf \"↓ %.0f %s ↑ %.0f %s (resets 25th)\", a[1], a[2], b[1], b[2]}'",
+            "text": "TZ=Africa/Cairo LC_ALL=C /usr/bin/sqlite3 -readonly -batch -noheader -init /dev/null /var/lib/vnstat/vnstat.db < \"$HOME/.config/fastfetch/network-usage.sql\" 2>/dev/null || printf '%s\\n' 'network usage unavailable'",
             "type": "command"
         },
         {

@@ -1123,6 +1123,7 @@ PanelWindow {
         id: calendarPanel
 
         isOpen: root.calendarOpen
+        manageAgendaBackground: true
 
         x: {
             // Centered on the clock when one is placed, on the bar otherwise.

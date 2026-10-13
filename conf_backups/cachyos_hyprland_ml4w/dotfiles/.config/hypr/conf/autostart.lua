@@ -45,6 +45,10 @@ hl.on("hyprland.start", function ()
     -- Start swaync
     hl.exec_cmd("swaync")
 
+    -- Walker launcher backend + UI service (needs elephant for providers)
+    hl.exec_cmd("elephant")
+    hl.exec_cmd("walker --gapplication-service")
+
     -- Start hypridle
     hl.exec_cmd("hypridle")
 

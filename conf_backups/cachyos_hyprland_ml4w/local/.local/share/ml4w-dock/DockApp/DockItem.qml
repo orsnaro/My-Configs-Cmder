@@ -42,7 +42,12 @@ Item {
         return false
     }
 
+    readonly property bool dragging: item.dockWindow && item.entry
+        && item.dockWindow.pinnedDragKey === item.entry.key
     readonly property bool highlighted: itemMouse.containsMouse || item.menuOpen
+        || (item.dockWindow && item.entry
+            && item.dockWindow.pinnedDropKey === item.entry.key)
+    z: item.dragging ? 1 : 0
 
     implicitWidth: item.iconSize + 16
     implicitHeight: item.iconSize + 18
@@ -125,6 +130,8 @@ Item {
     Image {
         id: iconImage
         anchors.horizontalCenter: parent.horizontalCenter
+        anchors.horizontalCenterOffset: item.dragging
+            ? itemMouse.mouseX - item.width / 2 : 0
         anchors.verticalCenter: parent.verticalCenter
         // Like nwg-dock, the icon sits a touch above the true centre so the
         // running indicator below it does not feel cramped.
@@ -174,12 +181,50 @@ Item {
         id: itemMouse
         anchors.fill: parent
         hoverEnabled: true
-        cursorShape: Qt.PointingHandCursor
+        cursorShape: item.dragging ? Qt.ClosedHandCursor : Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
+        pressAndHoldInterval: 250
+        // Retain this through released → clicked; reset only on the next press.
+        property bool consumedHold: false
+
+        onPressed: mouse => {
+            if (mouse.button !== Qt.LeftButton)
+                return
+            consumedHold = false
+            if (item.pinned && item.dockWindow) {
+                tooltipTimer.stop()
+                previewCloseTimer.stop()
+                tooltip.visible = false
+                item.dockWindow.closeMenu()
+                item.dockWindow.closePreviews()
+            }
+        }
+        onPressAndHold: mouse => {
+            if (mouse.button !== Qt.LeftButton || !item.pinned || !item.dockWindow) {
+                // Reject unhandled holds so Qt still emits the original click.
+                mouse.accepted = false
+                return
+            }
+            consumedHold = true
+            item.dockWindow.beginPinnedDrag(item)
+        }
+        onPositionChanged: mouse => {
+            if (item.dragging)
+                item.dockWindow.updatePinnedDrag(item, mouse.x, mouse.y)
+        }
+        onReleased: mouse => {
+            if (mouse.button === Qt.LeftButton && item.dragging)
+                item.dockWindow.finishPinnedDrag(item, mouse.x, mouse.y)
+        }
+        onCanceled: {
+            if (item.dragging)
+                item.dockWindow.cancelPinnedDrag()
+        }
 
         onClicked: (mouse) => {
             if (mouse.button === Qt.LeftButton) {
-                item.activate()
+                if (!consumedHold)
+                    item.activate()
             } else if (mouse.button === Qt.MiddleButton) {
                 item.launch()
             } else if (mouse.button === Qt.RightButton) {
@@ -196,13 +241,17 @@ Item {
             }
         }
 
-        onEntered: tooltipTimer.restart()
+        onEntered: {
+            if (!item.dockWindow || !item.dockWindow.draggingPinned)
+                tooltipTimer.restart()
+        }
         onExited: {
             tooltipTimer.stop()
             tooltip.visible = false
             // Leaving the icon schedules a preview hide; reaching the popup
             // in time cancels it (see its HoverHandler).
-            previewCloseTimer.start()
+            if (!item.dockWindow || !item.dockWindow.draggingPinned)
+                previewCloseTimer.start()
         }
     }
 
@@ -230,9 +279,9 @@ Item {
         id: tooltipTimer
         interval: 400
         onTriggered: {
-            if (!itemMouse.containsMouse || item.menuOpen)
+            if (!itemMouse.containsMouse || itemMouse.pressed || item.menuOpen)
                 return
-            if (!item.dockWindow)
+            if (!item.dockWindow || item.dockWindow.draggingPinned)
                 return
             if (item.windows.length > 0)
                 item.dockWindow.openPreviewsFor(item)

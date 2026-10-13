@@ -50,5 +50,57 @@ if [[ $(jq -r '.floating' <<< "$active") == true ]]; then
     esac
     hyprctl dispatch "hl.dsp.window.move({ x = $x, y = $y, relative = true })" >/dev/null
 else
+    # A simple two-tile pair swaps slots along its axis or reorients across it.
+    # Outward-edge moves retain native monitor behavior.
+    if [[ $mode == direction ]] && pair=$(hyprctl clients -j 2>/dev/null | jq -r \
+        --argjson active "$active" --arg direction "$direction" '
+        def rectangle:
+            (.at | type) == "array" and (.size | type) == "array"
+            and (.at | length) == 2 and (.size | length) == 2
+            and all(.at[]; type == "number")
+            and all(.size[]; type == "number" and . > 0);
+        [.[] | select(.workspace.id == $active.workspace.id
+            and .mapped == true and .hidden == false and .floating == false)] as $tiles |
+        if ($tiles | length) != 2
+            or ($active.address | type) != "string"
+            or ($active.workspace.id | type) != "number"
+            or (all($tiles[]; .fullscreen == 0 and (.grouped | type) == "array"
+                and (.grouped | length) == 0 and rectangle) | not)
+        then empty else
+            [$tiles[] | select(.address == $active.address)] as $focused |
+            if ($focused | length) != 1 or ($active.address | test("^0x[0-9a-fA-F]+$") | not)
+            then empty else
+                $focused[0] as $me |
+                ($tiles[] | select(.address != $active.address)) as $other |
+                ($me.at[0] < $other.at[0] + $other.size[0]
+                    and $other.at[0] < $me.at[0] + $me.size[0]) as $x_overlap |
+                ($me.at[1] < $other.at[1] + $other.size[1]
+                    and $other.at[1] < $me.at[1] + $me.size[1]) as $y_overlap |
+                (if $y_overlap and ($x_overlap | not)
+                    then {first: ($me.at[0] < $other.at[0]),
+                        perpendicular: ($direction == "up" or $direction == "down")}
+                 elif $x_overlap and ($y_overlap | not)
+                    then {first: ($me.at[1] < $other.at[1]),
+                        perpendicular: ($direction == "left" or $direction == "right")}
+                 else empty end) as $layout |
+                ($direction == "up" or $direction == "left") as $want_first |
+                (if $layout.perpendicular then
+                    if $layout.first == $want_first then "toggle" else "toggle_swap" end
+                 elif $layout.first != $want_first then "swap"
+                 else empty end) as $order |
+                [$me.address, $me.workspace.id, $order] | @tsv
+            end
+        end' 2>/dev/null) && [[ -n $pair ]]; then
+        IFS=$'\t' read -r address workspace order <<< "$pair"
+        case "$order" in
+            toggle) actions='hl.dispatch(hl.dsp.layout("togglesplit"));' ;;
+            swap) actions='hl.dispatch(hl.dsp.layout("swapsplit"));' ;;
+            toggle_swap) actions='hl.dispatch(hl.dsp.layout("togglesplit")); hl.dispatch(hl.dsp.layout("swapsplit"));' ;;
+        esac
+        # Swapping without reinsertion preserves the divider's split ratio.
+        # One callback keeps the operations together and ignores stale focus.
+        hyprctl dispatch "function() local w = hl.get_active_window(); if w ~= nil and w.address == \"$address\" and w.workspace.id == $workspace then $actions end end" >/dev/null
+        exit 0
+    fi
     hyprctl dispatch "hl.dsp.window.move({ direction = \"$code\" })" >/dev/null
 fi

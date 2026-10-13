@@ -7,36 +7,178 @@
 #
 
 ml4w_cache_folder="$HOME/.cache/ml4w/hyprland-dotfiles"
+settings_dir="$HOME/.config/ml4w/settings"
+interval_file="$settings_dir/wallpaper-automation"
+enabled_file="$settings_dir/wallpaper-slideshow"
+pid_file="$ml4w_cache_folder/wallpaper-automation.pid"
+legacy_marker="$ml4w_cache_folder/wallpaper-automation"
 
 # Notifications
 source "$HOME/.config/ml4w/scripts/ml4w-notification-handler"
 APP_NAME="Waypaper"
 NOTIFICATION_ICON="preferences-desktop-wallpaper-symbolic"
 
-sec=$(cat ~/.config/ml4w/settings/wallpaper-automation)
+read_interval() {
+    local raw
+    raw=$(cat "$interval_file" 2>/dev/null || echo 300)
+    raw=$(printf '%s' "$raw" | tr -d '[:space:]')
+    if [[ "$raw" =~ ^[0-9]{1,6}$ ]] && (( 10#$raw > 0 )); then
+        printf '%s' "$((10#$raw))"
+    else
+        printf '300'
+    fi
+}
+
+is_running() {
+    [[ -f "$pid_file" ]] || return 1
+    local pid
+    pid=$(tr -d '[:space:]' < "$pid_file" 2>/dev/null)
+    [[ "$pid" =~ ^[1-9][0-9]*$ ]] || return 1
+    (( pid > 1 )) || return 1
+    kill -0 "$pid" 2>/dev/null || return 1
+    # Match the script argument, never arbitrary text in another command line.
+    grep -zFxq -- "$0" "/proc/$pid/cmdline" 2>/dev/null || return 1
+    return 0
+}
+
+running_pid() {
+    tr -d '[:space:]' < "$pid_file" 2>/dev/null
+}
+
+# One-time migration from the legacy empty marker file (which could go stale
+# across reboots) to the explicit enabled setting.
+migrate_legacy_marker() {
+    if [[ -f "$legacy_marker" && ! -f "$pid_file" ]]; then
+        [[ -f "$enabled_file" ]] || printf 'true' > "$enabled_file"
+        rm -f "$legacy_marker"
+    fi
+}
+
 _setWallpaperRandomly() {
+    local sec
     while true; do
-        $HOME/.config/ml4w/scripts/ml4w-wallpaper --random
+        sec=$(read_interval)
+        # A separate, owned process group lets stop cancel an in-flight update.
+        # Never pass the lifetime lock to wallpaper reloads or their daemons.
+        child_group=true
+        setsid "$HOME/.config/ml4w/scripts/ml4w-wallpaper" --random 8>&- 9>&- &
+        child_pid=$!
+        wait "$child_pid" || echo ":: Wallpaper update failed; retrying next interval" >&2
+        child_pid=""
         echo ":: Next wallpaper in $sec seconds..."
-        sleep $sec
+        child_group=false
+        sleep "$sec" 8>&- 9>&- &
+        child_pid=$!
+        # Waiting on a background child allows TERM to interrupt the long sleep.
+        wait "$child_pid" || true
+        child_pid=""
     done
 }
 
-if [ ! -f $ml4w_cache_folder/wallpaper-automation ]; then
-    touch $ml4w_cache_folder/wallpaper-automation
+do_start() {
+    mkdir -p "$ml4w_cache_folder" "$settings_dir"
+    # Serialize start across concurrent toggles (manual / keybind / autostart /
+    # gamemode). Holding fd 9 for the loop's lifetime makes the pid file a
+    # convenience for --stop/--status rather than the only guard.
+    exec 9>"$ml4w_cache_folder/.wallpaper-automation.lock"
+    if ! flock -n 9; then
+        echo ":: Slideshow is already starting or running"
+        return 0
+    fi
+    if is_running; then
+        echo ":: Slideshow already running (PID $(running_pid))"
+        return 0
+    fi
+    # Clear a stale pid file left by a reboot or crash.
+    rm -f "$pid_file"
+    printf 'true' > "$enabled_file"
+    printf '%s' "$$" > "$pid_file"
+    local _loop_pid="$$" child_pid="" child_group=false
+    cleanup_loop() {
+        if [[ -n "$child_pid" ]]; then
+            if "$child_group"; then
+                kill -TERM -- "-$child_pid" 2>/dev/null || kill -TERM "$child_pid" 2>/dev/null || true
+            else
+                kill -TERM "$child_pid" 2>/dev/null || true
+            fi
+            wait "$child_pid" 2>/dev/null || true
+        fi
+        [[ -f "$pid_file" && "$(cat "$pid_file" 2>/dev/null)" == "$_loop_pid" ]] && rm -f "$pid_file"
+        return 0
+    }
+    trap 'exit 0' TERM INT
+    trap cleanup_loop EXIT
+    # Start/stop decisions are serialized, but stop must not wait on the loop.
+    flock -u 8
+    exec 8>&-
     echo ":: Start wallpaper automation script"
     notify_user \
         --a "${APP_NAME}" \
         --i "${NOTIFICATION_ICON}" \
-        --m "Wallpaper automation process started.\nWallpaper will be changed every $sec seconds."
+        --m "Wallpaper automation process started.\nWallpaper will be changed every $(read_interval) seconds." 9>&-
     _setWallpaperRandomly
-else
-    rm $ml4w_cache_folder/wallpaper-automation
-    notify_user \
-        --a "${APP_NAME}" \
-        --i "${NOTIFICATION_ICON}" \
-        --m "Wallpaper automation process stopped."
-    echo ":: Wallpaper automation script process $wp stopped"
-    wp=$(pgrep -f ml4w-wallpaper-automation)
-    kill -KILL $wp
-fi
+}
+
+do_stop() {
+    printf 'false' > "$enabled_file"
+    if is_running; then
+        local pid
+        pid=$(running_pid)
+        if [[ "$pid" == "$$" ]]; then
+            rm -f "$pid_file"
+        else
+            kill -TERM "$pid" 2>/dev/null || true
+            local i
+            for i in $(seq 1 50); do
+                # A terminated but unreaped zombie still answers kill -0.
+                is_running || break
+                sleep 0.1
+            done
+            if is_running; then
+                kill -KILL "$pid" 2>/dev/null || true
+            fi
+            rm -f "$pid_file"
+        fi
+        notify_user \
+            --a "${APP_NAME}" \
+            --i "${NOTIFICATION_ICON}" \
+            --m "Wallpaper automation process stopped."
+        echo ":: Wallpaper automation script stopped"
+    else
+        rm -f "$pid_file"
+        echo ":: Wallpaper automation script is not running"
+    fi
+}
+
+do_status() {
+    if is_running; then
+        echo ":: Wallpaper automation script running (PID $(running_pid))"
+        return 0
+    fi
+    echo ":: Wallpaper automation script is not running"
+    return 1
+}
+
+show_help() {
+    echo "Usage: ml4w-wallpaper-automation [--toggle|--start|--stop|--status]"
+    echo "  No arguments toggles the slideshow (starts when stopped, stops when running)."
+}
+
+cmd="${1:---toggle}"
+case "$cmd" in
+    --status) do_status; exit $? ;;
+    --help|-h) show_help; exit 0 ;;
+    --start|--stop|--toggle) ;;
+    *) echo "Unknown option: $cmd" >&2; show_help >&2; exit 1 ;;
+esac
+
+mkdir -p "$ml4w_cache_folder" "$settings_dir" || exit 1
+exec 8>"$ml4w_cache_folder/.wallpaper-automation.control.lock"
+flock 8 || exit 1
+migrate_legacy_marker
+
+case "$cmd" in
+    --start) do_start ;;
+    --stop) do_stop ;;
+    --toggle) if is_running; then do_stop; else do_start; fi ;;
+esac

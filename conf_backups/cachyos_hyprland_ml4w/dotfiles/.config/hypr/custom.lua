@@ -1,4 +1,17 @@
 -- Personal GlazeWM-style additions. Loaded after ML4W's own bindings.
+-- Dolphin icons: Hyprland-only KConfig overlay; shared Plasma settings stay unchanged.
+local dolphin_icon_overrides = os.getenv("HOME") .. "/.config/hyprland-kde-overrides"
+local kde_config_dirs = os.getenv("XDG_CONFIG_DIRS")
+if not kde_config_dirs or kde_config_dirs == "" then
+    kde_config_dirs = "/etc/xdg"
+end
+local kde_config_paths = { dolphin_icon_overrides }
+for path in kde_config_dirs:gmatch("[^:]+") do
+    if path ~= dolphin_icon_overrides then
+        table.insert(kde_config_paths, path)
+    end
+end
+hl.env("XDG_CONFIG_DIRS", table.concat(kde_config_paths, ":"))
 -- Workspace layout (numeric IDs: this fork's Lua dispatcher only takes numbers).
 -- Display names live in quickshell StatusbarApp/WorkspacesModule.qml.
 -- Center (DP-2): 1 main + 9 gaming. Left Samsung (HDMI-A-2): 2 work .. 7 others.
@@ -115,19 +128,19 @@ for _, pair in ipairs({
     { "J", "left" }, { "L", "right" }, { "I", "up" }, { "K", "down" },
 }) do
     local letter, direction = pair[1], pair[2]
-    hl.bind("ALT + " .. direction, hl.dsp.focus({ direction = direction }),
-        { description = "Focus window " .. direction })
-    -- ALT+letters: Kitty panes own them while a Kitty window is focused
+    -- ALT+letters/arrows: Kitty panes own them while a Kitty window is focused
     -- (original event passes through, no reinjection, so pane move + edge fallthrough apply);
     -- anywhere else they focus Hyprland windows, stopping at the edge.
     local opts = { description = "Focus window " .. direction .. " (Kitty panes first)" }
-    hl.bind("ALT + " .. letter, function()
+    local function focus_or_passthrough()
         local w = hl.get_active_window()
         if w ~= nil and (w.class == "kitty" or w.class == "quake-kitty") then
             return { pass_event = true }
         end
         checked_focus(direction)
-    end, opts)
+    end
+    hl.bind("ALT + " .. letter, focus_or_passthrough, opts)
+    hl.bind("ALT + " .. direction, focus_or_passthrough, opts)
     -- SHIFT+ALT letters move; SHIFT+ALT arrows still focus.
     hl.bind("ALT + SHIFT + " .. letter,
         hl.dsp.exec_cmd("~/.local/bin/glaze-move-window " .. direction),
@@ -164,18 +177,18 @@ hl.bind("ALT + Tab", hl.dsp.exec_cmd("~/.local/bin/qs-lazy-toggle ~/.local/share
 hl.unbind("SUPER + SPACE")
 hl.bind("SUPER + CTRL + SPACE", hl.dsp.exec_cmd("qs ipc call statusbar focus"),
     { description = "Focus the statusbar" })
-hl.bind("SUPER + R", hl.dsp.exec_cmd("rofi -show run -i -replace"),
+hl.bind("SUPER + R", hl.dsp.exec_cmd("$HOME/.config/walker/launch.sh -m runner -N -H"),
     { description = "Run a command" })
 hl.bind("SUPER + SUPER_L", hl.dsp.exec_cmd("~/.config/hypr/scripts/launcher.sh"),
     { release = true, description = "Open app list with bare Super" })
-hl.bind("SUPER + period", hl.dsp.exec_cmd("rofimoji --action type copy"),
+hl.bind("SUPER + period", hl.dsp.exec_cmd("$HOME/.config/walker/launch.sh -m symbols -N -H --width 750"),
     { description = "Emoji picker (Win-style)" })
 
 -- Keyboard layout switch: SUPER+Space toggles us/ara (SHIFT+SPACE freed:
 -- it fired while typing and is problematic).
 -- Uses hyprctl switchxkblayout so ALT+SHIFT+keys (move/resize) keep working.
 -- XKB group toggles would eat those combos or hijack Caps Lock, so input.lua leaves kb_options empty.
--- SUPER+RETURN restored to terminal (default); layout moved to SUPER+SPACE, rofi run moved to SUPER+R.
+-- SUPER+RETURN restored to terminal (default); layout moved to SUPER+SPACE, run moved to SUPER+R (walker).
 hl.unbind("SHIFT + SPACE") -- keep old layout switch freed
 hl.unbind("SUPER + RETURN") -- clear default.lua duplicate, single terminal below
 hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("~/.local/bin/hypr-switch-xkblayout"),
@@ -220,6 +233,8 @@ hl.bind("PRINT", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh --instant
     { description = "PrtSc: instant area screenshot" })
 hl.bind("SHIFT + PRINT", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh --instant"),
     { description = "Shift+PrtSc: instant fullscreen screenshot" })
+hl.bind("CTRL + PRINT", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh --instant-output"),
+    { description = "Ctrl+PrtSc: instant focused-monitor screenshot" })
 
 -- Float file managers and small utilities (Hyprland-only, survives ML4W updates)
 hl.window_rule({ name = "float-dolphin", match = { class = "^(dolphin|org.kde.dolphin)$" }, float = true, center = true, size = "1100 700" })
@@ -240,6 +255,7 @@ hl.window_rule({ name = "float-steam-settings", match = { class = "^steam$", tit
 hl.window_rule({ name = "float-obsidian-settings", match = { class = "^(obsidian|md.obsidian.Obsidian)$", title = "Settings" }, float = true, center = true, size = "1000 700" })
 
 -- Hyprland-only boot apps (NOT ~/.config/autostart, so KDE is unaffected).
+-- Obsidian launches here only, never from KDE/plasma autostart.
 -- Workspace routing comes from glaze-apps.tsv silent rules.
 hl.on("hyprland.start", function()
     hl.exec_cmd("kitty")
@@ -268,5 +284,16 @@ hl.window_rule({ name = "gaming-wine-exe", match = { class = "\\.exe$" }, worksp
 hl.window_rule({ name = "gaming-steam-app", match = { class = "^steam_app_" }, workspace = "9", float = true })
 hl.window_rule({ name = "gaming-cemu", match = { class = "^[Cc]emu$" }, workspace = "9", float = true })
 
+-- Last workspace rule: Quake-time launches stay on the normal workspace below.
+hl.window_rule({
+    name = "quake-apps-to-normal-workspace",
+    match = { workspace = "special:quake", class = "negative:^quake-kitty$" },
+    workspace = "m+0 silent",
+})
+
 -- Focus follows mouse, mouse doesn't follow focus
-hl.config({ cursor = { no_warps = true } })
+hl.config({
+    input = { special_fallthrough = true },
+    binds = { hide_special_on_workspace_change = false },
+    cursor = { no_warps = true },
+})

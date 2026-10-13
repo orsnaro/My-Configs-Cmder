@@ -66,16 +66,35 @@ done
 sleep 0.5
 info "Quickshell ready"
 
-# Apply wallpaper theming on every start — qs is guaranteed ready for IPC calls.
-# Theming (matugen colors, quickshell reload) must always run.
-# Only the awww image set is skipped when already cached, to avoid a flicker.
+# Restore first, then resume slideshow in the same background job. This avoids
+# racing two updates while keeping login non-blocking. The global theming
+# preference is honored by ml4w-wallpaper; saved colors load separately in QML.
+(
 if [[ -z $(find "$AWWW_CACHE_FOLDER" -mindepth 1 -maxdepth 1 -type f -print -quit 2>/dev/null) ]]; then
     info "Set wallpaper to cache file $(cat $CACHE_FILE)"
-    ~/.config/ml4w/scripts/ml4w-wallpaper "$(cat $CACHE_FILE)" &
+    ~/.config/ml4w/scripts/ml4w-wallpaper "$(cat $CACHE_FILE)"
 else
     info "awww cache present, applying theming only for $(cat $CACHE_FILE)"
-    ~/.config/ml4w/scripts/ml4w-wallpaper "$(cat $CACHE_FILE)" --skip-wallpaper &
+    ~/.config/ml4w/scripts/ml4w-wallpaper "$(cat $CACHE_FILE)" --skip-wallpaper
 fi
+
+# BEGIN slideshow resume
+# Resume the wallpaper slideshow when enabled. The --status guard means a
+# second login (or a manual start racing autostart) never spawns a duplicate
+# loop, and a stale pid left by a reboot is replaced inside the script.
+slideshow_setting="$(cat "$HOME/.config/ml4w/settings/wallpaper-slideshow" 2>/dev/null || echo false)"
+slideshow_setting=$(printf '%s' "$slideshow_setting" | tr '[:upper:]' '[:lower:]' | tr -d '[:space:]')
+if [[ "$slideshow_setting" == "true" ]]; then
+    if ~/.config/ml4w/scripts/ml4w-wallpaper-automation --status >/dev/null 2>&1; then
+        info "Wallpaper slideshow already running"
+    else
+        info "Resuming wallpaper slideshow"
+        ~/.config/ml4w/scripts/ml4w-wallpaper-automation --start >/dev/null 2>&1 &
+        disown
+    fi
+fi
+# END slideshow resume
+) &
 
 # Start ML4W Settings App — LAZY-START: launched on first open via
 # ~/.local/bin/qs-lazy-toggle (Sidebar/Welcome buttons), not at boot.
