@@ -143,6 +143,17 @@ class BackupRestoreTests(unittest.TestCase):
         self.assertEqual((destination / ".config/hypr/unrelated.conf").read_text(), "preserve\n")
         self.assertEqual((destination / ".config/hypr/fixture.conf").read_text(), "current\n")
 
+    def test_backup_excludes_bulky_gif_logos_but_keeps_text_logo_sources(self) -> None:
+        images = self.home / ".config/fastfetch/images"
+        self.write(images / "logo.gif", "GIF89a fixture\n")
+        self.write(images / "ascii-logo.txt", "text logo\n")
+        self.run_script("BACKUP.sh", self.home)
+        self.assertFalse((self.snapshot / "dotfiles/.config/fastfetch/images/logo.gif").exists())
+        self.assertEqual(
+            (self.snapshot / "dotfiles/.config/fastfetch/images/ascii-logo.txt").read_text(),
+            "text logo\n",
+        )
+
     def test_backup_regenerates_manifest_from_current_snapshot(self) -> None:
         self.write(self.snapshot / "dotfiles/.config/hypr/obsolete.conf", "stale\n")
         self.run_script("BACKUP.sh", self.home)

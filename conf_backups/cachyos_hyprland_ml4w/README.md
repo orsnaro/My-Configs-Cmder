@@ -13,7 +13,7 @@ Layout here mirrors $HOME:
 - `local/.local/bin/...` (hypr-*, glaze-*, qs-lazy-toggle, albion-data-watch/start; cemu-mousepad.py excluded)
 - `local/.local/share/...` (ml4w-dock QML source, quickshell-overview, ml4w-dotfiles-settings, applications/quake-kitty.desktop)
 
-Excluded: wallpapers, backup leftovers (`*.bak*`, `*-bak`, `backup-*/`), Python caches, `.git/`, `.github/`, private `.superpowers/`/`.opencode/` scratch, virtual environments, node_modules, `.env*`, OAuth credentials/tokens, and Fish's mutable `fish_variables` store. Intentional dock `docs/superpowers/` reports/plans and tests remain included. Calendar caches, notification state, GTK bookmarks and personal agenda data are not allowlisted.
+Excluded: wallpapers, bulky `*.gif` logo assets (re-add `fastfetch/images/` GIFs manually if you use the GIF logo config), backup leftovers (`*.bak*`, `*-bak`, `backup-*/`), Python caches, `.git/`, `.github/`, private `.superpowers/`/`.opencode/` scratch, virtual environments, node_modules, `.env*`, OAuth credentials/tokens, and Fish's mutable `fish_variables` store. Intentional dock `docs/superpowers/` reports/plans and tests remain included. Calendar caches, notification state, GTK bookmarks and personal agenda data are not allowlisted.
 
 Kitty source patch: `dotfiles/.config/kitty/patches/*.diff` + `apply-native-patch.sh`, requires sudo, version-pinned 0.49.2. See `KITTY_PATCH_STATE.txt`.
 

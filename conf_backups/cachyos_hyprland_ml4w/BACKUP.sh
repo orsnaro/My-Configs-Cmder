@@ -15,7 +15,7 @@ EXCLUDES=(
   --exclude='.venv/' --exclude='venv/' --exclude='node_modules/'
   --exclude='.env' --exclude='.env.*' --exclude='credentials.json'
   --exclude='token.json' --exclude='tokens.json' --exclude='client_secret*.json'
-  --exclude='fish_variables' --exclude='wallpapers/'
+  --exclude='fish_variables' --exclude='wallpapers/' --exclude='*.gif'
 )
 
 backup_tree() { # $1=source $2=destination, optional rsync filters follow
