@@ -111,6 +111,61 @@ PanelWindow {
     property var transitionEffects: ["simple", "left", "right", "top", "bottom", "center", "any", "random", "none"]
     property string transitionEffect: defaultTransitionEffect
 
+    // Whether wallpaper changes also regenerate the theme. Persisted in
+    // settings/wallpaper-theming ("true"/"false", default true); honored by
+    // ml4w-wallpaper for manual, random, slideshow, and login changes alike.
+    property string themingSettingFile: Quickshell.env("HOME") + "/.config/ml4w/settings/wallpaper-theming"
+    property bool themingEnabled: true
+
+    // Whether the slideshow loop is enabled. Persisted in
+    // settings/wallpaper-slideshow ("true"/"false", default false) by
+    // ml4w-wallpaper-automation; read here only for the menu label.
+    property string slideshowSettingFile: Quickshell.env("HOME") + "/.config/ml4w/settings/wallpaper-slideshow"
+    property bool slideshowEnabled: false
+
+    function normalizeThemingEnabled(settingValue): bool {
+        const cleaned = settingValue.trim().toLowerCase();
+        return ["false", "0", "off", "no"].indexOf(cleaned) === -1;
+    }
+
+    FileView {
+        id: themingSettingFileHandler
+        path: Qt.url(root.themingSettingFile)
+        blockLoading: true
+        watchChanges: true
+        onLoaded: {
+            root.themingEnabled = normalizeThemingEnabled(this.text())
+        }
+        onLoadFailed: {
+            root.themingEnabled = true
+        }
+        onFileChanged: {
+            this.reload();
+            root.themingEnabled = normalizeThemingEnabled(this.text())
+        }
+        onSaved: {
+            root.themingEnabled = normalizeThemingEnabled(this.text())
+        }
+    }
+
+    FileView {
+        id: slideshowSettingFileHandler
+        path: Qt.url(root.slideshowSettingFile)
+        blockLoading: true
+        printErrors: false
+        watchChanges: true
+        onLoaded: {
+            root.slideshowEnabled = this.text().trim().toLowerCase() === "true"
+        }
+        onLoadFailed: {
+            root.slideshowEnabled = false
+        }
+        onFileChanged: {
+            this.reload();
+            root.slideshowEnabled = this.text().trim().toLowerCase() === "true"
+        }
+    }
+
     FileView {
         id: transitionEffectSettingFileHandler
         path: Qt.url(root.transitionEffectSettingFile)
@@ -396,12 +451,13 @@ PanelWindow {
                             text: "Random Wallpaper"
                             onClicked: {
                                 root.isOpen = false
-                                Quickshell.execDetached(["bash", "-c", Quickshell.env("HOME") + "/.config/ml4w/scripts/ml4w-wallpaper --random"])
+                                const themingParams = root.themingEnabled ? " --theming" : " --skip-theming"
+                                Quickshell.execDetached(["bash", "-c", Quickshell.env("HOME") + "/.config/ml4w/scripts/ml4w-wallpaper --random" + themingParams])
                             } 
                         }
 
                         ML4WMenuItem {
-                            text: "Toggle Slideshow (5 min)"
+                            text: root.slideshowEnabled ? "Stop Slideshow" : "Start Slideshow (5 min)"
                             onClicked: {
                                 root.isOpen = false
                                 Quickshell.execDetached(["bash", "-c", "echo -n 300 > " + Quickshell.env("HOME") + "/.config/ml4w/settings/wallpaper-automation; exec " + Quickshell.env("HOME") + "/.config/ml4w/scripts/ml4w-wallpaper-automation"])
@@ -438,7 +494,6 @@ PanelWindow {
                                 if (!advancedOptions.visible) {
                                     outputMonitorSelector.currentIndex = 0
                                     wallpaperPositioningSelector.currentIndex = 0
-                                    shouldUpdateTheming.checked = true
                                 }
                             }
                         }
@@ -588,8 +643,10 @@ PanelWindow {
 
                 ML4WCheckBox {
                     id: shouldUpdateTheming
-                    checked: true
+                    checked: root.themingEnabled
                     text: "Update theming from wallpaper"
+
+                    onToggled: themingSettingFileHandler.setText(checked ? "true" : "false")
 
                     Accessible.name: text
                     Accessible.description: qsTr("Choose whether to update theming based on the new wallpaper selector")
@@ -756,14 +813,14 @@ PanelWindow {
                                         : ""
                                     const positioningParams = " --crop-gravity " + wallpaperPositioningSelector.currentText
                                     const themingParams = shouldUpdateTheming.checked
-                                        ? ""
+                                        ? " --theming"
                                         : " --skip-theming"
                                     options = `${outputParams}${positioningParams}${themingParams}`
                                 }
                                 Quickshell.execDetached([
                                     "bash",
                                     "-c",
-                                    scriptPath + " '" + model.filePath + "'" + options
+                                    scriptPath + " '" + model.filePath.replace(/'/g, "'\\''") + "'" + options
                                 ]);
                             }
                         }

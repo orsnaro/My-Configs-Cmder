@@ -466,7 +466,7 @@ class HyprRequestTest(unittest.TestCase):
 
 
 class SmartFocusMapsTest(unittest.TestCase):
-    def test_exact_four_kitten_maps_keep_layout_fallback(self) -> None:
+    def test_exact_letter_and_arrow_kitten_maps_keep_layout_fallback(self) -> None:
         focus_maps = [line for line in CONFIG.read_text().splitlines()
                       if line.startswith("map ") and " alt+" in line]
         self.assertEqual(focus_maps, [
@@ -474,9 +474,13 @@ class SmartFocusMapsTest(unittest.TestCase):
             "map --allow-fallback=shifted,ascii alt+l kitten smart-focus.py right",
             "map --allow-fallback=shifted,ascii alt+i kitten smart-focus.py up",
             "map --allow-fallback=shifted,ascii alt+k kitten smart-focus.py down",
+            "map --allow-fallback=shifted,ascii alt+left kitten smart-focus.py left",
+            "map --allow-fallback=shifted,ascii alt+right kitten smart-focus.py right",
+            "map --allow-fallback=shifted,ascii alt+up kitten smart-focus.py up",
+            "map --allow-fallback=shifted,ascii alt+down kitten smart-focus.py down",
         ])
 
-    def test_resize_fallback_maps_and_native_generator_are_unchanged(self) -> None:
+    def test_letter_and_arrow_resize_fallback_maps_precede_native_generator(self) -> None:
         lines = CONFIG.read_text().splitlines()
         resize_maps = [line for line in lines if line.startswith("map ") and " ctrl+alt+" in line
                        and "absolute-resize.py" in line]
@@ -485,6 +489,10 @@ class SmartFocusMapsTest(unittest.TestCase):
             "map --allow-fallback=shifted,ascii ctrl+alt+l remote_control_script absolute-resize.py right",
             "map --allow-fallback=shifted,ascii ctrl+alt+i remote_control_script absolute-resize.py up",
             "map --allow-fallback=shifted,ascii ctrl+alt+k remote_control_script absolute-resize.py down",
+            "map --allow-fallback=shifted,ascii ctrl+alt+left remote_control_script absolute-resize.py left",
+            "map --allow-fallback=shifted,ascii ctrl+alt+right remote_control_script absolute-resize.py right",
+            "map --allow-fallback=shifted,ascii ctrl+alt+up remote_control_script absolute-resize.py up",
+            "map --allow-fallback=shifted,ascii ctrl+alt+down remote_control_script absolute-resize.py down",
         ])
         generators = [line.split(maxsplit=1)[1] for line in lines
                       if line.startswith("geninclude ")]
@@ -493,6 +501,9 @@ class SmartFocusMapsTest(unittest.TestCase):
         if not generator.is_absolute():
             generator = CONFIG.parent / generator
         self.assertEqual(generator.resolve(), CONFIG.with_name("native-resize-maps.py").resolve())
+        generator_index = lines.index(f"geninclude {generators[0]}")
+        for mapping in resize_maps:
+            self.assertLess(lines.index(mapping), generator_index)
 
 
 def run_loader_smoke() -> None:

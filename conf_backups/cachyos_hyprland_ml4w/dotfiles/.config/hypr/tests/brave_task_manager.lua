@@ -9,6 +9,7 @@ hl = {
     bind = function() end,
     unbind = function() end,
     on = function() end,
+    env = function() end,
     exec_cmd = operation("exec"),
     workspace_rule = function() end,
     window_rule = function(rule) rules[rule.name] = rule end,

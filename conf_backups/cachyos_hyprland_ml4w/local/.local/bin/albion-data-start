@@ -1,0 +1,17 @@
+#!/bin/bash
+# ML4W-only background launcher for Albion Data Client (Europe auto-detect)
+LOG="$HOME/.local/share/albiondata-client/client.log"
+BIN="$HOME/.local/bin/albiondata-client"
+mkdir -p "$(dirname "$LOG")"
+# Exact match on binary path at start of cmdline (pgrep -f without anchor
+# false-matches our own shell when its command string contains the log path).
+if pgrep -f "^${BIN}( |$)" >/dev/null 2>&1; then
+  echo "$(date -Is) already running pid=$(pgrep -f "^${BIN}( |$)" | tr '\n' ' ')" >>"$LOG"
+  exit 0
+fi
+echo "$(date -Is) starting albiondata-client --minimize" >>"$LOG"
+# Albion Data Client has no log-path flag: its own albiondata-client.log
+# files land in the process working directory, so pin it to the data dir
+# instead of $HOME.
+cd "$(dirname "$LOG")" || exit 1
+exec "$BIN" -minimize >>"$LOG" 2>&1

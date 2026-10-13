@@ -8,6 +8,7 @@ EFFECT=""
 NOTIFICATIONS=false
 SKIP_WALLPAPER=false
 SKIP_THEMING=false
+THEMING_EXPLICIT=""
 MONITOR_OUTPUT=""
 AWWW_CROP_GRAVITY="center"
 CACHE_FOLDER="$HOME/.cache/ml4w/hyprland-dotfiles"
@@ -19,6 +20,7 @@ RASI_FILE="$CACHE_FOLDER/current_wallpaper.rasi"
 SETTINGS_BLUR="$HOME/.config/ml4w/settings/blur.sh"
 SETTINGS_WALLPAPER_FOLDER="$HOME/.config/ml4w/settings/wallpaper-folder"
 SETTINGS_WALLPAPER_EFFECT="$HOME/.config/ml4w/settings/wallpaper-effect"
+SETTINGS_WALLPAPER_THEMING="$HOME/.config/ml4w/settings/wallpaper-theming"
 SETTINGS_TRANSITION_EFFECT=$(cat "$HOME/.config/ml4w/settings/wallpaper-transition-effect")
 BLUR=$(cat "$SETTINGS_BLUR")
 
@@ -50,6 +52,7 @@ show_help() {
     echo "  --notifications        Enable desktop notifications."
     echo "  --skip-wallpaper       Will skip setting the wallpaper with awww."
     echo "  --skip-theming         Will skip updating OS themes based on new wallpaper."
+    echo "  --theming              Update OS themes (overrides a disabled theming setting)."
     echo "  --skip                 Alias for \"--skip-wallpaper\"."
     echo "  --monitor              Specify which input to apply wallpaper change (default applies to all outputs)"
     echo "  --crop-gravity         Specify where to anchor wallpaper image in case cropping is needed (values from 'awww img --crop-gravity; default is center)"
@@ -123,11 +126,19 @@ run_matugen() {
     [ -f "$HOME/.local/bin/matugen" ] && bin="$HOME/.local/bin/matugen"
 
     info "Running matugen in $mode mode"
-    "$bin" image "$IMAGE_PATH" --source-color-index 0 -m "$mode"
-    info "Matugen updated"
+    if "$bin" image "$IMAGE_PATH" --source-color-index 0 -m "$mode"; then
+        info "Matugen updated"
+    else
+        error "Failed to update theme with matugen"
+        return 1
+    fi
 }
 
 reload_waybar() {
+    if [[ -f "$HOME/.config/ml4w/settings/waybar-disabled" ]]; then
+        info "Waybar disabled, skipping launch"
+        return
+    fi
     if pgrep -x waybar >/dev/null; then
         info "Waybar is currently running."
         killall waybar || true
@@ -141,13 +152,18 @@ reload_waybar() {
 }
 
 reload_quickshell() {
-    if pgrep -x qs >/dev/null; then
-        qs ipc call theme-manager reload
-        qs -p "$HOME/.local/share/ml4w-dotfiles-settings/quickshell" ipc call theme-manager reload
-        info "Quickshell theme updated"
-    else
+    if ! pgrep -x qs >/dev/null; then
         warn "Quickshell not running, skipping theme reload"
+        return 0
     fi
+    local failed=false
+    qs ipc call theme-manager reload || { warn "Quickshell theme reload failed"; failed=true; }
+    qs -p "$HOME/.local/share/ml4w-dotfiles-settings/quickshell" ipc call theme-manager reload \
+        || { warn "ML4W settings theme reload failed"; failed=true; }
+    if "$failed"; then
+        return 1
+    fi
+    info "Quickshell theme updated"
 }
 
 reload_pywalfox() {
@@ -160,6 +176,17 @@ reload_swaync() {
     sleep 0.1
     swaync-client -rs
     info "SwayNC refreshed"
+}
+
+reload_walker() {
+    # Walker reads its CSS at service start, so restart it to pick up
+    # the regenerated ~/.config/walker/colors.css (matugen).
+    # NOTE: ml4w updates may overwrite this script; re-add if lost.
+    if command -v walker >/dev/null 2>&1; then
+        pkill -x walker 2>/dev/null
+        walker --gapplication-service >/dev/null 2>&1 &
+        info "Walker restarted"
+    fi
 }
 
 generate_image_variants() {
@@ -184,7 +211,9 @@ while [[ $# -gt 0 ]]; do
         --skip|--skip-wallpaper)
             SKIP_WALLPAPER=true; shift ;;
         --skip-theming)
-            SKIP_THEMING=true; shift ;;
+            SKIP_THEMING=true; THEMING_EXPLICIT=off; shift ;;
+        --theming)
+            SKIP_THEMING=false; THEMING_EXPLICIT=on; shift ;;
         --effect)
             EFFECT="$2"; shift 2 ;;
         --random)
@@ -224,6 +253,20 @@ while [[ $# -gt 0 ]]; do
 done
 
 # ============================================================
+# Theming preference: explicit CLI flags win, otherwise honor the
+# persisted settings file (missing/invalid means enabled).
+# ============================================================
+if [[ -z "$THEMING_EXPLICIT" ]]; then
+    if [[ ! -f "$SETTINGS_WALLPAPER_THEMING" ]]; then
+        echo "true" > "$SETTINGS_WALLPAPER_THEMING"
+    fi
+    theme_setting=$(tr '[:upper:]' '[:lower:]' < "$SETTINGS_WALLPAPER_THEMING" | tr -d '[:space:]')
+    case "$theme_setting" in
+        false|0|off|no) SKIP_THEMING=true ;;
+    esac
+fi
+
+# ============================================================
 # Validation
 # ============================================================
 if [[ -z "$IMAGE_PATH" ]]; then
@@ -244,16 +287,26 @@ info "Cache updated: $IMAGE_PATH"
 # ============================================================
 apply_effect
 wait_for_awww
-set_wallpaper
+wallpaper_status=0
+set_wallpaper || wallpaper_status=$?
+exit_status=0
 if "$SKIP_THEMING"; then
     info "Updating theming skipped"
+elif (( wallpaper_status != 0 )); then
+    error "Skipping theming because the wallpaper could not be set"
+    exit_status=1
 else
-    run_matugen
+    run_matugen || exit_status=$?
     reload_waybar
     reload_quickshell
     reload_pywalfox
     reload_swaync
+    reload_walker
     generate_image_variants
 fi
 send_notification "Wallpaper Updated" "$(basename "$IMAGE_PATH")${MONITOR_OUTPUT:+ on output $MONITOR_OUTPUT}"
+if (( exit_status != 0 || wallpaper_status != 0 )); then
+    error "Done with errors"
+    exit 1
+fi
 info "Done"

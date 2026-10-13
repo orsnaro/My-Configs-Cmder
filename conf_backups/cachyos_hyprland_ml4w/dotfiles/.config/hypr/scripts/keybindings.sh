@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Pipe the JSON stream directly through jq and awk, straight into rofi
+# Pipe the JSON stream directly through jq and awk, straight into walker
 hyprctl binds -j | jq -c '.[] | select(.description != "")' | awk '
 BEGIN {
     # Define modifier bits based on libxkbcommon
@@ -35,6 +35,6 @@ BEGIN {
         combo = (mods != "" ? mods : key)
     }
 
-    # Output: Line 1 (Keys), Line 2 (Description), followed by the Null separator
-    printf "%s\n➔ %s\0", combo, desc
-}' | rofi -dmenu -i -replace -p "Keybinds" -sep '\0' -eh 2 -config ~/.config/rofi/config-compact.rasi
+    # Output: single line per bind (walker dmenu shows plain lines)
+    printf "%s ➔ %s\n", combo, desc
+}' | walker -d -p "Keybinds"

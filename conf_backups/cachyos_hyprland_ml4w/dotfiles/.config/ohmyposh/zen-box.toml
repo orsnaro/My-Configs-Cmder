@@ -1,0 +1,144 @@
+console_title_template = ' {{ .Folder }} :: {{if .Root}}Admin{{end}}'
+version = 3
+final_space = true
+
+[secondary_prompt]
+  template = '❯❯ '
+  foreground = 'magenta'
+  background = 'transparent'
+
+# disabled to keep full prompt in history — re-enable for collapse
+# [transient_prompt]
+#   template = '❯ '
+#   background = 'transparent'
+#   foreground_templates = ['{{if gt .Code 0}}red{{end}}', '{{if eq .Code 0}}magenta{{end}}']
+
+[[blocks]]
+  type = 'prompt'
+  alignment = 'left'
+  newline = true
+
+  [[blocks.segments]]
+    template = '╭─ '
+    foreground = 'magenta'
+    background = 'transparent'
+    type = 'text'
+    style = 'plain'
+
+    [blocks.segments.properties]
+      cache_duration = 'none'
+
+  [[blocks.segments]]
+    template = '<b>{{ .Path }}</b>'
+    foreground = 'blue'
+    background = 'transparent'
+    type = 'path'
+    style = 'plain'
+
+    [blocks.segments.properties]
+      cache_duration = 'none'
+      style = 'agnoster_short'
+      max_depth = 2
+      hide_root_location = true
+
+  [[blocks.segments]]
+    template = '{{ if .Env.VIRTUAL_ENV }} ({{ base .Env.VIRTUAL_ENV }}){{ end }}'
+    foreground = 'green'
+    background = 'transparent'
+    type = 'text'
+    style = 'plain'
+
+  [[blocks.segments]]
+    template = ' {{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }}*{{ end }} <cyan>{{ if gt .Behind 0 }}⇣{{ end }}{{ if gt .Ahead 0 }}⇡{{ end }}</>'
+    foreground = 'p:grey'
+    background = 'transparent'
+    type = 'git'
+    style = 'plain'
+    foreground_templates = ['{{ if or (.Working.Changed) (.Staging.Changed) }}red{{ end }}', '{{ if gt .Ahead 0 }}blue{{ end }}', '{{ if gt .Behind 0 }}cyan{{ end }}']
+
+    [blocks.segments.properties]
+      branch_icon = ''
+      cache_duration = 'none'
+      commit_icon = '@'
+      fetch_status = true
+
+  [[blocks.segments]]
+    template = ' ✖'
+    foreground = 'red'
+    background = 'transparent'
+    type = 'status'
+    style = 'plain'
+
+    [blocks.segments.properties]
+      cache_duration = 'none'
+
+[[blocks]]
+  type = 'rprompt'
+  overflow = 'hidden'
+
+  [[blocks.segments]]
+    template = 'MEM:{{ round .PhysicalPercentUsed .Precision }}% '
+    foreground = 'yellow'
+    background = 'transparent'
+    type = 'sysinfo'
+    style = 'plain'
+
+    [blocks.segments.properties]
+      cache_duration = 'none'
+      precision = 0
+
+  [[blocks.segments]]
+    template = ' {{ .Full }}'
+    foreground = 'green'
+    background = 'transparent'
+    type = 'node'
+    style = 'plain'
+
+    [blocks.segments.properties]
+      cache_duration = 'none'
+
+  [[blocks.segments]]
+    template = ' {{ .Full }}'
+    foreground = 'yellow'
+    background = 'transparent'
+    type = 'python'
+    style = 'plain'
+
+    [blocks.segments.properties]
+      cache_duration = 'none'
+
+  [[blocks.segments]]
+    template = ' {{ .Full }}'
+    foreground = 'blue'
+    background = 'transparent'
+    type = 'go'
+    style = 'plain'
+
+    [blocks.segments.properties]
+      cache_duration = 'none'
+
+  [[blocks.segments]]
+    template = '{{ .FormattedMs }}'
+    foreground = 'yellow'
+    background = 'transparent'
+    type = 'executiontime'
+    style = 'plain'
+
+    [blocks.segments.properties]
+      cache_duration = 'none'
+      threshold = 500
+
+[[blocks]]
+  type = 'prompt'
+  alignment = 'left'
+  newline = true
+
+  [[blocks.segments]]
+    template = '╰─ ❯'
+    background = 'transparent'
+    type = 'text'
+    style = 'plain'
+    foreground_templates = ['{{if gt .Code 0}}red{{end}}', '{{if eq .Code 0}}magenta{{end}}']
+
+    [blocks.segments.properties]
+      cache_duration = 'none'

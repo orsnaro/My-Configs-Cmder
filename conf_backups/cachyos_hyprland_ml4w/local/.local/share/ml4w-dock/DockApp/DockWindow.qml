@@ -82,6 +82,87 @@ PanelWindow {
             root.pinnedApps.filter(id => root.entryKey(id) !== key))
     }
 
+    // Keep the model unchanged until release: rebuilding it destroys the
+    // delegate that owns the mouse grab.
+    property string pinnedDragKey: ""
+    property string pinnedDropKey: ""
+    property var pinnedDragSnapshot: null
+    readonly property bool draggingPinned: pinnedDragKey !== ""
+
+    function cancelPinnedDrag(): void {
+        if (!root.draggingPinned)
+            return
+        root.pinnedDragKey = ""
+        root.pinnedDropKey = ""
+        root.pinnedDragSnapshot = null
+    }
+
+    function beginPinnedDrag(item): void {
+        if (!item || !item.pinned || !root.isPinned(item.entry.key))
+            return
+        root.pinnedDragSnapshot = root.pinnedApps.slice()
+        root.pinnedDragKey = item.entry.key
+        root.pinnedDropKey = item.entry.key
+    }
+
+    function updatePinnedDrag(item, x, y): void {
+        if (!root.draggingPinned || !item || item.entry.key !== root.pinnedDragKey)
+            return
+        const point = item.mapToItem(dockRow, x, y)
+        let nearest = null
+        let distance = Infinity
+        let left = Infinity
+        let right = -Infinity
+        for (let i = 0; i < appRepeater.count; i++) {
+            const candidate = appRepeater.itemAt(i)
+            if (!candidate || !candidate.pinned)
+                continue
+            left = Math.min(left, candidate.x)
+            right = Math.max(right, candidate.x + candidate.width)
+            const delta = Math.abs(point.x - candidate.x - candidate.width / 2)
+            if (delta < distance) {
+                nearest = candidate
+                distance = delta
+            }
+        }
+        root.pinnedDropKey = nearest && point.x >= left && point.x <= right
+            && point.y >= nearest.y && point.y <= nearest.y + nearest.height
+            ? nearest.entry.key : ""
+    }
+
+    function finishPinnedDrag(item, x, y): void {
+        if (!root.draggingPinned)
+            return
+        root.updatePinnedDrag(item, x, y)
+        const source = root.pinnedDragKey
+        const target = root.pinnedDropKey
+        const snapshot = root.pinnedDragSnapshot
+        root.cancelPinnedDrag()
+        if (!target || source === target)
+            return
+        const from = snapshot.findIndex(id => root.entryKey(id) === source)
+        const to = snapshot.findIndex(id => root.entryKey(id) === target)
+        if (from < 0 || to < 0 || from === to)
+            return
+        // Multiple stored aliases share one icon; keep alias runs together.
+        const moved = snapshot.filter(id => root.entryKey(id) === source)
+        const reordered = snapshot.filter(id => root.entryKey(id) !== source)
+        let insertion = reordered.findIndex(id => root.entryKey(id) === target)
+        if (from < to)
+            while (insertion < reordered.length && root.entryKey(reordered[insertion]) === target)
+                insertion++
+        reordered.splice(insertion, 0, ...moved)
+        // Finish release/click handlers first. The callback needs no delegate or
+        // window reference: DockSettings outlives the window being disabled.
+        Qt.callLater(function() {
+            if (JSON.stringify(DockSettings.settings.apps.pinned) === JSON.stringify(snapshot))
+                DockSettings.persistPinned(reordered)
+        })
+    }
+
+    onDockEntriesChanged: root.cancelPinnedDrag()
+    onVisibleChanged: { if (!visible) root.cancelPinnedDrag() }
+
     // --- APP MODEL ---
     // The desktop entry for a window's app id or a pinned id, or null.
     function lookupEntry(appId: string): var {
@@ -235,7 +316,7 @@ PanelWindow {
     // Slid into view when autohide is off, while the pointer is on the dock (or
     // in the hot zone at the screen edge), and while a context menu is open.
     readonly property bool revealed: !autohide || root.pointerHeld
-        || root.menuOpen || previewPopup.visible
+        || root.menuOpen || previewPopup.visible || root.draggingPinned
 
     // The pointer's hover, held for dock.hideDelay ms after it leaves. Without
     // the grace period the dock snaps shut on every momentary gap in the hover:
@@ -451,6 +532,7 @@ PanelWindow {
             }
 
             Repeater {
+                id: appRepeater
                 model: root.dockEntries
 
                 delegate: DockItem {

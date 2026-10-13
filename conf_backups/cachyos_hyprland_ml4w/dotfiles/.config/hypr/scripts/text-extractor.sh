@@ -47,7 +47,7 @@ fi
 
 argc() { echo $#; }
 rofi_cmd() {
-    rofi -dmenu -replace -config ~/.config/rofi/config-ocr-lang.rasi -i -no-show-icons -l 3 -width 30 -p "Select the OCR language"
+    walker -d -p "Select the OCR language"
 }
 
 if [ "$(argc $OCR_LANGUAGE_LIST)" -gt 1 ]; then

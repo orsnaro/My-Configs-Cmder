@@ -13,10 +13,11 @@
         }
     },
     "logo": {
-        "source": "~/.config/fastfetch/images/arch-no-tm.png",
-        "type": "kitty",
-        "width": 25,
-        "height": 13,
+        "source": "~/.config/fastfetch/images/ascii-logo-inverted-small-color.txt",
+        "type": "file",
+        "color": {
+            "1": "@4"
+        },
         "padding": {
             "left": 2,
             "right": 2,
@@ -68,7 +69,7 @@
         {
             "key": "󰻠",
             "keyColor": "#d2a8ff",
-            "text": "grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | sed -e 's/(R)//g' -e 's/(TM)//g' -e 's/[0-9]*th Gen //' -e 's/Core //' -e 's/ @ .*//' -e 's/^ *//'",
+            "text": "echo $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | sed -e 's/(R)//g' -e 's/(TM)//g' -e 's/[0-9]*th Gen //' -e 's/Core //' -e 's/ @ .*//' -e 's/^ *//') / $(cat /sys/devices/virtual/dmi/id/board_name)",
             "type": "command"
         },
         {
@@ -87,7 +88,7 @@
         {
             "key": "󰋊 1",
             "keyColor": "#71b7ff",
-            "text": "df -B1 --output=source,used,size / /boot /run/media/narol/shared_across_os | awk '$1 ~ /^\\/dev\\/nvme0n1/ {u+=$2; t+=$3} END {printf \"free %.2f GiB (%d%%)\", (t-u)/1024/1024/1024, u/t*100}'",
+            "text": "df -B1 --output=source,used,size / /boot /run/media/narol/shared_across_os | awk 'NR>1 {u+=$2; t+=$3} END {printf \"free %.2f GiB (%d%%)\", (t-u)/1024/1024/1024, u/t*100}'",
             "type": "command"
         },
         {
@@ -107,7 +108,7 @@
         {
             "key": "",
             "keyColor": "#ff8a8a",
-            "text": "/usr/bin/vnstat --oneline -i eno1 | /usr/bin/awk -F';' '{split($9,a,\" \"); split($10,b,\" \"); printf \"↓ %.0f %s ↑ %.0f %s (resets 25th)\", a[1], a[2], b[1], b[2]}'",
+            "text": "TZ=Africa/Cairo LC_ALL=C /usr/bin/sqlite3 -readonly -batch -noheader -init /dev/null /var/lib/vnstat/vnstat.db < \"$HOME/.config/fastfetch/network-usage.sql\" 2>/dev/null || printf '%s\\n' 'network usage unavailable'",
             "type": "command"
         },
         {

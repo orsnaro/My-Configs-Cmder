@@ -30,3 +30,23 @@ alias repos='cd /shared_across_des/repos'
 
 # Open default file explorer in current dir, detached (no terminal bloat)
 alias e. 'nohup xdg-open . >/dev/null 2>&1 & disown'
+
+# --- CP study (Linux port of Win11 cmder user_aliases.cmd) ---
+# Win source: ~/Projects/My-Configs-Cmder/cmder/config/user_aliases.cmd
+#   cporg=cdv C:\Users\%USERNAME%\repo_CPP_COMP_study
+# Linux repo lives at /shared_across_des/repos/cp_study (has CP.cpp/Cp.cs/Cp.sql/cp.py + done_probs/todo_probs)
+alias cporg='cd /shared_across_des/repos/cp_study'
+
+# Win: doneprob=save_N_push_solved_prob.bat cpp | csdoneprob=... cs | pydoneprob=... py
+# (sqldoneprob did NOT exist on Win — created here as sql equivalent)
+alias doneprob='save_N_push_solved_prob cpp'
+alias csdoneprob='save_N_push_solved_prob cs'
+alias pydoneprob='save_N_push_solved_prob py'
+alias sqldoneprob='save_N_push_solved_prob sql'
+
+# Win: addtodo=add_todo_prob.bat cpp | csaddtodo=... cs | pyaddtodo=... py
+# (sqladdtodo did NOT exist on Win — created here as sql equivalent)
+alias addtodo='add_todo_prob cpp'
+alias csaddtodo='add_todo_prob cs'
+alias pyaddtodo='add_todo_prob py'
+alias sqladdtodo='add_todo_prob sql'

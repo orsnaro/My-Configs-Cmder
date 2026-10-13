@@ -4,7 +4,7 @@
 Read by kitty.conf via `geninclude` at config load. stdout becomes config
 lines; anything else (notifications, marker files) is a side effect.
 
-- Patched kitty: prints four later `resize_divider` maps that take
+- Patched kitty: prints eight later `resize_divider` maps that take
   precedence over the script fallback maps in custom.conf.
 - Stock kitty (or patch overwritten by an update): prints nothing, so the
   `absolute-resize.py` fallback maps stay active, and fires a one-time
@@ -69,10 +69,12 @@ def maybe_alert(src_hash):
         pass
 
 
-def main():
+def main() -> int:
     if probe_native():
         for key, direction in (('j', 'left'), ('l', 'right'),
-                               ('i', 'up'), ('k', 'down')):
+                               ('i', 'up'), ('k', 'down'),
+                               ('left', 'left'), ('right', 'right'),
+                               ('up', 'up'), ('down', 'down')):
             # Same fallback as custom.conf so native resize works in ara too.
             print('map --allow-fallback=shifted,ascii ctrl+alt+{} resize_divider {}'.format(key, direction))
     else:

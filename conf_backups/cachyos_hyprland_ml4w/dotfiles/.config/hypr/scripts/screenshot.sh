@@ -64,6 +64,26 @@ take_instant_full() {
     [[ -f "$HOME/$png_name" && -d "$screenshot_folder" && -w "$screenshot_folder" ]] && mv "$HOME/$png_name" "$screenshot_folder/"
 }
 
+# Quick instant mode: focused monitor only (copy to clipboard + save, single capture)
+take_instant_output() {
+    local output png_name
+    png_name="${NAME%.*}.png"
+    output=$(hyprctl monitors -j | jq -r '.[] | select(.focused == true) | .name')
+    [[ -z "$output" ]] && exit 1
+    # kill any stale freeze overlay left by a cancelled area pick,
+    # then let workspace/layer fade-out animations settle before capture
+    pkill -x hyprpicker 2>/dev/null || true
+    sleep 0.2
+    grim -o "$output" -t png - | tee "$HOME/$png_name" | wl-copy --type image/png && notify_user \
+        --a "${APP_NAME}" \
+        --i "${NOTIFICATION_ICON}" \
+        --s "Screenshot saved + copied" \
+        --m "$screenshot_folder/$png_name" \
+        --t 1000
+
+    [[ -f "$HOME/$png_name" && -d "$screenshot_folder" && -w "$screenshot_folder" ]] && mv "$HOME/$png_name" "$screenshot_folder/"
+}
+
 # Quick instant mode: area selection
 take_instant_area() {
     local pid_picker region png_name grim_status
@@ -112,6 +132,9 @@ if [[ "$1" == "--instant" ]]; then
 elif [[ "$1" == "--instant-area" ]]; then
     take_instant_area
     exit 0
+elif [[ "$1" == "--instant-output" ]]; then
+    take_instant_output
+    exit 0
 fi
 
 # Options
@@ -137,12 +160,12 @@ save='Save'
 copy_save='Copy & Save'
 edit='Edit'
 
-# Rofi CMD
+# Walker dmenu CMD
 rofi_cmd() {
-    rofi -dmenu -replace -config ~/.config/rofi/config-screenshot.rasi -i -no-show-icons -l 2 -width 30 -p "Take screenshot"
+    walker -d -p "Take screenshot"
 }
 
-# Pass variables to rofi dmenu
+# Pass variables to walker dmenu
 run_rofi() {
     echo -e "$option_1\n$option_2" | rofi_cmd
 }
@@ -151,7 +174,7 @@ run_rofi() {
 # Choose Timer
 # CMD
 timer_cmd() {
-    rofi -dmenu -replace -config ~/.config/rofi/config-screenshot.rasi -i -no-show-icons -l 5 -width 30 -p "Choose timer"
+    walker -d -p "Choose timer"
 }
 
 # Ask for confirmation
@@ -187,7 +210,7 @@ timer_run() {
 # Chose Screenshot Type
 # CMD
 type_screenshot_cmd() {
-    rofi -dmenu -replace -config ~/.config/rofi/config-screenshot.rasi -i -no-show-icons -l 3 -width 30 -p "Type of screenshot"
+    walker -d -p "Type of screenshot"
 }
 
 # Ask for confirmation
@@ -217,7 +240,7 @@ type_screenshot_run() {
 # Choose to save or copy photo
 # CMD
 copy_save_editor_cmd() {
-    rofi -dmenu -replace -config ~/.config/rofi/config-screenshot.rasi -i -no-show-icons -l 4 -width 30 -p "How to save"
+    walker -d -p "How to save"
 }
 
 # Ask for confirmation

@@ -3,9 +3,9 @@
 # NATIVE build (pacman obsidian) — staged 2026-10-05, apply after install.
 set -euo pipefail
 
-MOUNT="/run/media/narol/shared_across_os"
+MOUNT="/run/media/narol/HDD"
 VAULT="$MOUNT/obsidians/notes"
-SHARED_UUID="75E52AA11AD75C2E"
+SHARED_UUID="808A96DD8A96CED2"
 
 # Reject an unmounted path or a different device; never fall back to a stale vault.
 mounted_uuid=$(findmnt -rn --mountpoint "$MOUNT" -o UUID 2>/dev/null || true)

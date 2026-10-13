@@ -77,6 +77,15 @@ its default value.
 
 Both commands are run through bash, so `~`, arguments and pipes work.
 
+### Reorder pinned apps
+
+Hold the left mouse button on a pinned icon for about 0.25 seconds, drag it
+horizontally onto another pinned icon, then release. The icon follows the
+pointer and the destination is highlighted. The new order is saved once on
+release and survives a restart. Releasing outside the pinned icons cancels;
+running-only apps cannot be reordered. Normal clicks and right-click menus
+remain unchanged. Reordering adds no polling, recurring timers or processes.
+
 ## Wallpaper colors with matugen
 
 To make the dock follow your wallpaper, have [matugen](https://github.com/InioX/matugen)

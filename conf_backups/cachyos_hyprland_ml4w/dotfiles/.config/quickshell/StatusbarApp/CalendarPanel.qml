@@ -45,12 +45,93 @@ Item {
     // --- GOOGLE AGENDA (events + tasks from gcal-sync.py) ---
     property var agendaEvents: []
     property var agendaTasks: []
+    property bool manageAgendaBackground: false
+    property var agendaRawEvents: []
+    property string agendaUpdated: ""
+    property string agendaError: ""
+    property string agendaErrorUpdated: ""
+    property bool agendaStale: false
+
+    function parseLocalDate(s) {
+        let m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(s)
+        if (!m)
+            return null
+        let d = new Date(+m[1], +m[2] - 1, +m[3])
+        if (isNaN(d.getTime()) || d.getFullYear() !== +m[1]
+                || d.getMonth() !== +m[2] - 1 || d.getDate() !== +m[3])
+            return null
+        return d
+    }
+
+    function agendaStamp(raw) {
+        if (typeof raw !== "string" || raw === "")
+            return null
+        let d = /^\d{4}-\d{2}-\d{2}$/.test(raw) ? panel.parseLocalDate(raw) : new Date(raw)
+        if (!d || isNaN(d.getTime()))
+            return null
+        return d
+    }
+
+    function agendaUsable(entry, now) {
+        if (!entry || typeof entry !== "object")
+            return false
+        if (typeof entry.summary !== "string" || entry.summary === "")
+            return false
+        let start = panel.agendaStamp(entry.start)
+        let end = panel.agendaStamp(entry.end)
+        if (start === null || end === null || end < start)
+            return false
+        return end > now
+    }
+
+    function refreshAgenda(): void {
+        let now = new Date()
+        let kept = []
+        for (let i = 0; i < panel.agendaRawEvents.length; i++) {
+            let e = panel.agendaRawEvents[i]
+            if (panel.agendaUsable(e, now))
+                kept.push(e)
+        }
+        panel.agendaEvents = kept
+        if (typeof panel.agendaUpdated === "string" && panel.agendaUpdated !== "") {
+            let stamp = new Date(panel.agendaUpdated)
+            panel.agendaStale = !isNaN(stamp.getTime()) && (now - stamp) > 1800000
+        } else {
+            panel.agendaStale = false
+        }
+    }
+
+    function allDayLabel(raw): string {
+        let d = panel.parseLocalDate(raw)
+        if (d === null)
+            return "All day"
+        return "All day · " + Qt.formatDateTime(d, "d MMM")
+    }
+
+    function agendaIsNewer(raw) {
+        if (typeof raw !== "string" || raw === "")
+            return false
+        let incoming = new Date(raw)
+        if (isNaN(incoming.getTime()))
+            return false
+        if (panel.agendaErrorUpdated === "")
+            return true
+        let base = new Date(panel.agendaErrorUpdated)
+        return isNaN(base.getTime()) || incoming > base
+    }
 
     function parseAgenda(src): void {
         try {
             let d = JSON.parse(src)
-            panel.agendaEvents = d.events || []
+            panel.agendaRawEvents = Array.isArray(d.events) ? d.events : []
             panel.agendaTasks = d.tasks || []
+            if (typeof d.updated === "string")
+                panel.agendaUpdated = d.updated
+            if (panel.agendaError !== "" && panel.agendaIsNewer(d.updated)) {
+                panel.agendaError = ""
+                panel.agendaErrorUpdated = ""
+            }
+            panel.refreshAgenda()
         } catch (e) {
             // Ignore malformed cache; the next sync rewrites it.
         }
@@ -61,7 +142,9 @@ Item {
         path: Quickshell.env("HOME") + "/.config/gcal/cache.json"
         blockLoading: true
         printErrors: false
+        watchChanges: true
         onLoaded: panel.parseAgenda(text())
+        onFileChanged: agendaFile.reload()
     }
 
     // Sync on every open; the timer keeps it fresh in the background.
@@ -69,14 +152,34 @@ Item {
         id: agendaSync
         command: [Quickshell.env("HOME") + "/.config/gcal/.venv/bin/python",
             Quickshell.env("HOME") + "/.config/gcal/gcal-sync.py"]
-        running: panel.isOpen
-        stdout: StdioCollector { onStreamFinished: agendaFile.reload() }
+        stderr: StdioCollector { id: agendaSyncErr }
+        onExited: (exitCode, exitStatus) => {
+            if (exitCode === 0 && exitStatus === 0) {
+                panel.agendaError = ""
+                panel.agendaErrorUpdated = ""
+                agendaFile.reload()
+            } else if (exitStatus === 0) {
+                panel.agendaErrorUpdated = panel.agendaUpdated
+                if (agendaSyncErr.text.indexOf("invalid_grant") !== -1)
+                    panel.agendaError = "Calendar sync failed · sign-in expired"
+                else
+                    panel.agendaError = "Calendar sync failed · cached data shown"
+                panel.refreshAgenda()
+            } else if (exitCode !== 15) {
+                panel.agendaErrorUpdated = panel.agendaUpdated
+                panel.agendaError = "Calendar sync failed · cached data shown"
+                panel.refreshAgenda()
+            }
+        }
     }
     Timer {
         interval: 900000
         repeat: true
-        running: true
-        onTriggered: agendaSync.running = true
+        running: panel.manageAgendaBackground
+        onTriggered: {
+            panel.refreshAgenda()
+            agendaSync.running = true
+        }
     }
     // Reminder daemon: notify + sound for imminent events / due tasks.
     Process {
@@ -87,7 +190,7 @@ Item {
     Timer {
         interval: 300000
         repeat: true
-        running: true
+        running: panel.manageAgendaBackground
         triggeredOnStart: true
         onTriggered: agendaRemind.running = true
     }
@@ -114,6 +217,9 @@ Item {
         showPanel = true
         // Fresh agenda for every open.
         agendaFile.reload()
+        panel.refreshAgenda()
+        if (!agendaSync.running)
+            agendaSync.running = true
 
         // Auto-refresh "Today" if the date changed while Quickshell was running
         let now = new Date()
@@ -463,6 +569,16 @@ Item {
                         font.bold: true
                     }
 
+                    Text {
+                        Layout.fillWidth: true
+                        visible: panel.agendaError !== "" || panel.agendaStale
+                        text: panel.agendaError !== "" ? panel.agendaError : "Calendar cache stale · refresh pending"
+                        color: Theme.on_background
+                        font.family: Theme.fontFamily
+                        font.pixelSize: 12
+                        elide: Text.ElideRight
+                    }
+
                     ListView {
                         Layout.fillWidth: true
                         Layout.fillHeight: true
@@ -476,7 +592,7 @@ Item {
                                 Layout.preferredWidth: 118
                                 text: {
                                     if (modelData.allDay)
-                                        return "All day"
+                                        return panel.allDayLabel(modelData.start)
                                     return Qt.formatDateTime(new Date(modelData.start), "ddd d MMM · hh:mm")
                                 }
                                 color: Theme.on_background
@@ -491,11 +607,14 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 13
                                 elide: Text.ElideRight
+                                HoverHandler { id: eventTitleHover }
+                                ToolTip.text: modelData.summary
+                                ToolTip.visible: eventTitleHover.hovered
                             }
                         }
                     }
                     Text {
-                        visible: panel.agendaEvents.length === 0
+                        visible: panel.agendaEvents.length === 0 && panel.agendaError === ""
                         text: "No upcoming events"
                         color: Theme.on_background
                         font.family: Theme.fontFamily
@@ -512,11 +631,12 @@ Item {
 
                     ListView {
                         Layout.fillWidth: true
-                        Layout.preferredHeight: Math.min(3, panel.agendaTasks.length) * 24 + 4
+                        Layout.preferredHeight: Math.min(3, panel.agendaTasks.length) * 24
                         clip: true
                         model: panel.agendaTasks.slice(0, 6)
                         delegate: RowLayout {
                             width: ListView.view.width
+                            height: 24
                             spacing: 8
                             Text {
                                 text: "○"
@@ -532,6 +652,9 @@ Item {
                                 font.family: Theme.fontFamily
                                 font.pixelSize: 13
                                 elide: Text.ElideRight
+                                HoverHandler { id: taskTitleHover }
+                                ToolTip.text: modelData.title
+                                ToolTip.visible: taskTitleHover.hovered
                             }
                         }
                     }
