@@ -5,10 +5,12 @@ import QtQuick.Effects
 import QtQuick.Layouts
 import qs.CustomTheme
 
-// Shows the number of pending system updates next to a package icon. The count
-// comes from ml4w-check-system-updates (the same script the Waybar module
-// uses), polled every 30 minutes. The module hides itself completely while no
-// updates are available; clicking it launches the ML4W update routine.
+// Shows the number of pending updates next to a package icon. The count is
+// read from Cachy Update's (arch-update) cached aggregate state, which lists
+// one pending entry per line across system packages, the AUR and Flatpak. The
+// module hides itself completely while nothing is cached; clicking it opens
+// the interactive `arch-update` run in the configured ML4W terminal. Updates
+// stay manual: nothing here checks for or installs packages.
 Rectangle {
     id: updates
 
@@ -23,10 +25,21 @@ Rectangle {
     // Set by the keyboard navigation in StatusbarWindow.
     property bool focused: false
 
-    // Run the module's action (mouse click or keyboard Return).
+    // XDG state dir, falling back to ~/.local/state when unset or empty.
+    // Quickshell.env() yields null (not "") for an unset variable.
+    readonly property string stateHome: Quickshell.env("XDG_STATE_HOME")
+        || (Quickshell.env("HOME") + "/.local/state")
+    // arch-update writes one line per pending update here; absent = nothing.
+    readonly property string cachePath: stateHome + "/arch-update/last_updates_check"
+
+    // Configured ML4W terminal (settings/terminal.sh); kitty when unset.
+    property string terminal: "kitty"
+
+    // Open the interactive Cachy Update run in the configured terminal, keeping
+    // the ML4W floating window class. Never --check or an unattended update.
     function activate(): void {
         Quickshell.execDetached(["bash", "-c",
-            Quickshell.env("HOME") + "/.config/ml4w/settings/installupdates.sh"])
+            updates.terminal + " --class dotfiles-floating -e arch-update"])
     }
 
     // Hidden (and collapsed to zero size) when there is nothing to update.
@@ -91,31 +104,53 @@ Rectangle {
         onClicked: updates.activate()
     }
 
-    // Parse the script's JSON output ({"text": "69", ...}); an empty line means
-    // zero updates and the script prints nothing.
+    // Count nonblank lines in a cached aggregate (system + AUR + Flatpak);
+    // blank separator lines are not updates.
+    function countCache(source): int {
+        const raw = source || ""
+        let total = 0
+        for (const line of raw.split("\n"))
+            if (line.trim() !== "")
+                total++
+        return total
+    }
+
+    // Re-read the cached aggregate on demand: the 1800s fallback timer and the
+    // `updates refresh` IPC call. This never runs a check or install command.
     function refresh(): void {
-        updatesProc.running = false
-        updatesProc.running = true
+        cacheView.reload()
     }
 
-    Process {
-        id: updatesProc
-        command: ["bash", "-c",
-            Quickshell.env("HOME") + "/.config/ml4w/scripts/ml4w-check-system-updates"]
-        running: true
-        stdout: StdioCollector {
-            onStreamFinished: {
-                try {
-                    let raw = this.text.trim()
-                    updates.count = raw ? parseInt(JSON.parse(raw).text) || 0 : 0
-                } catch (e) {
-                    updates.count = 0
-                }
-            }
+    // Cachy Update owns this file; FileView only watches it, so live writes,
+    // atomic replacements and the updater clearing it all refresh the count.
+    FileView {
+        id: cacheView
+        path: updates.cachePath
+        blockLoading: true
+        printErrors: false
+        watchChanges: true
+        onLoaded: updates.count = updates.countCache(text())
+        onLoadFailed: updates.count = 0
+        onFileChanged: cacheView.reload()
+    }
+
+    // Follow the configured ML4W terminal so the click keeps the user's choice.
+    FileView {
+        id: terminalFile
+        path: Quickshell.env("HOME") + "/.config/ml4w/settings/terminal.sh"
+        blockLoading: true
+        printErrors: false
+        watchChanges: true
+        onLoaded: {
+            const value = text().trim()
+            if (value !== "")
+                updates.terminal = value
         }
+        onFileChanged: terminalFile.reload()
     }
 
-    // Re-check on the same 1800s interval as the Waybar module.
+    // Keep the existing 1800s cadence, but only re-read the cache the updater
+    // already wrote; Cachy's own timer is what performs real checks.
     Timer {
         interval: 1800 * 1000
         running: true
@@ -126,7 +161,7 @@ Rectangle {
     // Let external scripts drive the module via `qs ipc call updates ...`.
     // `reset` clears the count immediately (e.g. right after an update run,
     // so the module hides itself without waiting for the next poll); `refresh`
-    // re-runs the check script on demand.
+    // re-reads the cached aggregate on demand.
     IpcHandler {
         target: "updates"
         function reset(): void { updates.count = 0 }

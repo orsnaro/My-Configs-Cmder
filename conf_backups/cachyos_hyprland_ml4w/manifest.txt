@@ -406,6 +406,7 @@ dotfiles/.config/quickshell/StatusbarApp/tests/slim_ram.sh
 dotfiles/.config/quickshell/StatusbarApp/tests/sysinfo.sh
 dotfiles/.config/quickshell/StatusbarApp/tests/system_panel_load.sh
 dotfiles/.config/quickshell/StatusbarApp/tests/system_panel_state.qml
+dotfiles/.config/quickshell/StatusbarApp/tests/updates.py
 dotfiles/.config/quickshell/StatusbarApp/tests/volume_panel.sh
 dotfiles/.config/quickshell/StatusbarApp/tests/weather.sh
 dotfiles/.config/quickshell/WallpaperApp/WallpaperWindow.qml

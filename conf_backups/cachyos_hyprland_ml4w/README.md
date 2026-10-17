@@ -30,10 +30,12 @@ Re-backup: `./BACKUP.sh` — refreshes the allowlisted snapshot and manifest. Mi
 - Mouse-follow focus remains enabled with `special_fallthrough = true`; `hide_special_on_workspace_change = false` keeps Quake visible while normal workspaces change.
 - Dock press/hold reordering uses the current 250 ms threshold; gesture regressions and the implementation report are included.
 - Includes current Kitty resize mappings, wallpaper automation/theming, calendar panel/helpers, Fastfetch network-usage query, and Walker/Elephant configuration.
+- The Quickshell updates button uses Cachy Update (`arch-update`): its count includes system, AUR, and Flatpak entries from `${XDG_STATE_HOME:-$HOME/.local/state}/arch-update/last_updates_check`. It watches that cache and reloads it every 30 minutes without launching another update checker. The existing Cachy Update timer owns scheduled checks; clicking the button opens its interactive updater in the configured ML4W terminal. Updates remain manual, with no package-age delay.
 
 ## Restore prerequisites
 
 - Install the applications/tools referenced by the configs separately (including Walker/Elephant, Matugen, Quickshell, Oh My Posh, and the Albion data client if used). This is a config/source backup, not a binary or package backup.
+- The updates button requires Cachy Update (`arch-update`) and the terminal configured in `~/.config/ml4w/settings/terminal.sh`. Keep Cachy Update's check timer enabled for fresh counts; its cache is runtime state and is not backed up.
 - Fish expects `~/.local/bin/oh-my-posh`; the Pomo module expects `~/.local/bin/pomo`. Install these separately or recreate their links; the current Pomo binary lives in an external repo.
 - Calendar helpers require a fresh `~/.config/gcal/.venv` with `google-api-python-client`, `google-auth`, and `google-auth-oauthlib`. Supply your own `client_secret_*.json`, then run `~/.config/gcal/.venv/bin/python ~/.config/gcal/gcal-consent.py` to consent. Tokens, caches, and virtual environments are intentionally not restored.
 - Obsidian's mounted vault and browser profiles are external and are not backed up here.
@@ -42,7 +44,9 @@ Re-backup: `./BACKUP.sh` — refreshes the allowlisted snapshot and manifest. Mi
 
 `python3 -m unittest discover -s tests -v` runs both scripts against disposable homes under `/tmp/opencode` with real rsync. Component regressions live in their respective `tests/` directories; some GUI integrations require a dedicated session/terminal.
 
-Snapshot validation on 2026-10-13: backup/restore fixtures, Hyprland, Kitty unit tests, wallpaper tests and offline calendar tests pass. **The full suite is not green:** the statusbar module-order assertion predates the microphone module, Fastfetch's historical baseline fixture is external/missing, and dock Wayland long-hold/timing checks fail. These are reported for separate investigation, not silently skipped; the backup PR is a draft.
+`python3 dotfiles/.config/quickshell/StatusbarApp/tests/updates.py` exercises the real updates module offscreen with disposable cache/terminal fixtures, without checking repositories or installing updates. The volume-panel layout regression includes the existing microphone module; no layout change is needed for the updater integration.
+
+Snapshot validation on 2026-10-13 (historical snapshot, not a current status): backup/restore fixtures, Hyprland, Kitty unit tests, wallpaper tests and offline calendar tests passed then. **The full suite was not green at that time:** the statusbar module-order assertion predated the microphone module, Fastfetch's historical baseline fixture was external/missing, and dock Wayland long-hold/timing checks failed. The statusbar/volume-panel assertion has since been corrected for the 2026-10-17 updater change; the unrelated historical Fastfetch external-fixture and dock GUI failures are **not** claimed fixed. These are reported for separate investigation, not silently skipped; the backup PR is a draft.
 
 ## Directional navigation
 
