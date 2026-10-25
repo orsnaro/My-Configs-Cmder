@@ -1,0 +1,255 @@
+part OsdDrawer {
+    //  The volume and notification drawer's content, clipped to its shape. Both sit on one plate
+    //  (the same 8% veil as the others), 12 in from the drawer's edge; `osd_kind` picks which is drawn.
+    group {
+        clip inset 2 box { at: mix(mix(do.ix, do.ex, fm), 2 * os.px - mix(do.ix, do.ex, fm), rt), do.ey; size: mix(do.iw, do.ew, fm), do.eh; corner: 26 * u * (1 - 0.73 * sq) }
+        opacity: fo
+        move: rt * (screen.width - 2 * os.px), (1 - fo) * 12 * u + bt * (yo + vb - 2 * os.cy)
+        //  The same as the calendar's: what is inside grows with the drawer, from the edge it comes out of (the strip's, or the right frame's for the volume and the notifications, which grow leftwards).
+        group {
+            pivot: mix(mix(screen.width - th.r, screen.width + 26 * u, fm), 2 * os.px - mix(screen.width - th.r, screen.width + 26 * u, fm), rt), do.ey
+            scale: max(do.lf, 0.05)
+        //  Two effects cannot sit one inside the other, so the Retro theme's pixelation of the drawer (`px.do`) is on this group, and the face's own (below) on a
+        //  group beside it.
+        group {
+            shader: pixelate, px.do
+        let oy = os.ck + (8 + osd_h / 2) * u                 // the plate's middle
+        let ot = os.ck + 8 * u                               // and its top
+        //  Obsidian: a solid plate a step lighter than the shell, with a small tight shadow, in place of the veil.
+        body { color: mix(obsidian, ink, (veil) * 1.6); opacity: obs; shadow: 0, 2 * u, 7 * u, 40%, #000000; show: obs > 0.004; box { at: os.px, oy; size: osd_w * u, osd_h * u; corner: 14 * u } }
+        box { at: os.px, oy; size: osd_w * u, osd_h * u; corner: 14 * u; color: ink; opacity: (veil) * (1 - obs) }
+        //  A press on the plate takes the drawer down (a notification is dismissed with it). Declared
+        //  first, so the cross and the buttons above it win where they overlap.
+        zone box os_hit { at: os.px, oy; size: osd_w * u, osd_h * u; corner: 14 * u; cursor: pointer }
+        on press os_hit while osd_kind == vol { osd_on = false }
+        on press os_hit while osd_kind == note { emit nt_close }
+
+        // ── the volume ──
+        group {
+            opacity: okv * max(osd_vp, 1 - max(osd_bp, osd_mp))
+            show: okv > 0.01 and (osd_v or not (osd_b or osd_m))
+            let vy = ot + 32 * u                             // the top row (the plate's middle when it is the only one)
+            let vtx = os.px - 128 * u                        // the face's tile
+            box { at: vtx, vy; size: 44 * u, 44 * u; corner: 12 * u; color: ink; opacity: 6% }
+            //  The level is a wave: it ripples as far as the volume goes, and the rest of the track is
+            //  a flat, faint line. A tall white pill marks the end.
+            let tr0 = os.px - 96 * u
+            let trw = 170 * u
+            let span = trw * volume_level
+            //  All 48 pieces of the wave are spread over the level's own length, so a short one is drawn as
+            //  smoothly as a long one (spread over the whole track, only a handful would fall inside it).
+            let seg = max(span, 1) / 48
+            //  The wave is always the same number of S-curves (two and a half), spread over however
+            //  long the level is: at 100% they are long and lazy, and as the volume drops the whole
+            //  thing is squeezed toward the left, the curves getting tighter and steeper. `wf` is
+            //  the ripple's frequency, in degrees a pixel (sin takes degrees), for the length it has to fit. It fades to flat over a tenth of
+            //  its length at each end, so it always meets the flat line and the pill.
+            let wf = 360 * 2.5 / max(span, 1)
+            let wa = 4.5 * u
+            let f0 = max(0.001, span * 0.1)
+            let f1 = max(0.001, span * 0.12)
+            repeat i in 0..48 {
+                let xa = tr0 + i * seg
+                let xb = xa + seg
+                //  The ripple dies away to nothing at both ends, so wherever it is in its swing the wave
+                //  always meets the flat line and the knob on the same centre line.
+                let ea = clamp((xa - tr0) / f0, 0, 1) * clamp((tr0 + span - xa) / f1, 0, 1)
+                let eb = clamp((xb - tr0) / f0, 0, 1) * clamp((tr0 + span - xb) / f1, 0, 1)
+                line { from: xa, vy + wa * ea * sin((xa - tr0) * wf - time * 120); to: xb, vy + wa * eb * sin((xb - tr0) * wf - time * 120); width: 5 * u; color: if(audio.muted, faint, mint); opacity: min(1, span / (3 * u)) }
+            }
+            line { from: tr0 + span, vy; to: tr0 + trw, vy; width: 5 * u; color: ink; opacity: 12% }
+            box { at: clamp(tr0 + span, tr0 + 4 * u, tr0 + trw - 4 * u), vy; size: 6 * u, 26 * u; corner: 3 * u; color: ink }
+            text number(audio.volume * 100, 0, "%") { at: floor(os.px + 116 * u + 0.5), floor(vy + 0.5); anchor: center; align: center; size: 21; weight: 700; color: ink; family: "Space Grotesk"; show: not audio.muted }
+            text "Muted" { at: floor(os.px + 116 * u + 0.5), floor(vy + 0.5); anchor: center; align: center; size: 21; weight: 700; color: faint; family: "Space Grotesk"; show: audio.muted }
+        }
+
+        // ── the brightness: under the volume when both are out, alone in its place otherwise ──
+        group {
+            opacity: okv * osd_bp
+            show: okv > 0.01 and osd_b
+            let by = ot + (32 + 72 * osd_vp) * u
+            let btx = os.px - 128 * u                        // the sun's tile
+            box { at: btx, by; size: 44 * u, 44 * u; corner: 12 * u; color: ink; opacity: 6% }
+            //  A sun that turns slowly: a disc that grows with the level, and eight rays that lengthen with it and breathe.
+            ellipse { at: btx, by; radius: (4 + 2.5 * bright_osd) * u; color: mint }
+            ellipse { at: btx, by; radius: (8 + 4 * bright_osd + 1.5 * sin(time * 180)) * u; color: minthi; opacity: 12% + 10% * bright_osd }
+            repeat r in 0..8 {
+                let ang = r * 45 + time * 35
+                let r0 = (8 + 1.5 * bright_osd) * u
+                let r1 = r0 + (2.5 + 3.5 * bright_osd + 1.2 * sin(time * 200 + r * 90)) * u
+                line { from: btx + r0 * cos(ang), by + r0 * sin(ang); to: btx + r1 * cos(ang), by + r1 * sin(ang); width: 2.2 * u; color: mint; opacity: 55% + 45% * bright_osd }
+            }
+            //  The level as a row of beams: thin upright bars across as far as the brightness goes, taller and brighter towards the end, each shimmering as a
+            //  wave of light runs along them. The rest of the track is a faint line, and the same pill as the volume's marks the end, with a glow behind it.
+            let btr0 = os.px - 96 * u
+            let btrw = 170 * u
+            let bspan = btrw * clamp(bright_osd, 0, 1)
+            line { from: btr0, by; to: btr0 + btrw, by; width: 3 * u; color: ink; opacity: 10% }
+            repeat i in 0..34 {
+                let near = (i + 0.5) / 34
+                let bx = btr0 + near * bspan
+                let sh = 0.5 + 0.5 * sin(i * 40 - time * 260)
+                let bh = (4 + 16 * near * (0.4 + 0.6 * sh)) * u
+                line { from: bx, by - bh / 2; to: bx, by + bh / 2; width: 2.4 * u; color: mix(mint, minthi, sh * near); opacity: 30% + 70% * near }
+            }
+            ellipse { at: btr0 + bspan, by; radius: (9 + 2.5 * sin(time * 220)) * u; color: minthi; opacity: 22% * clamp(bright_osd * 8, 0, 1) }
+            box { at: clamp(btr0 + bspan, btr0 + 4 * u, btr0 + btrw - 4 * u), by; size: 6 * u, 26 * u; corner: 3 * u; color: ink }
+            text number(bright_now * 100, 0, "%") { at: floor(os.px + 116 * u + 0.5), floor(by + 0.5); anchor: center; align: center; size: 21; weight: 700; color: ink; family: "Space Grotesk" }
+        }
+
+        // ── the microphone: muted or on, under whichever of the other two are out ──
+        group {
+            opacity: okv * osd_mp
+            show: okv > 0.01 and osd_m
+            let mcy = ot + (32 + 72 * osd_vp + 72 * osd_bp) * u
+            let mtx = os.px - 128 * u
+            box { at: mtx, mcy; size: 44 * u, 44 * u; corner: 12 * u; color: if(audio.input_muted, alert, mint); opacity: if(audio.input_muted, 16%, 14%) }
+            //  A microphone: its head, the cradle round it, and the stand; a slash through it while it is muted.
+            box { at: mtx, mcy - 4 * u; size: 9 * u, 15 * u; corner: 4.5 * u; color: if(audio.input_muted, faint, mint) }
+            path { at: mtx, mcy - 4 * u; stroke: 1.8 * u; color: if(audio.input_muted, faint, mint); move -7.5 * u, 1 * u; curve 0, 9.5 * u via -7.5 * u, 9.5 * u; curve 7.5 * u, 1 * u via 7.5 * u, 9.5 * u }
+            box { at: mtx, mcy + 9 * u; size: 1.8 * u, 4 * u; corner: 0.9 * u; color: if(audio.input_muted, faint, mint) }
+            path { at: mtx, mcy; stroke: 2.2 * u; color: alert; opacity: if(audio.input_muted, 100%, 0); move -9 * u, -10 * u; line 9 * u, 10 * u }
+            text "Microphone muted" { at: floor(os.px - 90 * u + 0.5), floor(mcy + 0.5); anchor: left center; size: 19; weight: 700; color: ink; family: "Space Grotesk"; show: audio.input_muted }
+            text "Microphone on" { at: floor(os.px - 90 * u + 0.5), floor(mcy + 0.5); anchor: left center; size: 19; weight: 700; color: mint; family: "Space Grotesk"; show: not audio.input_muted }
+        }
+
+        // ── a notification ──
+        group {
+            opacity: okn
+            show: okn > 0.01
+            let nty = oy                                  // the tile's middle: the plate's, so it sits vertically centred
+            let ntx = os.px - 90 * u                      // 8 in from the plate's left edge, and half of the 30 tile
+            let ntl = os.px - 64 * u                      // where its words start
+            let ncr = os.px + (osd_w / 2 - 18) * u        // the close cross, inside the plate's right edge
+            box { at: ntx, nty; size: 30 * u, 30 * u; corner: 9 * u; color: ink; opacity: 6% }
+            //  No picture from the app: a bell, in the accent (or red, for something urgent).
+            group {
+                show: not nt_icon_on
+                ellipse { at: ntx, nty - 1.5 * u; radius: 4.8 * u; color: if(nt_urgent, alert, mint) }
+                box { at: ntx, nty + 3.5 * u; size: 12.5 * u, 2.5 * u; corner: 1.25 * u; color: if(nt_urgent, alert, mint) }
+                ellipse { at: ntx, nty + 6.5 * u; radius: 1.5 * u; color: if(nt_urgent, alert, mint) }
+            }
+            group {
+                show: nt_icon_on
+                image nt_img { at: floor(ntx - 15 * u + 0.5), floor(nty - 15 * u + 0.5); size: floor(30 * u + 0.5), floor(30 * u + 0.5) }
+            }
+            //  A ring off the tile when it arrives.
+            ellipse { at: ntx, nty; radius: (16 + 15 * nt_ring) * u; stroke: 2 * u; color: if(nt_urgent, alert, mint); opacity: 90% * (1 - nt_ring) }
+            ellipse { at: ntx + 13.5 * u, nty - 13.5 * u; radius: 3.5 * u; color: alert; opacity: if(nt_urgent, 60% + 40% * sin(time * 300), 0) }
+
+            text nt_app { at: floor(ntl + 0.5), floor(ot + 12 * u + 5 * u + 0.5); anchor: left center; size: 11.5; weight: 700; width: 144 * u; lines: 1; color: faint; family: "Space Grotesk" }
+            text nt_title { at: floor(ntl + 0.5), floor(ot + 30 * u + 0.5); anchor: left top; size: 15; weight: 700; width: 144 * u; lines: 3; measure: ntt; color: ink; family: "Space Grotesk" }
+            text nt_body { at: floor(ntl + 0.5), floor(ot + (34 + nt_th) * u + 0.5); anchor: left top; size: 12.5; width: 144 * u; lines: 6; measure: ntb; color: faint; family: "Space Grotesk"; show: nt_body_on }
+            //  Its buttons, under the words.
+            row nt_row {
+                at: floor(ntl + 0.5), floor(ot + (nt_content + 8) * u + 0.5)
+                gap: 8
+                wrap: 2
+                for a in nt_acts { NtAct(a, click: nt_act) }
+            }
+            //  Close.
+            ellipse { at: ncr, ot + 12 * u + 8 * u; radius: 8 * u; color: ink; opacity: 22% * nt_x.hover }
+            line { from: ncr - 3 * u, ot + 12 * u + 8 * u - 3 * u; to: ncr + 3 * u, ot + 12 * u + 8 * u + 3 * u; width: 1.4 * u; color: ink; opacity: 55% + 45% * nt_x.hover }
+            line { from: ncr + 3 * u, ot + 12 * u + 8 * u - 3 * u; to: ncr - 3 * u, ot + 12 * u + 8 * u + 3 * u; width: 1.4 * u; color: ink; opacity: 55% + 45% * nt_x.hover }
+            zone box nt_x { at: ncr, ot + 12 * u + 8 * u; size: 20 * u, 20 * u; corner: 10 * u; cursor: pointer }
+            on press nt_x { emit nt_close }
+        }
+
+        // ── a screenshot ──
+        group {
+            opacity: oks
+            show: oks > 0.01
+            let sty = ot + 8 * u                              // the picture's top
+            let stw = 292 * u
+            let sth = 164 * u
+            group {
+                clip inset 0 box { at: os.px, sty + sth / 2; size: stw, sth; corner: 10 * u }
+                image shot_img { at: floor(os.px - stw / 2 + 0.5), floor(sty + 0.5); size: floor(stw + 0.5), floor(sth + 0.5) }
+            }
+            zone box shot_open_z { at: os.px, sty + sth / 2; size: stw, sth; corner: 10 * u; cursor: pointer; label: "Open the screenshot" }
+            on press shot_open_z { emit shot_act(0) }
+            //  Close, on the picture's corner (a dark disc, so it shows on a light picture too).
+            ellipse { at: os.px + stw / 2 - 16 * u, sty + 16 * u; radius: 11 * u; color: #000000; opacity: 45% + 20% * shot_x.hover }
+            line { from: os.px + stw / 2 - 19.5 * u, sty + 12.5 * u; to: os.px + stw / 2 - 12.5 * u, sty + 19.5 * u; width: 1.5 * u; color: #ffffff; opacity: 90% }
+            line { from: os.px + stw / 2 - 12.5 * u, sty + 12.5 * u; to: os.px + stw / 2 - 19.5 * u, sty + 19.5 * u; width: 1.5 * u; color: #ffffff; opacity: 90% }
+            zone box shot_x { at: os.px + stw / 2 - 16 * u, sty + 16 * u; size: 26 * u, 26 * u; corner: 13 * u; cursor: pointer }
+            on press shot_x { emit shot_close }
+            text shot_name { at: floor(os.px - stw / 2 + 2 * u + 0.5), floor(sty + sth + 14 * u + 0.5); anchor: left center; size: 12; weight: 600; width: stw - 4 * u; lines: 1; color: faint; family: "Space Grotesk" }
+            //  What can be done with it: Open and Delete always; the text ones when tesseract can read it.
+            repeat k in 0..4 {
+                let sn = if(shot_ocr, 4, 2)
+                let sg = 6 * u
+                let sw = (stw - (sn - 1) * sg) / sn
+                let sl = if(shot_ocr, k, if(k == 0, 0, 3))        // which action this button is
+                let sx = os.px - stw / 2 + sw / 2 + k * (sw + sg)
+                let sy = sty + sth + 38 * u
+                group {
+                    show: k < sn
+                    box { at: sx, sy; size: sw, 26 * u; corner: 13 * u; color: if(sl == 3, alert, mint); opacity: 14% + 12% * shot_b.$k.hover }
+                    text pick(sl, "Open", "Copy text", "Ask", "Delete") { at: floor(sx + 0.5), floor(sy + 0.5); anchor: center; align: center; size: 12; weight: 700; color: if(sl == 3, alert, mint); family: "Space Grotesk" }
+                    zone box shot_b.$k { at: sx, sy; size: sw, 28 * u; corner: 14 * u; cursor: pointer; active: k < sn and oks > 0.5 }
+                    on press shot_b.$k { emit shot_act(sl) }
+                }
+            }
+        }
+        }
+        //  The volume's face (see the pencil smiley): over the volume's row, with that row's own fade and the same place.
+        group {
+            shader: pixelate, 2 * u
+            opacity: okv * max(osd_vp, 1 - max(osd_bp, osd_mp))
+            show: okv > 0.01 and (osd_v or not (osd_b or osd_m))
+            let fvy = ot + 32 * u
+            let fvx = os.px - 128 * u
+            //  A little face on the slider, a smiley drawn in pencil and seen through a coarse grid of pixels. The pencil: every line is a few short
+            //  strokes that are drawn again, a hair off, about eight times a second (the way a hand-drawn film boils), the circle is drawn twice,
+            //  a little crooked, and it is drawn in as the banner arrives. The mood is the volume: the mouth grows from a small smile into a laugh
+            //  (and the cheeks get hatched) as it goes up, and with the sound off the eyes are dashes and the mouth a flat line. It blinks now and then.
+            group {
+                move: 0, -1.0 * u * (0.5 + 0.5 * sin(time * 200))
+                //  The whole face grows with the volume (small and quiet, a third bigger at full), about its middle; the eyes grow on top of that.
+                pivot: fvx, fvy
+                scale: 0.8 + 0.35 * if(audio.muted, 0, volume_level)
+                let fr = floor(time * 8)                                   // which redrawing of the lines this is
+                let lv = if(audio.muted, 0, volume_level)
+                let fdraw = clamp(fo * 1.5 - 0.1, 0, 1)                    // how much of the circle is drawn in so far
+                let fR = 15 * u
+                //  The head: two turns of an uneven circle, 18 strokes the first time round, 12 the second, a little smaller and fainter.
+                repeat k in 0..18 {
+                    let a0 = k * 20 + 6
+                    let a1 = a0 + 22
+                    let r0 = fR * (1 + 0.05 * sin(fr * 53 + k * 97))
+                    let r1 = fR * (1 + 0.05 * sin(fr * 53 + (k + 1) * 97))
+                    line { from: fvx + r0 * cos(a0), fvy + r0 * sin(a0); to: fvx + r1 * cos(a1), fvy + r1 * sin(a1); width: 1.7 * u; color: if(audio.muted, faint, ink); opacity: if(k < fdraw * 18, 88%, 0%) }
+                }
+                repeat k in 0..12 {
+                    let a0 = k * 30 + 112
+                    let a1 = a0 + 33
+                    let r0 = fR * 0.93 * (1 + 0.06 * sin(fr * 41 + k * 131 + 40))
+                    let r1 = fR * 0.93 * (1 + 0.06 * sin(fr * 41 + (k + 1) * 131 + 40))
+                    line { from: fvx + 1.2 * u + r0 * cos(a0), fvy - 0.8 * u + r0 * sin(a0); to: fvx + 1.2 * u + r1 * cos(a1), fvy - 0.8 * u + r1 * sin(a1); width: 1.3 * u; color: if(audio.muted, faint, ink); opacity: if(k < fdraw * 12, 34%, 0%) }
+                }
+                //  The eyes: two dots that tremble with the pencil, a little bigger when it is loud; dashes when it is muted; shut for one redrawing in forty.
+                let blink = if(mod(fr, 40) == 0, 1, 0)
+                let er = (1.4 + 1.8 * lv) * u
+                ellipse { at: fvx - 5.5 * u + 0.5 * u * sin(fr * 71), fvy - 4.5 * u + 0.5 * u * sin(fr * 83 + 20); radius: er; scale: 1, 1 - 0.85 * blink; color: if(audio.muted, faint, ink); opacity: fdraw; show: not audio.muted }
+                ellipse { at: fvx + 5.5 * u + 0.5 * u * sin(fr * 67 + 50), fvy - 4.5 * u + 0.5 * u * sin(fr * 79 + 90); radius: er; scale: 1, 1 - 0.85 * blink; color: if(audio.muted, faint, ink); opacity: fdraw; show: not audio.muted }
+                line { from: fvx - 8 * u, fvy - 4.5 * u + 0.4 * u * sin(fr * 71); to: fvx - 3.5 * u, fvy - 4.5 * u + 0.4 * u * sin(fr * 83); width: 1.6 * u; color: if(audio.muted, faint, ink); opacity: fdraw; show: audio.muted }
+                line { from: fvx + 3.5 * u, fvy - 4.5 * u + 0.4 * u * sin(fr * 67); to: fvx + 8 * u, fvy - 4.5 * u + 0.4 * u * sin(fr * 79); width: 1.6 * u; color: if(audio.muted, faint, ink); opacity: fdraw; show: audio.muted }
+                //  The mouth, in a coloured pencil: a smile that deepens with the level, and from about half way an open laugh that is filled in.
+                let md = (6 + 9 * lv) * u                                  // where the bend of the smile is pulled to
+                let mw = (6 + 1.5 * lv) * u
+                let mj = 0.5 * u * sin(fr * 59 + 10)
+                path { at: fvx, fvy; stroke: 1.8 * u; color: if(audio.muted, faint, mint); opacity: fdraw; show: not audio.muted; move -mw, 3 * u + mj; curve mw, 3 * u - mj via 0, md }
+                path { at: fvx, fvy; color: if(audio.muted, faint, mint); opacity: 45% * clamp((lv - 0.5) * 4, 0, 1) * fdraw; show: not audio.muted and lv > 0.5; move -mw, 3 * u + mj; curve mw, 3 * u - mj via 0, md; close }
+                line { from: fvx - 5 * u, fvy + 4.5 * u + 0.5 * u * sin(fr * 59); to: fvx + 5 * u, fvy + 4.5 * u + 0.5 * u * sin(fr * 61 + 30); width: 1.8 * u; color: if(audio.muted, faint, ink); opacity: fdraw; show: audio.muted }
+                //  Cheeks, shaded with three little strokes each, more of them the louder it is.
+                repeat c in 0..3 {
+                    let ho = clamp(lv * 3.2 - c * 0.7, 0, 1) * fdraw * 65%
+                    line { from: fvx - 11.5 * u + c * 2 * u, fvy + 0.5 * u + 0.4 * u * sin(fr * 47 + c * 60); to: fvx - 9 * u + c * 2 * u, fvy + 3.5 * u + 0.4 * u * sin(fr * 53 + c * 70); width: 1.1 * u; color: if(audio.muted, faint, mint); opacity: ho }
+                    line { from: fvx + 9 * u + c * 2 * u, fvy + 0.5 * u + 0.4 * u * sin(fr * 57 + c * 80); to: fvx + 11.5 * u + c * 2 * u, fvy + 3.5 * u + 0.4 * u * sin(fr * 43 + c * 90); width: 1.1 * u; color: if(audio.muted, faint, mint); opacity: ho }
+                }
+            }
+        }
+        }
+    }
+}

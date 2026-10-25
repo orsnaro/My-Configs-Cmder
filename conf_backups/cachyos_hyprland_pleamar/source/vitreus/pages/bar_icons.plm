@@ -1,0 +1,174 @@
+part BarIcons {
+    //  The bar's icons are drawn here, on top of the bar and outside its wave-shader group, with a soft dark
+    //  halo (a group `glow` in the palette's dark colour) so they hold up on a light wallpaper, as the text
+    //  does. An effect cannot sit inside another effect's group, hence outside. The click areas and rules
+    //  stay in the bar group above.
+    component TrialWorkspace(w: record, pick: event) {
+        size: ws.step, bar.h
+        prop tile_active = 0 ~pop                   // the switch rides the same spring a hovered tile does
+        follow tile_active = if(ws.active == w.id, 1, 0)
+        //  Workspaces 1-7 are the primary row: their fixed glyph stays visible while empty, faded.
+        let primary = w.id <= 7
+        prop tile_hover = 0 ~pop
+        follow tile_hover = touch.hover
+        //  The larger box only needs a small swell: the row's 25u step is unchanged.
+        let tile_scale = 1 + max(0.03 * tile_active, 0.065 * tile_hover)
+        let dot_radius = 3.5 * (1 + max(0.40 * tile_active, 0.35 * tile_hover))
+        let tile_along = ws.o + ws.tile / 2 + w.slot * ws.step
+        let tile_x = mix(tile_along, ws.icon_cross, lm)
+        let tile_y = mix(ws.icon_cross, tile_along, lm)
+        //  The middle bar keeps one glyph per workspace; the side strips still use the dynamic app glyph.
+        body {
+            color: mix(ink, mint, tile_active)
+            opacity: min(100%, if(w.occupied, 85%, 30%) + 70% * tile_active + 15% * touch.hover) * bs.ws
+            rim: 40%
+            shadow: 0, 0, 7 * u, 30% * tile_active, mint
+            box { at: tile_x, tile_y; size: ws.box * tile_scale, ws.box * tile_scale; corner: 0.3 * ws.box }
+            show: primary or w.occupied
+        }
+        ellipse { at: tile_x, tile_y; radius: dot_radius; color: mix(ink, mint, tile_active); opacity: (0.65 + 0.35 * tile_active) * bs.ws; show: not primary and not w.occupied }
+        //  On Retro/UwU the old `deep` glyph vanished into the dark ink box; use the
+        //  accent foreground, except UwU's active pink tile where dark ink is readable.
+        //  Primary workspaces keep the glyph while empty, faded until something lands there.
+        text w.static_icon { at: tile_x, tile_y; anchor: center; size: 20; weight: 400; color: if(uwu and tile_active > 0.5, deep, onmint); family: "Material Symbols Outlined"; opacity: bs.ws * min(100%, if(w.occupied, 100%, 38%) + 62% * tile_active + 15% * touch.hover); show: primary or w.occupied }
+        zone box touch { at: mix(tile_along, lf.x, lm), mix(bar.y, tile_along, lm); size: mix(ws.step, 40 * u, lm), mix(bar.h, ws.step, lm); cursor: pointer; active: bs.ws > 0.5 }
+        on press touch { emit pick(w.id) }
+    }
+    group {
+        glow: 2.4 * u, 110%, deep
+        //  Running windows, between the updates pill and the tray: the one with the keyboard has a mint rule.
+        row win_bar_row {
+            at: floor(tb.win - tb.win_w / 2 + 0.5), floor(bar.y - 9 * u + 0.5)
+            gap: floor(tb.win_step - 18 * u + 0.5)
+            show: lm < 0.5 and wn > 0
+            for t in tasks { WinIcon(t, focus: task_focus, kill: task_close) { show: t.index < 12 } }
+        }
+        row tray_bar_row {
+            at: floor(tr.x - ((if(bs.tray > 0.02, bartrays.count, 0) + if(rec_on, 1, 0) + if(priv_mic, 1, 0) + if(priv_cam, 1, 0) + if(priv_scr and not rec_on, 1, 0)) * 24 - 6) * u / 2 + 0.5), floor(bar.y - 9 * u + 0.5)
+            gap: floor(6 * u + 0.5)
+            show: lm < 0.5
+            BarPriv(0) { show: priv_mic }
+            BarPriv(1) { show: priv_cam }
+            BarPriv(2) { show: priv_scr and not rec_on }
+            BarRec(rec_stop) { show: rec_on }
+            for t in bartrays { BarTray(t, click: bar_tray_click, menu: bar_tray_menu) { show: bs.tray > 0.02 } }
+        }
+        column tray_bar_col {
+            at: floor(lf.x - 9 * u + 0.5), floor(lv.tray + 0.5)
+            gap: floor(6 * u + 0.5)
+            show: lm >= 0.5
+            BarPriv(0) { show: priv_mic }
+            BarPriv(1) { show: priv_cam }
+            BarPriv(2) { show: priv_scr and not rec_on }
+            BarRec(rec_stop) { show: rec_on }
+            for t in bartrays { BarTray(t, click: bar_tray_click, menu: bar_tray_menu) { show: bs.tray > 0.02 } }
+        }
+        //  Each workspace is a button of its own: one static glyph, centred in its box.
+        for w in trial_workspaces { TrialWorkspace(w, pick: go) }
+        //  The overview button: two windows drawn as outlines (the marks are all solid), wide with small corners, one behind the other; the front one has
+        //  its title bar. Brightening under the pointer.
+        let ovi.w = 1.3 * ws.U
+        path { at: ob.x, ob.y; stroke: ovi.w; color: ink; opacity: (45% + 35% * ov_btn.hover) * bs.ws * lm
+            move -0.25 * ob.d, 0.15 * ob.d; line -0.41 * ob.d, 0.15 * ob.d; line -0.41 * ob.d, -0.35 * ob.d; line 0.25 * ob.d, -0.35 * ob.d; line 0.25 * ob.d, -0.15 * ob.d }
+        box { at: ob.x + 0.08 * ob.d, ob.y + 0.1 * ob.d; size: 0.66 * ob.d, 0.5 * ob.d; corner: 0.08 * ob.d; stroke: ovi.w; color: ink; opacity: (70% + 30% * ov_btn.hover) * bs.ws * lm }
+        path { at: ob.x, ob.y; stroke: ovi.w; color: ink; opacity: (70% + 30% * ov_btn.hover) * bs.ws * lm
+            move -0.25 * ob.d, -0.01 * ob.d; line 0.41 * ob.d, -0.01 * ob.d }
+        //  The player's buttons.
+        group {
+            opacity: mshow * bs.media * bs.title
+            group {
+                pivot: mcx - 18.5 * u, mcy
+                scale: 1 + 0.14 * bp.prev.hover
+                box { at: mcx - 20.5 * u, mcy; size: 1.4 * u, 7 * u; corner: 0.7 * u; color: ink; opacity: 65% + 35% * bp.prev.hover }
+                path { at: mcx - 17 * u, mcy; color: ink; opacity: 65% + 35% * bp.prev.hover; move 3 * u, -3.5 * u; line -2.5 * u, 0; line 3 * u, 3.5 * u; close }
+            }
+            //  Pause while it plays, play while it is paused.
+            group {
+                pivot: mcx, mcy
+                scale: 1 + 0.14 * bp.play.hover
+                box { at: mcx - 3 * u, mcy; size: 2.6 * u, 9 * u; corner: 1 * u; color: ink; opacity: 85% + 15% * bp.play.hover; show: media.playing }
+                box { at: mcx + 3 * u, mcy; size: 2.6 * u, 9 * u; corner: 1 * u; color: ink; opacity: 85% + 15% * bp.play.hover; show: media.playing }
+                path { at: mcx, mcy; color: ink; opacity: 85% + 15% * bp.play.hover; show: not media.playing; move -3 * u, -4.5 * u; line 7 * u, 0; line -3 * u, 4.5 * u; close }
+            }
+            group {
+                pivot: mcx + 18.5 * u, mcy
+                scale: 1 + 0.14 * bp.next.hover
+                path { at: mcx + 17 * u, mcy; color: ink; opacity: 65% + 35% * bp.next.hover; move -3 * u, -3.5 * u; line 2.5 * u, 0; line -3 * u, 3.5 * u; close }
+                box { at: mcx + 20.5 * u, mcy; size: 1.4 * u, 7 * u; corner: 0.7 * u; color: ink; opacity: 65% + 35% * bp.next.hover }
+            }
+        }
+        //  Down the left the player's buttons are the top bar's own, turned with the title (a quarter anticlockwise, so they read from the foot up:
+        //  previous nearest the text, next at the far end), at the top end of it.
+        group {
+            opacity: mshow * bs.media0 * lm
+            pivot: lf.x, lv.mid
+            rotate: -90deg
+            group {
+                pivot: lf.x - 18.5 * cu, lv.mid
+                scale: 1 + 0.14 * vm_prev.hover
+                box { at: lf.x - 20.5 * cu, lv.mid; size: 1.4 * cu, 7 * cu; corner: 0.7 * cu; color: ink; opacity: 65% + 35% * vm_prev.hover }
+                path { at: lf.x - 17 * cu, lv.mid; color: ink; opacity: 65% + 35% * vm_prev.hover; move 3 * cu, -3.5 * cu; line -2.5 * cu, 0; line 3 * cu, 3.5 * cu; close }
+            }
+            group {
+                pivot: lf.x, lv.mid
+                scale: 1 + 0.14 * vm_play.hover
+                box { at: lf.x - 3 * cu, lv.mid; size: 2.6 * cu, 9 * cu; corner: 1 * cu; color: ink; opacity: 85% + 15% * vm_play.hover; show: media.playing }
+                box { at: lf.x + 3 * cu, lv.mid; size: 2.6 * cu, 9 * cu; corner: 1 * cu; color: ink; opacity: 85% + 15% * vm_play.hover; show: media.playing }
+                path { at: lf.x, lv.mid; color: ink; opacity: 85% + 15% * vm_play.hover; show: not media.playing; move -3 * cu, -4.5 * cu; line 7 * cu, 0; line -3 * cu, 4.5 * cu; close }
+            }
+            group {
+                pivot: lf.x + 18.5 * cu, lv.mid
+                scale: 1 + 0.14 * vm_next.hover
+                path { at: lf.x + 17 * cu, lv.mid; color: ink; opacity: 65% + 35% * vm_next.hover; move -3 * cu, -3.5 * cu; line 2.5 * cu, 0; line -3 * cu, 3.5 * cu; close }
+                box { at: lf.x + 20.5 * cu, lv.mid; size: 1.4 * cu, 7 * cu; corner: 0.7 * cu; color: ink; opacity: 65% + 35% * vm_next.hover }
+            }
+        }
+        //  The settings button: a gear, between the player's buttons and the controls button.
+        group {
+            show: lm >= 0.5
+            opacity: 65% + 35% * max(set_hit.hover, clamp(ds, 0, 1))
+            move: (lf.x - set.x) * lm, (lv.set - bar.y) * lm
+            group {
+                pivot: set.x, bar.y
+                scale: 1 + 0.14 * set_hit.hover
+                ellipse { at: set.x, bar.y; radius: 3.6 * u; stroke: 1.7 * u; color: mix(ink, mint, clamp(ds, 0, 1)) }
+                ellipse { at: set.x, bar.y; radius: 1.2 * u; color: mix(ink, mint, clamp(ds, 0, 1)) }
+                repeat i in 0..8 {
+                    group {
+                        pivot: set.x, bar.y
+                        rotate: i * 45deg
+                        box { at: set.x, bar.y - 6 * u; size: 2 * u, 2.6 * u; corner: 0.7 * u; color: mix(ink, mint, clamp(ds, 0, 1)) }
+                    }
+                }
+            }
+        }
+        //  Down the left the launcher's button sits between the settings and controls buttons.
+        //  The horizontal bar shows no button; SUPER + Space still opens the launcher.
+        group {
+            show: lm >= 0.5
+            opacity: (65% + 35% * max(sr_hit.hover, clamp(dl, 0, 1))) * bs.sr
+            move: (lf.x - sr.x) * lm, (lv.sr - bar.y) * lm
+            group {
+                pivot: sr.x + 2 * u, bar.y + 2 * u
+                scale: 1 + 0.14 * sr_hit.hover
+                ellipse { at: sr.x - 1.2 * u, bar.y - 1.2 * u; radius: 4 * u; stroke: 1.7 * u; color: mix(ink, mint, clamp(dl, 0, 1)) }
+                line { from: sr.x + 1.8 * u, bar.y + 1.8 * u; to: sr.x + 5 * u, bar.y + 5 * u; width: 1.9 * u; color: mix(ink, mint, clamp(dl, 0, 1)) }
+            }
+        }
+        //  The controls button, between the settings button and the clock: two sliders.
+        text "tune" { at: ctl.x, bar.y; anchor: center; size: 18; weight: 400; color: faint; family: "Material Symbols Outlined"; opacity: bs.ctl; show: lm < 0.5 }
+        group {
+            show: lm >= 0.5
+            opacity: (65% + 35% * max(ctl_hit.hover, clamp(dk, 0, 1))) * bs.ctl
+            move: (lf.x - ctl.x) * lm, (lv.ctl - bar.y) * lm
+            group {
+                pivot: ctl.x, bar.y
+                scale: 1 + 0.14 * ctl_hit.hover
+                box { at: ctl.x, bar.y - 3.5 * u; size: 13 * u, 1.6 * u; corner: 0.8 * u; color: mix(ink, mint, clamp(dk, 0, 1)) }
+                box { at: ctl.x, bar.y + 3.5 * u; size: 13 * u, 1.6 * u; corner: 0.8 * u; color: mix(ink, mint, clamp(dk, 0, 1)) }
+                ellipse { at: ctl.x + 2.5 * u, bar.y - 3.5 * u; radius: 2.6 * u; color: mix(ink, mint, clamp(dk, 0, 1)) }
+                ellipse { at: ctl.x - 2.5 * u, bar.y + 3.5 * u; radius: 2.6 * u; color: mix(ink, mint, clamp(dk, 0, 1)) }
+            }
+        }
+    }
+}

@@ -1,0 +1,43 @@
+#!/bin/sh
+# Lock with the running Vitreus lock scene; Hyprlock stays the fallback for a
+# session where that scene is not running. This is the one lock path used by
+# Super+L, the Power menu, and the trial policy.
+set -u
+
+PATH="$HOME/.local/bin:$PATH"
+export PATH
+
+runtime=${XDG_RUNTIME_DIR:-/run/user/$(id -u)}
+sock=$runtime/pleamar/lockscreen.sock
+
+native_up() {
+    [ -S "$sock" ] || return 1
+    pleamar --say lockscreen "get locked" >/dev/null 2>&1
+}
+
+if [ "${1:-}" = "--status" ]; then
+    if native_up; then printf 'native\n'; else printf 'hyprlock\n'; fi
+    exit 0
+fi
+
+if [ "${1:-}" = "--dry-run" ]; then
+    if native_up; then printf 'native\n'; else printf 'hyprlock\n'; fi
+    exit 0
+fi
+
+if native_up; then
+    if pleamar --say lockscreen "fact locked true" >/dev/null 2>&1; then
+        # The scene may accept the fact but fail to acquire the compositor's
+        # lock in time. Confirm, then fall back rather than leaving a dead key.
+        i=0
+        while [ "$i" -lt 10 ]; do
+            if [ "$(pleamar --say lockscreen "get locked" 2>/dev/null)" = "true" ]; then
+                exit 0
+            fi
+            i=$((i + 1))
+            sleep 0.1
+        done
+    fi
+fi
+
+exec hyprlock

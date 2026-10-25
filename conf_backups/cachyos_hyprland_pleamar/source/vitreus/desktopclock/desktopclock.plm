@@ -1,0 +1,225 @@
+language 0.1
+import "../palette-live.plm"
+import "clockface.plm"
+import "clockface_styled.plm"
+
+//  The desktop clock: the time in digits drawn as glass, on the bottom layer (above the wallpaper, under every window).
+//  Each digit is a single stroke (clockface.plm), and all of them are one body of glass: the light runs round their edges and the compositor
+//  blurs what is behind them. Its tint is the shell's (`tint` of palette.plm, which Iris keeps), the same as the bar's glass.
+//
+//  Turn it on or off with   pleamar --say desktopclock "fact shown true"   (or false); Settings > Clock has the switch and the rest.
+//  Its settings are kept in desktopclock.json, in ~/.local/share/pleamar/desktopclock (see desktopclock.luau).
+
+scene DesktopClock {
+    surface { size: full, full; anchor: top_left; margin: 0; level: bottom; screens: each; reserve: -1 }
+
+    permissions { services: "clock", "files", "files.write"; run: "pleamar", "hyprctl" }
+
+    //  The shell's colours as facts (palette-live.plm reads them): Vitreus sets them when the palette changes (`push_pal` in vitreus.luau), so the theme
+    //  changes the colour at once, not after a reload of this scene as the imported palette.plm did.
+    fact pal_ink_r = 0.9608   // #f5f7f5
+    fact pal_ink_g = 0.9686
+    fact pal_ink_b = 0.9608
+    fact pal_faint_r = 0.7608   // #c2c7cc
+    fact pal_faint_g = 0.7804
+    fact pal_faint_b = 0.8000
+    fact pal_mint_r = 0.6196   // #9ed6bd
+    fact pal_mint_g = 0.8392
+    fact pal_mint_b = 0.7412
+    fact pal_mintlo_r = 0.4235   // #6cbc9c
+    fact pal_mintlo_g = 0.7373
+    fact pal_mintlo_b = 0.6118
+    fact pal_minthi_r = 0.8627   // #dcf8ec
+    fact pal_minthi_g = 0.9725
+    fact pal_minthi_b = 0.9255
+    fact pal_onmint_r = 0.0627   // #10161a
+    fact pal_onmint_g = 0.0863
+    fact pal_onmint_b = 0.1020
+    fact pal_tint_r = 0.1059   // #1b2127
+    fact pal_tint_g = 0.1294
+    fact pal_tint_b = 0.1529
+    fact pal_panel_r = 0.0863   // #161a1f
+    fact pal_panel_g = 0.1020
+    fact pal_panel_b = 0.1216
+    fact pal_deep_r = 0.0431   // #0b0e11
+    fact pal_deep_g = 0.0549
+    fact pal_deep_b = 0.0667
+    fact pal_off_r = 0.2275   // #3a4048
+    fact pal_off_g = 0.2510
+    fact pal_off_b = 0.2824
+    fact pal_alert_r = 0.9373   // #ef4444
+    fact pal_alert_g = 0.2667
+    fact pal_alert_b = 0.2667
+
+    service clock as now { hour: number }
+
+    fact where: top_left | top | top_right | left | center | right | bottom_left | bottom | bottom_right = center
+    fact gx = -1           // the cell of its top left corner, 0 to 15 (-1: not chosen yet, `where` says)
+    fact gy = -1           // and the row, 0 to 8
+    fact edit = false      // Edit, from the desktop's right-click menu: the widget shows the cells it takes and can be dragged to others (desktopmenu/ says so)
+    fact g0x = 0           // while it is dragged: the cell it was at when it was pressed
+    fact g0y = 0
+    fact dragging = false
+    fact mon = 0           // which monitor shows the card (the scene has a copy on each, only this one draws it and takes the pointer); the logic keeps it
+    text mon_name = ""     // the name of the monitor that shows the card (Settings > Widgets sets it; the logic keeps it)
+    //  Where the monitors lie in the desktop (logical pixels) and how big they are, up to four (the logic asks `hyprctl`; a monitor that is not there is 0 x 0).
+    fact m0x = 0
+    fact m0y = 0
+    fact m0w = 0
+    fact m0h = 0
+    fact m1x = 0
+    fact m1y = 0
+    fact m1w = 0
+    fact m1h = 0
+    fact m2x = 0
+    fact m2y = 0
+    fact m2w = 0
+    fact m2h = 0
+    fact m3x = 0
+    fact m3y = 0
+    fact m3w = 0
+    fact m3h = 0
+    fact pcx = 0           // while it is dragged: the face's centre when it was pressed, in the desktop's own coordinates
+    fact pcy = 0
+    fact dcx = 0           // and where that centre is now
+    fact dcy = 0
+    fact zpx = 0           // while it is dragged: where the middle of the face was when it was pressed (the zone stays there)
+    fact zpy = 0
+    fact shown = false     // the logic sets it from desktopclock.json (so that `sh` follows it from nothing)
+    fact lay = 0           // 0 pipe, 1 rule, 2 tower, 3 digital, 4 slash, 5 hero (see clockface.plm)
+    fact h12 = true        // a 12 hour clock (the logic turns it into the digits); the Settings page reads it
+    fact d0 = -1           // the digits shown: -1 for none (the hour's tens, with a 12 hour clock, when the hour is below 10)
+    fact d1 = 0
+    fact d2 = 0
+    fact d3 = 0
+    fact px = 220          // the digits' height in pixels
+    fact wti = 1           // the strokes: 0 thin, 1 regular, 2 bold
+    fact cli = 1           // the glass: 0 clear, 1 soft, 2 full
+
+    //  The style of the hours, the minutes and the divider (see clockface_styled.plm): a weight and a size (multipliers; 1 is the normal) and a tint (0 the glass, 1 mint, 2 light, 3 rose, 4 grey)
+    fact ghw = 1
+    fact ghz = 1
+    fact ghc = 0
+    fact gmw = 1
+    fact gmz = 1
+    fact gmc = 0
+    fact gsw = 1
+    fact gsz = 1
+    fact gsc = 0
+    fact greset = 0          // set to 1 by Settings: every glyph back to the normal style (the logic puts it back to 0)
+    text gpack = ""          // all of them in one line, for the Settings page to read at once: "w,z,c;" for the hours, the minutes and the divider
+
+    prop sh = 0 ~calm
+    follow sh = if(shown, 1, 0)
+    fact obs = false        // Vitreus has its glass off: the digits are flat obsidian (Vitreus says so with `fact obs true`)
+    prop ob = 0 ~calm
+    follow ob = if(obs or look == 1 or look == 2, 1, 0)
+    fact look = 0           // the shell's theme (Vitreus says so): 0 Glass, 1 Retro, 2 UwU, 3 Cyber; the last three draw the digits as plastic, like the bar (outline, hard shadow)
+    prop pl = 0 ~calm
+    follow pl = if(look == 1 or look == 2, 1, 0)
+    prop cy = 0 ~calm
+    follow cy = if(look == 3, 1, 0)         // Cyber: the digits are filled with the neon (the glass's own tint is near-black there)
+    prop uk = 0 ~calm
+    follow uk = if(look == 2, 1, 0)
+
+    let k = px / 88
+    let wt = if(wti == 0, 0.62, if(wti == 2, 1.4, 1))
+    let clr = if(cli == 0, 55%, if(cli == 1, 80%, 100%))
+    //  Where the middle of the face is, in the surface: the middle of it, or against the edge or corner it sits in (half the face, and its stroke).
+    //  What the style of the parts adds to the face (the same sums as in clockface_styled.plm and in the Settings page): how far each part grows past its normal size, so that
+    //  the cells the clock takes (and the outline of them in Edit mode) hold all of it and not only the normal face.
+    let pm1 = if(lay == 2, 0.6, 1)
+    let pm2 = if(lay == 2, 0.6, if(lay == 5, 0.5, 1))
+    let ugeh = max(0, 1.4 * pm1 * (ghz * (23 + 6.5 * wt * ghw) - (23 + 6.5 * wt)))
+    let ugev = max(0, 1.4 * pm1 * (ghz * (44 + 6.5 * wt * ghw) - (44 + 6.5 * wt)))
+    let umeh = max(0, 1.4 * pm2 * (gmz * (23 + 6.5 * wt * gmw) - (23 + 6.5 * wt)))
+    let umev = max(0, 1.4 * pm2 * (gmz * (44 + 6.5 * wt * gmw) - (44 + 6.5 * wt)))
+    let udv = max(0, 4.2 * wt * (gsw * gsz - 1))
+    let udc = max(0, 9.8 * wt * (gsw * gsz - 1))
+    let hw = (if(lay == 0, 149, if(lay == 1 or lay == 5, 61, if(lay == 2, 31, if(lay == 3, 152, 130)))) + 6.5 * wt + 2 * max(ugeh, umeh) + 1.5 * max(udv, udc)) * k
+    let hh = (if(lay == 0, 59, if(lay == 1, 111, if(lay == 2, 131, if(lay == 3, 44, if(lay == 4, 112, 84))))) + 6.5 * wt + 2.2 * max(ugev, umev) + 1.5 * udv) * k
+    let isl = if(where == top_left or where == left or where == bottom_left, 1, 0)
+    let isr = if(where == top_right or where == right or where == bottom_right, 1, 0)
+    let ist = if(where == top_left or where == top or where == top_right, 1, 0)
+    let isb = if(where == bottom_left or where == bottom or where == bottom_right, 1, 0)
+    //  The desktop is a grid of 16 columns and 9 rows, inside a 40 px margin; the settings put a widget on it by the cell of its top left corner (`gx`, `gy`) and it
+    //  takes as many cells as it needs (`cfw`, `cfh`, which Settings > Widgets asks for). Against an edge of the grid it sits against that edge, between them it is centred in its cells.
+    //  `gx` and `gy` below 0 are an older settings file: it is put where `where` says (one of the nine places, which is what the cells are made of).
+    //  The room the bar's frame takes round the screen (Vitreus tells it: `room_*`, in pixels, 0 when the bar is not a frame), which the grid stays out of, so a widget cannot be put under the bar.
+    fact room_t = 0
+    fact room_r = 0
+    fact room_b = 0
+    fact room_l = 0
+    let gnx = 28           // the grid: 28 columns and 16 rows (it used to be 16 x 9), from the bar's frame (the `room_*`) plus a 16 px margin
+    let gny = 16
+    let gm = 16
+    let gl = gm + room_l
+    let gt = gm + room_t
+    let gr = gm + room_r
+    let gb = gm + room_b
+    let mi = clamp(screen.index, 0, 3)
+    //  The scene's copies are not in the order `hyprctl` lists the monitors: the logic learns it and numbers the `m0x`.. facts and `mon` by the copies.
+    let here = if(mi == mon, 1, 0)
+    let scw = pick(mi, m0w, m1w, m2w, m3w)        // what this monitor measures (`screen.width` is 0 in a copy made for each monitor)
+    let sch = pick(mi, m0h, m1h, m2h, m3h)
+    let mox = pick(mon, m0x, m1x, m2x, m3x)       // where the monitor that shows it has its top left in the desktop
+    let moy = pick(mon, m0y, m1y, m2y, m3y)
+    let gw = (scw - gl - gr) / gnx
+    let gh = (sch - gt - gb) / gny
+    let fw = clamp(ceil(2 * hw / gw), 1, gnx)
+    let fh = clamp(ceil(2 * hh / gh), 1, gny)
+    let ex0 = clamp(if(gx < 0, if(isl > 0.5, 0, if(isr > 0.5, gnx - fw, (gnx - fw) / 2)), gx), 0, gnx - fw)
+    let ey0 = clamp(if(gy < 0, if(ist > 0.5, 0, if(isb > 0.5, gny - fh, (gny - fh) / 2)), gy), 0, gny - fh)
+    //  In Edit mode what is drawn follows the cell with a spring (`erx`, `ery`); otherwise it is the cell.
+    prop erx = 0 ~quick
+    prop ery = 0 ~quick
+    follow erx = if(gx < 0, ex0, gx)      // (one for all the copies, so it must not depend on this monitor's size: `ex` clamps it)
+    follow ery = if(gy < 0, ey0, gy)
+    let ex = clamp(mix(ex0, erx, edp), 0, gnx - fw)
+    let ey = clamp(mix(ey0, ery, edp), 0, gny - fh)
+    //  Against the grid's edge the face is against the edge, between them it is in the middle of its cells, and in between it moves from one to the other (so that it never jumps).
+    let cxm = gl + (ex + fw / 2) * gw
+    let cym = gt + (ey + fh / 2) * gh
+    let fx = cxm + (gl + hw + 13 - cxm) * clamp(1 - ex, 0, 1) + (scw - gr - hw - 13 - cxm) * clamp(ex + fw - (gnx - 1), 0, 1)
+    let fy = cym + (gt + hh + 13 - cym) * clamp(1 - ey, 0, 1) + (sch - gb - hh - 13 - cym) * clamp(ey + fh - (gny - 1), 0, 1)
+    //  Edit mode: the cells it takes are outlined, and a press on them takes the widget; it moves a whole cell at a time under the pointer, and keeps its place (the settings
+    //  file is written for each cell it lands on). The zone stays where the press was while it is dragged, as a zone that moves itself would lose the drag.
+    prop edp = 0 ~calm
+    follow edp = if(edit, 1, 0)
+    prop dgp = 0 ~quick
+    follow dgp = if(dragging, 1, 0)
+    //  The outline hugs the face (a little margin round it) instead of the cells it takes, and the face is in the middle of it.
+    let pad = 10
+    let zx = if(dragging, zpx, fx) - hw - pad
+    let zy = if(dragging, zpy, fy) - hh - pad
+    //  Dragged over to another monitor it lands there: the monitor under the card's centre is the one that shows it, and the cell is worked out against that one's grid.
+    let in0 = if(dcx >= m0x and dcx < m0x + m0w and dcy >= m0y and dcy < m0y + m0h, 1, 0)
+    let in1 = if(dcx >= m1x and dcx < m1x + m1w and dcy >= m1y and dcy < m1y + m1h, 1, 0)
+    let in2 = if(dcx >= m2x and dcx < m2x + m2w and dcy >= m2y and dcy < m2y + m2h, 1, 0)
+    let in3 = if(dcx >= m3x and dcx < m3x + m3w and dcy >= m3y and dcy < m3y + m3h, 1, 0)
+    let tmon = if(in0 > 0.5, 0, if(in1 > 0.5, 1, if(in2 > 0.5, 2, if(in3 > 0.5, 3, mon))))
+    let tox = pick(tmon, m0x, m1x, m2x, m3x)
+    let toy = pick(tmon, m0y, m1y, m2y, m3y)
+    let tgw = (max(pick(tmon, m0w, m1w, m2w, m3w), 800) - gl - gr) / gnx
+    let tgh = (max(pick(tmon, m0h, m1h, m2h, m3h), 600) - gt - gb) / gny
+    let tfw = clamp(ceil(2 * hw / tgw), 1, gnx)
+    let tfh = clamp(ceil(2 * hh / tgh), 1, gny)
+    zone box edz { from: zx, zy; size: 2 * (hw + pad), 2 * (hh + pad); corner: 16; cursor: pointer; active: edit and (here > 0.5 or dragging); label: "Move clock" }
+    on press edz { pcx = mox + gl + (ex0 + fw / 2) * gw; pcy = moy + gt + (ey0 + fh / 2) * gh; dcx = pcx; dcy = pcy; zpx = fx; zpy = fy; dragging = true }
+    on drag edz { dcx = pcx + drag.dx; dcy = pcy + drag.dy }
+    on change dcx { mon = tmon; gx = clamp(floor((dcx - tox - gl) / tgw - tfw / 2 + 0.5), 0, gnx - tfw); gy = clamp(floor((dcy - toy - gt) / tgh - tfh / 2 + 0.5), 0, gny - tfh) }
+    on change dcy { mon = tmon; gx = clamp(floor((dcx - tox - gl) / tgw - tfw / 2 + 0.5), 0, gnx - tfw); gy = clamp(floor((dcy - toy - gt) / tgh - tfh / 2 + 0.5), 0, gny - tfh) }
+    on release edz { dragging = false; mon = tmon; gx = clamp(floor((dcx - tox - gl) / tgw - tfw / 2 + 0.5), 0, gnx - tfw); gy = clamp(floor((dcy - toy - gt) / tgh - tfh / 2 + 0.5), 0, gny - tfh) }   // (the rules above read the frame before: once more, now that it is still)
+    group {
+        show: edp > 0.01 and here > 0.5
+        opacity: edp
+        box { from: fx - hw - pad, fy - hh - pad; size: 2 * (hw + pad), 2 * (hh + pad); corner: 16; color: mint; opacity: 7% + 9% * dgp }
+        box { from: fx - hw - pad, fy - hh - pad; size: 2 * (hw + pad), 2 * (hh + pad); corner: 16; stroke: 1.6; color: mint; opacity: 55% + 45% * dgp }
+        text "Clock" { at: fx - hw - pad + 14, fy - hh - pad + 16; anchor: left center; size: 12; weight: 700; color: mint; family: "Space Grotesk"; shadow: 0, 1, 5, 70% }
+    }
+
+    group {
+        show: here > 0.5
+        ClockFaceStyled(k, lay, d0, d1, d2, d3, fx, fy, mix(tint, mint, cy), 1, 0.4, sh * clr, wt, mint, ink, alert, faint, ob, pl, uk, deep)
+    }
+}

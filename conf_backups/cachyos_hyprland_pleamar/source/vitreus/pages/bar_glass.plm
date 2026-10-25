@@ -1,0 +1,1018 @@
+part BarGlass {
+    //  The whole bar, glass and all, is one group so the wave can bend it as one thing.
+    group {
+        //  Only while it does something: the Retro's pixelation, or a wave that can bend (not on the left, not with the panel half down, and while a beat or a ring is moving).
+        //  The rest of the time the group goes without its shader and its full-surface pass (pleamar 0.3.12 and later).
+        shader: wave, pv, mix(clamp(ring, 0, 1), 1, lm), mix((mc - (cx - bar.w / 2)) / bar.w, 0.5, clamp(ring_mid, 0, 1)), lf.w, 2.6 * u * (1 - min(1, drop * 2)) * (1 - lm), bar.w, pxa, lf.t while pxa > 1.5 or (lm < 0.999 and drop < 0.5 and (pv > 0.001 or ring < 0.999))
+        //  With the Retro on, a barely visible box over the whole surface makes the group's box the surface, so the pixelation (wave.wgsl) knows where the opening is.
+        box { from: 0, 0; size: screen.width, screen.height; color: deep; opacity: 1.2% * cas_k }
+        // ── the liquid ───────────────────────────────────────────────
+        body {
+            color: mix(tint, #000000, cy_dark * cy_k)
+            glass: 100%
+            opacity: glass_op * (1 - obs)
+            lens: glass_bend
+            frost: glass_clear
+            refraction: glass_refr
+            dispersion: glass_disp
+            rim: 10% * glass_rim + 14% * pv * glass_rim
+            shine: pointer
+            shadow: 0, 1 + 6 * drop + 3 * pv, 6 + 14 * drop + 8 * pv, 8% + 16% * drop + 8% * pv, deep
+            show: obs < 0.996 and not glass_auto
+            include "bar_shapes.plm"
+        }
+        //  The same glass with `frost: auto` (frosted only where what is behind is busy): `frost:` cannot take `auto` from an expression, so it is a body of its own.
+        body {
+            color: mix(tint, #000000, cy_dark * cy_k)
+            glass: 100%
+            opacity: glass_op * (1 - obs)
+            lens: glass_bend
+            frost: auto
+            refraction: glass_refr
+            dispersion: glass_disp
+            rim: 10% * glass_rim + 14% * pv * glass_rim
+            shine: pointer
+            shadow: 0, 1 + 6 * drop + 3 * pv, 6 + 14 * drop + 8 * pv, 8% + 16% * drop + 8% * pv, deep
+            show: obs < 0.996 and glass_auto
+            include "bar_shapes.plm"
+        }
+        //  The same shapes again, as flat obsidian: a body with no rim (`rim: 0%`). (Before pleamar 0.4.14 a `rim` that was an expression
+        //  was read as its first number, so `rim: 40% * cas_k` kept 40% of light on the edge with the Cassette off; now it is worked out.)
+        //  Blur behind the obsidian: a glass body asks the compositor for it (100 % glass at 34 %: the request needs glass x opacity of 30 % or more, and a more opaque layer would hide the blur), and the obsidian over it (60 % opaque while blur is on, solid when it is off) hides the glass's look.
+        body {
+            color: obsidian
+            glass: 100%
+            lens: false
+            rim: 0%
+            refraction: 0%
+            dispersion: 0%
+            shine: 9000, 9000
+            opacity: obs * 0.34 * (1 - pk)
+            show: obs > 0.97
+            include "bar_shapes.plm"
+        }
+        body {
+            color: obsidian
+            rim: 0%
+            opacity: obs * (1 - 0.4 * clamp(hy_blur, 0, 1))
+            shadow: 0, 3 + 6 * drop + 3 * pv, 14 + 14 * drop + 8 * pv, (30% + 16% * drop + 8% * pv) * (1 - pk), #000000
+            show: obs > 0.004
+            include "bar_shapes.plm"
+        }
+        //  The Cassette's plastic over it (see `cas_k`): a lit lip, a dark outline, a hard shadow.
+        body {
+            color: obsidian
+            rim: 40% * cas_k
+            border: 1.7 * u * cas_k, deep
+            shadow: 4.5 * u * cas_k, 5.5 * u * cas_k, 0, 55% * cas_k, deep
+            opacity: cas_k
+            show: cas_k > 0.004
+            include "bar_shapes.plm"
+        }
+        //  The UwU's candy plastic over it: a pastel gradient across the whole screen (pink, lilac, sky, mint), a thick grape outline, a lit lip and a hard pink shadow.
+        body {
+            gradient: 0, 0 to screen.width, screen.height, #ffcfe8, #e6d6ff 38%, #cfeaff 68%, #d2fff0
+            rim: 55% * uwu_k
+            border: 3 * u * uwu_k, deep
+            shadow: 4 * u * uwu_k, 5 * u * uwu_k, 0, 90% * uwu_k, mix(deep, #ff6ec7, 0.75)
+            opacity: uwu_k
+            show: uwu_k > 0.004
+            include "bar_shapes.plm"
+        }
+        //  The Cassette's detail on each drawer, only while it is plastic and the drawer is out: an accent-coloured tab at the top left (opposite the grips) (a console's button), a row of straight vertical grip slots in the bottom right
+        //  corner (like the vents of a handheld: dark, with a lit edge) that run a few pixels past the drawer's bottom edge as if they wrapped round the base, and a screw in the bottom left.
+        //  Inside the drawer they stay in its margin, so they never touch what it holds.
+        group {
+            show: cas_k > 0.01 and dk0 > 0.9
+            opacity: cas_k * clamp(dk0 * 3 - 2, 0, 1)
+            let gdk.l = dk.ex - dk.ew / 2
+            let gdk.r = dk.ex + dk.ew / 2
+            let gdk.t = dk.ey - dk.eh / 2
+            let gdk.b = min(dk.ey + dk.eh / 2, vb - lf.t - 1)
+            box { at: gdk.l + 58.5 * u + 2, gdk.t + 9 + 3; size: 58 * u, 24; corner: 5; color: deep; opacity: 38% }
+            box { at: gdk.l + 58.5 * u, gdk.t + 9; size: 58 * u, 24; corner: 5; color: mintlo }
+            box { at: gdk.l + 58.5 * u, gdk.t + 9 - 2.5; size: 58 * u, 24 - 5; corner: 5; color: mint }
+            line { from: gdk.l + 58.5 * u - 24 * u, gdk.t + 9 - 2.5 - (24 - 5) / 2 + 4; to: gdk.l + 58.5 * u + 24 * u, gdk.t + 9 - 2.5 - (24 - 5) / 2 + 4; width: 2.2; color: minthi; opacity: 70% }
+            box { at: gdk.l + 58.5 * u, gdk.t + 9; size: 58 * u, 24; corner: 5; stroke: 1.4; color: deep }
+            repeat k in 0..8 {
+                line { from: gdk.r - 20 * u - k * 11 * u, gdk.b + 4; to: gdk.r - 20 * u - k * 11 * u, gdk.b - 18; width: 6; color: mix(deep, #ffffff, 6%) }
+                line { from: gdk.r - 20 * u - k * 11 * u + 3.6, gdk.b + 4; to: gdk.r - 20 * u - k * 11 * u + 3.6, gdk.b - 18; width: 1.2; color: #ffffff; opacity: 45% }
+            }
+            ellipse { at: gdk.l + 12, gdk.b - 12; radius: 3.6; color: mix(deep, #ffffff, 38%) }
+            ellipse { at: gdk.l + 12, gdk.b - 12; radius: 3.6; stroke: 1.1; color: deep }
+            line { from: gdk.l + 10, gdk.b - 10; to: gdk.l + 14, gdk.b - 14; width: 1.3; color: deep }
+        }
+        group {
+            show: cas_k > 0.01 and dc0 > 0.9
+            opacity: cas_k * clamp(dc0 * 3 - 2, 0, 1)
+            let gdc.l = dc.ex - dc.ew / 2
+            let gdc.r = dc.ex + dc.ew / 2
+            let gdc.t = dc.ey - dc.eh / 2
+            let gdc.b = min(dc.ey + dc.eh / 2, vb - lf.t - 1)
+            box { at: gdc.l + 58.5 * u + 2, gdc.t + 9 + 3; size: 58 * u, 24; corner: 5; color: deep; opacity: 38% }
+            box { at: gdc.l + 58.5 * u, gdc.t + 9; size: 58 * u, 24; corner: 5; color: mintlo }
+            box { at: gdc.l + 58.5 * u, gdc.t + 9 - 2.5; size: 58 * u, 24 - 5; corner: 5; color: mint }
+            line { from: gdc.l + 58.5 * u - 24 * u, gdc.t + 9 - 2.5 - (24 - 5) / 2 + 4; to: gdc.l + 58.5 * u + 24 * u, gdc.t + 9 - 2.5 - (24 - 5) / 2 + 4; width: 2.2; color: minthi; opacity: 70% }
+            box { at: gdc.l + 58.5 * u, gdc.t + 9; size: 58 * u, 24; corner: 5; stroke: 1.4; color: deep }
+            repeat k in 0..8 {
+                line { from: gdc.r - 20 * u - k * 11 * u, gdc.b + 4; to: gdc.r - 20 * u - k * 11 * u, gdc.b - 18; width: 6; color: mix(deep, #ffffff, 6%) }
+                line { from: gdc.r - 20 * u - k * 11 * u + 3.6, gdc.b + 4; to: gdc.r - 20 * u - k * 11 * u + 3.6, gdc.b - 18; width: 1.2; color: #ffffff; opacity: 45% }
+            }
+            ellipse { at: gdc.l + 12, gdc.b - 12; radius: 3.6; color: mix(deep, #ffffff, 38%) }
+            ellipse { at: gdc.l + 12, gdc.b - 12; radius: 3.6; stroke: 1.1; color: deep }
+            line { from: gdc.l + 10, gdc.b - 10; to: gdc.l + 14, gdc.b - 14; width: 1.3; color: deep }
+        }
+        group {
+            show: cas_k > 0.01 and ds0 > 0.9
+            opacity: cas_k * clamp(ds0 * 3 - 2, 0, 1)
+            let gds.l = ds.ex - ds.ew / 2
+            let gds.r = ds.ex + ds.ew / 2
+            let gds.t = ds.ey - ds.eh / 2
+            let gds.b = min(ds.ey + ds.eh / 2, vb - lf.t - 1)
+            box { at: gds.l + 58.5 * u + 2, gds.t + 9 + 3; size: 58 * u, 24; corner: 5; color: deep; opacity: 38% }
+            box { at: gds.l + 58.5 * u, gds.t + 9; size: 58 * u, 24; corner: 5; color: mintlo }
+            box { at: gds.l + 58.5 * u, gds.t + 9 - 2.5; size: 58 * u, 24 - 5; corner: 5; color: mint }
+            line { from: gds.l + 58.5 * u - 24 * u, gds.t + 9 - 2.5 - (24 - 5) / 2 + 4; to: gds.l + 58.5 * u + 24 * u, gds.t + 9 - 2.5 - (24 - 5) / 2 + 4; width: 2.2; color: minthi; opacity: 70% }
+            box { at: gds.l + 58.5 * u, gds.t + 9; size: 58 * u, 24; corner: 5; stroke: 1.4; color: deep }
+            repeat k in 0..8 {
+                line { from: gds.r - 20 * u - k * 11 * u, gds.b + 4; to: gds.r - 20 * u - k * 11 * u, gds.b - 18; width: 6; color: mix(deep, #ffffff, 6%) }
+                line { from: gds.r - 20 * u - k * 11 * u + 3.6, gds.b + 4; to: gds.r - 20 * u - k * 11 * u + 3.6, gds.b - 18; width: 1.2; color: #ffffff; opacity: 45% }
+            }
+            ellipse { at: gds.l + 12, gds.b - 12; radius: 3.6; color: mix(deep, #ffffff, 38%) }
+            ellipse { at: gds.l + 12, gds.b - 12; radius: 3.6; stroke: 1.1; color: deep }
+            line { from: gds.l + 10, gds.b - 10; to: gds.l + 14, gds.b - 14; width: 1.3; color: deep }
+        }
+        group {
+            show: cas_k > 0.01 and dl0 > 0.9
+            opacity: cas_k * clamp(dl0 * 3 - 2, 0, 1)
+            let gdl.l = dl.ex - dl.ew / 2
+            let gdl.r = dl.ex + dl.ew / 2
+            let gdl.t = dl.ey - dl.eh / 2
+            let gdl.b = min(dl.ey + dl.eh / 2, vb - lf.t - 1)
+            box { at: gdl.l + 58.5 * u + 2, gdl.t + 9 + 3; size: 58 * u, 24; corner: 5; color: deep; opacity: 38% }
+            box { at: gdl.l + 58.5 * u, gdl.t + 9; size: 58 * u, 24; corner: 5; color: mintlo }
+            box { at: gdl.l + 58.5 * u, gdl.t + 9 - 2.5; size: 58 * u, 24 - 5; corner: 5; color: mint }
+            line { from: gdl.l + 58.5 * u - 24 * u, gdl.t + 9 - 2.5 - (24 - 5) / 2 + 4; to: gdl.l + 58.5 * u + 24 * u, gdl.t + 9 - 2.5 - (24 - 5) / 2 + 4; width: 2.2; color: minthi; opacity: 70% }
+            box { at: gdl.l + 58.5 * u, gdl.t + 9; size: 58 * u, 24; corner: 5; stroke: 1.4; color: deep }
+            repeat k in 0..8 {
+                line { from: gdl.r - 20 * u - k * 11 * u, gdl.b + 4; to: gdl.r - 20 * u - k * 11 * u, gdl.b - 18; width: 6; color: mix(deep, #ffffff, 6%) }
+                line { from: gdl.r - 20 * u - k * 11 * u + 3.6, gdl.b + 4; to: gdl.r - 20 * u - k * 11 * u + 3.6, gdl.b - 18; width: 1.2; color: #ffffff; opacity: 45% }
+            }
+            ellipse { at: gdl.l + 12, gdl.b - 12; radius: 3.6; color: mix(deep, #ffffff, 38%) }
+            ellipse { at: gdl.l + 12, gdl.b - 12; radius: 3.6; stroke: 1.1; color: deep }
+            line { from: gdl.l + 10, gdl.b - 10; to: gdl.l + 14, gdl.b - 14; width: 1.3; color: deep }
+        }
+        group {
+            show: cas_k > 0.01 and dm0 > 0.9
+            opacity: cas_k * clamp(dm0 * 3 - 2, 0, 1)
+            let gdm.l = dm.ex - dm.ew / 2
+            let gdm.r = dm.ex + dm.ew / 2
+            let gdm.t = dm.ey - dm.eh / 2
+            let gdm.b = min(dm.ey + dm.eh / 2, vb - lf.t - 1)
+            box { at: gdm.l + 58.5 * u + 2, gdm.t + 9 + 3; size: 58 * u, 24; corner: 5; color: deep; opacity: 38% }
+            box { at: gdm.l + 58.5 * u, gdm.t + 9; size: 58 * u, 24; corner: 5; color: mintlo }
+            box { at: gdm.l + 58.5 * u, gdm.t + 9 - 2.5; size: 58 * u, 24 - 5; corner: 5; color: mint }
+            line { from: gdm.l + 58.5 * u - 24 * u, gdm.t + 9 - 2.5 - (24 - 5) / 2 + 4; to: gdm.l + 58.5 * u + 24 * u, gdm.t + 9 - 2.5 - (24 - 5) / 2 + 4; width: 2.2; color: minthi; opacity: 70% }
+            box { at: gdm.l + 58.5 * u, gdm.t + 9; size: 58 * u, 24; corner: 5; stroke: 1.4; color: deep }
+            repeat k in 0..8 {
+                line { from: gdm.r - 20 * u - k * 11 * u, gdm.b + 4; to: gdm.r - 20 * u - k * 11 * u, gdm.b - 18; width: 6; color: mix(deep, #ffffff, 6%) }
+                line { from: gdm.r - 20 * u - k * 11 * u + 3.6, gdm.b + 4; to: gdm.r - 20 * u - k * 11 * u + 3.6, gdm.b - 18; width: 1.2; color: #ffffff; opacity: 45% }
+            }
+            ellipse { at: gdm.l + 12, gdm.b - 12; radius: 3.6; color: mix(deep, #ffffff, 38%) }
+            ellipse { at: gdm.l + 12, gdm.b - 12; radius: 3.6; stroke: 1.1; color: deep }
+            line { from: gdm.l + 10, gdm.b - 10; to: gdm.l + 14, gdm.b - 14; width: 1.3; color: deep }
+        }
+        group {
+            show: cas_k > 0.01 and dz0 > 0.9
+            opacity: cas_k * clamp(dz0 * 3 - 2, 0, 1)
+            let gdz.l = dz.fx - dz.fw / 2
+            let gdz.r = dz.fx + dz.fw / 2
+            let gdz.t = dz.fcy - dz.fh / 2
+            let gdz.b = min(dz.fcy + dz.fh / 2, vb - lf.t - 1)
+            box { at: gdz.l + 58.5 * u + 2, gdz.t + 9 + 3; size: 58 * u, 24; corner: 5; color: deep; opacity: 38% }
+            box { at: gdz.l + 58.5 * u, gdz.t + 9; size: 58 * u, 24; corner: 5; color: mintlo }
+            box { at: gdz.l + 58.5 * u, gdz.t + 9 - 2.5; size: 58 * u, 24 - 5; corner: 5; color: mint }
+            line { from: gdz.l + 58.5 * u - 24 * u, gdz.t + 9 - 2.5 - (24 - 5) / 2 + 4; to: gdz.l + 58.5 * u + 24 * u, gdz.t + 9 - 2.5 - (24 - 5) / 2 + 4; width: 2.2; color: minthi; opacity: 70% }
+            box { at: gdz.l + 58.5 * u, gdz.t + 9; size: 58 * u, 24; corner: 5; stroke: 1.4; color: deep }
+            repeat k in 0..8 {
+                line { from: gdz.r - 20 * u - k * 11 * u, gdz.b + 4; to: gdz.r - 20 * u - k * 11 * u, gdz.b - 18; width: 6; color: mix(deep, #ffffff, 6%) }
+                line { from: gdz.r - 20 * u - k * 11 * u + 3.6, gdz.b + 4; to: gdz.r - 20 * u - k * 11 * u + 3.6, gdz.b - 18; width: 1.2; color: #ffffff; opacity: 45% }
+            }
+            ellipse { at: gdz.l + 12, gdz.b - 12; radius: 3.6; color: mix(deep, #ffffff, 38%) }
+            ellipse { at: gdz.l + 12, gdz.b - 12; radius: 3.6; stroke: 1.1; color: deep }
+            line { from: gdz.l + 10, gdz.b - 10; to: gdz.l + 14, gdz.b - 14; width: 1.3; color: deep }
+        }
+        //  The Cyber's HUD marks: bright corner brackets (with a soft glow) round the bar and round every drawer that is out, and a little ruler of ticks under each. At each one's bottom right a terminal readout: hex digits that jump between three values, and a block cursor that blinks.
+        //  They are drawn on the glass, outside it, and never outline it.
+        group {
+            show: cy_k > 0.01 and lm < 0.5
+            opacity: cy_k * (1 - lm)
+            let cybarl = cx - (bar.w + pv * 10 * u) / 2
+            let cybarr = cx + (bar.w + pv * 10 * u) / 2
+            let cybart = bar.y - bar.h / 2
+            let cybarb = bar.y - bar.h / 2 + bar.h + pop
+            //  (the bar itself has no corner brackets: only the drawers and the cards under it do; its ruler of ticks and its readout stay)
+            repeat cybark in 0..13 {
+                line { from: cybarl + 22 * u + cybark * 6 * u, cybarb + 6 * u + 1; to: cybarl + 22 * u + cybark * 6 * u, cybarb + 6 * u + 1 + if(mod(cybark, 4) == 0, 6 * u, 3 * u); width: 1.1; color: mint; opacity: 70% }
+            }
+        
+            text "SYS 7F3A·9C21" { at: cybarr - 9 * u, cybarb + 6 * u + 11 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 0), 3) == 0, 85%, 0) }
+            text "SYS A1E4·03BD" { at: cybarr - 9 * u, cybarb + 6 * u + 11 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 0), 3) == 1, 85%, 0) }
+            text "SYS 5C90·E7F2" { at: cybarr - 9 * u, cybarb + 6 * u + 11 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 0), 3) == 2, 85%, 0) }
+            box { at: cybarr - 3 * u, cybarb + 6 * u + 11 * u; size: 5 * u, 10 * u; color: minthi; opacity: cy_on * if(mod(time * 1.7, 1) < 0.5, 90%, 0) }
+        }
+        group {
+            show: cy_k > 0.01 and dk0 > 0.9
+            opacity: cy_k * clamp(dk0 * 3 - 2, 0, 1)
+            let cydkl = dk.ex - dk.ew / 2
+            let cydkr = dk.ex + dk.ew / 2
+            let cydkt = dk.ey - dk.eh / 2
+            let cydkb = min(dk.ey + dk.eh / 2, vb - lf.t - 1)
+            shader matrix { at: cydkl, cydkt; size: cydkr - cydkl, cydkb - cydkt; corner: 24 * u; values: 0.28, 1; colors: mint, minthi }
+            repeat cydkc in 0..4 {
+                let cydkx = if(mod(cydkc, 2) == 0, cydkl - 7 * u, cydkr + 7 * u)
+                let cydky = if(cydkc < 2, cydkt - 7 * u, cydkb + 7 * u)
+                let cydksx = if(mod(cydkc, 2) == 0, -1, 1)
+                let cydksy = if(cydkc < 2, -1, 1)
+                path { at: cydkx, cydky; stroke: 5 * u; color: mint; opacity: 16%; move 0, -cydksy * 15 * u; line 0, 0; line -cydksx * 15 * u, 0 }
+                path { at: cydkx, cydky; stroke: 1.7; color: minthi; move 0, -cydksy * 15 * u; line 0, 0; line -cydksx * 15 * u, 0 }
+            }
+            repeat cydkk in 0..13 {
+                line { from: cydkl + 22 * u + cydkk * 6 * u, cydkb + 7 * u + 1; to: cydkl + 22 * u + cydkk * 6 * u, cydkb + 7 * u + 1 + if(mod(cydkk, 4) == 0, 6 * u, 3 * u); width: 1.1; color: mint; opacity: 70% }
+            }
+        
+            text "SYS 2B6D·F418" { at: cydkr - 16 * u, cydkb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 1), 3) == 0, 85%, 0) }
+            text "SYS E90C·57A3" { at: cydkr - 16 * u, cydkb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 1), 3) == 1, 85%, 0) }
+            text "SYS 30D8·B166" { at: cydkr - 16 * u, cydkb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 1), 3) == 2, 85%, 0) }
+            box { at: cydkr - 10 * u, cydkb - 9 * u; size: 5 * u, 10 * u; color: minthi; opacity: cy_on * if(mod(time * 1.7, 1) < 0.5, 90%, 0) }
+        }
+        group {
+            show: cy_k > 0.01 and dc0 > 0.9
+            opacity: cy_k * clamp(dc0 * 3 - 2, 0, 1)
+            let cydcl = dc.ex - dc.ew / 2
+            let cydcr = dc.ex + dc.ew / 2
+            let cydct = dc.ey - dc.eh / 2
+            let cydcb = min(dc.ey + dc.eh / 2, vb - lf.t - 1)
+            shader matrix { at: cydcl, cydct; size: cydcr - cydcl, cydcb - cydct; corner: 24 * u; values: 0.28, 1; colors: mint, minthi }
+            repeat cydcc in 0..4 {
+                let cydcx = if(mod(cydcc, 2) == 0, cydcl - 7 * u, cydcr + 7 * u)
+                let cydcy = if(cydcc < 2, cydct - 7 * u, cydcb + 7 * u)
+                let cydcsx = if(mod(cydcc, 2) == 0, -1, 1)
+                let cydcsy = if(cydcc < 2, -1, 1)
+                path { at: cydcx, cydcy; stroke: 5 * u; color: mint; opacity: 16%; move 0, -cydcsy * 15 * u; line 0, 0; line -cydcsx * 15 * u, 0 }
+                path { at: cydcx, cydcy; stroke: 1.7; color: minthi; move 0, -cydcsy * 15 * u; line 0, 0; line -cydcsx * 15 * u, 0 }
+            }
+            repeat cydck in 0..13 {
+                line { from: cydcl + 22 * u + cydck * 6 * u, cydcb + 7 * u + 1; to: cydcl + 22 * u + cydck * 6 * u, cydcb + 7 * u + 1 + if(mod(cydck, 4) == 0, 6 * u, 3 * u); width: 1.1; color: mint; opacity: 70% }
+            }
+        
+            text "SYS C4F1·0A9E" { at: cydcr - 16 * u, cydcb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 2), 3) == 0, 85%, 0) }
+            text "SYS 18B7·D620" { at: cydcr - 16 * u, cydcb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 2), 3) == 1, 85%, 0) }
+            text "SYS 9E05·4CF3" { at: cydcr - 16 * u, cydcb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 2), 3) == 2, 85%, 0) }
+            box { at: cydcr - 10 * u, cydcb - 9 * u; size: 5 * u, 10 * u; color: minthi; opacity: cy_on * if(mod(time * 1.7, 1) < 0.5, 90%, 0) }
+        }
+        group {
+            show: cy_k > 0.01 and ds0 > 0.9
+            opacity: cy_k * clamp(ds0 * 3 - 2, 0, 1)
+            let cydsl = ds.ex - ds.ew / 2
+            let cydsr = ds.ex + ds.ew / 2
+            let cydst = ds.ey - ds.eh / 2
+            let cydsb = min(ds.ey + ds.eh / 2, vb - lf.t - 1)
+            shader matrix { at: cydsl, cydst; size: cydsr - cydsl, cydsb - cydst; corner: 24 * u; values: 0.28, 1; colors: mint, minthi }
+            repeat cydsc in 0..4 {
+                let cydsx = if(mod(cydsc, 2) == 0, cydsl - 7 * u, cydsr + 7 * u)
+                let cydsy = if(cydsc < 2, cydst - 7 * u, cydsb + 7 * u)
+                let cydssx = if(mod(cydsc, 2) == 0, -1, 1)
+                let cydssy = if(cydsc < 2, -1, 1)
+                path { at: cydsx, cydsy; stroke: 5 * u; color: mint; opacity: 16%; move 0, -cydssy * 15 * u; line 0, 0; line -cydssx * 15 * u, 0 }
+                path { at: cydsx, cydsy; stroke: 1.7; color: minthi; move 0, -cydssy * 15 * u; line 0, 0; line -cydssx * 15 * u, 0 }
+            }
+            repeat cydsk in 0..13 {
+                line { from: cydsl + 22 * u + cydsk * 6 * u, cydsb + 7 * u + 1; to: cydsl + 22 * u + cydsk * 6 * u, cydsb + 7 * u + 1 + if(mod(cydsk, 4) == 0, 6 * u, 3 * u); width: 1.1; color: mint; opacity: 70% }
+            }
+        
+            text "SYS 7F3A·9C21" { at: cydsr - 16 * u, cydsb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 3), 3) == 0, 85%, 0) }
+            text "SYS A1E4·03BD" { at: cydsr - 16 * u, cydsb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 3), 3) == 1, 85%, 0) }
+            text "SYS 5C90·E7F2" { at: cydsr - 16 * u, cydsb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 3), 3) == 2, 85%, 0) }
+            box { at: cydsr - 10 * u, cydsb - 9 * u; size: 5 * u, 10 * u; color: minthi; opacity: cy_on * if(mod(time * 1.7, 1) < 0.5, 90%, 0) }
+        }
+        group {
+            show: cy_k > 0.01 and dl0 > 0.9
+            opacity: cy_k * clamp(dl0 * 3 - 2, 0, 1)
+            let cydll = dl.ex - dl.ew / 2
+            let cydlr = dl.ex + dl.ew / 2
+            let cydlt = dl.ey - dl.eh / 2
+            let cydlb = min(dl.ey + dl.eh / 2, vb - lf.t - 1)
+            shader matrix { at: cydll, cydlt; size: cydlr - cydll, cydlb - cydlt; corner: 24 * u; values: 0.28, 1; colors: mint, minthi }
+            repeat cydlc in 0..4 {
+                let cydlx = if(mod(cydlc, 2) == 0, cydll - 7 * u, cydlr + 7 * u)
+                let cydly = if(cydlc < 2, cydlt - 7 * u, cydlb + 7 * u)
+                let cydlsx = if(mod(cydlc, 2) == 0, -1, 1)
+                let cydlsy = if(cydlc < 2, -1, 1)
+                path { at: cydlx, cydly; stroke: 5 * u; color: mint; opacity: 16%; move 0, -cydlsy * 15 * u; line 0, 0; line -cydlsx * 15 * u, 0 }
+                path { at: cydlx, cydly; stroke: 1.7; color: minthi; move 0, -cydlsy * 15 * u; line 0, 0; line -cydlsx * 15 * u, 0 }
+            }
+            repeat cydlk in 0..13 {
+                line { from: cydll + 22 * u + cydlk * 6 * u, cydlb + 7 * u + 1; to: cydll + 22 * u + cydlk * 6 * u, cydlb + 7 * u + 1 + if(mod(cydlk, 4) == 0, 6 * u, 3 * u); width: 1.1; color: mint; opacity: 70% }
+            }
+        
+            text "SYS 2B6D·F418" { at: cydlr - 16 * u, cydlb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 4), 3) == 0, 85%, 0) }
+            text "SYS E90C·57A3" { at: cydlr - 16 * u, cydlb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 4), 3) == 1, 85%, 0) }
+            text "SYS 30D8·B166" { at: cydlr - 16 * u, cydlb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 4), 3) == 2, 85%, 0) }
+            box { at: cydlr - 10 * u, cydlb - 9 * u; size: 5 * u, 10 * u; color: minthi; opacity: cy_on * if(mod(time * 1.7, 1) < 0.5, 90%, 0) }
+        }
+        group {
+            show: cy_k > 0.01 and dm0 > 0.9
+            opacity: cy_k * clamp(dm0 * 3 - 2, 0, 1)
+            let cydml = dm.ex - dm.ew / 2
+            let cydmr = dm.ex + dm.ew / 2
+            let cydmt = dm.ey - dm.eh / 2
+            let cydmb = min(dm.ey + dm.eh / 2, vb - lf.t - 1)
+            shader matrix { at: cydml, cydmt; size: cydmr - cydml, cydmb - cydmt; corner: 24 * u; values: 0.28, 1; colors: mint, minthi }
+            repeat cydmc in 0..4 {
+                let cydmx = if(mod(cydmc, 2) == 0, cydml - 7 * u, cydmr + 7 * u)
+                let cydmy = if(cydmc < 2, cydmt - 7 * u, cydmb + 7 * u)
+                let cydmsx = if(mod(cydmc, 2) == 0, -1, 1)
+                let cydmsy = if(cydmc < 2, -1, 1)
+                path { at: cydmx, cydmy; stroke: 5 * u; color: mint; opacity: 16%; move 0, -cydmsy * 15 * u; line 0, 0; line -cydmsx * 15 * u, 0 }
+                path { at: cydmx, cydmy; stroke: 1.7; color: minthi; move 0, -cydmsy * 15 * u; line 0, 0; line -cydmsx * 15 * u, 0 }
+            }
+            repeat cydmk in 0..13 {
+                line { from: cydml + 22 * u + cydmk * 6 * u, cydmb + 7 * u + 1; to: cydml + 22 * u + cydmk * 6 * u, cydmb + 7 * u + 1 + if(mod(cydmk, 4) == 0, 6 * u, 3 * u); width: 1.1; color: mint; opacity: 70% }
+            }
+        
+            text "SYS C4F1·0A9E" { at: cydmr - 16 * u, cydmb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 5), 3) == 0, 85%, 0) }
+            text "SYS 18B7·D620" { at: cydmr - 16 * u, cydmb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 5), 3) == 1, 85%, 0) }
+            text "SYS 9E05·4CF3" { at: cydmr - 16 * u, cydmb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 5), 3) == 2, 85%, 0) }
+            box { at: cydmr - 10 * u, cydmb - 9 * u; size: 5 * u, 10 * u; color: minthi; opacity: cy_on * if(mod(time * 1.7, 1) < 0.5, 90%, 0) }
+        }
+        group {
+            show: cy_k > 0.01 and dz0 > 0.9
+            opacity: cy_k * clamp(dz0 * 3 - 2, 0, 1)
+            //  The glass the Desk's body is drawn as (`dz.f*`, as `box zdrawer` has it), not the rectangle it would have along the top (`dz.s*`): in the frame
+            //  layout the two differ by a few pixels, and the corner lines stood off the glass unevenly.
+            let cydzl = dz.fl
+            let cydzr = dz.fr
+            let cydzt = dz.ft
+            let cydzb = min(dz.fb, vb - lf.t - 1)
+            shader matrix { at: cydzl, cydzt; size: cydzr - cydzl, cydzb - cydzt; corner: 24 * u; values: 0.28, 1; colors: mint, minthi }
+            repeat cydzc in 0..4 {
+                let cydzx = if(mod(cydzc, 2) == 0, cydzl - 7 * u, cydzr + 7 * u)
+                let cydzy = if(cydzc < 2, cydzt - 7 * u, cydzb + 7 * u)
+                let cydzsx = if(mod(cydzc, 2) == 0, -1, 1)
+                let cydzsy = if(cydzc < 2, -1, 1)
+                path { at: cydzx, cydzy; stroke: 5 * u; color: mint; opacity: 16%; move 0, -cydzsy * 15 * u; line 0, 0; line -cydzsx * 15 * u, 0 }
+                path { at: cydzx, cydzy; stroke: 1.7; color: minthi; move 0, -cydzsy * 15 * u; line 0, 0; line -cydzsx * 15 * u, 0 }
+            }
+            repeat cydzk in 0..13 {
+                line { from: cydzl + 22 * u + cydzk * 6 * u, cydzb + 7 * u + 1; to: cydzl + 22 * u + cydzk * 6 * u, cydzb + 7 * u + 1 + if(mod(cydzk, 4) == 0, 6 * u, 3 * u); width: 1.1; color: mint; opacity: 70% }
+            }
+        
+            text "SYS 7F3A·9C21" { at: cydzr - 16 * u, cydzb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 6), 3) == 0, 85%, 0) }
+            text "SYS A1E4·03BD" { at: cydzr - 16 * u, cydzb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 6), 3) == 1, 85%, 0) }
+            text "SYS 5C90·E7F2" { at: cydzr - 16 * u, cydzb - 9 * u; anchor: right center; size: 10; weight: 500; color: minthi; family: "SpaceMono Nerd Font"; opacity: cy_on * if(mod(floor(time * 7 + 6), 3) == 2, 85%, 0) }
+            box { at: cydzr - 10 * u, cydzb - 9 * u; size: 5 * u, 10 * u; color: minthi; opacity: cy_on * if(mod(time * 1.7, 1) < 0.5, 90%, 0) }
+        }
+        //  The UwU theme's graphics, on every drawer that is out (and round the screen, below): cat ears on its top corners, three twinkling stars along its
+        //  top, two hearts that bob and a trail of paw prints in its bottom corners, and sparkles rising from the hearts. The ears are the only part outside
+        //  the drawer; the rest sits in its margin and never touches what it holds. Each sticker has a grape outline, as the drawers have.
+        group {
+            show: uwu_k > 0.01 and dk0 > 0.9
+            opacity: uwu_k * clamp(dk0 * 3 - 2, 0, 1)
+            let wdk.l = dk.ex - dk.ew / 2
+            let wdk.r = dk.ex + dk.ew / 2
+            let wdk.t = dk.ey - dk.eh / 2
+            let wdk.b = min(dk.ey + dk.eh / 2, vb - lf.t - 1)
+            let wdk.m = (dk.ex)
+            repeat side in 0..2 {
+                let ex = if(side == 0, wdk.l + 50 * u, wdk.r - 50 * u)
+                let sg = if(side == 0, -1, 1)
+                path { at: ex, wdk.t; color: obsidian; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8; close }
+                path { at: ex, wdk.t; stroke: 3 * u; color: deep; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8 }
+                path { at: ex, wdk.t; color: #ff8fc8; move -14 * u, 5; line sg * 9 * u, -19 * u; line 14 * u, 5; close }
+            }
+            //  Whiskers: three on each side of the drawer, fanning out of its edges at the bottom corners.
+            repeat wk in 0..6 {
+                let wks = if(wk < 3, -1, 1)
+                let wkx = if(wk < 3, wdk.l, wdk.r)
+                let wky = wdk.b - 20 * u + (mod(wk, 3) - 1) * 7 * u
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 4; color: deep }
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 1.8; color: #ffffff }
+            }
+            repeat s in 0..3 {
+                let sx = wdk.m + (s - 1) * 44 * u
+                let sr = if(s == 1, 7, 5) * u
+                group { scale: 1 + 0.22 * sin(time * 160 + s * 120); pivot: sx, wdk.t + 9
+                    path { at: sx, wdk.t + 9; stroke: 3; color: deep; move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                    path { at: sx, wdk.t + 9; color: pick(s, #ffe27a, #ffffff, #7fd3ff); move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                }
+            }
+            repeat hh in 0..2 {
+                let hx = wdk.l + (22 + hh * 22) * u
+                let hy = wdk.b - 11
+                let hr = if(hh == 0, 5.5, 4.5) * u
+                group { scale: 1 + 0.13 * sin(time * 200 + hh * 150); pivot: hx, hy
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    path { at: hx, hy; stroke: 3; color: deep; move -1.12 * hr, -0.1 * hr; line 0, 1.2 * hr; line 1.12 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    path { at: hx, hy; color: pick(hh, #ff6eb4, #b69cff); move -1.1 * hr, -0.1 * hr; line 0, 1.15 * hr; line 1.1 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.7 * hr, hy - 0.5 * hr; radius: hr * 0.2; color: #ffffff; opacity: 80% }
+                }
+            }
+            repeat pw in 0..3 {
+                let px = wdk.r - (26 + pw * 28) * u
+                let py = wdk.b - 12 + if(mod(pw, 2) == 0, 0, -3)
+                ellipse { at: px, py + 2.4; radius: 6; color: deep }
+                ellipse { at: px - 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px - 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px, py + 2.4; radius: 4.6; color: #ff8fc8 }
+                ellipse { at: px - 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px - 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+            }
+            particles { at: wdk.l + 36 * u, wdk.b - 16; area: 36 * u, 6; count: 16; life: 1.4s .. 2.6s; speed: 18 .. 42; direction: -90deg; spread: 40deg; size: 3.6, 1; colors: #ff6eb4, #b69cff; shape: spark }
+        }
+        group {
+            show: uwu_k > 0.01 and dc0 > 0.9
+            opacity: uwu_k * clamp(dc0 * 3 - 2, 0, 1)
+            let wdc.l = dc.ex - dc.ew / 2
+            let wdc.r = dc.ex + dc.ew / 2
+            let wdc.t = dc.ey - dc.eh / 2
+            let wdc.b = min(dc.ey + dc.eh / 2, vb - lf.t - 1)
+            let wdc.m = (dc.ex)
+            repeat side in 0..2 {
+                let ex = if(side == 0, wdc.l + 50 * u, wdc.r - 50 * u)
+                let sg = if(side == 0, -1, 1)
+                path { at: ex, wdc.t; color: obsidian; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8; close }
+                path { at: ex, wdc.t; stroke: 3 * u; color: deep; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8 }
+                path { at: ex, wdc.t; color: #ff8fc8; move -14 * u, 5; line sg * 9 * u, -19 * u; line 14 * u, 5; close }
+            }
+            //  Whiskers: three on each side of the drawer, fanning out of its edges at the bottom corners.
+            repeat wk in 0..6 {
+                let wks = if(wk < 3, -1, 1)
+                let wkx = if(wk < 3, wdc.l, wdc.r)
+                let wky = wdc.b - 20 * u + (mod(wk, 3) - 1) * 7 * u
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 4; color: deep }
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 1.8; color: #ffffff }
+            }
+            repeat s in 0..3 {
+                let sx = wdc.m + (s - 1) * 44 * u
+                let sr = if(s == 1, 7, 5) * u
+                group { scale: 1 + 0.22 * sin(time * 160 + s * 120); pivot: sx, wdc.t + 9
+                    path { at: sx, wdc.t + 9; stroke: 3; color: deep; move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                    path { at: sx, wdc.t + 9; color: pick(s, #ffe27a, #ffffff, #7fd3ff); move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                }
+            }
+            repeat hh in 0..2 {
+                let hx = wdc.l + (22 + hh * 22) * u
+                let hy = wdc.b - 11
+                let hr = if(hh == 0, 5.5, 4.5) * u
+                group { scale: 1 + 0.13 * sin(time * 200 + hh * 150); pivot: hx, hy
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    path { at: hx, hy; stroke: 3; color: deep; move -1.12 * hr, -0.1 * hr; line 0, 1.2 * hr; line 1.12 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    path { at: hx, hy; color: pick(hh, #ff6eb4, #b69cff); move -1.1 * hr, -0.1 * hr; line 0, 1.15 * hr; line 1.1 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.7 * hr, hy - 0.5 * hr; radius: hr * 0.2; color: #ffffff; opacity: 80% }
+                }
+            }
+            repeat pw in 0..3 {
+                let px = wdc.r - (26 + pw * 28) * u
+                let py = wdc.b - 12 + if(mod(pw, 2) == 0, 0, -3)
+                ellipse { at: px, py + 2.4; radius: 6; color: deep }
+                ellipse { at: px - 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px - 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px, py + 2.4; radius: 4.6; color: #ff8fc8 }
+                ellipse { at: px - 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px - 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+            }
+            particles { at: wdc.l + 36 * u, wdc.b - 16; area: 36 * u, 6; count: 16; life: 1.4s .. 2.6s; speed: 18 .. 42; direction: -90deg; spread: 40deg; size: 3.6, 1; colors: #ff6eb4, #b69cff; shape: spark }
+        }
+        group {
+            show: uwu_k > 0.01 and ds0 > 0.9
+            opacity: uwu_k * clamp(ds0 * 3 - 2, 0, 1)
+            let wds.l = ds.ex - ds.ew / 2
+            let wds.r = ds.ex + ds.ew / 2
+            let wds.t = ds.ey - ds.eh / 2
+            let wds.b = min(ds.ey + ds.eh / 2, vb - lf.t - 1)
+            let wds.m = (ds.ex)
+            repeat side in 0..2 {
+                let ex = if(side == 0, wds.l + 50 * u, wds.r - 50 * u)
+                let sg = if(side == 0, -1, 1)
+                path { at: ex, wds.t; color: obsidian; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8; close }
+                path { at: ex, wds.t; stroke: 3 * u; color: deep; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8 }
+                path { at: ex, wds.t; color: #ff8fc8; move -14 * u, 5; line sg * 9 * u, -19 * u; line 14 * u, 5; close }
+            }
+            //  Whiskers: three on each side of the drawer, fanning out of its edges at the bottom corners.
+            repeat wk in 0..6 {
+                let wks = if(wk < 3, -1, 1)
+                let wkx = if(wk < 3, wds.l, wds.r)
+                let wky = wds.b - 20 * u + (mod(wk, 3) - 1) * 7 * u
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 4; color: deep }
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 1.8; color: #ffffff }
+            }
+            repeat s in 0..3 {
+                let sx = wds.m + (s - 1) * 44 * u
+                let sr = if(s == 1, 7, 5) * u
+                group { scale: 1 + 0.22 * sin(time * 160 + s * 120); pivot: sx, wds.t + 9
+                    path { at: sx, wds.t + 9; stroke: 3; color: deep; move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                    path { at: sx, wds.t + 9; color: pick(s, #ffe27a, #ffffff, #7fd3ff); move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                }
+            }
+            repeat hh in 0..2 {
+                let hx = wds.l + (22 + hh * 22) * u
+                let hy = wds.b - 11
+                let hr = if(hh == 0, 5.5, 4.5) * u
+                group { scale: 1 + 0.13 * sin(time * 200 + hh * 150); pivot: hx, hy
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    path { at: hx, hy; stroke: 3; color: deep; move -1.12 * hr, -0.1 * hr; line 0, 1.2 * hr; line 1.12 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    path { at: hx, hy; color: pick(hh, #ff6eb4, #b69cff); move -1.1 * hr, -0.1 * hr; line 0, 1.15 * hr; line 1.1 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.7 * hr, hy - 0.5 * hr; radius: hr * 0.2; color: #ffffff; opacity: 80% }
+                }
+            }
+            repeat pw in 0..3 {
+                let px = wds.r - (26 + pw * 28) * u
+                let py = wds.b - 12 + if(mod(pw, 2) == 0, 0, -3)
+                ellipse { at: px, py + 2.4; radius: 6; color: deep }
+                ellipse { at: px - 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px - 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px, py + 2.4; radius: 4.6; color: #ff8fc8 }
+                ellipse { at: px - 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px - 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+            }
+            particles { at: wds.l + 36 * u, wds.b - 16; area: 36 * u, 6; count: 16; life: 1.4s .. 2.6s; speed: 18 .. 42; direction: -90deg; spread: 40deg; size: 3.6, 1; colors: #ff6eb4, #b69cff; shape: spark }
+        }
+        group {
+            show: uwu_k > 0.01 and dl0 > 0.9
+            opacity: uwu_k * clamp(dl0 * 3 - 2, 0, 1)
+            let wdl.l = dl.ex - dl.ew / 2
+            let wdl.r = dl.ex + dl.ew / 2
+            let wdl.t = dl.ey - dl.eh / 2
+            let wdl.b = min(dl.ey + dl.eh / 2, vb - lf.t - 1)
+            let wdl.m = (dl.ex)
+            repeat side in 0..2 {
+                let ex = if(side == 0, wdl.l + 50 * u, wdl.r - 50 * u)
+                let sg = if(side == 0, -1, 1)
+                path { at: ex, wdl.t; color: obsidian; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8; close }
+                path { at: ex, wdl.t; stroke: 3 * u; color: deep; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8 }
+                path { at: ex, wdl.t; color: #ff8fc8; move -14 * u, 5; line sg * 9 * u, -19 * u; line 14 * u, 5; close }
+            }
+            //  Whiskers: three on each side of the drawer, fanning out of its edges at the bottom corners.
+            repeat wk in 0..6 {
+                let wks = if(wk < 3, -1, 1)
+                let wkx = if(wk < 3, wdl.l, wdl.r)
+                let wky = wdl.b - 20 * u + (mod(wk, 3) - 1) * 7 * u
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 4; color: deep }
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 1.8; color: #ffffff }
+            }
+            repeat s in 0..3 {
+                let sx = wdl.m + (s - 1) * 44 * u
+                let sr = if(s == 1, 7, 5) * u
+                group { scale: 1 + 0.22 * sin(time * 160 + s * 120); pivot: sx, wdl.t + 9
+                    path { at: sx, wdl.t + 9; stroke: 3; color: deep; move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                    path { at: sx, wdl.t + 9; color: pick(s, #ffe27a, #ffffff, #7fd3ff); move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                }
+            }
+            repeat hh in 0..2 {
+                let hx = wdl.l + (22 + hh * 22) * u
+                let hy = wdl.b - 11
+                let hr = if(hh == 0, 5.5, 4.5) * u
+                group { scale: 1 + 0.13 * sin(time * 200 + hh * 150); pivot: hx, hy
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    path { at: hx, hy; stroke: 3; color: deep; move -1.12 * hr, -0.1 * hr; line 0, 1.2 * hr; line 1.12 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    path { at: hx, hy; color: pick(hh, #ff6eb4, #b69cff); move -1.1 * hr, -0.1 * hr; line 0, 1.15 * hr; line 1.1 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.7 * hr, hy - 0.5 * hr; radius: hr * 0.2; color: #ffffff; opacity: 80% }
+                }
+            }
+            repeat pw in 0..3 {
+                let px = wdl.r - (26 + pw * 28) * u
+                let py = wdl.b - 12 + if(mod(pw, 2) == 0, 0, -3)
+                ellipse { at: px, py + 2.4; radius: 6; color: deep }
+                ellipse { at: px - 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px - 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px, py + 2.4; radius: 4.6; color: #ff8fc8 }
+                ellipse { at: px - 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px - 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+            }
+            particles { at: wdl.l + 36 * u, wdl.b - 16; area: 36 * u, 6; count: 16; life: 1.4s .. 2.6s; speed: 18 .. 42; direction: -90deg; spread: 40deg; size: 3.6, 1; colors: #ff6eb4, #b69cff; shape: spark }
+        }
+        group {
+            show: uwu_k > 0.01 and dm0 > 0.9
+            opacity: uwu_k * clamp(dm0 * 3 - 2, 0, 1)
+            let wdm.l = dm.ex - dm.ew / 2
+            let wdm.r = dm.ex + dm.ew / 2
+            let wdm.t = dm.ey - dm.eh / 2
+            let wdm.b = min(dm.ey + dm.eh / 2, vb - lf.t - 1)
+            let wdm.m = (dm.ex)
+            repeat side in 0..2 {
+                let ex = if(side == 0, wdm.l + 50 * u, wdm.r - 50 * u)
+                let sg = if(side == 0, -1, 1)
+                path { at: ex, wdm.t; color: obsidian; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8; close }
+                path { at: ex, wdm.t; stroke: 3 * u; color: deep; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8 }
+                path { at: ex, wdm.t; color: #ff8fc8; move -14 * u, 5; line sg * 9 * u, -19 * u; line 14 * u, 5; close }
+            }
+            //  Whiskers: three on each side of the drawer, fanning out of its edges at the bottom corners.
+            repeat wk in 0..6 {
+                let wks = if(wk < 3, -1, 1)
+                let wkx = if(wk < 3, wdm.l, wdm.r)
+                let wky = wdm.b - 20 * u + (mod(wk, 3) - 1) * 7 * u
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 4; color: deep }
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 1.8; color: #ffffff }
+            }
+            repeat s in 0..3 {
+                let sx = wdm.m + (s - 1) * 44 * u
+                let sr = if(s == 1, 7, 5) * u
+                group { scale: 1 + 0.22 * sin(time * 160 + s * 120); pivot: sx, wdm.t + 9
+                    path { at: sx, wdm.t + 9; stroke: 3; color: deep; move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                    path { at: sx, wdm.t + 9; color: pick(s, #ffe27a, #ffffff, #7fd3ff); move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                }
+            }
+            repeat hh in 0..2 {
+                let hx = wdm.l + (22 + hh * 22) * u
+                let hy = wdm.b - 11
+                let hr = if(hh == 0, 5.5, 4.5) * u
+                group { scale: 1 + 0.13 * sin(time * 200 + hh * 150); pivot: hx, hy
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    path { at: hx, hy; stroke: 3; color: deep; move -1.12 * hr, -0.1 * hr; line 0, 1.2 * hr; line 1.12 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    path { at: hx, hy; color: pick(hh, #ff6eb4, #b69cff); move -1.1 * hr, -0.1 * hr; line 0, 1.15 * hr; line 1.1 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.7 * hr, hy - 0.5 * hr; radius: hr * 0.2; color: #ffffff; opacity: 80% }
+                }
+            }
+            repeat pw in 0..3 {
+                let px = wdm.r - (26 + pw * 28) * u
+                let py = wdm.b - 12 + if(mod(pw, 2) == 0, 0, -3)
+                ellipse { at: px, py + 2.4; radius: 6; color: deep }
+                ellipse { at: px - 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px - 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px, py + 2.4; radius: 4.6; color: #ff8fc8 }
+                ellipse { at: px - 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px - 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+            }
+            particles { at: wdm.l + 36 * u, wdm.b - 16; area: 36 * u, 6; count: 16; life: 1.4s .. 2.6s; speed: 18 .. 42; direction: -90deg; spread: 40deg; size: 3.6, 1; colors: #ff6eb4, #b69cff; shape: spark }
+        }
+        group {
+            show: uwu_k > 0.01 and dz0 > 0.9
+            opacity: uwu_k * clamp(dz0 * 3 - 2, 0, 1)
+            let wdz.l = dz.fx - dz.fw / 2
+            let wdz.r = dz.fx + dz.fw / 2
+            let wdz.t = dz.fcy - dz.fh / 2
+            let wdz.b = min(dz.fcy + dz.fh / 2, vb - lf.t - 1)
+            let wdz.m = (dz.fx)
+            repeat side in 0..2 {
+                let ex = if(side == 0, wdz.l + 50 * u, wdz.r - 50 * u)
+                let sg = if(side == 0, -1, 1)
+                path { at: ex, wdz.t; color: obsidian; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8; close }
+                path { at: ex, wdz.t; stroke: 3 * u; color: deep; move -23 * u, 8; line sg * 13 * u, -30 * u; line 23 * u, 8 }
+                path { at: ex, wdz.t; color: #ff8fc8; move -14 * u, 5; line sg * 9 * u, -19 * u; line 14 * u, 5; close }
+            }
+            //  Whiskers: three on each side of the drawer, fanning out of its edges at the bottom corners.
+            repeat wk in 0..6 {
+                let wks = if(wk < 3, -1, 1)
+                let wkx = if(wk < 3, wdz.l, wdz.r)
+                let wky = wdz.b - 20 * u + (mod(wk, 3) - 1) * 7 * u
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 4; color: deep }
+                line { from: wkx - wks * 6 * u, wky; to: wkx + wks * 26 * u, wky + (mod(wk, 3) - 1) * 6 * u; width: 1.8; color: #ffffff }
+            }
+            repeat s in 0..3 {
+                let sx = wdz.m + (s - 1) * 44 * u
+                let sr = if(s == 1, 7, 5) * u
+                group { scale: 1 + 0.22 * sin(time * 160 + s * 120); pivot: sx, wdz.t + 9
+                    path { at: sx, wdz.t + 9; stroke: 3; color: deep; move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                    path { at: sx, wdz.t + 9; color: pick(s, #ffe27a, #ffffff, #7fd3ff); move 0, -sr; line 0.3 * sr, -0.3 * sr; line sr, 0; line 0.3 * sr, 0.3 * sr; line 0, sr; line -0.3 * sr, 0.3 * sr; line -sr, 0; line -0.3 * sr, -0.3 * sr; close }
+                }
+            }
+            repeat hh in 0..2 {
+                let hx = wdz.l + (22 + hh * 22) * u
+                let hy = wdz.b - 11
+                let hr = if(hh == 0, 5.5, 4.5) * u
+                group { scale: 1 + 0.13 * sin(time * 200 + hh * 150); pivot: hx, hy
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62 + 1.5; color: deep }
+                    path { at: hx, hy; stroke: 3; color: deep; move -1.12 * hr, -0.1 * hr; line 0, 1.2 * hr; line 1.12 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    ellipse { at: hx + 0.52 * hr, hy - 0.3 * hr; radius: hr * 0.62; color: pick(hh, #ff6eb4, #b69cff) }
+                    path { at: hx, hy; color: pick(hh, #ff6eb4, #b69cff); move -1.1 * hr, -0.1 * hr; line 0, 1.15 * hr; line 1.1 * hr, -0.1 * hr; close }
+                    ellipse { at: hx - 0.7 * hr, hy - 0.5 * hr; radius: hr * 0.2; color: #ffffff; opacity: 80% }
+                }
+            }
+            repeat pw in 0..3 {
+                let px = wdz.r - (26 + pw * 28) * u
+                let py = wdz.b - 12 + if(mod(pw, 2) == 0, 0, -3)
+                ellipse { at: px, py + 2.4; radius: 6; color: deep }
+                ellipse { at: px - 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px - 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 2.4, py - 7.6; radius: 3.4; color: deep }
+                ellipse { at: px + 6.4, py - 3.2; radius: 3.4; color: deep }
+                ellipse { at: px, py + 2.4; radius: 4.6; color: #ff8fc8 }
+                ellipse { at: px - 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px - 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 2.4, py - 7.6; radius: 2.2; color: #ff8fc8 }
+                ellipse { at: px + 6.4, py - 3.2; radius: 2.2; color: #ff8fc8 }
+            }
+            particles { at: wdz.l + 36 * u, wdz.b - 16; area: 36 * u, 6; count: 16; life: 1.4s .. 2.6s; speed: 18 .. 42; direction: -90deg; spread: 40deg; size: 3.6, 1; colors: #ff6eb4, #b69cff; shape: spark }
+        }
+        //  The UwU's star burst, in place of the ripples the liquid sends along the strip's edge (switched off while it is on): when a drawer has closed, five small stars fan
+        //  out from where it went back into the frame, shrink and fade. One clock for each drawer (`sb.*`, restarted by its closing; vitreus.plm).
+        group {
+            show: uwu_k > 0.01 and sb_dc < 0.995 and fm > 0.5
+            opacity: uwu_k * 80%
+            repeat st in 0..5 {
+                let bdca = 0 + (st - 2) * 24
+                let bdcd = (10 + 58 * (1 - (1 - sb_dc) * (1 - sb_dc))) * u
+                let bdcr = (2 + 3.5 * (1 - sb_dc) * (1 - sb_dc) + 1.2 * mod(st, 2)) * u * clamp((1 - sb_dc) * 3, 0, 1)
+                path { at: mix(lf.w + cos(bdca) * bdcd, pcx + sin(bdca) * bdcd, tm), mix(dc.ey + sin(bdca) * bdcd, lf.w + cos(bdca) * bdcd, tm); stroke: 2.4; color: deep; opacity: clamp((1 - sb_dc) * 3, 0, 1); move 0, -bdcr; line 0.3 * bdcr, -0.3 * bdcr; line bdcr, 0; line 0.3 * bdcr, 0.3 * bdcr; line 0, bdcr; line -0.3 * bdcr, 0.3 * bdcr; line -bdcr, 0; line -0.3 * bdcr, -0.3 * bdcr; close }
+                path { at: mix(lf.w + cos(bdca) * bdcd, pcx + sin(bdca) * bdcd, tm), mix(dc.ey + sin(bdca) * bdcd, lf.w + cos(bdca) * bdcd, tm); color: pick(mod(st, 5), #ffe27a, #ff6eb4, #7fd3ff, #b69cff, #ffffff); opacity: clamp((1 - sb_dc) * 3, 0, 1); move 0, -bdcr; line 0.3 * bdcr, -0.3 * bdcr; line bdcr, 0; line 0.3 * bdcr, 0.3 * bdcr; line 0, bdcr; line -0.3 * bdcr, 0.3 * bdcr; line -bdcr, 0; line -0.3 * bdcr, -0.3 * bdcr; close }
+            }
+        }
+        group {
+            show: uwu_k > 0.01 and sb_dk < 0.995 and fm > 0.5
+            opacity: uwu_k * 80%
+            repeat st in 0..5 {
+                let bdka = 0 + (st - 2) * 24
+                let bdkd = (10 + 58 * (1 - (1 - sb_dk) * (1 - sb_dk))) * u
+                let bdkr = (2 + 3.5 * (1 - sb_dk) * (1 - sb_dk) + 1.2 * mod(st, 2)) * u * clamp((1 - sb_dk) * 3, 0, 1)
+                path { at: mix(lf.w + cos(bdka) * bdkd, pcx + sin(bdka) * bdkd, tm), mix(dk.ey + sin(bdka) * bdkd, lf.w + cos(bdka) * bdkd, tm); stroke: 2.4; color: deep; opacity: clamp((1 - sb_dk) * 3, 0, 1); move 0, -bdkr; line 0.3 * bdkr, -0.3 * bdkr; line bdkr, 0; line 0.3 * bdkr, 0.3 * bdkr; line 0, bdkr; line -0.3 * bdkr, 0.3 * bdkr; line -bdkr, 0; line -0.3 * bdkr, -0.3 * bdkr; close }
+                path { at: mix(lf.w + cos(bdka) * bdkd, pcx + sin(bdka) * bdkd, tm), mix(dk.ey + sin(bdka) * bdkd, lf.w + cos(bdka) * bdkd, tm); color: pick(mod(st, 5), #ffe27a, #ff6eb4, #7fd3ff, #b69cff, #ffffff); opacity: clamp((1 - sb_dk) * 3, 0, 1); move 0, -bdkr; line 0.3 * bdkr, -0.3 * bdkr; line bdkr, 0; line 0.3 * bdkr, 0.3 * bdkr; line 0, bdkr; line -0.3 * bdkr, 0.3 * bdkr; line -bdkr, 0; line -0.3 * bdkr, -0.3 * bdkr; close }
+            }
+        }
+        group {
+            show: uwu_k > 0.01 and sb_dm < 0.995 and fm > 0.5
+            opacity: uwu_k * 80%
+            repeat st in 0..5 {
+                let bdma = 0 + (st - 2) * 24
+                let bdmd = (10 + 58 * (1 - (1 - sb_dm) * (1 - sb_dm))) * u
+                let bdmr = (2 + 3.5 * (1 - sb_dm) * (1 - sb_dm) + 1.2 * mod(st, 2)) * u * clamp((1 - sb_dm) * 3, 0, 1)
+                path { at: mix(lf.w + cos(bdma) * bdmd, pcx + sin(bdma) * bdmd, tm), mix(dm.ey + sin(bdma) * bdmd, lf.w + cos(bdma) * bdmd, tm); stroke: 2.4; color: deep; opacity: clamp((1 - sb_dm) * 3, 0, 1); move 0, -bdmr; line 0.3 * bdmr, -0.3 * bdmr; line bdmr, 0; line 0.3 * bdmr, 0.3 * bdmr; line 0, bdmr; line -0.3 * bdmr, 0.3 * bdmr; line -bdmr, 0; line -0.3 * bdmr, -0.3 * bdmr; close }
+                path { at: mix(lf.w + cos(bdma) * bdmd, pcx + sin(bdma) * bdmd, tm), mix(dm.ey + sin(bdma) * bdmd, lf.w + cos(bdma) * bdmd, tm); color: pick(mod(st, 5), #ffe27a, #ff6eb4, #7fd3ff, #b69cff, #ffffff); opacity: clamp((1 - sb_dm) * 3, 0, 1); move 0, -bdmr; line 0.3 * bdmr, -0.3 * bdmr; line bdmr, 0; line 0.3 * bdmr, 0.3 * bdmr; line 0, bdmr; line -0.3 * bdmr, 0.3 * bdmr; line -bdmr, 0; line -0.3 * bdmr, -0.3 * bdmr; close }
+            }
+        }
+        group {
+            show: uwu_k > 0.01 and sb_ds < 0.995 and lm > 0.5
+            opacity: uwu_k * 80%
+            repeat st in 0..5 {
+                let bdsa = -90 + (st - 2) * 24
+                let bdsd = (10 + 58 * (1 - (1 - sb_ds) * (1 - sb_ds))) * u
+                let bdsr = (2 + 3.5 * (1 - sb_ds) * (1 - sb_ds) + 1.2 * mod(st, 2)) * u * clamp((1 - sb_ds) * 3, 0, 1)
+                path { at: ccx + cos(bdsa) * bdsd, vb - lf.t / 2 + sin(bdsa) * bdsd; stroke: 2.4; color: deep; opacity: clamp((1 - sb_ds) * 3, 0, 1); move 0, -bdsr; line 0.3 * bdsr, -0.3 * bdsr; line bdsr, 0; line 0.3 * bdsr, 0.3 * bdsr; line 0, bdsr; line -0.3 * bdsr, 0.3 * bdsr; line -bdsr, 0; line -0.3 * bdsr, -0.3 * bdsr; close }
+                path { at: ccx + cos(bdsa) * bdsd, vb - lf.t / 2 + sin(bdsa) * bdsd; color: pick(mod(st, 5), #ffe27a, #ff6eb4, #7fd3ff, #b69cff, #ffffff); opacity: clamp((1 - sb_ds) * 3, 0, 1); move 0, -bdsr; line 0.3 * bdsr, -0.3 * bdsr; line bdsr, 0; line 0.3 * bdsr, 0.3 * bdsr; line 0, bdsr; line -0.3 * bdsr, 0.3 * bdsr; line -bdsr, 0; line -0.3 * bdsr, -0.3 * bdsr; close }
+            }
+        }
+        group {
+            show: uwu_k > 0.01 and sb_dl < 0.995 and lm > 0.5
+            opacity: uwu_k * 80%
+            repeat st in 0..5 {
+                let bdla = 90 + (st - 2) * 24
+                let bdld = (10 + 58 * (1 - (1 - sb_dl) * (1 - sb_dl))) * u
+                let bdlr = (2 + 3.5 * (1 - sb_dl) * (1 - sb_dl) + 1.2 * mod(st, 2)) * u * clamp((1 - sb_dl) * 3, 0, 1)
+                path { at: ccx + cos(bdla) * bdld, yo + lf.t / 2 + sin(bdla) * bdld; stroke: 2.4; color: deep; opacity: clamp((1 - sb_dl) * 3, 0, 1); move 0, -bdlr; line 0.3 * bdlr, -0.3 * bdlr; line bdlr, 0; line 0.3 * bdlr, 0.3 * bdlr; line 0, bdlr; line -0.3 * bdlr, 0.3 * bdlr; line -bdlr, 0; line -0.3 * bdlr, -0.3 * bdlr; close }
+                path { at: ccx + cos(bdla) * bdld, yo + lf.t / 2 + sin(bdla) * bdld; color: pick(mod(st, 5), #ffe27a, #ff6eb4, #7fd3ff, #b69cff, #ffffff); opacity: clamp((1 - sb_dl) * 3, 0, 1); move 0, -bdlr; line 0.3 * bdlr, -0.3 * bdlr; line bdlr, 0; line 0.3 * bdlr, 0.3 * bdlr; line 0, bdlr; line -0.3 * bdlr, 0.3 * bdlr; line -bdlr, 0; line -0.3 * bdlr, -0.3 * bdlr; close }
+            }
+        }
+        group {
+            show: uwu_k > 0.01 and sb_dz < 0.995 and lm > 0.5
+            opacity: uwu_k * 80%
+            repeat st in 0..5 {
+                let bdza = 180 + (st - 2) * 24
+                let bdzd = (10 + 58 * (1 - (1 - sb_dz) * (1 - sb_dz))) * u
+                let bdzr = (2 + 3.5 * (1 - sb_dz) * (1 - sb_dz) + 1.2 * mod(st, 2)) * u * clamp((1 - sb_dz) * 3, 0, 1)
+                path { at: screen.width - lf.t + cos(bdza) * bdzd, dz.fcy + sin(bdza) * bdzd; stroke: 2.4; color: deep; opacity: clamp((1 - sb_dz) * 3, 0, 1); move 0, -bdzr; line 0.3 * bdzr, -0.3 * bdzr; line bdzr, 0; line 0.3 * bdzr, 0.3 * bdzr; line 0, bdzr; line -0.3 * bdzr, 0.3 * bdzr; line -bdzr, 0; line -0.3 * bdzr, -0.3 * bdzr; close }
+                path { at: screen.width - lf.t + cos(bdza) * bdzd, dz.fcy + sin(bdza) * bdzd; color: pick(mod(st, 5), #ffe27a, #ff6eb4, #7fd3ff, #b69cff, #ffffff); opacity: clamp((1 - sb_dz) * 3, 0, 1); move 0, -bdzr; line 0.3 * bdzr, -0.3 * bdzr; line bdzr, 0; line 0.3 * bdzr, 0.3 * bdzr; line 0, bdzr; line -0.3 * bdzr, 0.3 * bdzr; line -bdzr, 0; line -0.3 * bdzr, -0.3 * bdzr; close }
+            }
+        }
+        group {
+            show: uwu_k > 0.01 and sb_do < 0.995 and lm > 0.5
+            opacity: uwu_k * 80%
+            repeat st in 0..5 {
+                let bdoa = 180 + (st - 2) * 24
+                let bdod = (10 + 58 * (1 - (1 - sb_do) * (1 - sb_do))) * u
+                let bdor = (2 + 3.5 * (1 - sb_do) * (1 - sb_do) + 1.2 * mod(st, 2)) * u * clamp((1 - sb_do) * 3, 0, 1)
+                path { at: screen.width - lf.t + cos(bdoa) * bdod, do.ey + sin(bdoa) * bdod; stroke: 2.4; color: deep; opacity: clamp((1 - sb_do) * 3, 0, 1); move 0, -bdor; line 0.3 * bdor, -0.3 * bdor; line bdor, 0; line 0.3 * bdor, 0.3 * bdor; line 0, bdor; line -0.3 * bdor, 0.3 * bdor; line -bdor, 0; line -0.3 * bdor, -0.3 * bdor; close }
+                path { at: screen.width - lf.t + cos(bdoa) * bdod, do.ey + sin(bdoa) * bdod; color: pick(mod(st, 5), #ffe27a, #ff6eb4, #7fd3ff, #b69cff, #ffffff); opacity: clamp((1 - sb_do) * 3, 0, 1); move 0, -bdor; line 0.3 * bdor, -0.3 * bdor; line bdor, 0; line 0.3 * bdor, 0.3 * bdor; line 0, bdor; line -0.3 * bdor, 0.3 * bdor; line -bdor, 0; line -0.3 * bdor, -0.3 * bdor; close }
+            }
+        }
+        //  Round the screen: confetti dots along the frame's bottom and right edges, and twinkling stars on its right corners.
+        group {
+            show: uwu_k > 0.01 and lm > 0.35
+            opacity: uwu_k * lm
+            repeat cd in 0..92 {
+                ellipse { at: 14 * u + cd * 27 * u, vb - lf.t / 2; radius: 2.3; color: pick(mod(cd, 4), #ff6eb4, #b69cff, #7fd3ff, #ffe27a) }
+            }
+            repeat cd2 in 0..40 {
+                ellipse { at: screen.width - lf.t / 2, yo + 40 * u + cd2 * 27 * u; radius: 2.3; color: pick(mod(cd2, 4), #7fd3ff, #ffe27a, #ff6eb4, #b69cff) }
+            }
+            repeat cs in 0..2 {
+                let cy2 = if(cs == 0, yo + lf.t / 2, vb - lf.t / 2)
+                let cx2 = screen.width - lf.t / 2
+                group { scale: 1 + 0.25 * sin(time * 170 + cs * 140); pivot: cx2, cy2
+                    path { at: cx2, cy2; color: #ffe27a; move 0, -6; line 1.8, -1.8; line 6, 0; line 1.8, 1.8; line 0, 6; line -1.8, 1.8; line -6, 0; line -1.8, -1.8; close }
+                }
+            }
+        }
+        //  The three dots on each tab (the volume card's hint), fading out as the panel they open comes out.
+        group {
+            show: lm > 0.35 and max(nt_vis_t, nt_vis_b) > 0.05
+            repeat i in 0..3 {
+                ellipse { at: ccx + (i - 1) * 6.5 * cu, yo + lf.t + nt_d * nt_vis_t / 2; radius: 1.6 * cu; color: ink; opacity: (35% + 55% * ntn_t.hover) * clamp(nt_vis_t * 1.6 - 0.4, 0, 1) * (1 - clamp(dl, 0, 1)) }
+                ellipse { at: ccx + (i - 1) * 6.5 * cu, vb - lf.t - nt_d * nt_vis_b / 2; radius: 1.6 * cu; color: ink; opacity: (35% + 55% * ntn_b.hover) * clamp(nt_vis_b * 1.6 - 0.4, 0, 1) * (1 - clamp(ds, 0, 1)) }
+            }
+        }
+        //  The battery gauge, inside the bar with a thick margin of empty glass round it (`bf.m`). It is only there
+        //  while `batt_open` (the pointer is on the bar, or the charge is under 20 %): it fades in and grows a little
+        //  from its middle line. It is a tint of the accent that brightens towards its front (a red one while it is
+        //  draining below 20 %), and its own rim gives it an edge. It follows the bar's shape (which swells with the
+        //  beat) and never moves by itself: an animation here would keep the scene painting, and most of all when
+        //  the battery is low.
+        group {
+            let bf.m = 7 * u                                        // the margin between the gauge and the bar's edge
+            let bf.x = cx - (bar.w + pv * 10 * u) / 2 + bf.m
+            let bf.mid = bar.y - bar.h / 2 + (bar.h + pop) / 2      // the pill's middle line
+            let bf.nub = 6.6 * u                                    // how far the nub on its far end sticks out
+            let bf.full = bar.w + pv * 10 * u - 2 * bf.m - bf.nub   // the gauge's length at 100 %: the nub has the same margin at its end as the gauge has at the other
+            let bf.tall = bar.h + pop - 2 * bf.m                   // the pill's height
+            let bf.show = clamp(batt_open, 0, 1) * (1 - lm)
+            let bf.hh = bf.tall * (0.7 + 0.3 * bf.show)
+            let bf.len = max(0.1, bf.full * batt_fill)
+            let bf.c = mix(mint, #e0655a, batt_low)
+            //  The empty part of the gauge, very faint, the same size as the gauge at a full charge. The nub on its far end, like the terminal of a
+            //  battery (it says what this is), is its own shape, below.
+            body {
+                color: bf.c
+                rim: 10%
+                opacity: 10% * bf.show * batt_on
+                box { from: bf.x, bf.mid - bf.hh / 2; size: bf.full, bf.hh; corner: min(bf.hh / 2, max(0.5, bar.rad - bf.m)) }
+                box { at: bf.x + bf.full + 3.1 * u, bf.mid; size: 7 * u, 0.56 * bf.hh; corner: 2.6 * u }
+            }
+            body {
+                gradient: bf.x, 0 to bf.x + max(1, bf.len), 0, mix(tint, bf.c, 0.28), bf.c
+                rim: 18%
+                opacity: (19% + 9% * batt_low) * bf.show * batt_on
+                box { from: bf.x, bf.mid - bf.hh / 2; size: bf.len, bf.hh; corner: min(bf.hh / 2, max(0.5, bar.rad - bf.m)) }
+            }
+            //  The nub on the gauge's far end, like a battery's terminal. It is in the faint track too, so that it has the same two layers the fill has (the
+            //  fill alone is not as bright as the fill over the track), in the colour the fill's gradient ends on, with the fill's opacity. Its edges are exactly the track nub's, it stops where the gauge starts, and it has no edge light of its own: the track's gives the edge,
+            //  and a second one would draw a line across the joint.
+            body {
+                color: bf.c
+                opacity: (19% + 9% * batt_low) * bf.show * batt_on
+                box { at: bf.x + bf.full + 3.3 * u, bf.mid; size: 6.6 * u, 0.56 * bf.hh; corner: 2.6 * u }
+            }
+        }
+
+        //  Down the left the strip is the gauge: it fills from the foot up, with the same margin of empty glass round it, the same colours, and
+        //  the same rule for when it shows (the pointer on the strip, or a charge under 20 %).
+        group {
+            let bl.m = 7 * u
+            let bl.show = clamp(batt_open, 0, 1) * lm
+            let bl.w = lf.w - 2 * bl.m
+            let bl.bot = vb - lf.t - bl.m
+            let bl.nub = 6.6 * u                                    // how far the nub on its top end sticks out
+            let bl.full = vh - 2 * (lf.t + bl.m) - bl.nub           // the gauge's length at 100 %: the nub has the same margin at its end as the gauge has at the other
+            let bl.len = max(0.1, bl.full * batt_fill)
+            let bl.c = mix(mint, #e0655a, batt_low)
+            //  The empty part of the strip's gauge (the nub on its top end is part of the fill's shape, below).
+            body {
+                color: bl.c
+                rim: 10%
+                opacity: 10% * bl.show * batt_on
+                box { from: bl.m, bl.bot - bl.full; size: bl.w, bl.full; corner: min(bl.w / 2, max(0.5, bar.rad - bl.m)); show: lm > 0.004 }
+                box { at: lf.x, bl.bot - bl.full - 3.1 * u; size: 0.56 * bl.w, 7 * u; corner: 2.6 * u; show: lm > 0.004 }
+            }
+            body {
+                gradient: lf.x, bl.bot to lf.x, bl.bot - max(1, bl.len), mix(tint, bl.c, 0.28), bl.c
+                rim: 18%
+                opacity: (19% + 9% * batt_low) * bl.show * batt_on
+                box { from: bl.m, bl.bot - bl.len; size: bl.w, bl.len; corner: min(bl.w / 2, max(0.5, bar.rad - bl.m)); show: lm > 0.004 }
+            }
+            //  The nub on the strip gauge's top end (see the bar's): its own body, in the colour the fill's gradient ends on.
+            body {
+                color: bl.c
+                opacity: (19% + 9% * batt_low) * bl.show * batt_on
+                box { at: lf.x, bl.bot - bl.full - 3.3 * u; size: 0.56 * bl.w, 6.6 * u; corner: 2.6 * u; show: lm > 0.004 }
+            }
+        }
+
+        //  The charging glint: a soft band of the accent that crosses the bar from left to right, inside its shape. Built
+        //  of thin slices whose strength follows a bell, so it has no hard edge; it is strongest in the middle of the
+        //  crossing and gone (opacity 0) whenever `charge_sweep` rests at 1.
+        group {
+            clip inset 0 box { at: cx, bar.y - bar.h / 2 + (bar.h + pop) / 2; size: bar.w + pv * 10 * u, bar.h + pop; corner: bar.rad }
+            let cg.w = 130 * u                                                   // the band's width
+            let cg.x = mix(cx - bar.w / 2 - cg.w / 2, cx + bar.w / 2 + cg.w / 2, clamp(charge_sweep, 0, 1))
+            let cg.a = sin(clamp(charge_sweep, 0, 1) * 180) * batt_on * (1 - lm)           // fades in and out over the crossing
+            repeat k in 0..14 {
+                box { at: cg.x + (k - 6.5) * cg.w / 14, bar.y; size: cg.w / 14 + 1, bar.h + pop; color: mint; opacity: 15% * cg.a * sin((k + 0.5) / 14 * 180) }
+            }
+        }
+
+        // ── the bar ──────────────────────────────────────────────────
+        //  Under everything else on the bar (declared first, so the pieces win their presses): it only says that the
+        //  pointer is over the bar, in the gaps between them.
+        zone box bar_hover { at: cx, bar.y; size: bar.w, bar.h; active: lm < 0.5 }
+        zone box lf_hover { at: lf.x, vc; size: lf.w, vh; active: lm > 0.5 }
+        zone box ov_btn { at: ob.x, ob.y; size: ob.s + 8 * u, ob.s + 8 * u; cursor: pointer; active: bs.ws > 0.5 and lm > 0.5 }
+        on press ov_btn { emit ov_toggle }
+        follow ovp = ov_btn.hover
+
+        //  What is in front: the app in small type above, the title under it, cut
+        //  with an ellipsis where the hardware metrics start.
+        //  Down the left the title gives up room to the controls while something plays.
+
+        //  The whole title area is a button: it opens the controls panel. Declared before
+        //  the little player controls below, which sit over it and win where they overlap.
+        //  It is only as wide as the text it holds (never past `win.w`, never thinner than a
+        //  fingertip), not the whole gap up to the metrics. Unseen copies, with no width limit,
+        //  only to know how wide the app name and the title really are.
+        text win.class { at: 0, 0; anchor: left center; size: 15; weight: 600; lines: 1; measure: vclw; opacity: 0; family: "Space Grotesk" }
+    text win.title { at: 0, 0; anchor: left center; size: 14; weight: 500; lines: 1; measure: vtiw; opacity: 0; family: "Space Grotesk" }
+    text win.class { at: floor(win.x + 0.5), floor(bar.y - 6.5 * u + 0.5); anchor: left center; size: 17; weight: 600; lines: 1; measure: clsw; opacity: 0; family: "Space Grotesk" }
+        text win.title { at: floor(win.x + 0.5), floor(bar.y + 8.75 * u + 0.5); anchor: left center; size: 13.5; weight: 500; lines: 1; measure: titw; opacity: 0; family: "Space Grotesk" }
+        text win_title30 { at: 0, 0; anchor: left center; size: 12; weight: 500; lines: 1; measure: tb_title_w; opacity: 0; family: "Space Grotesk" }
+        //  With a name in front (`win.have` 1) the button is as wide as the name. With no window
+        //  the texts are empty, and the button would be a narrow strip at the left: it then takes
+        //  most of the gap and is centred in it.
+        let win.have = clamp(max(clsw.width, titw.width) / (6 * u), 0, 1)
+        let win.zc = mix(win.cm, win.xs - 6 * u + win.hw / 2, win.have)
+        let win.zw = mix(max(48 * u, win.w - 12 * u), win.hw, win.have)
+        //  On the top strip the player's buttons sit inside the audio pill, between the speaker and
+        //  the microphone; down the left they still sit at the title's top end.
+        let mcx = if(lm < 0.5, tb.media_ctl, mix(win.cm, win.xs - 6 * u + win.hw - 27.5 * u, win.have))
+        let mcy = bar.y
+        zone box win_hit { at: win.zc, bar.y; size: win.zw, bar.h; cursor: pointer; active: bs.title > 0.5 }
+        on press win_hit { pending = none; panel_scr = screen.index; panel = if(panel == player, none, player) }
+        follow ptab_hold = if((pl_btn_z.hover > 0.5 or (win_hit.hover > 0.5 and lm < 0.5)) and panel != player, 1, 0)       // the title's tab (see `ptab_*`): the frame's zone or this one
+
+        // ── the player, small, in the bar ────────────────────────────
+        //  While there is a player, playing or paused; in the horizontal bar it sits inside the
+        //  audio pill on the right, between the speaker and the microphone.
+        group {
+            opacity: mshow * bs.media
+            //  In the horizontal bar `mcx`/`mcy` are the anchor inside the audio pill, 17 between centres.
+            zone box bp.prev { at: mcx - 17 * u, mcy; size: 17 * u, 18 * u; cursor: pointer; active: mshow > 0.5 and bs.media > 0.5 }
+            zone box bp.play { at: mcx, mcy; size: 17 * u, 18 * u; cursor: pointer; active: mshow > 0.5 and bs.media > 0.5 }
+            zone box bp.next { at: mcx + 17 * u, mcy; size: 17 * u, 18 * u; cursor: pointer; active: mshow > 0.5 and bs.media > 0.5 }
+            on press bp.prev { emit mcmd(0) }
+            on press bp.play { emit mcmd(1) }
+            on press bp.next { emit mcmd(2) }
+        }
+
+        zone box vt_hit { at: lf.x, lv.tm; size: lf.w - 6 * u, max(1, lv.span); cursor: pointer; active: lm > 0.5 and bv.title and lv.span > 20 * u }
+        on press vt_hit { pending = none; panel_scr = screen.index; panel = if(panel == player, none, player) }
+        zone box vm_prev { at: lf.x, lv.mid + 17 * cu; size: 30 * cu, 17 * cu; cursor: pointer; active: lm > 0.5 and bv.media and mshow > 0.5 }
+        zone box vm_play { at: lf.x, lv.mid; size: 30 * cu, 17 * cu; cursor: pointer; active: lm > 0.5 and bv.media and mshow > 0.5 }
+        zone box vm_next { at: lf.x, lv.mid - 17 * cu; size: 30 * cu, 17 * cu; cursor: pointer; active: lm > 0.5 and bv.media and mshow > 0.5 }
+        on press vm_prev { emit mcmd(0) }
+        on press vm_play { emit mcmd(1) }
+        on press vm_next { emit mcmd(2) }
+        zone box set_hit { at: mix(set.x, lf.x, lm), mix(bar.y, lv.set, lm); size: mix(24 * u, 36 * u, lm), mix(bar.h, 30 * u, lm); cursor: pointer; active: lm >= 0.5 }
+        on press set_hit { panel_scr = screen.index; panel = if(panel == settings, none, settings) }
+
+        zone box sr_hit { at: mix(sr.x, lf.x, lm), mix(bar.y, lv.sr, lm); size: mix(24 * u, 36 * u, lm), mix(bar.h, 30 * u, lm); cursor: pointer; active: bs.sr > 0.5 and lm > 0.5 }
+        on press sr_hit { panel_scr = screen.index; panel = if(panel == launch, none, launch) }
+        zone box ctl_hit { at: mix(ctl.x, lf.x, lm), mix(bar.y, lv.ctl, lm); size: mix(26 * u, 36 * u, lm), mix(bar.h, 30 * u, lm); cursor: pointer; active: bs.ctl > 0.5 }
+        on press ctl_hit { pending = none; panel_scr = screen.index; panel = if(panel == controls, none, controls) }
+
+        //  The calendar's button is the clock and a little around it: 4 more at each side.
+        zone box bar_hit { at: mix(at.clock, lf.x, lm), mix(bar.y, lv.clk + 30 * u, lm); size: mix(fw.clock + 8 * u, lf.w - 4 * u, lm), mix(bar.h, 100 * u, lm); cursor: pointer; active: bs.clock > 0.5 }
+        on press bar_hit { pending = none; panel_scr = screen.index; panel = if(panel == calendar, none, calendar) }
+        //  Right-click closes whatever is open. It also matters for a reason that
+        //  has nothing to do with the calendar: pleamar treats an unclaimed right
+        //  click, anywhere in a scene that never uses the right button at all, as
+        //  an emergency exit and quits outright - which is exactly what looked
+        //  like "everything crashes." Claiming it here, once, disarms that for
+        //  the whole scene.
+        on press right bar_hit { panel = none }
+        //  How open the battery gauge is (see `batt_open`): it lives here, where the bar's zones are, to read their hover.
+        follow batt_open = if(max(max(max(max(max(max(max(max(max(max(max(max(max(max(bar_hover.hover, wsh.1), wsh.2), wsh.3), wsh.4), wsh.5), win_hit.hover), bp.prev.hover), bp.play.hover), bp.next.hover), set_hit.hover), sr_hit.hover), ctl_hit.hover), bar_hit.hover), lf_hover.hover) > 0.15 or (pwr.percent < 20 and pwr.present), 1, 0)
+    }
+}

@@ -1,0 +1,107 @@
+part TrialGeometry {
+    // Trial-only top-bar anchors; hardware follows the QS-compatible workspace row.
+    let tb.row = bar.y
+    let tb.ws = bar.l + 10 * u
+    //  The horizontal row starts at the overview centre (10u into its section), then its shared pad;
+    //  the horizontal bar shows no overview button, so the pad folds away.
+    let tb.ws_row_r = tb.ws + 10 * u + ws.overview_pad + ws.row_w
+    //  From the left: the workspace row, the hardware metrics, then the focused window's title,
+    //  which hugs the shortened title the top strip draws. The player's buttons sit in the audio
+    //  pill on the right, between the speaker and the microphone.
+    let tb.metrics = max(tb.ws + 188 * u, tb.ws_row_r + 14 * u)
+    let tb.clock = cx
+    let tb.clock_w = 130 * u
+    let tb.clock_l = tb.clock - tb.clock_w / 2
+    // Fixed reading slots keep changing values from shifting either group.
+    let tb.hw_pad = 14
+    let tb.hw_gap = 8
+    let tb.load_cell_w = 66
+    let tb.mem_cell_w = 90
+    let tb.vmem_cell_w = 98
+    let tb.load_w = 2 * tb.hw_pad + 2 * tb.load_cell_w + tb.hw_gap
+    let tb.memory_w = 2 * tb.hw_pad + tb.mem_cell_w + tb.hw_gap + tb.vmem_cell_w
+    let tb.hw_w = tb.load_w + 12 + tb.memory_w
+    let tb.cpu = tb.metrics + tb.hw_pad + tb.load_cell_w / 2
+    let tb.gpu = tb.cpu + tb.load_cell_w + tb.hw_gap
+    let tb.memory = tb.metrics + tb.load_w + 12
+    let tb.mem = tb.memory + tb.hw_pad + tb.mem_cell_w / 2
+    let tb.vmem = tb.memory + tb.hw_pad + tb.mem_cell_w + tb.hw_gap + tb.vmem_cell_w / 2
+    let tb.hw_r = tb.memory + tb.memory_w
+    //  A title's button holds its shortened text and 6u of pad each side. It sits after the
+    //  metrics and never grows past the run the clock leaves.
+    let tb.ptitle_l = tb.hw_r + 14 * u
+    let tb.ptitle_max = max(48 * u, tb.clock_l - 12 * u - tb.ptitle_l)
+    let tb.ptitle_w = max(48 * u, min(tb.ptitle_max, tb_title_w.width + 12 * u))
+    let tb.ptitle_r = tb.ptitle_l + tb.ptitle_w
+    let tb.weather_y = bar.y - 10 * u
+    let tb.clock_y = bar.y + 6 * u
+    // Center each natural-width line, using the preview's 4px/7px gaps.
+    let tb.weather_icon = tb.clock - (14 + 4 + tb_temp_w.width) / 2 + 7
+    let tb.temp = tb.weather_icon + 7 + 4
+    let tb.date_w = max(tb_day_w.width, tb_date_w.width)
+    let tb.clock_line_w = tb_time_w.width + 7 + tb.date_w
+    let tb.time = tb.clock - tb.clock_line_w / 2
+    let tb.date = tb.clock + tb.clock_line_w / 2 - tb.date_w / 2
+    let tb.weekday_y = tb.clock_y - 4.5
+    let tb.date_y = tb.clock_y + 4.5
+    //  Right cluster, left to right: the bell beside the clock, the native tray
+    //  between its bookends, the night toggle, the volume/mic pair, the updates
+    //  pill between the mic and the US/AR language layout, the native settings
+    //  sliders, and power at the right edge. The bell moves beside the clock, 2u
+    //  past its reserved width, so it reads as part of the centre rather than
+    //  the far-right cluster.
+    let tb.power = bar.r - 14 * u
+    let tb.controls = tb.power - 27 * u
+    let tb.keyboard = tb.controls - 30 * u
+    //  The updates pill is centred in the gap between the mic and the language
+    //  layout. Both neighbours keep their existing press widths, and the gap
+    //  around the pill is the same on each side.
+    let tb.update_gap = 8 * u
+    let tb.update_pill_w = 38 * u
+    let tb.update_r = tb.keyboard - 17 * u - tb.update_gap
+    let tb.update_l = tb.update_r - tb.update_pill_w
+    let tb.update_pill = (tb.update_l + tb.update_r) / 2
+    //  The microphone mirrors the speaker; the player's buttons sit between them, inside the pill.
+    let tb.mic_readout_w = 28 * u
+    let tb.mic = tb.update_l - tb.update_gap - tb.mic_readout_w
+    let tb.mic_icon = tb.mic - 9 * u
+    let tb.mic_value = tb.mic
+    let tb.mic_hit = tb.mic + 7 * u
+    //  The player's run is centred in the gap: the same air past the volume readout and past the
+    //  mic glyph, with a hair more toward the speaker.
+    let tb.media_w = 51 * u
+    let tb.media_r = tb.mic - 26 * u
+    let tb.media_l = tb.media_r - tb.media_w
+    let tb.media_ctl = (tb.media_l + tb.media_r) / 2
+    let tb.volume = tb.media_l - 31 * u
+    //  The number hugs the speaker glyph (~5px ink gap); the pill keeps its ~15px pad left of the glyph.
+    let tb.volume_icon = tb.volume - 9 * u
+    let tb.volume_value = tb.volume
+    let tb.audio_l = tb.volume - 25 * u
+    let tb.audio_r = tb.mic + tb.mic_readout_w + 2 * u
+    let tb.night = tb.audio_l - 14 * u
+    let tb.tray_r = tb.night - 24 * u
+    let tb.tray_l = tb.tray_r - fw.tray
+    let tb.tray = (tb.tray_l + tb.tray_r) / 2
+    let tb.tray_sep_l = tb.tray_l - 8 * u
+    let tb.tray_sep_r = tb.tray_r + 8 * u
+    let tb.alert_pill_w = 38 * u
+    let tb.alert_l = tb.clock + tb.clock_w / 2 + 2 * u
+    //  Running windows sit immediately left of the tray: up to twelve 18u icons. When the right
+    //  cluster grows they tighten the gap rather than run into the bell.
+    let tb.win_n = min(wrn, 12)
+    let tb.win_gap = 12 * u * min(1, tb.win_n)
+    let tb.win_room = max(0, tb.tray_l - tb.win_gap - (tb.alert_l + tb.alert_pill_w + 12 * u))
+    let tb.win_step = if(tb.win_n <= 1, 24 * u, min(24 * u, max(18 * u, (tb.win_room - 18 * u) / max(1, tb.win_n - 1))))
+    let tb.win_w = if(tb.win_n <= 0, 0, (tb.win_n - 1) * tb.win_step + 18 * u)
+    let tb.win_r = tb.tray_l - tb.win_gap
+    let tb.win_l = tb.win_r - tb.win_w
+    let tb.win = (tb.win_l + tb.win_r) / 2
+    //  The fixed bell and update slots keep 1-3 digits from moving the icon, and the number hugs it.
+    let tb.updates = tb.update_l + 22 * u
+    let tb.update_icon = tb.update_l + 9 * u
+    let tb.update_count = tb.update_icon + 8 * u
+    let tb.alert_pill = tb.alert_l + tb.alert_pill_w / 2
+    let tb.alert_icon = tb.alert_l + 9 * u
+    let tb.alert_count = tb.alert_icon + 8 * u
+}

@@ -1,0 +1,17 @@
+//  Written by Vitreus's logic from the wallpaper (Iris); edits here are overwritten.
+//  `let`s only: the lock screen imports this. (The shell's own scene takes its colours as facts: palette-live.plm.)
+
+library Palette {
+    let ink    = #f0eeea
+    let faint  = #ebf1f1
+    let mint   = #e9efb6
+    let mintlo = #dce68c
+    let minthi = #fbfcf2
+    let onmint = #10161a
+    let tint   = #294748
+    let panel  = #365d5f
+    let deep   = #172728
+    let off    = #556c6c
+    let alert  = #dabda8
+    let wink   = #f0eeea
+}

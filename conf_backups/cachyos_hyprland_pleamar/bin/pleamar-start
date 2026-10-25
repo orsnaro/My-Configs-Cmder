@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Start the permanent Vitreus scene with a complete Wayland/Hyprland session
+# environment, even when systemd did not inherit it from the compositor.
+set -euo pipefail
+
+export HOME="${HOME:-/home/narol}"
+export XDG_CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+export XDG_DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
+export XDG_STATE_HOME="${XDG_STATE_HOME:-$HOME/.local/state}"
+export XDG_CACHE_HOME="${XDG_CACHE_HOME:-$HOME/.cache}"
+export XDG_RUNTIME_DIR="${XDG_RUNTIME_DIR:-/run/user/$(id -u)}"
+export PATH="$HOME/.local/bin:$HOME/.config/pleamar/shells/vitreus/bin:${PATH:-/usr/local/bin:/usr/bin:/bin}"
+export QT_QPA_PLATFORM="${QT_QPA_PLATFORM:-wayland;xcb}"
+
+if [ -z "${WAYLAND_DISPLAY:-}" ]; then
+    for socket in "$XDG_RUNTIME_DIR"/wayland-*; do
+        [ -S "$socket" ] || continue
+        case "$socket" in
+            *.lock|*.sock) continue ;;
+        esac
+        WAYLAND_DISPLAY="$(basename "$socket")"
+        export WAYLAND_DISPLAY
+        break
+    done
+fi
+
+if [ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
+    for directory in "$XDG_RUNTIME_DIR"/hypr/*; do
+        [ -d "$directory" ] || continue
+        HYPRLAND_INSTANCE_SIGNATURE="$(basename "$directory")"
+        export HYPRLAND_INSTANCE_SIGNATURE
+        break
+    done
+fi
+
+# The compositor renders on the AMD RX 6600 (renderD129). Pleamar talks Vulkan and
+# otherwise enumerates the Intel iGPU (renderD128) first: pin it to RADV so every
+# shell frame stays on the same GPU as the screen it is composited onto.
+export DRI_PRIME=1
+export VK_DRIVER_FILES=/usr/share/vulkan/icd.d/radeon_icd.json
+
+exec "$HOME/.local/bin/pleamar" \
+    --scene "$HOME/.config/pleamar/shells/vitreus/vitreus.plm" \
+    --no-hud "$@"

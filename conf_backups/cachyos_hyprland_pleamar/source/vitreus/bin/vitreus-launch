@@ -1,0 +1,35 @@
+#!/bin/sh
+# Open Vitreus's native launcher in one of its search modes.
+#
+# The launcher word is the first character typed: ":" is emoji and "^" is the
+# clipboard. The launcher's own launch_open handler clears the field when the
+# panel changes, so seed the mode after that handler has run.
+set -u
+
+mode=${1:-apps}
+case "$mode" in
+    apps) hint=-1 ;;
+    commands) hint=1 ;;
+    emoji) hint=2 ;;
+    clipboard) hint=3 ;;
+    *)
+        printf 'usage: %s [apps|commands|emoji|clipboard]\n' "$0" >&2
+        exit 2
+        ;;
+esac
+
+pleamar_bin=$(command -v pleamar) || {
+    echo 'vitreus-launch: pleamar is not in PATH' >&2
+    exit 127
+}
+
+say()
+{
+    "$pleamar_bin" --say vitreus "$@"
+}
+
+say "fact panel launch" || exit $?
+if [ "$hint" -ge 0 ]; then
+    sleep 0.12
+    say "emit launch_hint $hint"
+fi

@@ -1,0 +1,21 @@
+[Unit]
+Description=Pleamar Vitreus permanent shell
+Documentation=file:///home/narol/.config/pleamar/shells/vitreus
+After=graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/narol
+Environment=HOME=/home/narol
+Environment=XDG_CONFIG_HOME=/home/narol/.config
+Environment=XDG_DATA_HOME=/home/narol/.local/share
+Environment=XDG_STATE_HOME=/home/narol/.local/state
+Environment=XDG_CACHE_HOME=/home/narol/.cache
+ExecStart=/home/narol/.local/bin/pleamar-start
+Restart=on-failure
+RestartSec=2
+KillMode=mixed
+
+[Install]
+WantedBy=

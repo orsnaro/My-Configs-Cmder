@@ -1,0 +1,168 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "version": 3,
+  "final_space": true,
+  "palette": {
+    "pink": "magenta",
+    "blue": "blue",
+    "yellow": "yellow",
+    "purple": "lightBlue",
+    "green": "lightGreen",
+    "red": "red"
+  },
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:pink",
+          "template": "╭─["
+        },
+        {
+          "type": "session",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:pink",
+          "template": "<p:blue>\uf007 {{ .UserName }}</>"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:pink",
+          "template": "]─["
+        },
+        {
+          "type": "path",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:pink",
+          "template": "<p:yellow>\uf07b {{ .Path }}</>",
+          "properties": {
+            "style": "powerlevel",
+            "max_width": "{{ min 40 (max 1 (sub (int (default \"80\" .Env.COLUMNS)) 48)) }}",
+            "display_root": true
+          }
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:pink",
+          "template": "]"
+        },
+        {
+          "type": "git",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:pink",
+          "template": "{{ $remote := .Upstream }}{{ if not $remote }}{{ range $name, $_ := .Remotes }}{{ if or (not $remote) (eq $name \"origin\") }}{{ $remote = $name }}{{ end }}{{ end }}{{ end }}─[<p:purple>{{ .HEAD }}{{ if or (.Working.Changed) (.Staging.Changed) }}*{{ end }}{{ if gt .Ahead 0 }}↑{{ .Ahead }}{{ end }}{{ if gt .Behind 0 }}↓{{ .Behind }}{{ end }}</>{{ if $remote }} <p:blue>→ {{ $remote }}</>{{ end }}]",
+          "properties": {
+            "branch_icon": "\ue0a0 ",
+            "fetch_status": true,
+            "fetch_upstream_icon": false
+          }
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:pink",
+          "template": "{{ if .Env.VIRTUAL_ENV }}─[<p:green>\ue73c {{ base .Env.VIRTUAL_ENV }}</>]{{ end }}"
+        },
+        {
+          "type": "executiontime",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:pink",
+          "template": "─[<p:purple>\uf253 {{ .FormattedMs }}</>]",
+          "properties": {
+            "threshold": 500,
+            "style": "amarillo"
+          }
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "right",
+      "overflow": "hide",
+      "segments": [
+        {
+          "type": "sysinfo",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:yellow",
+          "template": "[MEM:{{ round .PhysicalPercentUsed .Precision }}%]",
+          "properties": {
+            "precision": 0,
+            "cache_duration": "none"
+          }
+        },
+        {
+          "type": "python",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:yellow",
+          "template": " [Py {{ .Full }}]",
+          "properties": {
+            "display_mode": "context",
+            "home_enabled": true,
+            "fetch_virtual_env": true,
+            "tooling": ["python", "python3"],
+            "cache_duration": "none"
+          }
+        },
+        {
+          "type": "node",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:green",
+          "template": " [Node {{ .Full }}]",
+          "properties": {
+            "display_mode": "files",
+            "cache_duration": "none"
+          }
+        },
+        {
+          "type": "go",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:blue",
+          "template": " [Go {{ .Full }}]",
+          "properties": {
+            "display_mode": "files",
+            "cache_duration": "none"
+          }
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "newline": true,
+      "segments": [
+        {
+          "type": "text",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:pink",
+          "template": "╰"
+        },
+        {
+          "type": "text",
+          "style": "plain",
+          "background": "transparent",
+          "foreground": "p:green",
+          "foreground_templates": ["{{ if gt .Code 0 }}p:red{{ end }}"],
+          "template": "❯"
+        }
+      ]
+    }
+  ]
+}

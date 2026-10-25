@@ -1,0 +1,4 @@
+scene TrialPolicyProbe {
+    surface { size: 64, 64; screens: "DP-2"; open: false }
+    permissions { run: "hyprctl", "printenv" }
+}

@@ -1,0 +1,231 @@
+language 0.1
+import "../palette-live.plm"
+
+//  The desktop editor: a shelf along the bottom of the screen with a tile for each thing that lives on the desktop, over everything (overlay layer), and the grid's dots on the desktop.
+//  A click on a tile puts that widget on the desktop or takes it off (the sticky-notes tile adds a note); the widgets that can be moved (the clock, the system monitor) show the cells they
+//  take and are dragged in place on the desktop itself, by their own scenes (`edit`, see desktopclock.plm); Done or Escape ends it. Nothing here catches the mouse unless it is open.
+//  Open it from the desktop menu's Edit row, from Super + Shift + E, or by hand:   pleamar --say desktopedit "fact open true"
+//  The logic (desktopedit.luau) does what the tiles say, by telling Vitreus and the widgets' scenes.
+
+scene DesktopEdit {
+    surface { size: full, full; anchor: top_left; margin: 0; level: overlay; screens: each max 4; reserve: -1; keyboard: on_demand while open }
+
+    permissions { run: "pleamar", "sh" }
+
+    fact pal_ink_r = 0.9608   // #f5f7f5
+    fact pal_ink_g = 0.9686
+    fact pal_ink_b = 0.9608
+    fact pal_faint_r = 0.7608   // #c2c7cc
+    fact pal_faint_g = 0.7804
+    fact pal_faint_b = 0.8000
+    fact pal_mint_r = 0.6196   // #9ed6bd
+    fact pal_mint_g = 0.8392
+    fact pal_mint_b = 0.7412
+    fact pal_mintlo_r = 0.4235   // #6cbc9c
+    fact pal_mintlo_g = 0.7373
+    fact pal_mintlo_b = 0.6118
+    fact pal_minthi_r = 0.8627   // #dcf8ec
+    fact pal_minthi_g = 0.9725
+    fact pal_minthi_b = 0.9255
+    fact pal_onmint_r = 0.0627   // #10161a
+    fact pal_onmint_g = 0.0863
+    fact pal_onmint_b = 0.1020
+    fact pal_tint_r = 0.1059   // #1b2127
+    fact pal_tint_g = 0.1294
+    fact pal_tint_b = 0.1529
+    fact pal_panel_r = 0.0863   // #161a1f
+    fact pal_panel_g = 0.1020
+    fact pal_panel_b = 0.1216
+    fact pal_deep_r = 0.0431   // #0b0e11
+    fact pal_deep_g = 0.0549
+    fact pal_deep_b = 0.0667
+    fact pal_off_r = 0.2275   // #3a4048
+    fact pal_off_g = 0.2510
+    fact pal_off_b = 0.2824
+    fact pal_alert_r = 0.9373   // #ef4444
+    fact pal_alert_g = 0.2667
+    fact pal_alert_b = 0.2667
+
+    fact open = false          // the editor is out
+    fact emon = -1             // which monitor shows the shelf (`screen.index`; -1: the first)
+    fact hov = -1              // the tile under the pointer (-1 none, 5 Done)
+    fact on0 = false           // what each tile shows: the clock, the system monitor, the audio visualiser, the webcam
+    fact on1 = false
+    fact on2 = false
+    fact on3 = false
+    fact on4 = false          // the calendar
+    fact on5 = false          // the reminders
+    fact obs = false           // Vitreus has its glass off: the shelf is flat obsidian
+    event tile_do ->           // a tile, by position
+
+    spring pop = 230, 17
+    prop eo = 0 ~pop
+    follow eo = if(open, 1, 0)
+    prop ob = 0 ~calm
+    follow ob = if(obs, 1, 0)
+    repeat i in 0..6 {
+        prop tn.$i = 0 ~calm
+    }
+    follow tn.0 = if(on0, 1, 0)
+    follow tn.1 = if(on1, 1, 0)
+    follow tn.2 = if(on2, 1, 0)
+    follow tn.3 = if(on3, 1, 0)
+    follow tn.4 = if(on4, 1, 0)
+    follow tn.5 = if(on5, 1, 0)
+
+    let mine = if(emon < 0, screen.index == 0, screen.index == emon)
+    let sw = max(screen.width, 800)
+    let sh = max(screen.height, 600)
+    let shw = min(sw - 80, 1220)
+    let shh = 150
+    let sx0 = (sw - shw) / 2
+    let sy0 = sh - shh - 48 + (1 - eo) * (shh + 60)
+    let tw = 104
+    let tp = 114
+    let tx0 = sx0 + 262
+
+    //  The grid: a dot at each corner of the cells (28 columns, 16 rows), from the bar's frame (`room_*`, which Vitreus tells) plus a 16 px margin: what the widgets snap to.
+    fact room_t = 0
+    fact room_r = 0
+    fact room_b = 0
+    fact room_l = 0
+    let gl = 16 + room_l
+    let gt = 16 + room_t
+    let eg.w = (sw - gl - 16 - room_r) / 28
+    let eg.h = (sh - gt - 16 - room_b) / 16
+    group {
+        show: eo > 0.01 and mine
+        opacity: eo
+        repeat i in 0..493 {
+            ellipse { at: gl + mod(i, 29) * eg.w, gt + floor(i / 29) * eg.h; radius: 1.8; color: ink; opacity: 24% }
+        }
+    }
+
+    //  The shelf's own zone first (a press on the bare shelf goes nowhere), then the tiles and Done over it.
+    zone box shelf { at: sx0 + shw / 2, sy0 + shh / 2; size: shw, shh; active: open and eo > 0.6 and mine }
+    repeat i in 0..7 {
+        zone box tz.$i { at: tx0 + i * tp + tw / 2, sy0 + 26 + 52; size: tw, 104; corner: 16; cursor: pointer; active: open and eo > 0.6 and mine; label: pick(i, "Clock", "System monitor", "Audio visualiser", "Webcam", "Calendar", "Reminders", "New sticky note") }
+        on press tz.$i { emit tile_do(i) }
+        on hover tz.$i for 1ms { hov = i }
+        on leave tz.$i { hov = -1 }
+    }
+    zone box donez { at: sx0 + shw - 82, sy0 + shh / 2; size: 124, 44; corner: 22; cursor: pointer; active: open and eo > 0.6 and mine; label: "Done" }
+    on press donez { open = false }
+    on hover donez for 1ms { hov = 7 }
+    on leave donez { hov = -1 }
+    on key Escape while open { open = false }
+
+    group {
+        show: eo > 0.01 and mine
+        opacity: clamp(eo * 1.5, 0, 1)
+        body {
+            color: tint
+            glass: 1
+            lens: false
+            rim: 70%
+            shine: 0, 0
+            shadow: 0, 10, 26, 36%
+            opacity: 88% * (1 - ob)
+            show: ob < 0.996
+            box { from: sx0, sy0; size: shw, shh; corner: 26 }
+        }
+        body {
+            color: mix(mix(tint, #000000, 0.7), ink, 0.3)
+            rim: 0%
+            opacity: 100% * ob
+            shadow: 0, 10, 26, 45%, #000000
+            show: ob > 0.004
+            box { from: sx0, sy0; size: shw, shh; corner: 26 }
+        }
+
+        //  what it is, and what the mouse does
+        box { at: sx0 + 34, sy0 + 34; size: 11, 11; corner: 2; rotate: 45deg; color: mint }
+        text "EDIT DESKTOP" { at: sx0 + 54, sy0 + 34; anchor: left center; size: 15; weight: 700; color: ink; family: "Space Grotesk" }
+        text "Pick it, place it, tweak it." { at: sx0 + 30, sy0 + 58; anchor: left center; size: 11; weight: 500; color: faint; family: "Space Grotesk" }
+        repeat r in 0..3 {
+            let ry = sy0 + 84 + r * 21
+            box { at: sx0 + 40, ry; size: 22, 17; corner: 5; color: mint; opacity: 20% }
+            text pick(r, "Tile", "Drag", "Esc") { at: sx0 + 40, ry; anchor: center center; size: 9; weight: 700; color: mint; family: "Space Grotesk" }
+            text pick(r, "Add it or take it off", "Move a widget", "Done") { at: sx0 + 60, ry; anchor: left center; size: 11; weight: 600; color: ink; opacity: 88%; family: "Space Grotesk" }
+        }
+        box { at: sx0 + 238, sy0 + shh / 2; size: 1.5, shh - 44; color: ink; opacity: 14% }
+
+        //  the tiles
+        repeat i in 0..7 {
+            let cx = tx0 + i * tp + tw / 2
+            let cy = sy0 + 26 + 52
+            let hv = if(hov == i, 1, 0)
+            let on = pick(i, tn.0, tn.1, tn.2, tn.3, tn.4, tn.5, 0)
+            box { at: cx, cy; size: tw, 104; corner: 16; color: deep; opacity: 55% + 10% * hv }
+            box { at: cx, cy; size: tw, 104; corner: 16; stroke: 1.6; color: mint; opacity: 12% + 18% * hv + 70% * on }
+            //  the picture of each (small shapes in the shell's colours)
+            group {
+                //  clock: the digits
+                show: i == 0
+                text "10" { at: cx, cy - 18; anchor: center center; size: 26; weight: 700; color: mix(faint, mint, on); family: "Space Grotesk" }
+                text "09" { at: cx, cy + 6; anchor: center center; size: 26; weight: 700; color: mix(faint, mint, on); family: "Space Grotesk" }
+            }
+            group {
+                //  system monitor: three meters
+                show: i == 1
+                repeat q in 0..3 {
+                    box { at: cx - 3, cy - 20 + q * 14; size: 44, 6; corner: 3; color: ink; opacity: 18% }
+                    box { from: cx - 25, cy - 23 + q * 14; size: 44 * pick(q, 0.7, 0.45, 0.85), 6; corner: 3; color: mix(faint, mint, on) }
+                    text pick(q, "C", "M", "G") { at: cx - 36, cy - 20 + q * 14; anchor: center center; size: 8; weight: 700; color: faint; family: "Space Grotesk" }
+                }
+            }
+            group {
+                //  visualiser: bars
+                show: i == 2
+                repeat q in 0..7 {
+                    box { at: cx - 24 + q * 8, cy - 8; size: 5, 8 + pick(q, 14, 30, 20, 38, 26, 16, 24); corner: 2.5; color: mix(faint, mint, on) }
+                }
+            }
+            group {
+                //  webcam: a round lens
+                show: i == 3
+                ellipse { at: cx, cy - 8; radius: 24; stroke: 3; color: mix(faint, mint, on) }
+                ellipse { at: cx, cy - 8; radius: 9; color: mix(faint, mint, on) }
+                ellipse { at: cx + 14, cy - 22; radius: 2.5; color: ink; opacity: 80% }
+            }
+            group {
+                //  sticky note: a square with a plus
+                //  calendar: a page with a grid of dots and a lit day
+                show: i == 4
+                box { at: cx, cy - 8; size: 46, 44; corner: 7; stroke: 2; color: mix(faint, mint, on) }
+                box { at: cx, cy - 22; size: 46, 9; corner: 4; color: mix(faint, mint, on) }
+                repeat q in 0..12 {
+                    ellipse { at: cx - 15 + mod(q, 4) * 10, cy - 10 + floor(q / 4) * 10; radius: 2.2; color: if(q == 6, mint, ink); opacity: if(q == 6, 100%, 45%) }
+                }
+            }
+            group {
+                //  reminders: ticked and unticked lines
+                show: i == 5
+                repeat q in 0..3 {
+                    box { at: cx - 20, cy - 22 + q * 15; size: 10, 10; corner: 3; stroke: 1.6; color: mix(faint, mint, on); }
+                    box { at: cx + 6, cy - 22 + q * 15; size: 28, 4; corner: 2; color: ink; opacity: 40% }
+                }
+                box { at: cx - 20, cy - 22; size: 10, 10; corner: 3; color: mix(faint, mint, on) }
+            }
+            group {
+                //  sticky note: a square with a plus
+                show: i == 6
+                box { at: cx, cy - 8; size: 46, 46; corner: 6; color: faint; opacity: 20% }
+                box { at: cx, cy - 8; size: 46, 46; corner: 6; stroke: 1.6; color: faint }
+                box { at: cx, cy - 8; size: 18, 3; corner: 1.5; color: ink }
+                box { at: cx, cy - 8; size: 3, 18; corner: 1.5; color: ink }
+            }
+            text pick(i, "CLOCK", "SYSTEM", "VISUALISER", "WEBCAM", "CALENDAR", "REMINDERS", "STICKY NOTE") { at: cx, cy + 38; anchor: center center; size: 10; weight: 700; color: mix(ink, mint, on); family: "Space Grotesk" }
+            //  the badge at the corner: a tick when it is on the desktop, a plus when it is not (the sticky note always has the plus)
+            let bon = if(i == 6, 0, on)
+            ellipse { at: cx + tw / 2 - 6, cy - 46; radius: 11; color: mix(deep, mint, 0.2 + 0.8 * bon); }
+            ellipse { at: cx + tw / 2 - 6, cy - 46; radius: 11; stroke: 1.5; color: mint }
+            text "✓" { at: cx + tw / 2 - 6, cy - 46; anchor: center center; size: 13; weight: 700; color: onmint; opacity: bon; family: "Space Grotesk" }
+            text "+" { at: cx + tw / 2 - 6, cy - 46; anchor: center center; size: 15; weight: 700; color: mint; opacity: 1 - bon; family: "Space Grotesk" }
+        }
+
+        //  Done
+        box { at: sx0 + shw - 82, sy0 + shh / 2; size: 124, 44; corner: 22; color: mint; opacity: 80% + 20% * if(hov == 7, 1, 0) }
+        text "✓  DONE" { at: sx0 + shw - 82, sy0 + shh / 2; anchor: center center; size: 14; weight: 700; color: onmint; family: "Space Grotesk" }
+    }
+}
