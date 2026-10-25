@@ -1,0 +1,6 @@
+#!/bin/sh
+# Opens the home folder in the user's file manager (SUPER + E). Asks the file manager itself over D-Bus (org.freedesktop.FileManager1,
+# which Nautilus, Dolphin, Thunar and others answer), because xdg-open follows the inode/directory handler, and on some systems that is a terminal.
+dbus-send --session --type=method_call --dest=org.freedesktop.FileManager1 /org/freedesktop/FileManager1 \
+    org.freedesktop.FileManager1.ShowFolders array:string:"file://$HOME" string:"" 2> /dev/null && exit 0
+exec xdg-open "$HOME"

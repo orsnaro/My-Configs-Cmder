@@ -1,0 +1,9 @@
+{
+  "only_pinned": true,
+  "pinned": [
+    "KDE Connect Indicator",
+    "blueman",
+    "nm-applet",
+    "proton.vpn.app.gtk"
+  ]
+}

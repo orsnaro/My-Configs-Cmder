@@ -1,0 +1,11 @@
+recorded: 2026-10-25
+kitty: 0.49.2
+kitty_native_resize_divider: present; native-action regression tests passed
+kitty_patch_diffs: original filenames target 0.49.1; review before applying to another package
+fish: 4.9.3
+login_shell: /usr/bin/fish
+oh_my_posh: 31.3.0
+oh_my_posh_installed: /home/narol/.local/bin/oh-my-posh
+oh_my_posh_sha256: 92a253b607dbc632f9e45c9de06cb9650a1a3e7c36df2012a7b7600f22dcad80
+active_prompt: ~/.config/ohmyposh/screenshot.omp.json
+note: binaries are not copied; restoration does not install packages or apply system patches

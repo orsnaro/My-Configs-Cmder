@@ -1,0 +1,64 @@
+part TrialStatus {
+    group {
+        show: lm < 0.5
+        // Separate, equal soft highlights; no divider between hardware pairs.
+        box { from: tb.metrics, tb.row - 14 * u; size: tb.load_w, 28 * u; corner: 7 * u; color: mint; opacity: 4% }
+        box { from: tb.memory, tb.row - 14 * u; size: tb.memory_w, 28 * u; corner: 7 * u; color: mint; opacity: 4% }
+        box { from: tb.audio_l, tb.row - 14 * u; size: tb.audio_r - tb.audio_l, 28 * u; corner: 7 * u; color: mint; opacity: 4% }
+        box { at: tb.metrics - 9 * u, tb.row; size: u, 20 * u; color: mint; opacity: 20% }
+        box { at: tb.tray_sep_l, tb.row; size: u, 20 * u; color: mint; opacity: 20%; show: tn > 0.02 }
+        box { at: tb.tray_sep_r, tb.row; size: u, 20 * u; color: mint; opacity: 20%; show: tn > 0.02 }
+
+        text trial_cpu { at: tb.cpu, tb.row; anchor: center; align: center; size: 13; weight: 600; width: tb.load_cell_w; lines: 1; color: ink; family: "Space Grotesk" }
+        text trial_gpu { at: tb.gpu, tb.row; anchor: center; align: center; size: 13; weight: 600; width: tb.load_cell_w; lines: 1; color: ink; family: "Space Grotesk" }
+        text trial_ram { at: tb.mem, tb.row; anchor: center; align: center; size: 13; weight: 600; width: tb.mem_cell_w; lines: 1; color: ink; family: "Space Grotesk" }
+        text trial_vram { at: tb.vmem, tb.row; anchor: center; align: center; size: 13; weight: 600; width: tb.vmem_cell_w; lines: 1; color: ink; family: "Space Grotesk" }
+        zone box trial_metrics_hit { from: tb.metrics, tb.row - bar.h / 2; size: tb.hw_r - tb.metrics, bar.h; cursor: pointer; label: "System monitor" }
+        on press trial_metrics_hit { pending = none; panel_scr = screen.index; set_page = pg_sys; panel = settings }
+
+        // Weather alone is stacked above the smaller clock/date.
+        text trial_weather_icon { at: tb.weather_icon, tb.weather_y; anchor: center; size: 14; weight: 400; color: mint; family: "Material Symbols Outlined" }
+        text trial_weather { at: tb.temp, tb.weather_y; anchor: left center; size: 11.5; weight: 400; measure: tb_temp_w; color: mint; family: "Space Grotesk" }
+        zone box trial_weather_hit { at: tb.clock, tb.weather_y; size: tb.clock_w, 15 * u; cursor: pointer; label: "Refresh Alexandria weather" }
+        on press trial_weather_hit { emit trial_weather_refresh }
+        text clock_hm { at: tb.time, tb.clock_y; anchor: left center; size: 21; weight: 600; measure: tb_time_w; color: mint; family: "Space Grotesk" }
+        text bar_date { at: tb.date, tb.weekday_y; anchor: center; size: 8.5; weight: 500; measure: tb_day_w; color: faint; family: "Space Grotesk" }
+        text trial_date_dm { at: tb.date, tb.date_y; anchor: center; size: 8.5; weight: 500; measure: tb_date_w; color: faint; family: "Space Grotesk" }
+
+        text "system_update" { at: tb.update_icon, tb.row; anchor: center; size: 18; weight: 400; color: faint; family: "Material Symbols Outlined" }
+        box { from: tb.update_l, tb.row - 14 * u; size: tb.update_pill_w, 28 * u; corner: 7 * u; color: mint; opacity: 4% }
+        text trial_updates { at: tb.update_count, tb.row; anchor: left center; align: left; size: 11.5; width: 18 * u; lines: 1; color: mint; family: "Space Grotesk" }
+        zone box trial_updates_hit { at: tb.update_pill, tb.row; size: tb.update_pill_w, bar.h; cursor: pointer; label: "Open interactive system updater" }
+        on press trial_updates_hit { emit trial_updates_open }
+
+        text "volume_up" { at: tb.volume_icon, tb.row; anchor: center; size: 18; weight: 400; color: faint; family: "Material Symbols Outlined"; show: not audio.muted }
+        text "volume_off" { at: tb.volume_icon, tb.row; anchor: center; size: 18; weight: 400; color: alert; family: "Material Symbols Outlined"; show: audio.muted }
+        text "{audio.volume * 100, 0}%" { at: tb.volume_value, tb.row; anchor: left center; size: 11.5; color: if(audio.muted, alert, mint); family: "Space Grotesk" }
+        zone box trial_volume_hit { at: tb.volume, tb.row; size: 40 * u, bar.h; cursor: pointer; label: "Audio controls; left click opens the mixer, right click mute" }
+        on press trial_volume_hit { pending = none; panel_scr = screen.index; mixer_on_open = true; panel = controls }
+        on press right trial_volume_hit { emit trial_volume_toggle }
+        on scroll trial_volume_hit { emit trial_volume_wheel(wheel) }   // the wheel steps the level 5% a notch
+        text "mic" { at: tb.mic_icon, tb.row; anchor: center; size: 18; weight: 400; color: faint; family: "Material Symbols Outlined"; show: not audio.input_muted }
+        text "mic_off" { at: tb.mic_icon, tb.row; anchor: center; size: 18; weight: 400; color: alert; family: "Material Symbols Outlined"; show: audio.input_muted }
+        text "{audio.input * 100, 0}%" { at: tb.mic_value, tb.row; anchor: left center; size: 11.5; color: if(audio.input_muted, alert, mint); family: "Space Grotesk" }
+        zone box trial_mic_hit { at: tb.mic_hit, tb.row; size: 42 * u, bar.h; cursor: pointer; label: "Microphone gain; click to mute, scroll to adjust" }
+        on press trial_mic_hit { emit trial_mic_toggle }
+        on scroll trial_mic_hit { emit trial_mic_wheel(wheel) }   // the wheel steps the gain 5% a notch
+        text "bedtime" { at: tb.night, tb.row; anchor: center; size: 18; weight: 400; color: mint; family: "Material Symbols Outlined" }
+        zone box trial_night_hit { at: tb.night, tb.row; size: 28 * u, bar.h; cursor: pointer; label: "Night settings — existing schedule stays in control during this trial" }
+        on press trial_night_hit { pending = none; panel_scr = screen.index; set_page = pg_night; panel = settings }
+        text "notifications" { at: tb.alert_icon, tb.row; anchor: center; size: 18; weight: 400; color: faint; family: "Material Symbols Outlined" }
+        box { from: tb.alert_l, tb.row - 14 * u; size: tb.alert_pill_w, 28 * u; corner: 7 * u; color: mint; opacity: 4% }
+        text "{nt_hist.count}" { at: tb.alert_count, tb.row; anchor: left center; align: left; size: 11.5; width: 18 * u; lines: 1; color: mint; family: "Space Grotesk" }
+        zone box trial_alert_hit { at: tb.alert_pill, tb.row; size: tb.alert_pill_w, bar.h; cursor: pointer; label: "Notification history and Do Not Disturb" }
+        on press trial_alert_hit { pending = none; panel_scr = screen.index; panel = controls; emit trial_alerts_open }
+
+        // Visually left-to-right with the tray at the middle of the cluster: night, native Controls, Power, then the US/AR layout at the right edge.
+        text trial_keyboard { at: tb.keyboard, tb.row; anchor: center; size: 13; weight: 600; color: faint; family: "Space Grotesk" }
+        zone box trial_keyboard_hit { at: tb.keyboard, tb.row; size: 34 * u, bar.h; cursor: pointer; label: "Switch keyboard layout — US / AR" }
+        on press trial_keyboard_hit { emit trial_keyboard_switch }
+        text "power_settings_new" { at: tb.power, tb.row; anchor: center; size: 18; weight: 400; color: faint; family: "Material Symbols Outlined" }
+        zone box trial_power_hit { at: tb.power, tb.row; size: 28 * u, bar.h; cursor: pointer; label: "Open power and session controls" }
+        on press trial_power_hit { pending = none; panel_scr = screen.index; panel = controls; emit trial_power_open }
+    }
+}

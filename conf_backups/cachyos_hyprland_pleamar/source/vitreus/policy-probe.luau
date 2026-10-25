@@ -1,0 +1,8 @@
+require("logic/trial_policy")()
+run("hyprctl", { "eval", "error('MUST_NOT_RUN')" }, function(_, code)
+    assert(code ~= 0, "policy failed to intercept compositor mutation")
+    run("printenv", { "USER" }, function(out, status)
+        assert(status == 0 and #out > 0, "read-only command was blocked")
+        log("native trial-policy probe PASS")
+    end)
+end)

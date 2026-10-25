@@ -1,0 +1,5 @@
+#!/bin/sh
+# Read-only Google Calendar sync using the existing ~/.config/gcal OAuth token.
+# The venv belongs to the old statusbar integration; no secret is copied here.
+set -eu
+exec "$HOME/.config/gcal/.venv/bin/python" "$HOME/.config/gcal/gcal-sync.py"

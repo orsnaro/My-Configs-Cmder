@@ -1,0 +1,1029 @@
+part Dashboard {
+    //  ── the dashboard ─────────────────────────────────────────────────────────────────────────────────────────────────────────
+    //  Eight tiles of the shell's glass, of different sizes on a grid four across and three down, that rise softly out of the middle of
+    //  the screen as if from just under the surface of water. The screen goes a little dim and deep like a pool (dashboard/water.wgsl);
+    //  the tiles are already there under it, seen through the water (wavering, tinted, soft, light drifting over them:
+    //  dashboard/underwater.wgsl), and come up through the last of it one after another; as they break the surface, ripples run round
+    //  each tile's rim and bulge it. Closing lets the water back over them, with a last set of ripples.
+    //
+    //    ┌──┬──┬───────────────────────────┬──────────────────┐
+    //    │▮ │▮ │ clock  ·  reminders       │ weather          │
+    //    │▮ │▮ ├─────────┬─────────────────┤                  │
+    //    │▮ │▮ │ notifi- │ quick toggles   ├──────────────────┤
+    //    │▮ │▮ │ cations ├─────────────────┤ now playing      │
+    //    │▮ │▮ │         │ system, network │                  │
+    //    └──┴──┴─────────┴─────────────────┴──────────────────┘
+    //  The tiles are staggered, not a grid: no edge runs straight across (the weather goes further down than the clock, the toggles
+    //  stop short of the player).
+    //
+    //  Down the left, as tall as the dashboard, two sliders of glass of their own (no tile round them): the volume and the screen's
+    //  brightness.
+    //
+    //  Everything on it works, through the same events as the shell's own panels: the volume slider, mute and the microphone, the
+    //  player's buttons, the quick toggles, Do Not Disturb, and ticking off today's reminders (the calendar's). The system tile keeps
+    //  bin/vitreus-sysmon running while the dashboard is open (vitreus.luau).
+    //  SUPER + SHIFT + D (hypr_vitreus.lua) or `pleamar --say vitreus "emit dash_toggle"` opens and closes it; Escape or a click
+    //  outside the tiles closes it.
+
+    //  One tile: its glass (the shell's, like the overview's cards), the water over it until it has run off, and what it holds, all
+    //  through the surfacing effect. `c` is how far it has surfaced (each tile has its own, so they come up one after another).
+    component DshTile(l: number, t: number, w: number, h: number, c: number, k: number = 26) {
+        size: w, h
+        group {
+            pivot: l + w / 2, t + h / 2
+            scale: 0.96 + 0.04 * c
+            opacity: c * dsh.vis
+            shader: dsh_underwater, dsh_under, dsh.wr, dsh.wg, dsh.wb, dsh_rq, dsh_rh, w / 2 while not dsh.still
+            //  A little larger than the tile and all but invisible: it makes the group's box that big, so the ripples have room.
+            box { from: l - 36, t - 36; size: w + 72, h + 72; color: tint; opacity: 0.015; show: not dsh.still }
+            body {
+                color: mix(tint, #000000, cy_dark * cy_k)
+                glass: 100%
+                opacity: glass_op * (1 - obs)
+                lens: glass_bend
+                frost: glass_clear
+                refraction: glass_refr
+                dispersion: glass_disp
+                rim: 14% * glass_rim
+                shine: pointer
+                shadow: 0, 14 * (1 - dsh_under), 36, 34% * (1 - dsh_under), deep
+                show: obs < 0.996
+                box { from: l, t; size: w, h; corner: k }
+            }
+            //  Obsidian, as the overview's: blur behind it asked for by a faint glass body, the obsidian over it.
+            body {
+                color: obsidian
+                glass: 100%
+                lens: false
+                rim: 0%
+                refraction: 0%
+                dispersion: 0%
+                shine: 9000, 9000
+                opacity: obs * 0.34
+                show: obs > 0.97
+                box { from: l, t; size: w, h; corner: k }
+            }
+            body {
+                color: obsidian
+                rim: 0%
+                opacity: obs * (1 - 0.4 * clamp(hy_blur, 0, 1))
+                shadow: 0, 14 * (1 - dsh_under), 42, 45% * (1 - dsh_under), #000000
+                show: obs > 0.004
+                box { from: l, t; size: w, h; corner: k }
+            }
+            box { from: l, t; size: w, h; corner: k; color: rgb(dsh.wr, dsh.wg, dsh.wb); opacity: 0.45 * dsh_under }
+            //  The pointer's light on the glass: a soft wash of the accent under it.
+            body {
+                gradient: radial cursor.x, cursor.y radius 220, mint, tint
+                rim: 0%
+                opacity: 0.13 * dsh.vis
+                box { from: l, t; size: w, h; corner: k }
+            }
+            children
+        }
+    }
+
+    group {
+        show: dsh_water > 0.004 or dsh_rise > 0.004
+        let dsh.gap = 18
+        let dsh.pw = 88                                               // a slider's width
+        let dsh.tw = min(1420, screen.width * 0.74)                   // the whole dashboard: the sliders, then the grid
+        let dsh.gw = dsh.tw - dsh.pw * 2 - dsh.gap * 2                // the grid of tiles, right of the sliders
+        let dsh.gh = min(640, vh * 0.66)
+        let dsh.sl = cx - dsh.tw / 2                                  // the sliders' left edge
+        let dsh.x0 = dsh.sl + dsh.pw * 2 + dsh.gap * 2                // the grid's
+        let dsh.y0 = yo + vh / 2 - dsh.gh / 2
+        let dsh.sc = 0.95 + 0.05 * dsh_rise                           // a little smaller while further down
+        let dsh.vis = clamp(dsh_rise * 1.5, 0, 1)
+        //  Nothing of the surfacing effect is running (the same test as its shader's).
+        let dsh.still = dsh_under < 0.002 and (dsh_rh < 0.01 or dsh_rq >= 0.999)
+        //  The water's colour, as numbers for the effect's shader (a group's shader is given numbers, not colours).
+        let dsh.wr = pal_deep_r * 0.7 + pal_mint_r * 0.3
+        let dsh.wg = pal_deep_g * 0.7 + pal_mint_g * 0.3
+        let dsh.wb = pal_deep_b * 0.7 + pal_mint_b * 0.3
+
+        //  Where each tile is: its left and top edges, its width and height. Laid out as fractions of the grid's width and height, with
+        //  half a gap taken off each edge that has a neighbour.
+        let dsh.hg = dsh.gap / 2
+        let dA.l = dsh.x0
+        let dA.t = dsh.y0
+        let dA.w = dsh.gw * 0.60 - dsh.hg
+        let dA.h = dsh.gh * 0.35 - dsh.hg
+        let dW.l = dsh.x0 + dsh.gw * 0.60 + dsh.hg
+        let dW.t = dsh.y0
+        let dW.w = dsh.gw * 0.40 - dsh.hg
+        let dW.h = dsh.gh * 0.48 - dsh.hg
+        let dD.l = dsh.x0
+        let dD.t = dsh.y0 + dsh.gh * 0.35 + dsh.hg
+        let dD.w = dsh.gw * 0.27 - dsh.hg
+        let dD.h = dsh.gh * 0.47 - dsh.hg                              // the notifications: shorter, they scroll
+        let dB.l = dsh.x0                                             // the battery, under them
+        let dB.t = dD.t + dD.h + dsh.gap
+        let dB.w = dD.w
+        let dB.h = dsh.y0 + dsh.gh - dB.t
+        let dF.l = dsh.x0 + dsh.gw * 0.27 + dsh.hg
+        let dF.t = dsh.y0 + dsh.gh * 0.35 + dsh.hg
+        let dF.w = dsh.gw * 0.33 - dsh.gap
+        let dF.h = dsh.gh * 0.27 - dsh.gap
+        let dG.l = dsh.x0 + dsh.gw * 0.27 + dsh.hg
+        let dG.t = dsh.y0 + dsh.gh * 0.62 + dsh.hg
+        let dG.w = dsh.gw * 0.33 - dsh.gap
+        let dG.h = dsh.gh * 0.38 - dsh.hg
+        let dC.l = dsh.x0 + dsh.gw * 0.60 + dsh.hg
+        let dC.t = dsh.y0 + dsh.gh * 0.48 + dsh.hg
+        let dC.w = dsh.gw * 0.40 - dsh.hg
+        let dC.h = dsh.gh * 0.52 - dsh.hg
+        let dE.l = dsh.sl                                             // the two sliders, together
+        let dE.t = dsh.y0
+        let dE.w = dsh.pw * 2 + dsh.gap
+        let dE.h = dsh.gh
+
+        //  (No pool over the screen: the desktop is left as it is, not dimmed or deepened, while the dashboard is up.)
+
+        group {
+            pivot: cx, yo + vh / 2
+            scale: dsh.sc
+
+            //  Each tile takes its own presses, so a click on one does not reach `away_z` (which closes the dashboard). Declared before the
+            //  tiles: a press goes to the zone declared last, so their buttons, declared after, still get theirs.
+            zone box dsh_hold.0 { from: dA.l, dA.t; size: dA.w, dA.h; corner: 26; active: dash_open; label: "Clock and reminders" }
+            zone box dsh_hold.1 { from: dW.l, dW.t; size: dW.w, dW.h; corner: 26; active: dash_open; label: "Weather" }
+            zone box dsh_hold.2 { from: dC.l, dC.t; size: dC.w, dC.h; corner: 26; active: dash_open; label: "Now playing" }
+            zone box dsh_hold.3 { from: dD.l, dD.t; size: dD.w, dD.h; corner: 26; active: dash_open; label: "Notifications" }
+            zone box dsh_hold.7 { from: dB.l, dB.t; size: dB.w, dB.h; corner: 26; active: dash_open; label: "Battery" }
+            zone box dsh_hold.5 { from: dF.l, dF.t; size: dF.w, dF.h; corner: 26; active: dash_open; label: "User" }
+            zone box dsh_hold.6 { from: dG.l, dG.t; size: dG.w, dG.h; corner: 26; active: dash_open; label: "System and network" }
+
+            //  ── Clock and reminders: the time, big and light, the date (and the battery, if there is one) under it; on the right today's
+            //  reminders (the calendar's), ticked off with a press ──
+            DshTile(dA.l, dA.t, dA.w, dA.h, dsh_c0) {
+                //  The time, set big: the hour oversized and thin, then the minute's two digits staggered down a diagonal, the tens in the accent
+                //  and heavy, the ones light, just a hair apart in height, so it reads as a composition and not a line of digits.
+                let dAt.cy = dA.t + dA.h * 0.44
+                text dsh_hh { at: dA.l + 22, dAt.cy; anchor: left center; size: 128; weight: 700; family: "Space Grotesk"; gradient: 0, dAt.cy - 64 to 0, dAt.cy + 64, ink, mix(ink, mint, 0.5); measure: dsh_hw }
+                text dsh_m1 { at: dA.l + 22 + dsh_hw.width + 16, dAt.cy - 3; anchor: left center; size: 70; weight: 700; family: "Space Grotesk"; color: mint }
+                text dsh_ap { at: dA.l + 22 + dsh_hw.width + 56 + 48, dAt.cy + 22; anchor: left center; size: 18; weight: 600; family: "Space Grotesk"; color: faint }
+                text dsh_m2 { at: dA.l + 22 + dsh_hw.width + 56, dAt.cy + 3; anchor: left center; size: 70; weight: 300; family: "Space Grotesk"; color: ink }
+                box { at: dA.l + 22 + dsh_hw.width + 6, dAt.cy; size: 3, 70; corner: 1.5; color: mint; opacity: 0.35 }
+                text now.date { at: dA.l + 32, dA.t + dA.h - 40; anchor: left center; size: 18; family: "Space Grotesk"; color: faint; measure: dsh_date }
+                //  The seconds: sixty ticks along the foot, lit as far as the minute has got, the latest one taller.
+                repeat s in 0..60 {
+                    box { at: dA.l + 28 + s * (dA.w - 56) / 59, dA.t + dA.h - 16; size: 2, if(s == tick.second, 11, 5); corner: 1; color: mint; opacity: if(s <= tick.second, if(s == tick.second, 1, 0.5), 0.12) }
+                }
+                //  Today's reminders, right of the clock, after a hairline.
+                let dR.l = dA.l + if(dsh_ap_on, max(300, 22 + dsh_hw.width + 104 + 66), 300)   // their left edge and width: past the AM / PM label, whatever the hour's digits measure
+                let dR.w = dA.l + dA.w - 28 - dR.l
+                box { from: dR.l - 20, dA.t + 26; size: 1, dA.h - 52; color: ink; opacity: 0.1 }
+                text "Reminders" { at: dR.l, dA.t + 34; anchor: left center; size: 15; weight: 600; family: "Space Grotesk"; color: ink }
+                text "Today" { at: dR.l + dR.w, dA.t + 34; anchor: right center; size: 12; family: "Space Grotesk"; color: faint }
+                repeat i in 0..4 {
+                    let dRi.y = dA.t + 68 + i * 32
+                    group {
+                        show: cal_events.count > i
+                        ellipse { at: dR.l + 9, dRi.y; radius: 9; color: if(cal_events.$i.done, mint, ink); opacity: if(cal_events.$i.done, 0.9, 0.12 + 0.1 * dsh_rem.$i.hover) }
+                        text "󰄬" { at: dR.l + 9, dRi.y; anchor: center; size: 11; family: "SpaceMono Nerd Font Propo"; color: onmint; show: cal_events.$i.done }
+                        text cal_events.$i.title { at: dR.l + 28, dRi.y; anchor: left center; size: 14; width: dR.w - 90; lines: 1; family: "Space Grotesk"; color: ink; opacity: if(cal_events.$i.done, 0.5, 1) }
+                        text cal_events.$i.time { at: dR.l + dR.w, dRi.y; anchor: right center; size: 11.5; family: "Space Grotesk"; color: faint }
+                        zone box dsh_rem.$i { from: dR.l - 6, dRi.y - 15; size: dR.w + 12, 30; cursor: pointer; active: dash_open; label: "Done"; role: toggle; checked: cal_events.$i.done }
+                        on press dsh_rem.$i { emit cal_check(i) }
+                    }
+                }
+                //  Nothing due: a tiny city under the sky outside. The weather is the real one (wx_kind): sun by day when it is clear or partly
+                //  clear, stars by night, clouds when it is cloudy, rain or a storm (with flashes), snow, drifting fog. The windows are lit
+                //  at night and mostly dark by day. Without a forecast yet it is a clear sky. Gone as soon as there is a reminder.
+                group {
+                    show: cal_events.count < 1
+                    let dRy.by = dA.t + dA.h - 30                     // the ground
+                    let dRy.mh = max(40, dRy.by - (dA.t + 92))        // the tallest a building gets
+                    let dRy.k = if(wx_ok, wx_kind, 0)                 // 0 clear · 1 partly · 2 cloud · 3 fog · 4 rain · 5 snow · 6 storm
+                    let dRy.day = if(now.hour >= 7 and now.hour < 19, 1, 0)
+                    let dRy.clear = if(dRy.k <= 1, 1, 0)
+                    text "Nothing for today" { at: dR.l + dR.w / 2, dA.t + 62; anchor: center; size: 13; family: "Space Grotesk"; color: faint }
+                    //  stars (night, clear skies only)
+                    repeat k in 0..9 {
+                        box { at: dR.l + fract(k * 0.618 + 0.1) * dR.w, dA.t + 74 + fract(k * 0.37) * 22; size: 2, 2; color: ink; opacity: (1 - dRy.day) * dRy.clear * (0.1 + 0.4 * (sin(time * 50 + k * 83) + 1) / 2) }
+                    }
+                    //  the sun (day, clear or partly): a square with rays that turn
+                    group {
+                        show: dRy.day > 0 and dRy.clear > 0
+                        let dRs.x = dR.l + dR.w * 0.78
+                        let dRs.y = dA.t + 92
+                        box { at: dRs.x, dRs.y; size: 14, 14; color: #ffd27a }
+                        group {
+                            pivot: dRs.x, dRs.y
+                            rotate: time * 6deg
+                            repeat r in 0..8 {
+                                group {
+                                    pivot: dRs.x, dRs.y
+                                    rotate: r * 45deg
+                                    box { at: dRs.x, dRs.y - 17; size: 3, 6; color: #ffd27a; opacity: 0.7 }
+                                }
+                            }
+                        }
+                    }
+                    //  clouds drifting (partly: one; cloudy, rain, snow, storm: three, darker with rain)
+                    group {
+                        clip inset 0 box { from: dR.l, dA.t + 72; size: dR.w, 60 }
+                        repeat k in 0..3 {
+                            let dRc.x = dR.l - 40 + mod(time * (5 + k * 2) + k * dR.w * 0.37, dR.w + 80)
+                            let dRc.y = dA.t + 84 + k * 10
+                            let dRc.o = if(dRy.k >= 4, 0.3, 0.18)
+                            group {
+                                show: (dRy.k == 1 and k == 0) or dRy.k >= 2
+                                box { from: dRc.x, dRc.y + 6; size: 42, 9; color: ink; opacity: dRc.o }
+                                box { from: dRc.x + 6, dRc.y; size: 18, 9; color: ink; opacity: dRc.o }
+                                box { from: dRc.x + 20, dRc.y + 3; size: 15, 7; color: ink; opacity: dRc.o }
+                            }
+                        }
+                    }
+                    //  fog: faint bands sliding across
+                    repeat f in 0..3 {
+                        box { from: dR.l + mod(time * (4 + f * 3) + f * 90, dR.w + 120) - 120, dRy.by - 20 - f * 16; size: 120, 5; color: ink; opacity: if(dRy.k == 3, 0.1, 0) }
+                    }
+                    repeat b in 0..9 {
+                        let dRb.w = floor(dR.w / 9)
+                        let dRb.x = dR.l + b * dRb.w
+                        let dRb.h = floor(22 + fract(b * 0.37 + 0.13) * (dRy.mh - 22))
+                        box { from: dRb.x, dRy.by - dRb.h; size: dRb.w - 2, dRb.h; color: ink; opacity: 0.1 }
+                        repeat r in 0..9 {
+                            repeat c in 0..4 {
+                                let dRw.k = fract(sin((b * 7 + r * 13 + c * 29) * 57) * 437.5)
+                                let dRw.on = fract(dRw.k * 13 + floor(time * 0.2 + dRw.k * 9) * 0.618) > if(dRy.day > 0, 0.93, 0.55)
+                                box { from: dRb.x + 4 + c * 7, dRy.by - dRb.h + 5 + r * 7; size: 3, 3; color: mint; opacity: 0.85; show: dRw.on and (r + 1) * 7 + 4 < dRb.h and 4 + c * 7 + 3 < dRb.w - 3 }
+                            }
+                        }
+                    }
+                    box { from: dR.l, dRy.by; size: dR.w, 2; color: ink; opacity: 0.2 }
+                    //  rain (rain or storm), soft
+                    repeat d in 0..32 {
+                        let dRd.p = fract(time * (0.7 + 0.5 * fract(d * 0.37)) + d * 0.137)
+                        let dRd.y = dA.t + 100 + dRd.p * (dRy.by - dA.t - 100)
+                        let dRd.x = dR.l + fract(d * 0.618) * dR.w + dRd.p * -6
+                        line { show: dRy.k == 4 or dRy.k == 6; from: dRd.x, dRd.y; to: dRd.x - 1.2, dRd.y + 5; width: 1; color: mint; opacity: 0.17 }
+                    }
+                    //  snow
+                    repeat d in 0..28 {
+                        let dRn.p = fract(time * (0.12 + 0.08 * fract(d * 0.37)) + d * 0.137)
+                        box { at: dR.l + fract(d * 0.618) * dR.w + 6 * sin(time * 40 + d * 50), dA.t + 100 + dRn.p * (dRy.by - dA.t - 104); size: 2, 2; color: ink; opacity: 0.5; show: dRy.k == 5 }
+                    }
+                    //  a storm's flashes
+                    box { from: dR.l, dA.t + 70; size: dR.w, dRy.by - dA.t - 70; color: ink; opacity: if(dRy.k == 6 and fract(time * 0.23) < 0.035, 0.12, 0) }
+                }
+            }
+
+            //  ── Weather: the sky now and the temperature, what it is, and the week ahead ──
+            DshTile(dW.l, dW.t, dW.w, dW.h, dsh_c1) {
+                let dWx = dW.l + 43                                         // the icon's own centre (its glyph is narrower than the room left for it): the rays turn round it
+                let dWo = dW.h / 2 - 135                              // the content is 216 tall: this centres it in the card
+                //  The sky behind the forecast: sun rays turning behind the icon for clear and part-clear days, clouds drifting over, rain and snow falling,
+                //  all kept inside the card and quiet enough to read over.
+                group {
+                    clip inset 0 box { from: dW.l, dW.t; size: dW.w, dW.h; corner: 26 }
+                    show: wx_ok
+                    group {
+                        show: wx_kind < 2
+                        ellipse { at: dWx, dW.t + dWo + 50; radius: 60 + 5 * sin(time * 70); color: mint; opacity: 0.07 }
+                        repeat r in 0..12 {
+                            group {
+                                pivot: dWx, dW.t + dWo + 50
+                                rotate: r * 30deg + time * 5deg
+                                box { at: dWx, dW.t + dWo + 50 - 58; size: 3, 26; corner: 1.5; color: mint; opacity: 0.2 + 0.12 * sin(time * 90 + r * 50) }
+                            }
+                        }
+                    }
+                    group {
+                        show: wx_kind == 1 or wx_kind == 2 or wx_kind == 3
+                        repeat k in 0..4 {
+                            repeat q in 0..3 {
+                                ellipse { at: dW.l - 80 + fract(time * 0.012 + k * 0.25) * (dW.w + 160), dW.t + dWo + 40 + k * 36; radius: (46 + 8 * k) * (1 - q * 0.25); color: ink; opacity: if(wx_kind == 3, 0.06, 0.035) }
+                            }
+                        }
+                    }
+                    group {
+                        show: wx_kind == 4 or wx_kind == 6
+                        repeat d in 0..30 {
+                            let dWd.y = dW.t + fract(time * 0.9 + d * 0.173) * (dW.h + 20) - 10
+                            let dWd.x = dW.l + fract(d * 0.381) * dW.w + (dWd.y - dW.t) * 0.12
+                            line { from: dWd.x, dWd.y; to: dWd.x - 3, dWd.y + 13; width: 1.6; color: mint; opacity: 0.35 }
+                        }
+                    }
+                    group {
+                        show: wx_kind == 5
+                        repeat d in 0..26 {
+                            let dWs.y = dW.t + fract(time * 0.12 + d * 0.211) * (dW.h + 20) - 10
+                            ellipse { at: dW.l + fract(d * 0.337) * dW.w + 8 * sin(time * 80 + d * 40), dWs.y; radius: 1.8 + 0.9 * fract(d * 0.7); color: ink; opacity: 0.5 }
+                        }
+                    }
+                }
+                text pick(wx_kind, "󰖙", "󰖕", "󰖐", "󰖑", "󰖗", "󰖘", "󰖓") { at: dW.l + 28, dW.t + dWo + 50; anchor: left center; size: 46; family: "SpaceMono Nerd Font Propo"; color: mint; show: wx_ok }
+                //  The details, in the middle of the header: how it feels, the humidity, the wind and today's chance of rain.
+                repeat s in 0..4 {
+                    let dWs.x = dW.l + 128 + (s - floor(s / 2) * 2) * 104
+                    let dWs.y = dW.t + dWo + 36 + floor(s / 2) * 48
+                    text pick(s, "󰔏", "󰖎", "󰖝", "󰖗") { at: dWs.x, dWs.y; anchor: left center; size: 17; family: "SpaceMono Nerd Font Propo"; color: mint; show: wx_ok }
+                    text pick(s, "Feels like", "Humidity", "Wind", "Rain today") { at: dWs.x + 26, dWs.y + 14; anchor: left center; size: 11; family: "Space Grotesk"; color: faint; show: wx_ok }
+                }
+                text wx_feels { at: dW.l + 128 + 26, dW.t + dWo + 36 - 6; anchor: left center; size: 15; weight: 600; width: 74; lines: 1; family: "Space Grotesk"; color: ink; show: wx_ok }
+                text wx_hum { at: dW.l + 128 + 104 + 26, dW.t + dWo + 36 - 6; anchor: left center; size: 15; weight: 600; width: 74; lines: 1; family: "Space Grotesk"; color: ink; show: wx_ok }
+                text wx_wind { at: dW.l + 128 + 26, dW.t + dWo + 84 - 6; anchor: left center; size: 15; weight: 600; width: 74; lines: 1; family: "Space Grotesk"; color: ink; show: wx_ok }
+                text wx_rain { at: dW.l + 128 + 104 + 26, dW.t + dWo + 84 - 6; anchor: left center; size: 15; weight: 600; width: 74; lines: 1; family: "Space Grotesk"; color: ink; show: wx_ok }
+                text wx_temp { at: dW.l + dW.w - 28, dW.t + dWo + 64; anchor: right center; size: 50; weight: 300; family: "Space Grotesk"; color: ink; show: wx_ok }
+                text wx_desc { at: dW.l + 30, dW.t + dWo + 92; anchor: left center; size: 15; width: dW.w - 60; lines: 1; family: "Space Grotesk"; color: faint; show: wx_ok }
+                box { from: dW.l + 24, dW.t + dWo + 128; size: dW.w - 48, 1; color: ink; opacity: 0.1; show: wx_ok }
+                repeat i in 0..7 {
+                    let dWi.x = dW.l + 24 + (dW.w - 48) * (i + 0.5) / 7
+                    group {
+                        show: wx_ok and wx_days.count > i
+                        text wx_days.$i.label { at: dWi.x, dW.t + dWo + 156; anchor: center; size: 13; family: "Space Grotesk"; color: if(wx_days.$i.today, mint, faint) }
+                        text pick(wx_days.$i.kind, "󰖙", "󰖕", "󰖐", "󰖑", "󰖗", "󰖘", "󰖓") { at: dWi.x, dW.t + dWo + 186; anchor: center; size: 21; family: "SpaceMono Nerd Font Propo"; color: ink }
+                        text wx_days.$i.hi { at: dWi.x, dW.t + dWo + 216; anchor: center; size: 13; weight: 600; family: "Space Grotesk"; color: ink }
+                        text wx_days.$i.lo { at: dWi.x, dW.t + dWo + 236; anchor: center; size: 12; family: "Space Grotesk"; color: faint }
+                    }
+                }
+                text "No weather yet" { at: dW.l + dW.w / 2, dW.t + dW.h / 2; anchor: center; size: 14; family: "Space Grotesk"; color: faint; show: not wx_ok }
+            }
+
+            //  ── Now playing: the cover, the title and the artist, and the player's buttons ──
+            DshTile(dC.l, dC.t, dC.w, dC.h, dsh_c2) {
+                let dC.s = min(dC.h - 68, dC.w * 0.48)                // the cover's side
+                let dC.tx = dC.l + 18 + dC.s + 24                     // the words' left edge and width
+                let dC.tw = dC.w - dC.s - 66
+                //  The cover is a disc, ringed by the spectrum: 24 bars a side, the lows at the top, mirrored down both sides, each growing outward.
+                let dC.cx = dC.l + 18 + dC.s / 2
+                let dC.cy = dC.t + 18 + dC.s / 2
+                let dC.ar = dC.s * 0.34                               // the disc's radius
+                let dC.bm = dC.s / 2 - dC.ar - 8                      // the longest a bar can grow
+                //  A glow behind the cover that swells with the bass while it plays.
+                repeat g in 0..5 {
+                    ellipse { at: dC.cx, dC.cy; radius: dC.ar + 4 + g * 9; color: mint; opacity: (0.05 + 0.26 * bass * playf) * (1 - g / 5) * 0.7; show: media_on }
+                }
+                ellipse { at: dC.cx, dC.cy; radius: dC.ar; color: ink; opacity: 0.07; show: media_on }
+                text "󰝚" { at: dC.cx, dC.cy; anchor: center; size: 40; family: "SpaceMono Nerd Font Propo"; color: faint; opacity: 0.6; show: media_on }
+                //  The cover itself, in the disc (the logic loads it into `art`, cropped to a square), over the glow and the disc.
+                group {
+                    show: media_on
+                    clip inset 0 box { from: dC.cx - dC.ar, dC.cy - dC.ar; size: dC.ar * 2, dC.ar * 2; corner: dC.ar }
+                    image art { at: dC.cx - dC.ar, dC.cy - dC.ar; size: dC.ar * 2, dC.ar * 2 }
+                }
+                //  The room the cat sleeps in (only with no player): a window at night with curtains, a crescent moon and twinkling stars, a floor
+                //  with a rug, a lamp with a warm glow, a stool with a cactus, a bookshelf, and a computer desk on which the cat
+                //  sleeps beside the monitor. Everything sits on one floor line near the card's foot.
+                group {
+                    show: not media_on
+                    let dCb.fl = dC.t + dC.h - 44                     // the floor line
+                    let dCb.ww = floor(dC.w * 0.34)                   // the window's width and height
+                    let dCb.wh = floor(dC.h * 0.36)
+                    let dCb.wx = dC.l + (dC.w - dCb.ww) / 2 + 24      // its left and top (a little right of centre)
+                    let dCb.wy = dC.t + 26
+                    let dCb.sky = mix(onmint, mint, 0.1)
+                    //  the floor
+                    box { from: dC.l + 14, dCb.fl; size: dC.w - 28, dC.t + dC.h - 14 - dCb.fl; color: ink; opacity: 0.05 }
+                    box { from: dC.l + 14, dCb.fl; size: dC.w - 28, 2; color: ink; opacity: 0.18 }
+                    repeat f in 0..5 {
+                        box { from: dC.l + 14 + (f + 1) * (dC.w - 28) / 6, dCb.fl + 2; size: 1, dC.t + dC.h - 16 - dCb.fl; color: ink; opacity: 0.05 }
+                    }
+                    //  the window: the sky, stars, the moon, the frame, the curtains
+                    box { from: dCb.wx, dCb.wy; size: dCb.ww, dCb.wh; color: dCb.sky }
+                    repeat k in 0..8 {
+                        box { at: dCb.wx + 8 + fract(k * 0.618 + 0.15) * (dCb.ww - 16), dCb.wy + 8 + fract(k * 0.37 + 0.2) * (dCb.wh * 0.6); size: 3, 3; color: ink; opacity: 0.15 + 0.6 * (sin(time * 45 + k * 77) + 1) / 2 }
+                    }
+                    box { from: dCb.wx + dCb.ww * 0.66 + -3, dCb.wy + dCb.wh * 0.3 + -15; size: 3, 3; color: #f4ebc8; opacity: 0.9 }
+                    box { from: dCb.wx + dCb.ww * 0.66 + -9, dCb.wy + dCb.wh * 0.3 + -12; size: 6, 3; color: #f4ebc8; opacity: 0.9 }
+                    box { from: dCb.wx + dCb.ww * 0.66 + -12, dCb.wy + dCb.wh * 0.3 + -9; size: 6, 3; color: #f4ebc8; opacity: 0.9 }
+                    box { from: dCb.wx + dCb.ww * 0.66 + -12, dCb.wy + dCb.wh * 0.3 + -6; size: 6, 3; color: #f4ebc8; opacity: 0.9 }
+                    box { from: dCb.wx + dCb.ww * 0.66 + -15, dCb.wy + dCb.wh * 0.3 + -3; size: 9, 3; color: #f4ebc8; opacity: 0.9 }
+                    box { from: dCb.wx + dCb.ww * 0.66 + -15, dCb.wy + dCb.wh * 0.3 + 0; size: 9, 3; color: #f4ebc8; opacity: 0.9 }
+                    box { from: dCb.wx + dCb.ww * 0.66 + -15, dCb.wy + dCb.wh * 0.3 + 3; size: 9, 3; color: #f4ebc8; opacity: 0.9 }
+                    box { from: dCb.wx + dCb.ww * 0.66 + -12, dCb.wy + dCb.wh * 0.3 + 6; size: 9, 3; color: #f4ebc8; opacity: 0.9 }
+                    box { from: dCb.wx + dCb.ww * 0.66 + -12, dCb.wy + dCb.wh * 0.3 + 9; size: 12, 3; color: #f4ebc8; opacity: 0.9 }
+                    box { from: dCb.wx + dCb.ww * 0.66 + -9, dCb.wy + dCb.wh * 0.3 + 12; size: 21, 3; color: #f4ebc8; opacity: 0.9 }
+                    box { from: dCb.wx + dCb.ww * 0.66 + -3, dCb.wy + dCb.wh * 0.3 + 15; size: 9, 3; color: #f4ebc8; opacity: 0.9 }
+                    box { from: dCb.wx - 2, dCb.wy - 2; size: dCb.ww + 4, 3; color: ink; opacity: 0.4 }
+                    box { from: dCb.wx - 2, dCb.wy + dCb.wh - 1; size: dCb.ww + 4, 3; color: ink; opacity: 0.4 }
+                    box { from: dCb.wx - 2, dCb.wy - 2; size: 3, dCb.wh + 4; color: ink; opacity: 0.4 }
+                    box { from: dCb.wx + dCb.ww - 1, dCb.wy - 2; size: 3, dCb.wh + 4; color: ink; opacity: 0.4 }
+                    box { from: dCb.wx + dCb.ww / 2 - 1, dCb.wy; size: 3, dCb.wh; color: ink; opacity: 0.4 }
+                    box { from: dCb.wx, dCb.wy + dCb.wh / 2 - 1; size: dCb.ww, 3; color: ink; opacity: 0.4 }
+                    box { from: dCb.wx - 7, dCb.wy + dCb.wh + 1; size: dCb.ww + 14, 5; color: ink; opacity: 0.3 }
+                    box { from: dCb.wx - 8, dCb.wy - 5; size: 12, dCb.wh + 6; color: mint; opacity: 0.3 }
+                    box { from: dCb.wx + dCb.ww - 4, dCb.wy - 5; size: 12, dCb.wh + 6; color: mint; opacity: 0.3 }
+                    box { from: dCb.wx - 8, dCb.wy - 7; size: dCb.ww + 16, 3; color: ink; opacity: 0.35 }
+                    //  the rug under the desk
+                    box { from: dC.l + dC.w / 2 - 96, dCb.fl + 6; size: 240, 12; color: mint; opacity: 0.22 }
+                    box { from: dC.l + dC.w / 2 - 96, dCb.fl + 10; size: 240, 3; color: ink; opacity: 0.14 }
+                    //  the lamp, at the right edge: pole, base, a warm shade, and a glow that breathes
+                    let dCl.x = dC.l + dC.w - 43
+                    ellipse { at: dCl.x, dCb.fl - 98; radius: 44; color: #ffd27a; opacity: 0.05 + 0.03 * (sin(time * 35) + 1) / 2 }
+                    box { from: dCl.x - 1.5, dCb.fl - 92; size: 3, 92; color: ink; opacity: 0.45 }
+                    box { from: dCl.x - 10, dCb.fl - 4; size: 20, 4; color: ink; opacity: 0.45 }
+                    box { from: dCl.x - 7, dCb.fl - 112; size: 14, 5; color: #ffd27a; opacity: 0.85 }
+                    box { from: dCl.x - 10, dCb.fl - 107; size: 20, 5; color: #ffd27a; opacity: 0.85 }
+                    box { from: dCl.x - 13, dCb.fl - 102; size: 26, 5; color: #ffd27a; opacity: 0.85 }
+                    box { from: dCl.x - 30, dCb.fl; size: 60, 6; color: #ffd27a; opacity: 0.1 }
+                    //  a stool with the cactus, between the bookshelf and the desk
+                    let dCm2.x = dC.l + 104
+                    box { from: dCm2.x - 13, dCb.fl - 28; size: 26, 4; color: faint; opacity: 0.6 }
+                    box { from: dCm2.x - 10, dCb.fl - 24; size: 3, 24; color: faint; opacity: 0.5 }
+                    box { from: dCm2.x + 7, dCb.fl - 24; size: 3, 24; color: faint; opacity: 0.5 }
+                    //  a cactus in a small pot on the stool: a ribbed body with two arms and a pink flower
+                    box { from: dCm2.x - 8, dCb.fl - 42; size: 16, 14; color: faint; opacity: 0.8 }
+                    box { from: dCm2.x - 10, dCb.fl - 44; size: 20, 4; color: faint; opacity: 0.9 }
+                    box { from: dCm2.x - 5, dCb.fl - 78; size: 10, 34; color: mint; opacity: 0.8 }
+                    box { from: dCm2.x - 2, dCb.fl - 76; size: 2, 30; color: ink; opacity: 0.2 }
+                    box { from: dCm2.x - 14, dCb.fl - 66; size: 9, 5; color: mint; opacity: 0.8 }
+                    box { from: dCm2.x - 14, dCb.fl - 74; size: 5, 13; color: mint; opacity: 0.8 }
+                    box { from: dCm2.x + 5, dCb.fl - 60; size: 9, 5; color: mint; opacity: 0.8 }
+                    box { from: dCm2.x + 9, dCb.fl - 68; size: 5, 13; color: mint; opacity: 0.8 }
+                    box { from: dCm2.x - 3, dCb.fl - 83; size: 6, 5; color: #ff9bb3; opacity: 0.9 }
+                    //  a computer desk under the window (scaled 1.5 about its foot): a top, a leg and a pedestal with two drawers, a monitor on
+                    //  standby (its power light blinks), a keyboard and mouse and a stack of books; and on it the sleeping cat, beside the monitor
+                    let dCd.x = dC.l + dC.w / 2 + 28
+                    let dCd.c1 = mix(mint, onmint, 0.5)
+                    let dCd.c2 = mix(mint, onmint, 0.38)
+                    let dCd.c3 = mix(mint, onmint, 0.64)
+                    let dCd.mx = dCd.x + 4                             // the monitor's middle
+                    let dCh.pk = dsh_poke                              // 1 just after a press on the cat, down to 0
+                    let dCh.br = (sin(time * 45) + 1) / 2              // breathing, 0 to 1
+                    group {
+                        pivot: dCd.x, dCb.fl
+                        scale: 1.5
+                        box { from: dCd.x + -70, dCb.fl - 48; size: 140, 6; color: dCd.c1 }
+                        box { from: dCd.x + -70, dCb.fl - 48; size: 140, 2; color: ink; opacity: 0.2 }
+                        box { from: dCd.x + -66, dCb.fl - 42; size: 6, 42; color: dCd.c3 }
+                        box { from: dCd.x + 16, dCb.fl - 42; size: 50, 42; color: dCd.c2 }
+                        box { from: dCd.x + 20, dCb.fl - 38; size: 42, 16; color: dCd.c1 }
+                        box { from: dCd.x + 39, dCb.fl - 31; size: 4, 2; color: ink; opacity: 0.45 }
+                        box { from: dCd.x + 20, dCb.fl - 20; size: 42, 16; color: dCd.c1 }
+                        box { from: dCd.x + 39, dCb.fl - 13; size: 4, 2; color: ink; opacity: 0.45 }
+                        box { from: dCd.mx - 3, dCb.fl - 56; size: 6, 10; color: dCd.c3 }
+                        box { from: dCd.mx - 28, dCb.fl - 98; size: 56, 42; color: dCd.c3 }
+                        box { from: dCd.mx - 25, dCb.fl - 95; size: 50, 36; color: dCb.sky }
+                        box { from: dCd.mx - 1, dCb.fl - 61; size: 3, 2; color: #ffd27a; opacity: 0.3 + 0.6 * (sin(time * 70) + 1) / 2 }
+                        box { from: dCd.mx - 18, dCb.fl - 52; size: 36, 4; color: dCd.c3 }
+                        box { from: dCd.mx - 16, dCb.fl - 51; size: 32, 1; color: ink; opacity: 0.3 }
+                        box { from: dCd.mx + 24, dCb.fl - 51; size: 6, 3; color: dCd.c3 }
+                        box { from: dCd.x + 40, dCb.fl - 66; size: 20, 6; color: #ffd27a; opacity: 0.75 }
+                        box { from: dCd.x + 38, dCb.fl - 60; size: 24, 6; color: mint; opacity: 0.7 }
+                        box { from: dCd.x + 37, dCb.fl - 54; size: 26, 6; color: #ff9bb3; opacity: 0.7 }
+                        let dCt.u = 1.8                                       // one pixel of the cat
+                        let dCt.x = dCd.x - 62                                  // its head
+                        let dCt.gy = dCb.fl - 48                                // the desk's top
+                        let dCt.br = dCh.br * dCt.u * 0.8                       // the back rises a little
+                        let dCt.tw = sin(time * 55) * dCt.u * 0.7 * (1 + 4 * dCh.pk)
+                        group {
+                            move: 0, -3.5 * dCh.pk * abs(sin(dCh.pk * 540))
+                            box { from: dCt.x + dCt.u * 2, dCt.gy - dCt.u * 1; size: dCt.u * 15, dCt.u * 1; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * 1, dCt.gy - dCt.u * 3; size: dCt.u * 17, dCt.u * 2; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * 2, dCt.gy - dCt.u * 4; size: dCt.u * 15, dCt.u * 1; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * 4, dCt.gy - dCt.u * 5 - dCt.br; size: dCt.u * 11, dCt.u * 1 + dCt.br; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * 7, dCt.gy - dCt.u * 6 - dCt.br; size: dCt.u * 6, dCt.u * 1 + dCt.br; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * -3, dCt.gy - dCt.u * 1; size: dCt.u * 7, dCt.u * 1; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * -4, dCt.gy - dCt.u * 3; size: dCt.u * 9, dCt.u * 2; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * -3, dCt.gy - dCt.u * 4; size: dCt.u * 7, dCt.u * 1; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * -3, dCt.gy - dCt.u * 5; size: dCt.u * 3, dCt.u * 1; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * -3, dCt.gy - dCt.u * 6; size: dCt.u * 1, dCt.u * 1; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * 1, dCt.gy - dCt.u * 5; size: dCt.u * 3, dCt.u * 1; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * 3, dCt.gy - dCt.u * 6; size: dCt.u * 1, dCt.u * 1; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * 17, dCt.gy - dCt.u * 1; size: dCt.u * 3, dCt.u * 1; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x + dCt.u * 6, dCt.gy - dCt.u * 5 - dCt.br; size: dCt.u * 1, dCt.u * 3 + dCt.br; color: mint; opacity: 0.35 }
+                            box { from: dCt.x + dCt.u * 9, dCt.gy - dCt.u * 6 - dCt.br; size: dCt.u * 1, dCt.u * 4 + dCt.br; color: mint; opacity: 0.35 }
+                            box { from: dCt.x + dCt.u * 12, dCt.gy - dCt.u * 5 - dCt.br; size: dCt.u * 1, dCt.u * 3 + dCt.br; color: mint; opacity: 0.35 }
+                            box { from: dCt.x + dCt.u * 19, dCt.gy - dCt.u * 4 + dCt.tw; size: dCt.u, dCt.u * 4; color: mix(faint, onmint, 0.5) }
+                            box { from: dCt.x - dCt.u * 3.6, dCt.gy - dCt.u * 2.8; size: dCt.u * 1.8, dCt.u * 0.6; color: ink; opacity: (1 - clamp(dCh.pk * 8, 0, 1)) * 0.85 }
+                            box { from: dCt.x + dCt.u * 1.6, dCt.gy - dCt.u * 2.8; size: dCt.u * 1.8, dCt.u * 0.6; color: ink; opacity: (1 - clamp(dCh.pk * 8, 0, 1)) * 0.85 }
+                            box { from: dCt.x - dCt.u * 3.2, dCt.gy - dCt.u * 3.4; size: dCt.u, dCt.u * 1.3; color: mint; show: dCh.pk > 0.12 }
+                            box { from: dCt.x + dCt.u * 2.2, dCt.gy - dCt.u * 3.4; size: dCt.u, dCt.u * 1.3; color: mint; show: dCh.pk > 0.12 }
+                            box { from: dCt.x - dCt.u * 0.5, dCt.gy - dCt.u * 1.6; size: dCt.u, dCt.u * 0.7; color: mint }
+                        }
+                    }
+                    let dCw.hx = dCd.x - 1.5 * 62                      // the cat's head, where the desk's scale puts it
+                    let dCw.hy = dCb.fl - 1.5 * 56
+                    repeat k in 0..3 {
+                        let dCz.p = fract(time * 0.2 + k / 3)
+                        text "z" { at: dCw.hx + 10 + dCz.p * 26 + 4 * sin(dCz.p * 360), dCw.hy - 8 - dCz.p * 36; anchor: center; size: 10 + dCz.p * 8; weight: 700; family: "Space Grotesk"; color: mint; opacity: sin(dCz.p * 180) * 0.7 * (1 - clamp(dCh.pk * 4, 0, 1)) }
+                    }
+                    //  woken: a "!" over the cat and five notes thrown out, drifting up and fading as dsh_poke runs down
+                    text "!" { at: dCw.hx, dCw.hy - 14 - 6 * (1 - dCh.pk); anchor: center; size: 20; weight: 700; family: "Space Grotesk"; color: mint; opacity: clamp(dCh.pk * 3 - 1, 0, 1) }
+                    repeat n in 0..5 {
+                        let dCn.p = 1 - dCh.pk
+                        text "󰝚" { at: dCw.hx + 20 + (n - 2) * 13 * (0.4 + dCn.p), dCw.hy - 10 - dCn.p * (24 + n * 6); anchor: center; size: 13 + mod(n, 2) * 4; family: "SpaceMono Nerd Font Propo"; color: mint; opacity: sin(clamp(dCn.p, 0, 1) * 180) * 0.8; show: dCh.pk > 0.02 }
+                    }
+                    zone box dsh_spk { from: dCd.x - 108, dCb.fl - 104; size: 84, 40; corner: 12; cursor: pointer; active: dash_open and not media_on; label: "Poke the cat" }
+                    on press dsh_spk { dsh_poke: 1 ~0ms; dsh_poke: 0 ~1700ms after 60ms }
+                    //  a hanging picture at the top right, a little askew on its nail: a sailboat under a sun, in the manner of the Simpsons' living room
+                    let dCw2.cx = dC.l + dC.w - 24 - 36                 // its middle
+                    let dCw2.ax = dCw2.cx - 30                          // the painting's left and top (a frame of 6 round it)
+                    let dCw2.ay = dC.t + 60
+                    group {
+                        pivot: dCw2.cx, dC.t + 40
+                        rotate: 3.5deg
+                        line { from: dCw2.cx, dC.t + 40; to: dCw2.ax - 6, dCw2.ay - 6; width: 1; color: ink; opacity: 0.4 }
+                        line { from: dCw2.cx, dC.t + 40; to: dCw2.ax + 66, dCw2.ay - 6; width: 1; color: ink; opacity: 0.4 }
+                        box { at: dCw2.cx, dC.t + 40; size: 4, 4; color: ink; opacity: 0.5 }
+                        box { from: dCw2.ax - 6, dCw2.ay - 6; size: 72, 54; color: dCd.c1 }
+                        box { from: dCw2.ax - 3, dCw2.ay - 3; size: 66, 48; color: #e9e2cf }
+                        box { from: dCw2.ax + 0, dCw2.ay + 0; size: 60, 30; color: #7fb7e6 }
+                        box { from: dCw2.ax + 0, dCw2.ay + 30; size: 60, 12; color: #2f6fb0 }
+                        box { from: dCw2.ax + 9, dCw2.ay + 33; size: 9, 3; color: #7fb7e6; opacity: 0.7 }
+                        box { from: dCw2.ax + 36, dCw2.ay + 36; size: 9, 3; color: #7fb7e6; opacity: 0.7 }
+                        box { from: dCw2.ax + 45, dCw2.ay + 3; size: 9, 9; color: #ffd27a }
+                        box { from: dCw2.ax + 6, dCw2.ay + 6; size: 12, 3; color: #ffffff; opacity: 0.9 }
+                        box { from: dCw2.ax + 9, dCw2.ay + 3; size: 9, 3; color: #ffffff; opacity: 0.9 }
+                        box { from: dCw2.ax + 18, dCw2.ay + 24; size: 27, 3; color: #b0443c }
+                        box { from: dCw2.ax + 21, dCw2.ay + 27; size: 21, 3; color: #b0443c }
+                        box { from: dCw2.ax + 30, dCw2.ay + 6; size: 3, 18; color: #6b4a2f }
+                        box { from: dCw2.ax + 27, dCw2.ay + 9; size: 3, 3; color: #ffffff }
+                        box { from: dCw2.ax + 24, dCw2.ay + 12; size: 6, 3; color: #ffffff }
+                        box { from: dCw2.ax + 21, dCw2.ay + 15; size: 9, 3; color: #ffffff }
+                        box { from: dCw2.ax + 18, dCw2.ay + 18; size: 12, 3; color: #ffffff }
+                        box { from: dCw2.ax + 15, dCw2.ay + 21; size: 15, 3; color: #ffffff }
+                        box { from: dCw2.ax + 33, dCw2.ay + 12; size: 3, 3; color: #ffffff; opacity: 0.9 }
+                        box { from: dCw2.ax + 33, dCw2.ay + 15; size: 6, 3; color: #ffffff; opacity: 0.9 }
+                        box { from: dCw2.ax + 33, dCw2.ay + 18; size: 9, 3; color: #ffffff; opacity: 0.9 }
+                        box { from: dCw2.ax + 33, dCw2.ay + 21; size: 12, 3; color: #ffffff; opacity: 0.9 }
+                        box { from: dCw2.ax + 30, dCw2.ay + 3; size: 6, 3; color: #b0443c }
+                    }
+                    //  a bookshelf at the left edge: a frame with a darker back, five boards and rows of books of different heights and colours
+                    let dCs3.x = dC.l + 17
+                    box { from: dCs3.x + 4, dCb.fl - 134; size: 46, 130; color: dCd.c3; opacity: 0.35 }
+                    box { from: dCs3.x, dCb.fl - 138; size: 4, 138; color: dCd.c1 }
+                    box { from: dCs3.x + 50, dCb.fl - 138; size: 4, 138; color: dCd.c1 }
+                    repeat sh in 0..5 {
+                        box { from: dCs3.x, dCb.fl - 6 - sh * 32; size: 54, 4; color: dCd.c1 }
+                    }
+                    repeat sh in 0..4 {
+                        repeat bk in 0..6 {
+                            let dCk3.h = 14 + floor(fract(sh * 7.1 + bk * 3.7) * 9)
+                            box { from: dCs3.x + 5 + bk * 7.5, dCb.fl - 6 - sh * 32 - dCk3.h; size: 6, dCk3.h; color: pick(mod(sh + bk, 4), mint, #ffd27a, #ff9bb3, mix(mint, ink, 0.45)); opacity: 0.8; show: not (sh == 2 and bk == 4) }
+                        }
+                    }
+                    box { from: dCs3.x + 38, dCb.fl - 6 - 64 - 9; size: 9, 9; color: mint; opacity: 0.6 }
+                }
+                text "It's too quiet..." { at: dC.l + 82, dC.t + 56; anchor: center; align: center; size: 16; weight: 600; width: 132; lines: 2; family: "Space Grotesk"; color: ink; show: not media_on and dsh_poke < 0.05 }
+                text "...five more minutes." { at: dC.l + 82, dC.t + 84; anchor: center; align: center; size: 16; weight: 600; width: 132; lines: 2; family: "Space Grotesk"; color: mint; show: not media_on and dsh_poke >= 0.05 }
+                repeat i in 0..24 {
+                    let dCv.l = clamp(spec.s.$i * (0.8 + 0.7 * i / 23), 0, 1)
+                    let dCv.h = 2.5 + dC.bm * dCv.l
+                    group {
+                        show: media_on
+                        pivot: dC.cx, dC.cy
+                        rotate: (i + 0.5) * 7.5deg
+                        box { at: dC.cx, dC.cy - dC.ar - 6 - dCv.h / 2; size: 6, dCv.h; corner: 3; color: mix(mint, ink, dCv.l * 0.85); opacity: (0.35 + 0.65 * playf) * (45% + 55% * dCv.l) }
+                    }
+                    group {
+                        show: media_on
+                        pivot: dC.cx, dC.cy
+                        rotate: -(i + 0.5) * 7.5deg
+                        box { at: dC.cx, dC.cy - dC.ar - 6 - dCv.h / 2; size: 6, dCv.h; corner: 3; color: mix(mint, ink, dCv.l * 0.85); opacity: (0.35 + 0.65 * playf) * (45% + 55% * dCv.l) }
+                    }
+                }
+                text "Now playing" { at: dC.tx, dC.t + 40; anchor: left center; size: 12; family: "Space Grotesk"; color: faint; show: media_on }
+                text media.title { at: dC.tx, dC.t + 72; anchor: left top; size: 18; weight: 600; width: dC.tw; lines: 2; family: "Space Grotesk"; color: ink; show: media_on }
+                text media.artist { at: dC.tx, dC.t + 124; anchor: left top; size: 14; width: dC.tw; lines: 1; family: "Space Grotesk"; color: faint; show: media_on }
+                repeat b in 0..3 {
+                    let dCb.x = dC.tx + dC.tw / 2 + (b - 1) * 60
+                    let dCb.y = dC.t + 18 + dC.s - 28
+                    ellipse { at: dCb.x, dCb.y; radius: if(b == 1, 26, 20); color: if(b == 1, mint, ink); opacity: if(b == 1, 0.9, 0.06 + 0.1 * dsh_mb.$b.hover); show: media_on }
+                    text pick(b + if(b > 1, 1, 0) + if(b == 1 and media.playing, 1, 0), "󰒮", "󰐊", "󰏤", "󰒭") { at: dCb.x, dCb.y; anchor: center; size: 22; family: "SpaceMono Nerd Font Propo"; color: if(b == 1, onmint, ink); show: media_on }
+                    zone ellipse dsh_mb.$b { at: dCb.x, dCb.y; radius: 26; cursor: pointer; active: dash_open and media_on; label: pick(b, "Previous", "Play or pause", "Next") }
+                    on press dsh_mb.$b { emit mcmd(b) }
+                }
+                //  The seek row along the very foot of the card, its full width, as the floating player's: elapsed, a track filled as far as the song has gone with a knob, and the length.
+                //  Pressed or dragged it follows the pointer and seeks where it is let go. A stream with no end shows "Live".
+                let dCk.y = min(dC.t + dC.h - 26, dC.t + 18 + dC.s + 34)   // under the cover, not stranded at the foot of a tall card
+                let dCk.x0 = dC.l + 18 + 74
+                let dCk.w = dC.w - 36 - 148
+                let dCk.f = if(mp_len <= 0, 1, if(mp_drag, mp_df, mp_pf))      // a stream with no end: the wave runs the whole way
+                let dCk.hot = max(dsh_seek.hover, if(mp_drag, 1, 0))
+                text mp_el { at: dC.l + 18, dCk.y; anchor: left center; size: 15; weight: 600; width: 68; lines: 1; color: faint; family: "Space Grotesk"; show: media_on }
+                text mp_tot { at: dC.l + dC.w - 18, dCk.y; anchor: right center; align: right; size: 15; weight: 600; width: 68; lines: 1; color: faint; family: "Space Grotesk"; show: media_on and mp_len > 0 }
+                text "Live" { at: dC.l + dC.w - 18, dCk.y; anchor: right center; align: right; size: 15; weight: 700; color: mint; family: "Space Grotesk"; show: media_on and mp_len <= 0 }
+                box { at: dCk.x0 + dCk.w / 2, dCk.y; size: dCk.w, 5 + 1.5 * dCk.hot; corner: 3; color: ink; opacity: 14%; show: media_on and mp_len > 0 }
+                //  The part played is a wave that runs along it, as the volume banner's: 120 short lines spread over the played length, each a
+                //  little ahead of the last in the ripple, fading to flat at both ends so it meets the faint line and the pill. The ripple's
+                //  length stays the same however far the song has got (34 across), so it is the swing that moves, not the crests squeezing.
+                let dCk.xf = dCk.w * dCk.f
+                let dCk.seg = max(dCk.xf, 1) / 120
+                let dCk.wf = 360 / 34
+                let dCk.wa = 3.6 + 1.2 * dCk.hot
+                let dCk.f0 = max(0.001, min(dCk.xf * 0.2, 14))
+                repeat i in 0..120 {
+                    let dCw.xa = dCk.x0 + i * dCk.seg
+                    let dCw.xb = dCw.xa + dCk.seg
+                    let dCw.ea = clamp((dCw.xa - dCk.x0) / dCk.f0, 0, 1) * clamp((dCk.x0 + dCk.xf - dCw.xa) / dCk.f0, 0, 1)
+                    let dCw.eb = clamp((dCw.xb - dCk.x0) / dCk.f0, 0, 1) * clamp((dCk.x0 + dCk.xf - dCw.xb) / dCk.f0, 0, 1)
+                    line { show: media_on; from: dCw.xa, dCk.y + dCk.wa * dCw.ea * sin((dCw.xa - dCk.x0) * dCk.wf - time * 120); to: dCw.xb, dCk.y + dCk.wa * dCw.eb * sin((dCw.xb - dCk.x0) * dCk.wf - time * 120); width: 5 + 1.5 * dCk.hot; color: mint; opacity: min(1, dCk.xf / 8) * if(mp_len > 0, 1, 0.8 + 0.2 * sin(time * 120)) }
+                }
+                box { at: clamp(dCk.x0 + dCk.xf, dCk.x0 + 3, dCk.x0 + dCk.w - 3), dCk.y; size: 6, 22 + 4 * dCk.hot; corner: 3; color: ink; show: media_on and mp_len > 0 }
+                zone box dsh_seek { at: dCk.x0 + dCk.w / 2, dCk.y; size: dCk.w + 16, 22; cursor: pointer; active: media_on and mp_len > 0 and dash_open }
+                on press dsh_seek { mp_drag = true; mp_df = clamp((pointer.x - (dC.l + 92)) / (dC.w - 184), 0, 1) }
+                on drag dsh_seek { mp_df = clamp((pointer.x - (dC.l + 92)) / (dC.w - 184), 0, 1) }
+                on release dsh_seek { mp_drag = false; mp_pos = mp_df * mp_len; mp_pf: mp_df ~0ms; emit mp_seek(mp_df) }
+            }
+
+            //  ── Notifications: what came in, newest first, and Do Not Disturb ──
+            DshTile(dD.l, dD.t, dD.w, dD.h, dsh_c3) {
+                //  Under the header's buttons (a zone declared later is on top), the wheel scrolls the list.
+                let dDv.t = dD.t + 62                                          // where the list shows, top and height
+                let dDv.h = dD.h - 62 - 10
+                let dDv.c = nt_hist.count * 64                                 // all of it
+                zone box dsh_ntw { from: dD.l, dD.t; size: dD.w, dD.h; corner: 26; active: dash_open }
+                on scroll dsh_ntw { nt_to = clamp(nt_to - wheel * 48, 0, max(0, nt_hist.count * 64 - (dD.h - 72) + 4)) }
+                text "Notifications" { at: dD.l + 22, dD.t + 32; anchor: left center; size: 16; weight: 600; family: "Space Grotesk"; color: ink }
+                ellipse { at: dD.l + dD.w - 34, dD.t + 32; radius: 17; color: if(dnd_on, mint, ink); opacity: if(dnd_on, 0.9, 0.07 + 0.1 * dsh_dnd.hover) }
+                text pick(if(dnd_on, 1, 0), "󰂚", "󰂛") { at: dD.l + dD.w - 34, dD.t + 32; anchor: center; size: 17; family: "SpaceMono Nerd Font Propo"; color: if(dnd_on, onmint, ink) }
+                zone ellipse dsh_dnd { at: dD.l + dD.w - 34, dD.t + 32; radius: 18; cursor: pointer; active: dash_open; label: "Do Not Disturb" }
+                on press dsh_dnd { emit togglednd }
+                //  Clear: empties the history. It is there while there is something to clear.
+                let dDc.x = dD.l + dD.w - 34 - 17 - 12 - 31
+                box { at: dDc.x, dD.t + 32; size: 62, 30; corner: 15; color: ink; opacity: (0.08 + 0.1 * dsh_clr.hover) * clamp(nt_hist.count, 0, 1); show: nt_hist.count > 0 }
+                text "Clear" { at: dDc.x, dD.t + 32; anchor: center; size: 14; weight: 600; family: "Space Grotesk"; color: ink; show: nt_hist.count > 0 }
+                zone box dsh_clr { at: dDc.x, dD.t + 32; size: 64, 32; corner: 16; cursor: pointer; active: dash_open and nt_hist.count > 0; label: "Clear notifications" }
+                on press dsh_clr { emit nt_clear }
+                //  The list: every notification kept (up to 30), clipped to the room under the header and moved with the wheel.
+                group {
+                    clip inset 0 box { from: dD.l + 8, dDv.t; size: dD.w - 16, dDv.h; corner: 18 }
+                    repeat i in 0..30 {
+                        let dDi.y = dDv.t + 4 + i * 64 - nt_s
+                        let dDi.sx = if(nt_sw == i, nt_swp, 0)                    // swept along by a drag to the right
+                        group {
+                            show: nt_hist.count > i and dDi.y + 56 > dDv.t and dDi.y < dDv.t + dDv.h
+                            move: dDi.sx + if(i == 0, (1 - nt_in) * -36, 0), 0
+                            opacity: (1 - clamp(dDi.sx / 220, 0, 1)) * if(i == 0, nt_in, 1)
+                            box { from: dD.l + 14, dDi.y; size: dD.w - 28, 56; corner: 16; color: ink; opacity: 0.05 + 0.04 * clamp(dDi.sx / 90, 0, 1) }
+                            ellipse { at: dD.l + 30, dDi.y + 18; radius: 3.5; color: mint; opacity: 0.9 }
+                            text nt_hist.$i.title { at: dD.l + 42, dDi.y + 18; anchor: left center; size: 14; weight: 600; width: dD.w - 110; lines: 1; family: "Space Grotesk"; color: ink }
+                            text nt_hist.$i.when { at: dD.l + dD.w - 26, dDi.y + 18; anchor: right center; size: 11; family: "Space Grotesk"; color: faint }
+                            text nt_hist.$i.sub { at: dD.l + 42, dDi.y + 38; anchor: left center; size: 12.5; width: dD.w - 70; lines: 1; family: "Space Grotesk"; color: faint }
+                        }
+                        zone box dsh_ntr.$i { from: dD.l + 14, dDi.y; size: dD.w - 28, 56; corner: 16; active: dash_open and nt_hist.count > i and dDi.y > dDv.t - 20 and dDi.y + 56 < dDv.t + dDv.h + 20; label: "Notification: drag right to dismiss" }
+                        on press dsh_ntr.$i { nt_sw = i; nt_swx = 0 }
+                        on drag dsh_ntr.$i { nt_swx = max(0, drag.dx) }
+                        on release dsh_ntr.$i while nt_swx > 100 { emit nt_hist_del(i); nt_sw = -1; nt_swx = 0 }
+                        on release dsh_ntr.$i while nt_swx <= 100 { nt_sw = -1; nt_swx = 0 }
+                    }
+                }
+                box { from: dD.l + dD.w - 9, dDv.t + 4 + nt_s / max(dDv.c, 1) * (dDv.h - 8); size: 3, (dDv.h - 8) * min(1, dDv.h / max(dDv.c, 1)); corner: 1.5; color: ink; opacity: 0.3; show: dDv.c > dDv.h }
+                //  Nothing kept: a pixel cat asleep on the ground, breathing, its tail drifting, and a few z's rising from it. Under the pointer it is being
+                //  petted (dsh_pet follows the zone's hover): the back arches, the whole cat squashes a little and purrs, its eyes turn to happy arches,
+                //  its tail wags faster and hearts float up. Over the head itself (dsh_cathead; the body's zone starts where the head's ends, so only one of them has the pointer) the head
+                //  lifts and tips up into the hand as well (dsh_hup).
+                group {
+                    show: nt_hist.count < 1
+                    let dNc.u = 5.5                                   // one pixel of the picture
+                    let dNc.gy = dD.t + dD.h / 2 + 34                 // the ground
+                    let dNc.cx = dD.l + dD.w / 2 - dNc.u * 8                 // the cat's head: the body, head to tail tip, spans -4 to 20 of its pixels, so -8 puts its middle on the tile's (whiskers left out)
+                    let dNc.pet = dsh_pet                                       // 0 to 1: how much it is being petted
+                    let dNc.hu = dsh_hup                                        // 0 to 1: the pointer is over its head: it lifts into the hand (the back stays as it is)
+                    let dNc.love = max(dNc.pet, dNc.hu)                         // either way it is happy: the eyes and the hearts
+                    let dNc.br = (sin(time * 70) + 1) / 2 * dNc.u * 0.8 + dNc.pet * dNc.u * 2.2   // breathing: the back rises a little, a lot when petted
+                    let dNc.tw = sin(time * 55) * dNc.u * 0.7 * (1 + 3 * dNc.pet)         // the tail's tip
+                    group {
+                        pivot: dNc.cx + dNc.u * 8, dNc.gy
+                        scale: 1 + 0.05 * dNc.pet, 1 - 0.04 * dNc.pet
+                        move: 0.55 * dNc.pet * sin(time * 2880), 0.15 * dNc.pet * sin(time * 2160)
+                        box { from: dNc.cx + dNc.u * 2, dNc.gy - dNc.u * 1; size: dNc.u * 15, dNc.u * 1; color: faint }
+                        box { from: dNc.cx + dNc.u * 1, dNc.gy - dNc.u * 3; size: dNc.u * 17, dNc.u * 2; color: faint }
+                        box { from: dNc.cx + dNc.u * 2, dNc.gy - dNc.u * 4; size: dNc.u * 15, dNc.u * 1; color: faint }
+                        box { from: dNc.cx + dNc.u * 4, dNc.gy - dNc.u * 5 - dNc.br; size: dNc.u * 11, dNc.u * 1 + dNc.br; color: faint }
+                        box { from: dNc.cx + dNc.u * 7, dNc.gy - dNc.u * 6 - dNc.br; size: dNc.u * 6, dNc.u * 1 + dNc.br; color: faint }
+                        box { from: dNc.cx + dNc.u * 6, dNc.gy - dNc.u * 5 - dNc.br; size: dNc.u * 1, dNc.u * 3 + dNc.br; color: mint; opacity: 0.35 }
+                        box { from: dNc.cx + dNc.u * 9, dNc.gy - dNc.u * 6 - dNc.br; size: dNc.u * 1, dNc.u * 4 + dNc.br; color: mint; opacity: 0.35 }
+                        box { from: dNc.cx + dNc.u * 12, dNc.gy - dNc.u * 5 - dNc.br; size: dNc.u * 1, dNc.u * 3 + dNc.br; color: mint; opacity: 0.35 }
+                        box { from: dNc.cx + dNc.u * 17, dNc.gy - dNc.u * 1; size: dNc.u * 3, dNc.u * 1; color: faint }
+                        box { from: dNc.cx + dNc.u * 19, dNc.gy - dNc.u * 4 + dNc.tw; size: dNc.u, dNc.u * 4; color: faint }
+                        group {
+                            pivot: dNc.cx + dNc.u * 2, dNc.gy - dNc.u * 1
+                            move: 0, -dNc.hu * dNc.u * 1.6
+                            rotate: -2.5deg * dNc.hu
+                            box { from: dNc.cx + dNc.u * -3, dNc.gy - dNc.u * 1; size: dNc.u * 7, dNc.u * 1; color: faint }
+                            box { from: dNc.cx + dNc.u * -4, dNc.gy - dNc.u * 3; size: dNc.u * 9, dNc.u * 2; color: faint }
+                            box { from: dNc.cx + dNc.u * -3, dNc.gy - dNc.u * 4; size: dNc.u * 7, dNc.u * 1; color: faint }
+                            box { from: dNc.cx + dNc.u * -3, dNc.gy - dNc.u * 5; size: dNc.u * 3, dNc.u * 1; color: faint }
+                            box { from: dNc.cx + dNc.u * -3, dNc.gy - dNc.u * 6; size: dNc.u * 1, dNc.u * 1; color: faint }
+                            box { from: dNc.cx + dNc.u * 1, dNc.gy - dNc.u * 5; size: dNc.u * 3, dNc.u * 1; color: faint }
+                            box { from: dNc.cx + dNc.u * 3, dNc.gy - dNc.u * 6; size: dNc.u * 1, dNc.u * 1; color: faint }
+                            box { from: dNc.cx - dNc.u * 3.6, dNc.gy - dNc.u * 2.2; size: dNc.u * 1.8, dNc.u * 0.6; color: onmint; opacity: 1 - clamp(dNc.love * 4, 0, 1) }
+                            box { from: dNc.cx + dNc.u * 1.6, dNc.gy - dNc.u * 2.2; size: dNc.u * 1.8, dNc.u * 0.6; color: onmint; opacity: 1 - clamp(dNc.love * 4, 0, 1) }
+                            box { from: dNc.cx - dNc.u * 0.5, dNc.gy - dNc.u * 1.3; size: dNc.u, dNc.u * 0.7; color: mint }
+                            line { from: dNc.cx - dNc.u * 4, dNc.gy - dNc.u * 1.3; to: dNc.cx - dNc.u * 8, dNc.gy - dNc.u * 1.9; width: 1; color: ink; opacity: 0.5 }
+                            line { from: dNc.cx - dNc.u * 4, dNc.gy - dNc.u * 0.9; to: dNc.cx - dNc.u * 8, dNc.gy - dNc.u * 0.5; width: 1; color: ink; opacity: 0.5 }
+                            line { from: dNc.cx + dNc.u * 5, dNc.gy - dNc.u * 1.3; to: dNc.cx + dNc.u * 7, dNc.gy - dNc.u * 1.9; width: 1; color: ink; opacity: 0.5 }
+                            box { from: dNc.cx + dNc.u * -3.6, dNc.gy - dNc.u * 2.0; size: dNc.u * 0.7, dNc.u * 0.6; color: onmint; opacity: clamp(dNc.love * 4 - 1, 0, 1) }
+                            box { from: dNc.cx + dNc.u * -2.9000000000000004, dNc.gy - dNc.u * 2.6; size: dNc.u * 0.8, dNc.u * 0.6; color: onmint; opacity: clamp(dNc.love * 4 - 1, 0, 1) }
+                            box { from: dNc.cx + dNc.u * -2.1, dNc.gy - dNc.u * 2.0; size: dNc.u * 0.7, dNc.u * 0.6; color: onmint; opacity: clamp(dNc.love * 4 - 1, 0, 1) }
+                            box { from: dNc.cx + dNc.u * 1.6, dNc.gy - dNc.u * 2.0; size: dNc.u * 0.7, dNc.u * 0.6; color: onmint; opacity: clamp(dNc.love * 4 - 1, 0, 1) }
+                            box { from: dNc.cx + dNc.u * 2.3, dNc.gy - dNc.u * 2.6; size: dNc.u * 0.8, dNc.u * 0.6; color: onmint; opacity: clamp(dNc.love * 4 - 1, 0, 1) }
+                            box { from: dNc.cx + dNc.u * 3.1, dNc.gy - dNc.u * 2.0; size: dNc.u * 0.7, dNc.u * 0.6; color: onmint; opacity: clamp(dNc.love * 4 - 1, 0, 1) }
+                        }
+                    }
+                    repeat k in 0..3 {
+                        let dNz.p = fract(time * 0.22 + k / 3)
+                        text "z" { at: dNc.cx + dNc.u * 4 + dNz.p * 44 + 7 * sin(dNz.p * 360), dNc.gy - dNc.u * 9 - dNz.p * 56; anchor: center; size: 9 + dNz.p * 9; weight: 700; family: "Space Grotesk"; color: mint; opacity: sin(dNz.p * 180) * 0.8 }
+                    }
+                    repeat h in 0..2 {
+                        let dNh.p = fract(time * 0.9 + h / 2)
+                        text "󰋑" { at: dNc.cx + dNc.u * (1 + h * 5) + 5 * sin(dNh.p * 360), dNc.gy - dNc.u * 7 - dNh.p * 38; anchor: center; size: 14; family: "SpaceMono Nerd Font Propo"; color: #ff9bb3; opacity: dNc.love * sin(dNh.p * 180) }
+                    }
+                    follow dsh_pet = dsh_cat.hover
+                    follow dsh_hup = dsh_cathead.hover
+                    zone box dsh_cat { from: dNc.cx + dNc.u * 5, dNc.gy - dNc.u * 8; size: dNc.u * 16, dNc.u * 9; corner: 12; cursor: pointer; active: dash_open and nt_hist.count < 1; label: "Pet the cat" }
+                    zone box dsh_cathead { from: dNc.cx - dNc.u * 5, dNc.gy - dNc.u * 8; size: dNc.u * 10, dNc.u * 9; corner: 10; cursor: pointer; active: dash_open and nt_hist.count < 1; label: "Pet the cat's head" }
+                }
+            }
+
+            //  ── Power: the state (the charge and a bar if there is a battery; "Plugged in" if not) and a power button that slides it away to show the
+            //  session options, each held for a second. ──
+            DshTile(dB.l, dB.t, dB.w, dB.h, dsh_c7) {
+                let dBb.on = bat_here                              // the real battery
+                let dBb.pct = bat_pct
+                let dBb.chg = bat_chg
+                let dBp.x = dB.l + dB.w - 38
+                let dBp.y = dB.t + dB.h / 2
+                group {
+                    clip inset 0 box { from: dB.l, dB.t; size: dB.w, dB.h; corner: 26 }
+                    //  The state, sliding out to the left.
+                    group {
+                        move: -dB.w * dsh_pwk, 0
+                        opacity: 1 - dsh_pwk
+                        //  The battery drawn as one: an outline with a nub, a wash of colour filling it from the left as far as the charge goes
+                        //  (red under 20% unless charging), the number in it; its state beside it.
+                        let dBy.w = 124
+                        let dBy.h = 46
+                        let dBy.x = dB.l + 24
+                        let dBy.y = dB.t + dB.h / 2 - dBy.h / 2
+                        let dBy.lv = clamp(dBb.pct / 100, 0, 1)
+                        let dBy.c = mix(mint, #e0655a, if(dBy.lv < 0.2 and not dBb.chg, 1, 0))
+                        box { from: dBy.x, dBy.y; size: dBy.w, dBy.h; corner: 13; color: ink; opacity: 0.08; show: dBb.on }
+                        group {
+                            show: dBb.on
+                            clip inset 0 box { from: dBy.x, dBy.y; size: dBy.w, dBy.h; corner: 13 }
+                            box { from: dBy.x, dBy.y; size: dBy.w * dBy.lv, dBy.h; color: dBy.c; opacity: 0.3 }
+                            box { from: dBy.x + dBy.w * dBy.lv - 2, dBy.y; size: 2, dBy.h; color: dBy.c; opacity: 0.8; show: dBy.lv > 0.02 and dBy.lv < 0.99 }
+                        }
+                        box { from: dBy.x, dBy.y; size: dBy.w, dBy.h; corner: 13; stroke: 2.2; color: ink; opacity: 0.55; show: dBb.on }
+                        box { from: dBy.x + dBy.w + 3, dBy.y + dBy.h / 2 - 9; size: 6, 18; corner: 3; color: ink; opacity: 0.55; show: dBb.on }
+                        text number(dBb.pct, 0, "%") { at: dBy.x + dBy.w / 2, dBy.y + dBy.h / 2; anchor: center; size: 17; weight: 700; family: "Space Grotesk"; color: ink; show: dBb.on }
+                        text "󱐋" { at: dBy.x + 18, dBy.y + dBy.h / 2; anchor: center; size: 17; family: "SpaceMono Nerd Font Propo"; color: dBy.c; show: dBb.on and dBb.chg }
+                        text pick(if(dBb.chg, 1, 0), "On battery", "Charging") { at: dBy.x + dBy.w + 18, dBy.y + dBy.h / 2; anchor: left center; size: 12.5; width: dB.w - 24 - dBy.w - 18 - 80; lines: 1; family: "Space Grotesk"; color: if(dBb.chg, mint, faint); show: dBb.on }
+                        text "󰚥" { at: dB.l + 24, dB.t + dB.h / 2; anchor: left center; size: 34; family: "SpaceMono Nerd Font Propo"; color: mint; show: not dBb.on }
+                        text "Plugged in" { at: dB.l + 72, dB.t + dB.h / 2; anchor: left center; size: 16; weight: 600; family: "Space Grotesk"; color: ink; show: not dBb.on }
+                    }
+                    //  The options, sliding in from the right.
+                    group {
+                        move: dB.w * (1 - dsh_pwk), 0
+                        opacity: dsh_pwk
+                        text "Hold one to confirm" { at: dB.l + 24, dB.t + 18; anchor: left center; size: 11; family: "Space Grotesk"; color: faint }
+                        repeat o in 0..5 {
+                            let dBo.x = dB.l + 18 + (dB.w - 18 - 76) * (o + 0.5) / 5
+                            let dBo.y = dB.t + dB.h * 0.52
+                            let dBo.h = if(dsh_pk == o, dsh_pp, 0)
+                            ellipse { at: dBo.x, dBo.y; radius: 18; color: ink; opacity: 0.08 + 0.08 * dsh_po.$o.hover }
+                            arc { at: dBo.x, dBo.y; radius: 21; span: dBo.h * 360deg; rotate: dBo.h * 180deg; width: 3; color: mint; show: dBo.h > 0.01 }
+                            text pick(o, "󰌾", "󰤄", "󰍃", "󰜉", "󰐥") { at: dBo.x, dBo.y; anchor: center; size: 18; family: "SpaceMono Nerd Font Propo"; color: mix(ink, mint, max(dsh_po.$o.hover, dBo.h)) }
+                            text pick(o, "Lock", "Sleep", "Log out", "Restart", "Shut down") { at: dBo.x, dBo.y + 30; anchor: center; align: center; size: 9.5; width: 56; lines: 1; family: "Space Grotesk"; color: faint }
+                            zone ellipse dsh_po.$o { at: dBo.x, dBo.y; radius: 24; cursor: pointer; active: dash_open and dsh_pw; label: pick(o, "Lock", "Sleep", "Log out", "Restart", "Shut down") }
+                            on press dsh_po.$o { dsh_ps = time; dsh_pk = o }
+                            on release dsh_po.$o { dsh_pk = -1 }
+                            on hold dsh_po.$o for 900ms { dsh_pk = -1; dsh_pw = false; emit pow_press(o) }
+                        }
+                    }
+                }
+                //  The power button itself: it turns into a cross while the options are out.
+                ellipse { at: dBp.x, dBp.y; radius: 22; color: if(dsh_pw, ink, mint); opacity: if(dsh_pw, 0.1 + 0.1 * dsh_pb.hover, 0.9 + 0.1 * dsh_pb.hover) }
+                text "󰐥" { at: dBp.x, dBp.y; anchor: center; size: 21; family: "SpaceMono Nerd Font Propo"; color: onmint; opacity: 1 - dsh_pwk }
+                text "󰅖" { at: dBp.x, dBp.y; anchor: center; size: 19; family: "SpaceMono Nerd Font Propo"; color: ink; opacity: dsh_pwk }
+                zone ellipse dsh_pb { at: dBp.x, dBp.y; radius: 24; cursor: pointer; active: dash_open; label: "Power options" }
+                on press dsh_pb { dsh_pw = not dsh_pw }
+            }
+
+            //  ── Volume and brightness: two tall pills of glass, filled from the bottom as far as the level, dragged up and down. Brightness is
+            //  greyed out where there is no backlight to set (external monitors), as in the controls drawer ──
+            repeat v in 0..2 {
+                let dV.w = dsh.pw
+                let dV.l = dE.l + v * (dV.w + dsh.gap)
+                let dV.k = dV.w * 0.36
+                let dV.on = if(v == 0, 1, if(brightness.present, 1, 0))      // it can be moved
+                let dV.lv = if(dsh_sl.$v.pressed, clamp((dE.t + dE.h - pointer.y) / dE.h, 0, 1), clamp(if(v == 0, volume_level, bright_level), 0, 1))   // under the pointer while dragged, not waiting on the mixer
+                let dV.dim = if(v == 0, audio.muted, 1 - dV.on)               // its fill is grey: muted, or nothing to set
+                let dV.ly = clamp(dE.t + dE.h * (1 - dV.lv) - 21, dE.t + 9, dE.t + dE.h - 21)   // the line's top: it rides above the fill, 5 clear of it (the fill is 9 clear of the glass)
+                DshTile(dV.l, dE.t, dV.w, dE.h, pick(v, dsh_c4, dsh_c1), dV.k) {
+                    group {
+                        clip inset 9 box { from: dV.l, dE.t; size: dV.w, dE.h; corner: dV.k }
+                        box { from: dV.l, dV.ly + 21; size: dV.w, dE.t + dE.h - dV.ly - 21; color: if(dV.dim, faint, mint); opacity: if(dV.dim, 0.22, 0.85) }
+                    }
+                    //  Glass reflections on the fill itself, as if it were coloured glass lit from the top left: darker toward the right and the
+                    //  foot for depth, a long bright streak down the left with a thin one beside it, a bright surface line at the top that fades
+                    //  into the fill, and a soft band of light that rises through the fill about every twelve seconds. Quieter when it is muted.
+                    group {
+                        clip inset 9 box { from: dV.l, dE.t; size: dV.w, dE.h; corner: dV.k }
+                        show: dV.on > 0.5
+                        let dVg.t = dV.ly + 21                                  // the fill's top and height
+                        let dVg.h = max(0, dE.t + dE.h - dVg.t)
+                        let dVg.q = if(dV.dim, 0.5, 1)
+                        //  Every fade is made of many fine strips, each only a hair different from the next, so it reads as smooth glass and not bands.
+                        repeat c in 0..30 {
+                            box { from: dV.l + c * dV.w / 30, dVg.t; size: dV.w / 30 + 0.6, dVg.h; color: #000000; opacity: 0.17 * c / 30 * dVg.q }
+                        }
+                        repeat c in 0..14 {
+                            box { from: dV.l, dE.t + dE.h - 3 * (c + 1); size: dV.w, 3.6; color: #000000; opacity: 0.2 * (1 - c / 14) * dVg.q }
+                        }
+                        repeat c in 0..36 {
+                            box { from: dV.l + 15, dVg.t + 10 + c * max(0, dVg.h - 24) / 36; size: 8, max(0, dVg.h - 24) / 36 + 1; corner: if(c == 0, 4, 0); color: #ffffff; opacity: 0.3 * (1 - 0.6 * c / 36) * dVg.q }
+                        }
+                        repeat c in 0..12 {
+                            box { from: dV.l + 28, dVg.t + 14 + c * max(0, dVg.h * 0.5 - 14) / 12; size: 3, max(0, dVg.h * 0.5 - 14) / 12 + 1; corner: if(c == 0, 1.5, 0); color: #ffffff; opacity: 0.16 * (1 - c / 12) * dVg.q }
+                        }
+                        repeat c in 0..11 {
+                            box { from: dV.l, dVg.t + c * 2; size: dV.w, 2.4; color: #ffffff; opacity: 0.42 * pow(1 - c / 11, 1.6) * dVg.q }
+                        }
+                        let dVg.p = fract(time * 0.08 + v * 0.45)
+                        let dVg.y = dVg.t + (1 - dVg.p) * dVg.h
+                        repeat j in 0..18 {
+                            box { from: dV.l, dVg.y - 18 + j * 2; size: dV.w, 2.4; color: #ffffff; opacity: 0.14 * sin((j + 0.5) / 18 * 180) * sin(dVg.p * 180) * dVg.q; show: dVg.h > 24 }
+                        }
+                    }
+                    //  The handle: a bright line just above the top of the fill, reaching a little past the glass on both sides.
+                    //  Glass like the fill, not flat: a rim and a soft glow, darker toward the right, a bright streak along its upper edge and a
+                    //  short one down the left.
+                    let dVh.o = 0.55 + 0.45 * dV.on
+                    body {
+                        color: mint
+                        rim: 30%
+                        shadow: 0, 0, 7, 50%, mint
+                        opacity: dVh.o
+                        show: dV.on > 0.5
+                        box { from: dV.l - 7, dV.ly; size: dV.w + 14, 16; corner: 8 }
+                    }
+                    group {
+                        clip box { from: dV.l - 7, dV.ly; size: dV.w + 14, 16; corner: 8 }
+                        show: dV.on > 0.5
+                        repeat c in 0..20 {
+                            box { from: dV.l - 7 + c * (dV.w + 14) / 20, dV.ly; size: (dV.w + 14) / 20 + 0.6, 16; color: #000000; opacity: 0.2 * c / 20 * dVh.o }
+                        }
+                        repeat c in 0..6 {
+                            box { from: dV.l - 7, dV.ly + c * 1.6; size: dV.w + 14, 2; color: #ffffff; opacity: 0.45 * pow(1 - c / 6, 1.6) * dVh.o }
+                        }
+                        box { from: dV.l + 4, dV.ly + 4; size: (dV.w + 14) * 0.45, 3; corner: 1.5; color: #ffffff; opacity: 0.3 * dVh.o }
+                    }
+                    text number(dV.lv * 100, 0, "%") { at: dV.l + dV.w / 2, dE.t + 30; anchor: center; size: 20; weight: 600; family: "Space Grotesk"; color: ink; opacity: 0.5 + 0.5 * dV.on; show: dV.on }
+                    text "No backlight" { at: dV.l + dV.w / 2, dE.t + 30; anchor: center; size: 11.5; width: dV.w - 16; lines: 2; align: center; family: "Space Grotesk"; color: faint; show: not dV.on }
+                    text pick(if(v == 1, 4 + clamp(floor(dV.lv * 3), 0, 2), if(audio.muted, 3, clamp(floor(dV.lv * 3), 0, 2))), "󰕿", "󰖀", "󰕾", "󰖁", "󰃞", "󰃟", "󰃠") {
+                        at: dV.l + dV.w / 2, dE.t + dE.h - 32; anchor: center; size: 24; family: "SpaceMono Nerd Font Propo"; color: if(dV.lv > 0.18 and not dV.dim, onmint, ink); opacity: 0.45 + 0.55 * dV.on }
+                }
+                zone box dsh_sl.$v { from: dV.l, dE.t; size: dV.w, dE.h; corner: dV.k; cursor: ns_resize; active: dash_open and dV.on > 0.5; label: pick(v, "Volume", "Brightness"); role: slider; value: dV.lv }
+            }
+            on press dsh_sl.0 { emit setvol(clamp((dE.t + dE.h - pointer.y) / dE.h, 0, 1)) }
+            on drag dsh_sl.0 { emit setvol(clamp((dE.t + dE.h - pointer.y) / dE.h, 0, 1)) }
+            on press dsh_sl.1 { emit setbright(clamp((dE.t + dE.h - pointer.y) / dE.h, 0, 1)) }
+            on drag dsh_sl.1 { emit setbright(clamp((dE.t + dE.h - pointer.y) / dE.h, 0, 1)) }
+            //  The speaker, at the foot of the volume: a press mutes (declared after the slider, so it takes the press).
+            zone ellipse dsh_mute { at: dE.l + dsh.pw / 2, dE.t + dE.h - 32; radius: 22; cursor: pointer; active: dash_open; label: "Mute"; role: toggle; checked: audio.muted }
+            on press dsh_mute { emit mute }
+
+            //  ── The user: their picture in a ring of accent, their name, and the machine (host, distribution, kernel, how long it has been up) ──
+            DshTile(dF.l, dF.t, dF.w, dF.h, dsh_c5) {
+                let dF.r = dF.h / 2 - 20
+                let dF.cx = dF.l + 20 + dF.r
+                let dF.cy = dF.t + dF.h / 2
+                let dF.tx = dF.cx + dF.r + 22
+                let dF.w2 = dF.l + dF.w - dF.tx - 18
+                ellipse { at: dF.cx, dF.cy; radius: dF.r + 6; stroke: 4; color: mint; opacity: 0.9 }
+                ellipse { at: dF.cx, dF.cy; radius: dF.r; color: ink; opacity: 0.07 }
+                text "󰀄" { at: dF.cx, dF.cy; anchor: center; size: 56; family: "SpaceMono Nerd Font Propo"; color: faint; opacity: 0.7; show: not sm_has_avatar }
+                group {
+                    show: sm_has_avatar
+                    clip inset 0 box { from: dF.cx - dF.r, dF.cy - dF.r; size: dF.r * 2, dF.r * 2; corner: dF.r }
+                    image sm_av { at: dF.cx - dF.r, dF.cy - dF.r; size: dF.r * 2, dF.r * 2 }
+                }
+                //  Pressing the picture chooses another (a pencil shows while the pointer is on it).
+                ellipse { at: dF.cx, dF.cy; radius: dF.r; color: #000000; opacity: 0.5 * dsh_face.hover }
+                text "󰏫" { at: dF.cx, dF.cy; anchor: center; size: 34; family: "SpaceMono Nerd Font Propo"; color: #ffffff; opacity: dsh_face.hover }
+                zone ellipse dsh_face { at: dF.cx, dF.cy; radius: dF.r + 6; cursor: pointer; active: dash_open; label: "Change picture" }
+                on press dsh_face { face_open = true; emit face_list }
+                //  The name, big, with how long the machine has been up at the end of its line; under them three pills: host, distribution, kernel.
+                text sm_name { at: dF.tx, dF.cy - 54; anchor: left center; size: 28; weight: 600; width: dF.w2 - 90; lines: 1; family: "Space Grotesk"; color: ink; measure: dsh_nm }
+                text "󰔛" { at: dF.tx + dsh_nm.width + 18, dF.cy - 52; anchor: left center; size: 14; family: "SpaceMono Nerd Font Propo"; color: mint }
+                text sm_uptime { at: dF.tx + dsh_nm.width + 38, dF.cy - 52; anchor: left center; size: 14; weight: 600; family: "Space Grotesk"; color: mint }
+                repeat q in 0..3 {
+                    let dFq.y = dF.cy - 14 + q * 32
+                    box { from: dF.tx, dFq.y - 14; size: dF.w2, 28; corner: 14; color: ink; opacity: 0.07 }
+                    text pick(q, "󰌢", "󰣇", "󰌽") { at: dF.tx + 14, dFq.y; anchor: left center; size: 15; family: "SpaceMono Nerd Font Propo"; color: mint }
+                }
+                text sm_host { at: dF.tx + 40, dF.cy - 14; anchor: left center; size: 14.5; weight: 500; width: dF.w2 - 52; lines: 1; family: "Space Grotesk"; color: ink }
+                text sm_distro { at: dF.tx + 40, dF.cy + 18; anchor: left center; size: 14.5; weight: 500; width: dF.w2 - 52; lines: 1; family: "Space Grotesk"; color: ink }
+                text sm_kernel { at: dF.tx + 40, dF.cy + 50; anchor: left center; size: 14.5; weight: 500; width: dF.w2 - 52; lines: 1; family: "Space Grotesk"; color: faint }
+            }
+
+            //  ── System and network: three rings (processor, memory, graphics or swap), and under them the network: its name, how strong, and what
+            //  goes down and up now ──
+            DshTile(dG.l, dG.t, dG.w, dG.h, dsh_c6) {
+                repeat g in 0..3 {
+                    let dGg.x = dG.l + dG.w * (g + 0.5) / 3
+                    let dGg.y = dG.t + 66
+                    let dGg.v = clamp(pick(g, sm_cpu, sm_mem_f, if(sm_gpu_on, sm_gpu_f, sm_swap_f)), 0.002, 1)
+                    arc { at: dGg.x, dGg.y; radius: 36; span: 360deg; width: 7; color: ink; opacity: 0.1 }
+                    arc { at: dGg.x, dGg.y; radius: 36; span: dGg.v * 360deg; rotate: dGg.v * 180deg; width: 15; color: mix(mint, alert, clamp((dGg.v - 0.5) * 2, 0, 1)); opacity: 0.12 + 0.12 * dGg.v }
+                    arc { at: dGg.x, dGg.y; radius: 36; span: dGg.v * 360deg; rotate: dGg.v * 180deg; width: 7; color: mix(mint, alert, clamp((dGg.v - 0.5) * 2, 0, 1)) }
+                    text number(dGg.v * 100, 0, "%") { at: dGg.x, dGg.y; anchor: center; size: 15; weight: 600; family: "Space Grotesk"; color: ink }
+                    text pick(g + if(g == 2 and not sm_gpu_on, 1, 0), "CPU", "Memory", "GPU", "Swap") { at: dGg.x, dGg.y + 52; anchor: center; size: 12; family: "Space Grotesk"; color: faint }
+                }
+                box { from: dG.l + 24, dG.t + 140; size: dG.w - 48, 1; color: ink; opacity: 0.1 }
+                //  The network: the signal as four bars (a cable shows its own icon), the name, a status pill; under it two cells for the speeds,
+                //  each with the last minute drawn at its foot (rates against the biggest in view, as the system monitor's).
+                let dGn.y = dG.t + 160
+                let dGn.sg = if(net.strength > 1, net.strength / 100, net.strength)   // the service gives 0 to 1 in practice (its docs say 0 to 100): both work
+                repeat b in 0..4 {
+                    box { from: dG.l + 26 + b * 6, dGn.y + 9 - (5 + b * 4); size: 4, 5 + b * 4; corner: 1.2; color: mint; opacity: if(net.online and dGn.sg > b * 0.25 + 0.05, 1, 0.16); show: net.wifi }
+                }
+                text "󰈀" { at: dG.l + 26, dGn.y; anchor: left center; size: 18; family: "SpaceMono Nerd Font Propo"; color: if(net.online, mint, faint); show: not net.wifi }
+                text net.name { at: dG.l + 58, dGn.y; anchor: left center; size: 15; weight: 600; width: if(net.wifi, dG.w - 290, dG.w - 250); lines: 1; family: "Space Grotesk"; color: ink; show: net.online }   // (a cable's line under the badge is only the address: the name gets what the signal's share would take)
+                //  Between the name and the badge: how strong the signal is, and the address.
+                text sm_netinfo { at: dG.l + dG.w - 24 - 70, dGn.y; anchor: right center; align: right; size: 12; width: 130; lines: 1; family: "Space Grotesk"; color: faint; show: net.online }
+                text "Offline" { at: dG.l + 58, dGn.y; anchor: left center; size: 15; weight: 600; family: "Space Grotesk"; color: faint; show: not net.online }
+                box { at: dG.l + dG.w - 24 - 30, dGn.y; size: 60, 22; corner: 11; color: if(net.online, mint, ink); opacity: if(net.online, 0.16, 0.08) }
+                ellipse { at: dG.l + dG.w - 24 - 46, dGn.y; radius: 3; color: if(net.online, mint, faint) }
+                text pick(if(net.online, 0, 1), "Online", "Offline") { at: dG.l + dG.w - 24 - 38, dGn.y; anchor: left center; size: 11; weight: 600; family: "Space Grotesk"; color: if(net.online, mint, faint) }
+                let dGn.cw = (dG.w - 48 - 10) / 2
+                let dGn.t = dG.t + 180
+                let dGn.h = dG.h - 180 - 12
+                repeat c in 0..2 {
+                    let dGc.x = dG.l + 24 + c * (dGn.cw + 10)
+                    box { from: dGc.x, dGn.t; size: dGn.cw, dGn.h; corner: 12; color: ink; opacity: 0.06 }
+                    group {
+                        clip inset 0 box { from: dGc.x, dGn.t; size: dGn.cw, dGn.h; corner: 12 }
+                        repeat i in 0..60 {
+                            let dGk.k = i + 60 - sm_hist.count
+                            let dGk.v = clamp(if(c == 0, sm_hist.$i.rx, sm_hist.$i.tx), 0, 1)
+                            box { from: dGc.x + dGk.k * dGn.cw / 60, dGn.t + dGn.h - max(1.5, dGk.v * (dGn.h - 6)); size: max(1.5, dGn.cw / 60 - 0.6), max(1.5, dGk.v * (dGn.h - 6)); color: if(c == 0, mint, mix(mint, ink, 0.4)); opacity: 0.1 + 0.3 * dGk.k / 60; show: i < sm_hist.count }
+                        }
+                    }
+                    text pick(c, "󰇚", "󰕒") { at: dGc.x + 12, dGn.t + 14; anchor: left center; size: 13; family: "SpaceMono Nerd Font Propo"; color: mint }
+                    text sm_rx_txt { at: dGc.x + 32, dGn.t + 14; anchor: left center; size: 13.5; weight: 600; width: dGn.cw - 40; lines: 1; family: "Space Grotesk"; color: ink; show: c == 0 }
+                    text sm_tx_txt { at: dGc.x + 32, dGn.t + 14; anchor: left center; size: 13.5; weight: 600; width: dGn.cw - 40; lines: 1; family: "Space Grotesk"; color: ink; show: c == 1 }
+                }
+            }
+
+            //  ── The picture chooser: over the dashboard, a browser: the folder's folders and pictures as a grid, scrolled with the wheel. A folder
+            //  goes in when pressed; a picture becomes the picture. Escape, the cross or a press outside puts it away. ──
+            group {
+                show: face_k > 0.004
+                opacity: face_k
+                let fp.w = 700
+                let fp.h = 460
+                let fp.l = dsh.sl + dsh.tw / 2 - fp.w / 2
+                let fp.t = dsh.y0 + dsh.gh / 2 - fp.h / 2 + 12 * (1 - face_k)
+                let fp.vt = fp.t + 64                                  // the grid's top and height
+                let fp.vh = fp.h - 64 - 14
+                let fp.ch = ceil(face_pics.count / 6) * 108            // all of it
+                box { from: dsh.sl, dsh.y0; size: dsh.tw, dsh.gh; corner: 30; color: #000000; opacity: 0.35 }
+                zone box dsh_fpout { from: dsh.sl, dsh.y0; size: dsh.tw, dsh.gh; active: face_open }
+                on press dsh_fpout { face_open = false }
+                DshTile(fp.l, fp.t, fp.w, fp.h, 1) {
+                    //  Under everything else, so the buttons and pictures are above it.
+                    zone box dsh_fpbg { from: fp.l, fp.t; size: fp.w, fp.h; corner: 26; active: face_open }
+                    on scroll dsh_fpbg { fp_to = clamp(fp_to - wheel * 54, 0, max(0, fp.ch - fp.vh + 4)) }
+                    //  Up a folder, home, and where we are.
+                    ellipse { at: fp.l + 36, fp.t + 32; radius: 16; color: ink; opacity: (0.07 + 0.1 * dsh_fpu.hover) * if(face_at_top, 0.4, 1) }
+                    text "󰁞" { at: fp.l + 36, fp.t + 32; anchor: center; size: 16; family: "SpaceMono Nerd Font Propo"; color: ink; opacity: if(face_at_top, 0.4, 1) }
+                    zone ellipse dsh_fpu { at: fp.l + 36, fp.t + 32; radius: 18; cursor: pointer; active: face_open and not face_at_top; label: "Up a folder" }
+                    on press dsh_fpu { emit face_up }
+                    ellipse { at: fp.l + 76, fp.t + 32; radius: 16; color: ink; opacity: 0.07 + 0.1 * dsh_fph.hover }
+                    text "󰋜" { at: fp.l + 76, fp.t + 32; anchor: center; size: 16; family: "SpaceMono Nerd Font Propo"; color: ink }
+                    zone ellipse dsh_fph { at: fp.l + 76, fp.t + 32; radius: 18; cursor: pointer; active: face_open; label: "Home folder" }
+                    on press dsh_fph { emit face_home }
+                    text face_path { at: fp.l + 106, fp.t + 32; anchor: left center; size: 16; weight: 600; width: fp.w - 106 - 66; lines: 1; family: "Space Grotesk"; color: ink }
+                    ellipse { at: fp.l + fp.w - 34, fp.t + 32; radius: 16; color: ink; opacity: 0.07 + 0.1 * dsh_fpx.hover }
+                    text "󰅖" { at: fp.l + fp.w - 34, fp.t + 32; anchor: center; size: 16; family: "SpaceMono Nerd Font Propo"; color: ink }
+                    zone ellipse dsh_fpx { at: fp.l + fp.w - 34, fp.t + 32; radius: 18; cursor: pointer; active: face_open; label: "Close" }
+                    on press dsh_fpx { face_open = false }
+                    text "Nothing here" { at: fp.l + fp.w / 2, fp.t + fp.h / 2 + 20; anchor: center; size: 14; family: "Space Grotesk"; color: faint; show: face_pics.count < 1 }
+                    group {
+                        clip inset 0 box { from: fp.l + 8, fp.vt; size: fp.w - 16, fp.vh; corner: 18 }
+                        repeat i in 0..72 {
+                            let fpi.x = fp.l + 24 + (i - floor(i / 6) * 6) * 112
+                            let fpi.y = fp.vt + floor(i / 6) * 108 - fp_s
+                            group {
+                                show: face_pics.count > i
+                                box { from: fpi.x, fpi.y; size: 100, 100; corner: 18; color: ink; opacity: 0.07 }
+                                text "󰉋" { at: fpi.x + 50, fpi.y + 40; anchor: center; size: 36; family: "SpaceMono Nerd Font Propo"; color: mint; show: face_pics.$i.dir }
+                                text face_pics.$i.name { at: fpi.x + 50, fpi.y + 78; anchor: center; align: center; size: 12.5; width: 92; lines: 1; family: "Space Grotesk"; color: ink; show: face_pics.$i.dir }
+                                group {
+                                    show: not face_pics.$i.dir
+                                    clip inset 0 box { from: fpi.x, fpi.y; size: 100, 100; corner: 18 }
+                                    image face_pics.$i.thumb { at: fpi.x, fpi.y; size: 100, 100 }
+                                }
+                                box { from: fpi.x, fpi.y; size: 100, 100; corner: 18; color: mint; opacity: 0.22 * dsh_fp.$i.hover }
+                            }
+                            zone box dsh_fp.$i { from: fpi.x, fpi.y; size: 100, 100; corner: 18; cursor: pointer; active: face_open and face_pics.count > i and fpi.y > fp.vt - 40 and fpi.y < fp.vt + fp.vh - 60; label: "Open or choose" }
+                            on press dsh_fp.$i while face_pics.$i.dir { emit face_nav(i) }
+                            on press dsh_fp.$i while not face_pics.$i.dir { emit face_set(i); face_open = false }
+                        }
+                    }
+                    //  Where the scroll has got to.
+                    box { from: fp.l + fp.w - 10, fp.vt + 4 + fp_s / max(fp.ch, 1) * (fp.vh - 8); size: 4, (fp.vh - 8) * min(1, fp.vh / max(fp.ch, 1)); corner: 2; color: ink; opacity: 0.35; show: fp.ch > fp.vh }
+                }
+            }
+        }
+    }
+}

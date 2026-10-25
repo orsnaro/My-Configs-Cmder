@@ -1,0 +1,26 @@
+#!/bin/sh
+# Print the Hyprland output under the pointer, falling back to the focused one.
+#
+# The focused monitor can stay on the middle screen while the pointer is over an
+# empty part of a side monitor. Snap should follow the pointer, as a screenshot
+# taken there is what the user expects.
+set -u
+
+pos=$(hyprctl -j cursorpos 2>/dev/null || true)
+x=$(printf '%s' "$pos" | jq -r 'if type == "object" then (.x // empty) else empty end' 2>/dev/null || true)
+y=$(printf '%s' "$pos" | jq -r 'if type == "object" then (.y // empty) else empty end' 2>/dev/null || true)
+
+if [ -n "$x" ] && [ -n "$y" ]; then
+    name=$(hyprctl -j monitors 2>/dev/null \
+        | jq -r --argjson x "$x" --argjson y "$y" \
+            '.[] | select(.x <= $x and $x < (.x + .width) and .y <= $y and $y < (.y + .height)) | .name' \
+            2>/dev/null | head -n 1 || true)
+    if [ -n "$name" ]; then
+        printf '%s\n' "$name"
+        exit 0
+    fi
+fi
+
+hyprctl -j monitors 2>/dev/null \
+    | jq -r '.[] | select(.focused) | .name' 2>/dev/null \
+    | head -n 1 || true

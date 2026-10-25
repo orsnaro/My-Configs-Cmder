@@ -1,0 +1,13 @@
+{
+  "hidden": [],
+  "order": [
+    "ws",
+    "title",
+    "media",
+    "tray",
+    "sr",
+    "set",
+    "ctl",
+    "clock"
+  ]
+}

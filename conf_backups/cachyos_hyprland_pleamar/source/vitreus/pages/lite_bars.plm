@@ -1,0 +1,330 @@
+part LiteBars {
+    //  Compact side strips use the main bar's typography, palette and workspace spring.
+    //  Workspaces hug the left, the clock is centred, and the volume hugs the right. Everything is
+    //  one shared component, given the surface's own measured width, so no coordinate is taken from
+    //  the main bar's monitor. RAM and materials also use the main scene's existing data and controls.
+    fact bar_lite_dp1 = false
+    fact bar_lite_hdmi = false
+    fact lite_vol_dp1 = false
+    fact lite_vol_hdmi = false
+    //  A dropdown belongs to the strip that opened it; opening anything on the main bar closes both.
+    on change panel { lite_vol_dp1 = false; lite_vol_hdmi = false }
+    on change bar_lite_dp1 while not bar_lite_dp1 { lite_vol_dp1 = false }
+    on change bar_lite_hdmi while not bar_lite_hdmi { lite_vol_hdmi = false }
+
+    component LiteWorkspace(w: record, tile_x: number, tile_d: number, enabled: bool, pick: event) {
+        size: 24, 36
+        prop ls_active = 0 ~pop
+        follow ls_active = if(ws.active == w.id, 1, 0)
+        prop ls_hover = 0 ~pop
+        follow ls_hover = touch.hover
+        let ls_scale = 1 + max(0.10 * ls_active, 0.25 * ls_hover)
+        let ls_dot = 3.0 * (1 + max(0.40 * ls_active, 0.35 * ls_hover))
+        group {
+            show: enabled
+            body {
+                color: mix(ink, mint, ls_active)
+                opacity: min(100%, if(w.occupied, 85%, 30%) + 70% * ls_active + 15% * touch.hover)
+                rim: 40%
+                shadow: 0, 0, 7 * u, 30% * ls_active, mint
+                box { at: tile_x, 18; size: tile_d * ls_scale, tile_d * ls_scale; corner: 0.3 * tile_d }
+                show: w.occupied
+            }
+            //  The 36px strip's centre; no number label sits below it any more.
+            ellipse { at: tile_x, 18; radius: ls_dot; color: mix(ink, mint, ls_active); opacity: 0.65 + 0.35 * ls_active; show: not w.occupied }
+            text w.icon { at: tile_x, 18; anchor: center; size: 17; weight: 400; color: deep; family: "Material Symbols Outlined"; show: w.occupied }
+
+        }
+        zone box touch { at: tile_x, 18; size: 24, 36; cursor: pointer; active: enabled }
+        on press touch { emit pick(w.id) }
+    }
+
+    //  The native bar's material branches, fitted to a compact local strip instead of its full-screen
+    //  drawer shapes. Shared theme springs and Glass controls keep both side strips in the same mode.
+    component LiteMaterial(sw: number, sh: number) {
+        size: sw, sh
+        let lmat.corner = 10 * (1 - 0.73 * sq)
+        body {
+            color: mix(tint, #000000, cy_dark * cy_k)
+            glass: 100%
+            opacity: glass_op * (1 - obs)
+            lens: glass_bend
+            frost: glass_clear
+            refraction: glass_refr
+            dispersion: glass_disp
+            rim: 10% * glass_rim + 14% * pv * glass_rim
+            shine: pointer
+            show: obs < 0.996 and not glass_auto
+            box { from: 0, 0; size: sw, sh; corner: lmat.corner }
+        }
+        body {
+            color: mix(tint, #000000, cy_dark * cy_k)
+            glass: 100%
+            opacity: glass_op * (1 - obs)
+            lens: glass_bend
+            frost: auto
+            refraction: glass_refr
+            dispersion: glass_disp
+            rim: 10% * glass_rim + 14% * pv * glass_rim
+            shine: pointer
+            show: obs < 0.996 and glass_auto
+            box { from: 0, 0; size: sw, sh; corner: lmat.corner }
+        }
+        //  As on the main bar, a translucent glass underlay requests blur behind solid mode.
+        body {
+            color: obsidian
+            glass: 100%
+            lens: false
+            rim: 0%
+            refraction: 0%
+            dispersion: 0%
+            shine: 9000, 9000
+            opacity: obs * 0.34 * (1 - pk)
+            show: obs > 0.97
+            box { from: 0, 0; size: sw, sh; corner: lmat.corner }
+        }
+        body {
+            color: obsidian
+            rim: 0%
+            opacity: obs * (1 - 0.4 * clamp(hy_blur, 0, 1))
+            show: obs > 0.004
+            box { from: 0, 0; size: sw, sh; corner: lmat.corner }
+        }
+        body {
+            color: obsidian
+            rim: 40% * cas_k
+            border: 1.7 * u * cas_k, deep
+            opacity: cas_k
+            show: cas_k > 0.004
+            box { from: 0, 0; size: sw, sh; corner: lmat.corner }
+        }
+        body {
+            gradient: 0, 0 to sw, sh, #ffcfe8, #e6d6ff 38%, #cfeaff 68%, #d2fff0
+            rim: 55% * uwu_k
+            border: 3 * u * uwu_k, deep
+            opacity: uwu_k
+            show: uwu_k > 0.004
+            box { from: 0, 0; size: sw, sh; corner: lmat.corner }
+        }
+        //  Keep Cyber's neon outline inside the 36px surface; no full-screen HUD/drawer pass.
+        box { from: 1, 1; size: max(0, sw - 2), max(0, sh - 2); corner: lmat.corner; stroke: 1; color: mint; opacity: cy_k; show: cy_k > 0.01 }
+    }
+
+    //  A compact mixer row for the side dropdown. The Controls mixer is drawn 15% larger than the rest
+    //  (`cu`), which would need a 447px card; the side strips use this 296px row instead.
+    component LiteMixRow(m: record, set: event, mute: event) {
+        size: 296, 30
+        opacity: if(m.corked, 55%, 100%)
+        image m.icon { at: 12, 15; size: 18, 18 }
+        text m.name { at: 32, 15; anchor: left center; size: 12; width: 96; lines: 1; color: ink; family: "Space Grotesk" }
+        box { from: 134, 12; size: 80, 6; corner: 3; color: deep; opacity: 60% }
+        box { from: 134, 12; size: max(0.1, 80 * clamp(m.pct / 100, 0, 1)), 6; corner: 3; color: if(m.muted, faint, mint); opacity: if(m.muted, 60%, 100%) }
+        zone box track { at: 174, 15; size: 92, 24; cursor: pointer }
+        on press track { emit set(m.index * 4 + clamp((local.x - 134) / 80, 0, 1)) }
+        on drag track { emit set(m.index * 4 + clamp((local.x - 134) / 80, 0, 1)) }
+        text number(m.pct, 0, "%") { at: 252, 15; anchor: right center; align: right; size: 11.5; width: 28; lines: 1; color: faint; family: "Space Grotesk" }
+        path { at: 280, 15; color: if(m.muted, faint, mint); opacity: 85% + 15% * mzone.hover; move 0, -2; line 2.5, -2; line 5.5, -5; line 5.5, 5; line 2.5, 2; line 0, 2; close }
+        line { from: 271, 9; to: 287, 21; width: 1.4; color: alert; opacity: if(m.muted, 100%, 0) }
+        zone box mzone { at: 280, 15; size: 24, 24; cursor: pointer; label: "Mute app" }
+        on press mzone { emit mute(m.index) }
+    }
+
+    //  A row of the side dropdown's output list: the same choice the main drawer's card offers,
+    //  in 280px, with the dot that marks where the sound is going now.
+    component LiteOutRow(o: record, pick: event) {
+        size: 280, 30
+        zone box lout { from: 0, 0; size: 280, 30; corner: 9; cursor: pointer; label: "Play the sound here" }
+        box { from: 0, 0; size: 280, 30; corner: 9; color: ink; opacity: if(o.current, 14%, 0%) + 9% * lout.hover }
+        ellipse { at: 12, 15; radius: 3; color: mint; opacity: if(o.current, 100%, 0%) }
+        text o.name { at: 24, 15; anchor: left center; size: 12.5; width: 244; lines: 1; color: ink; family: "Space Grotesk" }
+        on press lout { emit pick(o.index) }
+    }
+
+    //  The side bars' volume dropdown: the master slider and compact mixer rows,
+    //  in a small named surface that exists only while its strip is visible and the speaker was pressed.
+    component LiteVolumePanel(sw: number, sh: number, side: number) {
+        size: sw, sh
+        fact lv_out = false
+        LiteMaterial(sw, sh)
+        text "volume_up" { at: 22, 26; anchor: center; size: 18; weight: 400; color: faint; family: "Material Symbols Outlined"; show: not audio.muted }
+        text "volume_off" { at: 22, 26; anchor: center; size: 18; weight: 400; color: alert; family: "Material Symbols Outlined"; show: audio.muted }
+        text "Volume" { at: 42, 26; anchor: left center; size: 15; weight: 600; color: ink; family: "Space Grotesk" }
+        text number(audio.volume * 100, 0, "%") { at: 284, 26; anchor: right center; align: right; size: 14; weight: 600; color: if(audio.muted, alert, mint); family: "Space Grotesk"; show: not audio.muted }
+        text "Muted" { at: 284, 26; anchor: right center; align: right; size: 14; weight: 600; color: alert; family: "Space Grotesk"; show: audio.muted }
+        text "close" { at: 314, 26; anchor: center; size: 18; weight: 400; color: faint; family: "Material Symbols Outlined" }
+        zone box lite_vol_close { at: 314, 26; size: 32, 32; cursor: pointer; label: "Close volume" }
+        on press lite_vol_close { lite_vol_dp1 = if(side == 0, false, lite_vol_dp1); lite_vol_hdmi = if(side == 1, false, lite_vol_hdmi) }
+
+        //  The master slider, in the popup's own local coordinates.
+        let lv.x0 = 22
+        let lv.w = 296
+        let lv.y = 58
+        let lv.th = 8
+        body {
+            color: deep
+            rim: 9%
+            box { at: lv.x0 + lv.w / 2, lv.y; size: lv.w, lv.th; corner: lv.th / 2 }
+        }
+        group {
+            show: not audio.muted
+            body {
+                gradient: lv.x0, 0 to lv.x0 + lv.w, 0, mintlo, mint 55%, minthi
+                rim: 22%
+                shadow: 0, 0, 7 * cu, 50%, mint
+                box { from: lv.x0, lv.y - lv.th / 2; size: max(0.1, lv.w * volume_level), lv.th; corner: lv.th / 2 }
+            }
+        }
+        body {
+            color: off
+            rim: 12%
+            show: audio.muted
+            box { from: lv.x0, lv.y - lv.th / 2; size: max(0.1, lv.w * volume_level), lv.th; corner: lv.th / 2 }
+        }
+        zone box lite_vol_slider { at: lv.x0 + lv.w / 2, lv.y; size: 316, 28; cursor: pointer; label: "Volume" }
+        on press lite_vol_slider { emit setvol(clamp((pointer.x - 22) / 296, 0, 1)) }
+        on drag lite_vol_slider { emit setvol(clamp((pointer.x - 22) / 296, 0, 1)) }
+
+        //  Where the sound is going: the current output, and the list of them. The list drops over
+        //  the mixer instead of making the card taller, so both stay inside the 340 x 320 surface.
+        let lo.row = 94
+        let lo.mix = 140
+        let lo.rh = 30
+        let lo.list = 114
+        let lo.rows = lo.rh * 6
+        let lo.mixh = min(160, max(1, mixer.count * 34 - 4))
+
+        box { from: 22, 78; size: 296, 1; color: ink; opacity: 8% }
+        box { from: 22, lo.row - 14; size: 296, 28; corner: 9; color: ink; opacity: 9% * lvo.hover }
+        text "speaker" { at: 32, lo.row; anchor: center; size: 17; weight: 400; color: faint; family: "Material Symbols Outlined" }
+        text outname { at: 48, lo.row; anchor: left center; size: 12.5; width: 236; lines: 1; color: ink; opacity: 65% + 35% * lvo.hover; family: "Space Grotesk"; show: outlist.count > 0 }
+        text "No output" { at: 48, lo.row; anchor: left center; size: 12.5; width: 236; lines: 1; color: faint; family: "Space Grotesk"; show: outlist.count < 1 }
+        path { at: 306, lo.row; stroke: 1.4; color: ink; opacity: 55% + 35% * lvo.hover; rotate: lv_out * 180deg; move -3.5, -2; line 0, 2; line 3.5, -2 }
+        zone box lvo { at: 170, lo.row; size: 296, 28; cursor: pointer; label: "Audio output" }
+        on press lvo { toggle lv_out }
+
+        box { from: 22, 116; size: 296, 1; color: ink; opacity: 8% }
+        text "Apps" { at: 22, 132; anchor: left center; size: 11; weight: 600; color: faint; family: "Space Grotesk" }
+        text "No app is playing sound" { at: sw / 2, 200; anchor: center; align: center; size: 12.5; color: faint; family: "Space Grotesk"; show: mixer.count < 1 }
+        column lite_mixcol {
+            at: 22, lo.mix
+            view: 296, lo.mixh
+            gap: 4
+            for m in mixer { LiteMixRow(m, set: mix_set, mute: mix_mute) }
+        }
+
+        group {
+            show: lv_out
+            zone box lv_outblock { from: 22, lo.list - 6; size: 296, lo.rows + 12; active: lv_out }
+            box { from: 22, lo.list - 6; size: 296, lo.rows + 12; corner: 12; color: deep }
+            column lv_outcol {
+                at: 30, lo.list
+                view: 280, lo.rows
+                gap: 0
+                for o in outlist { LiteOutRow(o, pick: pick_out) }
+            }
+            text "No output" { at: 170, lo.list + 30; anchor: center; align: center; size: 12.5; color: faint; family: "Space Grotesk"; show: outlist.count < 1 }
+        }
+        on pick_out { lv_out = false }
+        on change lite_vol_dp1 while not lite_vol_dp1 { lv_out = false }
+        on change lite_vol_hdmi while not lite_vol_hdmi { lv_out = false }
+    }
+
+    component LiteStrip(sw: number, side: number) {
+        let ls.pad = 12
+        let ls.tile = 18
+        let ls.gap = 6
+        let ls.step = ls.tile + ls.gap
+        let ls.h = 36
+        let ls.mid = ls.h / 2
+        let ls.clock_half = 32
+        let ls.clock = sw / 2
+        //  The pill hugs its content, never the whole monitor, and is always centred on it.
+        let ls.w = min(max(0, sw - 32), max(480, 2 * (min(64, trial_workspaces.count) * 24 + 54)))
+        let ls.left = (sw - ls.w) / 2
+        let ls.ws_r = ls.clock - ls.clock_half - 10
+        //  How many workspace buttons fit between the pill's left edge and the clock; the surplus is
+        //  left out before it, drawing and press zone alike.
+        let ls.fit = min(64, max(0, floor((ls.ws_r - ls.left - ls.pad) / ls.step)))
+        let ls.first = ls.left + ls.pad + ls.tile / 2
+        let ls.vol_value = ls.left + ls.w - ls.pad
+        let ls.vol_icon = ls.vol_value - 48
+        let ls.audio_on = ls.w >= 236
+        let ls.ram_r = ls.vol_icon - 24
+        let ls.ram_w = 100
+        let ls.ram_on = ls.audio_on and ls.ram_r - ls.ram_w > ls.clock + ls.clock_half + 12
+
+        group {
+            move: ls.left, 0
+            LiteMaterial(ls.w, ls.h)
+        }
+
+        for w in trial_workspaces {
+            LiteWorkspace(w, ls.first + w.slot * ls.step, ls.tile, w.slot < ls.fit, pick: go)
+        }
+
+        text clock_hm { at: ls.clock, ls.mid; anchor: center; align: center; width: ls.clock_half * 2; lines: 1; size: 19; weight: 600; color: mint; family: "Space Grotesk" }
+
+        text trial_ram { at: ls.ram_r, ls.mid; anchor: right center; align: right; width: ls.ram_w; lines: 1; size: 13; weight: 600; color: ink; family: "Space Grotesk"; show: ls.ram_on }
+        group {
+            show: ls.audio_on
+            text "volume_up" { at: ls.vol_icon, ls.mid; anchor: center; size: 18; weight: 400; color: faint; family: "Material Symbols Outlined"; show: not audio.muted }
+            text "volume_off" { at: ls.vol_icon, ls.mid; anchor: center; size: 18; weight: 400; color: alert; family: "Material Symbols Outlined"; show: audio.muted }
+            text "{audio.volume * 100, 0}%" { at: ls.vol_value, ls.mid; anchor: right center; align: right; width: 36; lines: 1; size: 11.5; color: if(audio.muted, alert, mint); family: "Space Grotesk" }
+            zone box lite_volume { at: ls.vol_icon + 20, ls.mid; size: 64, ls.h; cursor: pointer; label: "Audio: left click opens the mixer, right click mutes, the wheel steps it 5%" }
+            on press lite_volume { lite_vol_dp1 = if(side == 0, not lite_vol_dp1, false); lite_vol_hdmi = if(side == 1, not lite_vol_hdmi, false) }
+            on press right lite_volume { emit trial_volume_toggle }
+            on scroll lite_volume { emit trial_volume_wheel(wheel) }
+        }
+    }
+
+    //  The two strips ride the main bar's monitor facts: each one is there only while the full bar
+    //  is on some other single monitor. All/fallback-All leaves both closed, so no copy is doubled.
+    surface lite_dp1 {
+        size: full, 36
+        rate: 75
+        anchor: top
+        margin: 16, 0, 0, 0
+        reserve: 36 while bar_lite_dp1 and not (snap_open and snap_target == 1)
+        screens: "DP-1"
+        keyboard: none
+        open: bar_lite_dp1
+        LiteStrip(lite_dp1.width, 0)
+    }
+    surface lite_hdmi {
+        size: full, 36
+        rate: 75
+        anchor: top
+        margin: 10, 0, 0, 0
+        reserve: 36 while bar_lite_hdmi and not (snap_open and snap_target == 2)
+        screens: "HDMI-A-2"
+        keyboard: none
+        open: bar_lite_hdmi
+        LiteStrip(lite_hdmi.width, 1)
+    }
+
+    //  The dropdowns sit a few pixels under their strips, near the speaker at the right of the
+    //  centred pill. Margins are fixed numbers in the scene language, so each monitor gets the
+    //  left edge that puts the 340px card under its own icon.
+    surface lite_vol_popup_dp1 {
+        size: 340, 320
+        rate: 75
+        anchor: top_left
+        margin: 54, 0, 0, 750
+        level: overlay
+        screens: "DP-1"
+        keyboard: none
+        open: bar_lite_dp1 and lite_vol_dp1
+        LiteVolumePanel(340, 320, 0)
+    }
+    surface lite_vol_popup_hdmi {
+        size: 340, 320
+        rate: 75
+        anchor: top_left
+        margin: 54, 0, 0, 720
+        level: overlay
+        screens: "HDMI-A-2"
+        keyboard: none
+        open: bar_lite_hdmi and lite_vol_hdmi
+        LiteVolumePanel(340, 320, 1)
+    }
+}

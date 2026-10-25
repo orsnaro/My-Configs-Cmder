@@ -1,0 +1,144 @@
+#!/usr/bin/env python3
+"""Small trial-only bar feed; reuse native collectors without scanning processes."""
+from __future__ import annotations
+
+import argparse
+import json
+import math
+import os
+from pathlib import Path
+import runpy
+import signal
+import subprocess
+import time
+from typing import Any
+
+
+def number(value: Any) -> float | None:
+    if isinstance(value, bool) or not isinstance(value, (float, int)):
+        return None
+    return float(value) if math.isfinite(value) else None
+
+
+def clean(value: Any, limit: int) -> str:
+    if not isinstance(value, str):
+        return ''
+    return ' '.join(''.join(c if c.isprintable() else ' ' for c in value).split())[:limit]
+
+
+def memory(label: str, value: Any, divisor: int) -> str:
+    if isinstance(value, dict):
+        used = number(value.get('used'))
+        total = number(value.get('total'))
+        if used is not None and total is not None and total > 0 and 0 <= used <= total:
+            return f'{label} {used / divisor:.1f} GiB'
+    return f'{label} —'
+
+
+def keyboard_label(value: str) -> str:
+    name = clean(value, 64).casefold()
+    if name in ('us', 'en', 'english (us)'):
+        return 'US'
+    if name == 'ar' or name == 'arabic' or name.startswith('arabic ('):
+        return 'AR'
+    return '—'
+
+
+def weather_icon(value: Any) -> str:
+    if not isinstance(value, dict) or number(value.get('temp', value.get('temp_c'))) is None:
+        return 'cloud_off'
+    code = number(value.get('code'))
+    day = number(value.get('day'))
+    if code in (0, 1, 2):
+        if day not in (0, 1):
+            return 'cloud'
+        if code == 2:
+            return 'partly_cloudy_day' if day == 1 else 'partly_cloudy_night'
+        return 'sunny' if day == 1 else 'clear_night'
+    if code == 3:
+        return 'cloud'
+    if code in (45, 48):
+        return 'foggy'
+    if code in (51, 53, 55, 56, 57, 61, 63, 65, 66, 67, 80, 81, 82):
+        return 'rainy'
+    if code in (71, 73, 75, 77, 85, 86):
+        return 'weather_snowy'
+    if code in (95, 96, 99):
+        return 'thunderstorm'
+    return 'cloud_off'
+
+
+def build_status(*, before: tuple[int, int] | None, after: tuple[int, int] | None,
+                 mem: Any, gpu: Any, weather: Any, pomo: Any, updates: Any,
+                 keyboard: str, now: float, pomo_mtime: float) -> dict[str, str]:
+    cpu = 'CPU —'
+    if before and after:
+        busy, total = after[0] - before[0], after[1] - before[1]
+        if total > 0 and 0 <= busy <= total:
+            cpu = f'CPU {100 * busy / total:.0f}%'
+    gpu = gpu if isinstance(gpu, dict) else {}
+    util = number(gpu.get('util'))
+    temp = number(weather.get('temp', weather.get('temp_c'))) if isinstance(weather, dict) else None
+    pomo_text = clean(pomo.get('text'), 22) if isinstance(pomo, dict) else ''
+    return {
+        'cpu': cpu,
+        'ram': memory('MEM', mem, 1024**2),  # Native /proc/meminfo collector returns KiB.
+        'gpu': f'GPU {util:.0f}%' if util is not None and 0 <= util <= 100 else 'GPU —',
+        'vram': memory('VMEM', {'used': gpu.get('mem_used'), 'total': gpu.get('mem_total')}, 1024),
+        'weather': f'{temp:.0f}°C' if temp is not None else 'Weather —',
+        'weather_icon': weather_icon(weather),
+        'pomo': pomo_text if pomo_text and 0 <= now - pomo_mtime < 10 else 'Pomo idle',
+        'updates': str(sum(bool(s.strip()) for s in updates.splitlines())) if isinstance(updates, str) else '—',
+        'keyboard': keyboard_label(keyboard),
+    }
+
+
+def cached(path: Path, *, as_json: bool = False) -> Any:
+    try:
+        value = path.read_text()
+        return json.loads(value) if as_json else value
+    except (OSError, ValueError):
+        return None
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--once', action='store_true')
+    args = parser.parse_args()
+    signal.signal(signal.SIGPIPE, signal.SIG_DFL)
+    collectors = runpy.run_path(str(Path(__file__).resolve().with_name('vitreus-sysmon')))
+    home = Path.home()
+    cache = Path(os.environ.get('VITREUS_USER_CACHE_HOME') or os.environ.get('XDG_CACHE_HOME') or home / '.cache')
+    state = Path(os.environ.get('VITREUS_USER_STATE_HOME') or os.environ.get('XDG_STATE_HOME') or home / '.local/state')
+    before = collectors['cpu_times']().get('cpu')
+    keyboard = ''
+    tick = 0
+    time.sleep(0.25 if args.once else 2)
+    while True:
+        after = collectors['cpu_times']().get('cpu')
+        if tick % 5 == 0:
+            try:
+                command = subprocess.run(['hypr-current-xkblayout'], capture_output=True, text=True, timeout=2)
+                keyboard = command.stdout if command.returncode == 0 else ''
+            except (OSError, subprocess.TimeoutExpired):
+                keyboard = ''
+        pomo_path = Path('/tmp/pomo-status')  # Existing user's pomo contract, not scratch storage.
+        try:
+            pomo_mtime = pomo_path.stat().st_mtime
+        except OSError:
+            pomo_mtime = 0.0
+        value = build_status(before=before, after=after, mem=collectors['meminfo'](),
+                             gpu=collectors['gpu'](), weather=cached(cache / 'weather.json', as_json=True),
+                             pomo=cached(pomo_path, as_json=True),
+                             updates=cached(state / 'arch-update/last_updates_check'),
+                             keyboard=keyboard, now=time.time(), pomo_mtime=pomo_mtime)
+        print(json.dumps(value, ensure_ascii=False), flush=True)
+        if args.once:
+            break
+        before = after
+        tick += 1
+        time.sleep(2)
+
+
+if __name__ == '__main__':
+    main()
