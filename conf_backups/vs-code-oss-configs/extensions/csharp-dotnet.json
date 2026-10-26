@@ -1,0 +1,116 @@
+{
+  "profile": "C# .NET",
+  "extensions": [
+    {
+      "id": "cweijan.vscode-database-client2",
+      "version": "9.0.2",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "enkia.tokyo-night",
+      "version": "1.1.2",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "jakubkozera.csharp-dev-tools",
+      "version": "1.15.5",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "jakubkozera.ms-sql-manager",
+      "version": "0.20.5",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "jdinhlife.gruvbox",
+      "version": "1.29.1",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "jomblebee.jomblebee-csharp-solution-explorer",
+      "version": "0.16.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-azuretools.vscode-containers",
+      "version": "2.4.5",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-azuretools.vscode-docker",
+      "version": "2.0.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-dotnettools.vscode-dotnet-runtime",
+      "version": "3.2.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "patcx.vscode-nuget-gallery",
+      "version": "1.2.6",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "usernamehw.errorlens",
+      "version": "3.30.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "vscode-icons-team.vscode-icons",
+      "version": "13.0.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "zhuangtongfa.material-theme",
+      "version": "3.20.3",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    }
+  ],
+  "disabledExtensions": [
+    "github.copilot-chat"
+  ],
+  "disabledBuiltinExtensions": [
+    "github.copilot-chat"
+  ],
+  "disabledNotInstalled": []
+}

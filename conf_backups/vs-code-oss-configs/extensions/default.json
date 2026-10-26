@@ -1,0 +1,652 @@
+{
+  "profile": "Default",
+  "extensions": [
+    {
+      "id": "adpyke.codesnap",
+      "version": "1.3.4",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "bierner.markdown-mermaid",
+      "version": "1.32.1",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "bito.bito",
+      "version": "1.6.8",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "bmewburn.vscode-intelephense-client",
+      "version": "1.18.5",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "charliermarsh.ruff",
+      "version": "2026.90.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "christian-kohler.npm-intellisense",
+      "version": "1.4.5",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "christian-kohler.path-intellisense",
+      "version": "2.8.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "coolbear.systemd-unit-file",
+      "version": "1.0.6",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "cschlosser.doxdocgen",
+      "version": "1.4.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "cweijan.dbclient-jdbc",
+      "version": "1.4.2",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "cweijan.vscode-database-client2",
+      "version": "9.0.2",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "davidanson.vscode-markdownlint",
+      "version": "0.62.1",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "davidlday.languagetool-linter",
+      "version": "0.25.8",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "dbaeumer.vscode-eslint",
+      "version": "3.0.34",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "dracula-theme.theme-dracula",
+      "version": "2.25.1",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "eamodio.gitlens",
+      "version": "19.2.0",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ecmel.vscode-html-css",
+      "version": "2.0.14",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "enkia.tokyo-night",
+      "version": "1.1.2",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ericgomez.breakpoint-highlight",
+      "version": "0.0.4",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "esbenp.prettier-vscode",
+      "version": "12.4.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "foxundermoon.shell-format",
+      "version": "7.2.8",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "github.github-vscode-theme",
+      "version": "6.3.5",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "github.vscode-github-actions",
+      "version": "0.32.3",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "grapecity.gc-excelviewer",
+      "version": "4.2.58",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "jdinhlife.gruvbox",
+      "version": "1.29.1",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "kevinrose.vsc-python-indent",
+      "version": "1.21.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "kleber-swf.unity-code-snippets",
+      "version": "2.4.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "liviuschera.noctis",
+      "version": "10.43.3",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "mathematic.vscode-latex",
+      "version": "2.2.3",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "mgesbert.python-path",
+      "version": "0.0.14",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "mongodb.mongodb-vscode",
+      "version": "1.17.1",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-azuretools.vscode-containers",
+      "version": "2.4.5",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-dotnettools.vscode-dotnet-runtime",
+      "version": "3.2.0",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-playwright.playwright",
+      "version": "1.1.19",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-python.debugpy",
+      "version": "2026.6.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-python.isort",
+      "version": "2025.0.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-python.python",
+      "version": "2026.4.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-python.vscode-python-envs",
+      "version": "1.40.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-toolsai.jupyter",
+      "version": "2025.9.1",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-toolsai.jupyter-keymap",
+      "version": "1.1.2",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-toolsai.jupyter-renderers",
+      "version": "1.3.0",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-toolsai.vscode-jupyter-cell-tags",
+      "version": "0.1.9",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-toolsai.vscode-jupyter-slideshow",
+      "version": "0.1.6",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-vscode.cmake-tools",
+      "version": "1.24.42",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-vscode.cpptools-themes",
+      "version": "2.0.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-vscode.hexeditor",
+      "version": "1.11.1",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-vscode.makefile-tools",
+      "version": "0.12.17",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ms-vscode.powershell",
+      "version": "2025.4.0",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "njpwerner.autodocstring",
+      "version": "0.6.1",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "oderwat.indent-rainbow",
+      "version": "8.3.1",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "pkief.material-icon-theme",
+      "version": "5.39.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "pranaygp.vscode-css-peek",
+      "version": "4.5.1",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "redhat.java",
+      "version": "1.58.0",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "ritwickdey.liveserver",
+      "version": "5.7.10",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "sainnhe.gruvbox-material",
+      "version": "6.5.2",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "sst-dev.opencode",
+      "version": "1.0.0",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "tomoki1207.pdf",
+      "version": "1.2.2",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "tonybaloney.vscode-pets",
+      "version": "1.36.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "twxs.cmake",
+      "version": "0.0.17",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "usernamehw.errorlens",
+      "version": "3.30.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "vadimcn.vscode-lldb",
+      "version": "1.12.3",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": true,
+      "applicationScoped": false
+    },
+    {
+      "id": "vizards.deepseek-v4-for-copilot",
+      "version": "0.9.4",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "vscjava.vscode-gradle",
+      "version": "3.18.0",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "vscjava.vscode-java-debug",
+      "version": "0.60.0",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "vscjava.vscode-java-dependency",
+      "version": "0.27.7",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "vscjava.vscode-java-pack",
+      "version": "0.31.2",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "vscjava.vscode-java-test",
+      "version": "0.47.0",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "vscjava.vscode-maven",
+      "version": "0.45.3",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "vscode-icons-team.vscode-icons",
+      "version": "13.0.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "xaver.clang-format",
+      "version": "1.9.0",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "xdebug.php-debug",
+      "version": "1.40.2",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "yzane.markdown-pdf",
+      "version": "2.2.0",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "yzhang.markdown-all-in-one",
+      "version": "3.6.2",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "zhuangtongfa.material-theme",
+      "version": "3.20.3",
+      "disabled": false,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    },
+    {
+      "id": "zignd.html-css-class-completion",
+      "version": "1.20.0",
+      "disabled": true,
+      "preRelease": false,
+      "pinned": false,
+      "applicationScoped": false
+    }
+  ],
+  "disabledExtensions": [
+    "bito.bito",
+    "bmewburn.vscode-intelephense-client",
+    "cweijan.dbclient-jdbc",
+    "cweijan.vscode-database-client2",
+    "eamodio.gitlens",
+    "github.copilot-chat",
+    "jakubkozera.csharp-dev-tools",
+    "jomblebee.jomblebee-csharp-solution-explorer",
+    "mathematic.vscode-latex",
+    "mongodb.mongodb-vscode",
+    "ms-dotnettools.vscode-dotnet-runtime",
+    "ms-toolsai.jupyter",
+    "ms-toolsai.jupyter-keymap",
+    "ms-toolsai.jupyter-renderers",
+    "ms-toolsai.vscode-jupyter-cell-tags",
+    "ms-toolsai.vscode-jupyter-slideshow",
+    "ms-vscode.cmake-tools",
+    "ms-vscode.powershell",
+    "muhammad-sammy.csharp",
+    "oderwat.indent-rainbow",
+    "openai.chatgpt",
+    "patcx.vscode-nuget-gallery",
+    "pranaygp.vscode-css-peek",
+    "redhat.java",
+    "ritwickdey.liveserver",
+    "sst-dev.opencode",
+    "twxs.cmake",
+    "vadimcn.vscode-lldb",
+    "vizards.deepseek-v4-for-copilot",
+    "vscjava.vscode-gradle",
+    "vscjava.vscode-java-debug",
+    "vscjava.vscode-java-test",
+    "xaver.clang-format",
+    "xdebug.php-debug",
+    "zignd.html-css-class-completion"
+  ],
+  "disabledBuiltinExtensions": [
+    "github.copilot-chat"
+  ],
+  "disabledNotInstalled": [
+    "jakubkozera.csharp-dev-tools",
+    "jomblebee.jomblebee-csharp-solution-explorer",
+    "muhammad-sammy.csharp",
+    "openai.chatgpt",
+    "patcx.vscode-nuget-gallery"
+  ]
+}

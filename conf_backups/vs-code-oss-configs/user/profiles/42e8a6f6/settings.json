@@ -1,0 +1,90 @@
+{
+  "editor.fontSize": 14,
+  "editor.fontFamily": "JetBrainsMono Nerd Font",
+  "editor.fontLigatures": true,
+  "editor.mouseWheelZoom": true,
+  "editor.rulers": [
+    120
+  ],
+  "editor.smoothScrolling": true,
+  "editor.cursorSmoothCaretAnimation": "on",
+  "editor.cursorStyle": "line",
+  "editor.tabSize": 3,
+  "editor.detectIndentation": true,
+  "editor.renderWhitespace": "all",
+  "chat.disableAIFeatures": true,
+
+  "editor.inlineSuggest.enabled": true,
+  "editor.suggest.preview": true,
+
+  "editor.quickSuggestions": {
+    "other": true,
+    "comments": false,
+    "strings": true
+  },
+  "editor.suggestOnTriggerCharacters": true,
+  "editor.wordBasedSuggestions": "matchingDocuments",
+  "editor.tabCompletion": "on",
+  "workbench.colorCustomizations": {
+    "editorRuler.foreground": "#9a9a9a",
+    "errorLens.warningBackground": "#fff0",
+    "errorLens.warningMessageBackground": "#fff0",
+    "errorLens.warningForeground": "#fff0",
+    "errorLens.infoBackground": "#fff0",
+    "errorLens.infoMessageBackground": "#fff0",
+    "errorLens.infoForeground": "#fff0"
+  },
+  "workbench.colorTheme": "One Dark Pro Darker",
+  "workbench.iconTheme": "vscode-icons",
+  "workbench.startupEditor": "none",
+  "workbench.tree.indent": 20,
+  "workbench.sideBar.location": "right",
+  "workbench.list.smoothScrolling": true,
+  "workbench.editor.enablePreview": false,
+  "workbench.tree.enableStickyScroll": false,
+  "workbench.tree.renderIndentGuides": "always",
+  "window.titleBarStyle": "custom",
+  "window.title": "~\\${activeFolderMedium}",
+  "search.mode": "reuseEditor",
+  "breadcrumbs.enabled": true,
+  "csharpSolutionExplorer.languageServer.enabled": false,
+  "terminal.integrated.fontSize": 14,
+  "terminal.integrated.cursorStyle": "line",
+  "terminal.integrated.cursorBlinking": true,
+  "terminal.integrated.copyOnSelection": true,
+  "terminal.integrated.smoothScrolling": true,
+  "terminal.external.linuxExec": "konsole",
+  "csharpSolutionExplorer.debug.externalTerminalAttachDelayMs": 3000,
+  "files.autoSave": "onFocusChange",
+  "files.hotExit": "onExitAndWindowClose",
+  "files.exclude": {
+    "**/bin": true,
+    "**/obj": true,
+    "**/.git": true
+  },
+  "explorer.confirmDelete": false,
+  "telemetry.telemetryLevel": "off",
+  "dotnetAcquisitionExtension.enableTelemetry": false,
+  "[csharp]": {
+    "editor.tabSize": 4,
+    "editor.insertSpaces": true,
+    "editor.detectIndentation": false,
+    "editor.formatOnType": true
+  },
+  "debug.inlineValues": "off",
+  "explorer.autoReveal": true,
+  "vsicons.dontShowNewVersionMessage": true,
+  "editor.minimap.enabled": false,
+  "csharp-dev-tools.solutionViewer.folderColorTheme": "default",
+  "csharp-dev-tools.semanticColors.theme": "off",
+  "git.openRepositoryInParentFolders": "always",
+  "csharp-dev-tools.solutionViewer.folderIconVariant": "Tabler",
+  "csharp-dev-tools.solutionViewer.folderThickness": "small",
+  "files.trimTrailingWhitespace": true,
+  "editor.trimAutoWhitespace": true,
+  "errorLens.excludePatterns": [
+    "{**/*.md}"
+  ],
+  "errorLens.gutterIconsEnabled": true,
+  "errorLens.gutterIconSet": "emoji"
+}

@@ -1,0 +1,20 @@
+{
+  "profiles": [
+    {
+      "name": "Default",
+      "isDefault": true,
+      "sourceLocation": null,
+      "userDirectory": "user",
+      "export": "profiles/default.code-profile",
+      "extensionManifest": "extensions/default.json"
+    },
+    {
+      "name": "C# .NET",
+      "isDefault": false,
+      "sourceLocation": "42e8a6f6",
+      "userDirectory": "user/profiles/42e8a6f6",
+      "export": "profiles/csharp-dotnet.code-profile",
+      "extensionManifest": "extensions/csharp-dotnet.json"
+    }
+  ]
+}
