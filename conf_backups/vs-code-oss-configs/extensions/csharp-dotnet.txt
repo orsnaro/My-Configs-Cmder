@@ -1,0 +1,13 @@
+cweijan.vscode-database-client2@9.0.2
+enkia.tokyo-night@1.1.2
+jakubkozera.csharp-dev-tools@1.15.5
+jakubkozera.ms-sql-manager@0.20.5
+jdinhlife.gruvbox@1.29.1
+jomblebee.jomblebee-csharp-solution-explorer@0.16.0
+ms-azuretools.vscode-containers@2.4.5
+ms-azuretools.vscode-docker@2.0.0
+ms-dotnettools.vscode-dotnet-runtime@3.2.0
+patcx.vscode-nuget-gallery@1.2.6
+usernamehw.errorlens@3.30.0
+vscode-icons-team.vscode-icons@13.0.0
+zhuangtongfa.material-theme@3.20.3

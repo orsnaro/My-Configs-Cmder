@@ -1,0 +1,40 @@
+{
+  "snapshotUtc": "2026-10-26T20:46:49+00:00",
+  "application": "Code - OSS",
+  "applicationVersion": "1.138.0",
+  "platform": "linux",
+  "extensionRegistry": "https://open-vsx.org",
+  "accountSyncConfigured": false,
+  "profiles": [
+    {
+      "name": "Default",
+      "installedExtensions": 75,
+      "disabledInstalledExtensions": 29,
+      "disabledNotInstalled": 5
+    },
+    {
+      "name": "C# .NET",
+      "installedExtensions": 13,
+      "disabledInstalledExtensions": 0,
+      "disabledNotInstalled": 0
+    }
+  ],
+  "redactions": [
+    "remote.SSH.remotePlatform",
+    "runtime.crash-reporter-id",
+    "runtime.password-store"
+  ],
+  "excluded": [
+    "account credentials",
+    "extension secrets and connections",
+    "globalStorage",
+    "workspaceStorage",
+    "history",
+    "logs",
+    "workspace associations",
+    "extension binaries",
+    "chat history",
+    "old backup directories"
+  ],
+  "restoreVerification": "schema and data validated; not GUI-tested"
+}
