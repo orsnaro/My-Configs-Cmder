@@ -48,6 +48,23 @@ class BarTests(unittest.TestCase):
         self.assertEqual(source.count('Timer {'), 3)
         self.assertIn('interval: 3000', source)
 
+    def test_focused_title_reacts_elides_and_never_overlaps_center(self) -> None:
+        component = SOURCE / 'StatusbarApp/FocusedTitleModule.qml'
+        self.assertTrue(component.is_file(), 'Focused title component is missing')
+        self.run_fixture('focused_title.qml', ('FocusedTitleModule.qml',))
+        source = component.read_text()
+        self.assertNotIn('Timer {', source)
+        self.assertNotIn('Process {', source)
+
+    def test_title_is_registered_after_workspaces_only_on_main_bar(self) -> None:
+        app = SOURCE / 'StatusbarApp'
+        source = (app / 'StatusbarWindow.qml').read_text()
+        self.assertTrue('"title":' in source, 'Main bar must register title')
+        self.assertTrue('titleAvailableWidth' in source, 'Title needs a bounded layout budget')
+        for name in ('StatusbarWindow.qml', 'config.json'):
+            self.assertRegex((app / name).read_text(), r'"workspaces"\s*,\s*"title"')
+        self.assertNotIn('FocusedTitleModule', (app / 'SlimBarWindow.qml').read_text())
+
 
 if __name__ == '__main__':
     unittest.main()

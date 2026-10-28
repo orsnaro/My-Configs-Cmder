@@ -109,7 +109,7 @@ PanelWindow {
                     "alwaysExpanded": true, "autohide": false, "hideDelay": 400,
                     "marginTop": 0 },
         "pill":   { "collapsedWidth": 0, "expandedWidth": 680, "radius": 12, "animationDuration": 350 },
-        "modules":{ "left": ["launcher", "logo", "workspaces", "media"],
+        "modules":{ "left": ["launcher", "logo", "workspaces", "title", "media"],
                     "center": ["weather", "clock", "swaync"],
                     "right": ["cpu", "mem", "updates", "battery", "powerprofile", "systemtray", "mic", "volume", "keyboard", "power"] },
         "border": { "width": 2, "colorTop": "", "colorBottom": "" },
@@ -382,6 +382,24 @@ PanelWindow {
         }
     }
     Component { id: cLauncher;   LauncherModule {} }
+    Component {
+        id: cTitle
+        FocusedTitleModule { availableWidth: root.titleAvailableWidth }
+    }
+    // Budget from configured/screen width, not contentWidth (which includes title).
+    readonly property real titleAvailableWidth: {
+        let used = 0
+        let count = 0
+        for (let i = 0; i < leftRepeater.count; i++) {
+            const loader = leftRepeater.itemAt(i)
+            if (root.settings.modules.left[i] !== "title" && loader && loader.item && loader.visible) {
+                used += loader.width
+                count++
+            }
+        }
+        const barWidth = Math.min(root.width - 32, root.settings.pill.expandedWidth)
+        return Math.max(0, (barWidth - centerArea.implicitWidth) / 2 - 36 - used - count * leftArea.spacing)
+    }
     // Whether the calendar panel is showing. The panel is an information layer
     // of the clock module, drawn inside this window (see CalendarPanel.qml), so
     // the bar carries it rather than depending on a separate calendar window.
@@ -525,6 +543,7 @@ PanelWindow {
     readonly property var moduleComponents: ({
         "terminal":   cTerminal,
         "workspaces": cWorkspaces,
+        "title":      cTitle,
         "launcher":   cLauncher,
         "clock":      cClock,
         "swaync":     cSwaync,
@@ -1027,6 +1046,7 @@ PanelWindow {
                 Loader {
                     Layout.alignment: Qt.AlignVCenter
                     sourceComponent: root.moduleComponents[modelData] || null
+                    visible: (item && item.collapsed !== undefined) ? !item.collapsed : true
                     onLoaded: Qt.callLater(root.rebuildNavItems)
                 }
             }
@@ -1123,6 +1143,7 @@ PanelWindow {
         id: calendarPanel
 
         isOpen: root.calendarOpen
+        manageAgendaBackground: true
 
         x: {
             // Centered on the clock when one is placed, on the bar otherwise.
