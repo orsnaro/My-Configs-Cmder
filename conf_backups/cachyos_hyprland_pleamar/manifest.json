@@ -1972,8 +1972,8 @@
     {
       "path": "source/vitreus/bin/vitreus-tvremote",
       "kind": "file",
-      "sha256": "790182d5d92269c9bc2c3e39ba9992b94726bf790a0f9840b927441f6b30b166",
-      "size": 20137,
+      "sha256": "c15502c89d29a43637d5cd83cbd73236cca85b191f892e0b1a706b3b4b23d139",
+      "size": 20243,
       "mode": "0755"
     },
     {
@@ -5330,7 +5330,7 @@
       "source": ".config/pleamar/shells/vitreus/bin/vitreus-tvremote",
       "resolved_source": ".config/pleamar/shells/vitreus/bin/vitreus-tvremote",
       "mode": "0755",
-      "sha256": "790182d5d92269c9bc2c3e39ba9992b94726bf790a0f9840b927441f6b30b166"
+      "sha256": "c15502c89d29a43637d5cd83cbd73236cca85b191f892e0b1a706b3b4b23d139"
     },
     "source/vitreus/blur.wgsl": {
       "source": ".config/pleamar/shells/vitreus/blur.wgsl",
