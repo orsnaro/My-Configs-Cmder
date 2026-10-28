@@ -1,0 +1,91 @@
+#!/usr/bin/env python3
+"""vitreus-addons DATADIR: reads every add-on folder and writes DATADIR/addons.json for Settings > Widgets > Add-ons.
+
+An add-on is a folder in ~/.config/pleamar/vitreus-addons/<id>/ (the model is <shell>/addons/_template/) with an addon.toml and the scene it names.
+It lives outside the shell's own folder, so updating Vitreus never touches it. The add-ons that ship with the shell (<shell>/addons/, except the "_" templates) are listed too; one of the same name in the user's folder wins. A folder that starts with "_" is skipped. A broken add-on is left out
+and named in "errors", so one bad add-on never costs the others. Each add-on's data folder (~/.local/share/pleamar/<scene>/) is made private (0700), since an add-on may keep a token there. Prints nothing; exit 1 only when it cannot write the result."""
+import json, os, re, sys, tomllib
+
+data = sys.argv[1]
+here = os.path.dirname(os.path.realpath(__file__))
+template = os.path.realpath(os.path.join(here, "..", "addons", "_template"))
+bundled = os.path.realpath(os.path.join(here, "..", "addons"))
+user = os.path.join(os.path.expanduser("~"), ".config", "pleamar", "vitreus-addons")
+
+def read(folder, name):
+    toml = os.path.join(folder, "addon.toml")
+    if not os.path.isfile(toml):
+        raise ValueError("%s: no addon.toml" % name)
+    with open(toml, "rb") as f:
+        t = tomllib.load(f)
+    if not re.fullmatch(r"[a-z0-9][a-z0-9-]*", name):
+        raise ValueError("%s: the folder's name has to be lowercase letters, digits and dashes" % name)
+    scene = str(t.get("scene", name + ".plm"))
+    path = os.path.realpath(os.path.join(folder, scene))
+    if not path.startswith(os.path.realpath(folder) + os.sep) or not path.endswith(".plm"):
+        raise ValueError("%s: scene has to be a .plm file inside the add-on's folder" % name)
+    if not os.path.isfile(path):
+        raise ValueError("%s: the scene %s is not there" % (name, scene))
+    icon = t.get("icon")
+    if icon is not None:
+        ip = os.path.realpath(os.path.join(folder, str(icon)))
+        if not ip.startswith(os.path.realpath(folder) + os.sep) or not os.path.isfile(ip) or os.path.splitext(ip)[1].lower() not in (".svg", ".png", ".webp", ".jpg", ".jpeg"):
+            raise ValueError("%s: icon has to be an .svg or .png file inside the add-on's folder" % name)
+        icon = ip
+    drawer = t.get("drawer")
+    if drawer is not None:
+        if not isinstance(drawer, dict):
+            raise ValueError("%s: [drawer] has to be a table" % name)
+        def px(k, lo, hi):
+            v = drawer.get(k, 0)
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not (v == 0 or lo <= v <= hi):
+                raise ValueError("%s: [drawer] %s has to be 0 (the shell's choice) or between %d and %d pixels" % (name, k, lo, hi))
+            return int(v)
+        if icon is None:
+            raise ValueError("%s: a drawer opens from the add-on pill, which needs an icon (icon = \"icon.svg\" in addon.toml)" % name)
+        drawer = {"width": px("width", 240, 1600), "height": px("height", 160, 1600)}
+    wallpaper = t.get("wallpaper")
+    if wallpaper is not None:
+        if not isinstance(wallpaper, dict) or not isinstance(wallpaper.get("frames", False), bool):
+            raise ValueError("%s: [wallpaper] has to be a table, with frames = true or false" % name)
+        wallpaper = {"frames": wallpaper.get("frames", False)}
+    return {"id": name, "icon": icon, "drawer": drawer, "wallpaper": wallpaper, "sock": os.path.splitext(os.path.basename(path))[0], "name": str(t.get("name", name))[:28], "author": str(t.get("author", ""))[:40],
+            "version": str(t.get("version", ""))[:12], "description": str(t.get("description", ""))[:80], "scene": path}
+
+RESERVED = {"vitreus", "desktopclock", "desktopsysmon", "desktopnotes", "desktopmenu", "desktopmenu_hypr", "desktopedit", "desktopcards", "webcam", "lockscreen", "wptrans", "files", "cursortrail", "dashboard", "snap", "wm"}
+found, errors = [], []
+for root in (user, bundled):      # the user's folder first: an add-on there wins over a bundled one of the same name
+    if not os.path.isdir(root):
+        continue
+    for name in sorted(os.listdir(root)):
+        folder = os.path.join(root, name)
+        if name.startswith("_") or name.startswith(".") or not os.path.isdir(folder):
+            continue
+        if any(o["id"] == name for o in found):
+            continue
+        try:
+            a = read(folder, name)
+            if a["sock"] in RESERVED or any(o["sock"] == a["sock"] for o in found):
+                raise ValueError("%s: another scene is called %s.plm: give this scene's file a name of its own (its id is a good one) and name it in addon.toml" % (name, a["sock"]))
+            found.append(a)
+        except Exception as e:
+            errors.append(str(e) if isinstance(e, ValueError) else "%s: %s" % (name, e))
+
+try:
+    os.makedirs(data, exist_ok=True)
+    tmp = os.path.join(data, "addons.json.tmp")
+    with open(tmp, "w") as f:
+        json.dump({"folder": user, "template": template, "addons": found, "errors": errors}, f)
+    os.replace(tmp, os.path.join(data, "addons.json"))
+except OSError:
+    sys.exit(1)
+
+# An add-on's data folder holds what it keeps, perhaps a token: only its owner gets in (until pleamar makes the folders private itself).
+base = os.path.join(os.environ.get("XDG_DATA_HOME") or os.path.join(os.path.expanduser("~"), ".local", "share"), "pleamar")
+for a in found:
+    folder = os.path.join(base, a["sock"])
+    try:
+        os.makedirs(folder, mode=0o700, exist_ok=True)
+        os.chmod(folder, 0o700)
+    except OSError:
+        pass

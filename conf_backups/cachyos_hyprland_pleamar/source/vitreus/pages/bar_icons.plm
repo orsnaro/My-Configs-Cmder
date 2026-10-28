@@ -35,7 +35,7 @@ part BarIcons {
         on press touch { emit pick(w.id) }
     }
     group {
-        glow: 2.4 * u, 110%, deep
+        glow: 2.4 * bu, 110%, deep
         //  Running windows, between the updates pill and the tray: the one with the keyboard has a mint rule.
         row win_bar_row {
             at: floor(tb.win - tb.win_w / 2 + 0.5), floor(bar.y - 9 * u + 0.5)
@@ -44,8 +44,8 @@ part BarIcons {
             for t in tasks { WinIcon(t, focus: task_focus, kill: task_close) { show: t.index < 12 } }
         }
         row tray_bar_row {
-            at: floor(tr.x - ((if(bs.tray > 0.02, bartrays.count, 0) + if(rec_on, 1, 0) + if(priv_mic, 1, 0) + if(priv_cam, 1, 0) + if(priv_scr and not rec_on, 1, 0)) * 24 - 6) * u / 2 + 0.5), floor(bar.y - 9 * u + 0.5)
-            gap: floor(6 * u + 0.5)
+            at: floor(tr.x - ((if(bs.tray > 0.02, bartrays.count, 0) + if(rec_on, 1, 0) + if(priv_mic, 1, 0) + if(priv_cam, 1, 0) + if(priv_scr and not rec_on, 1, 0)) * 24 - 6) * bu / 2 + 0.5), floor(bar.y - 9 * bu + 0.5)
+            gap: floor(6 * bu + 0.5)
             show: lm < 0.5
             BarPriv(0) { show: priv_mic }
             BarPriv(1) { show: priv_cam }
@@ -54,14 +54,21 @@ part BarIcons {
             for t in bartrays { BarTray(t, click: bar_tray_click, menu: bar_tray_menu) { show: bs.tray > 0.02 } }
         }
         column tray_bar_col {
-            at: floor(lf.x - 9 * u + 0.5), floor(lv.tray + 0.5)
-            gap: floor(6 * u + 0.5)
+            at: floor(lf.x - 9 * bu + 0.5), floor(lv.tray + 0.5)
+            gap: floor(6 * bu + 0.5)
             show: lm >= 0.5
             BarPriv(0) { show: priv_mic }
             BarPriv(1) { show: priv_cam }
             BarPriv(2) { show: priv_scr and not rec_on }
             BarRec(rec_stop) { show: rec_on }
             for t in bartrays { BarTray(t, click: bar_tray_click, menu: bar_tray_menu) { show: bs.tray > 0.02 } }
+        }
+        // Native add-ons can also live on the Island instead of their corner pill.
+        row ax_bar_row {
+            at: floor(ax.x - fw.ax / 2 + 0.5), floor(bar.y - 9 * bu + 0.5)
+            gap: floor(6 * bu + 0.5)
+            show: fm < 0.5 and bs.ax > 0.02
+            for t in adk_pins { BarAddon(t) }
         }
         //  Each workspace is a button of its own: one static glyph, centred in its box.
         for w in trial_workspaces { TrialWorkspace(w, pick: go) }
@@ -77,24 +84,20 @@ part BarIcons {
         group {
             opacity: mshow * bs.media * bs.title
             group {
-                pivot: mcx - 18.5 * u, mcy
+                pivot: mcx - 18.5 * bu, mcy
                 scale: 1 + 0.14 * bp.prev.hover
-                box { at: mcx - 20.5 * u, mcy; size: 1.4 * u, 7 * u; corner: 0.7 * u; color: ink; opacity: 65% + 35% * bp.prev.hover }
-                path { at: mcx - 17 * u, mcy; color: ink; opacity: 65% + 35% * bp.prev.hover; move 3 * u, -3.5 * u; line -2.5 * u, 0; line 3 * u, 3.5 * u; close }
+                PBPrev(mcx - 18.5 * bu, mcy, bp.prev.hover, bu, 65% + 35% * bp.prev.hover)
             }
             //  Pause while it plays, play while it is paused.
             group {
                 pivot: mcx, mcy
                 scale: 1 + 0.14 * bp.play.hover
-                box { at: mcx - 3 * u, mcy; size: 2.6 * u, 9 * u; corner: 1 * u; color: ink; opacity: 85% + 15% * bp.play.hover; show: media.playing }
-                box { at: mcx + 3 * u, mcy; size: 2.6 * u, 9 * u; corner: 1 * u; color: ink; opacity: 85% + 15% * bp.play.hover; show: media.playing }
-                path { at: mcx, mcy; color: ink; opacity: 85% + 15% * bp.play.hover; show: not media.playing; move -3 * u, -4.5 * u; line 7 * u, 0; line -3 * u, 4.5 * u; close }
+                PBPlay(mcx, mcy, bp.play.hover, bu, 85% + 15% * bp.play.hover, if(media.playing, 1, 0))
             }
             group {
-                pivot: mcx + 18.5 * u, mcy
+                pivot: mcx + 18.5 * bu, mcy
                 scale: 1 + 0.14 * bp.next.hover
-                path { at: mcx + 17 * u, mcy; color: ink; opacity: 65% + 35% * bp.next.hover; move -3 * u, -3.5 * u; line 2.5 * u, 0; line -3 * u, 3.5 * u; close }
-                box { at: mcx + 20.5 * u, mcy; size: 1.4 * u, 7 * u; corner: 0.7 * u; color: ink; opacity: 65% + 35% * bp.next.hover }
+                PBNext(mcx + 18.5 * bu, mcy, bp.next.hover, bu, 65% + 35% * bp.next.hover)
             }
         }
         //  Down the left the player's buttons are the top bar's own, turned with the title (a quarter anticlockwise, so they read from the foot up:
@@ -104,23 +107,19 @@ part BarIcons {
             pivot: lf.x, lv.mid
             rotate: -90deg
             group {
-                pivot: lf.x - 18.5 * cu, lv.mid
+                pivot: lf.x - 18.5 * bcu, lv.mid
                 scale: 1 + 0.14 * vm_prev.hover
-                box { at: lf.x - 20.5 * cu, lv.mid; size: 1.4 * cu, 7 * cu; corner: 0.7 * cu; color: ink; opacity: 65% + 35% * vm_prev.hover }
-                path { at: lf.x - 17 * cu, lv.mid; color: ink; opacity: 65% + 35% * vm_prev.hover; move 3 * cu, -3.5 * cu; line -2.5 * cu, 0; line 3 * cu, 3.5 * cu; close }
+                PBPrev(lf.x - 18.5 * bcu, lv.mid, vm_prev.hover, bcu, 65% + 35% * vm_prev.hover)
             }
             group {
                 pivot: lf.x, lv.mid
                 scale: 1 + 0.14 * vm_play.hover
-                box { at: lf.x - 3 * cu, lv.mid; size: 2.6 * cu, 9 * cu; corner: 1 * cu; color: ink; opacity: 85% + 15% * vm_play.hover; show: media.playing }
-                box { at: lf.x + 3 * cu, lv.mid; size: 2.6 * cu, 9 * cu; corner: 1 * cu; color: ink; opacity: 85% + 15% * vm_play.hover; show: media.playing }
-                path { at: lf.x, lv.mid; color: ink; opacity: 85% + 15% * vm_play.hover; show: not media.playing; move -3 * cu, -4.5 * cu; line 7 * cu, 0; line -3 * cu, 4.5 * cu; close }
+                PBPlay(lf.x, lv.mid, vm_play.hover, bcu, 85% + 15% * vm_play.hover, if(media.playing, 1, 0))
             }
             group {
-                pivot: lf.x + 18.5 * cu, lv.mid
+                pivot: lf.x + 18.5 * bcu, lv.mid
                 scale: 1 + 0.14 * vm_next.hover
-                path { at: lf.x + 17 * cu, lv.mid; color: ink; opacity: 65% + 35% * vm_next.hover; move -3 * cu, -3.5 * cu; line 2.5 * cu, 0; line -3 * cu, 3.5 * cu; close }
-                box { at: lf.x + 20.5 * cu, lv.mid; size: 1.4 * cu, 7 * cu; corner: 0.7 * cu; color: ink; opacity: 65% + 35% * vm_next.hover }
+                PBNext(lf.x + 18.5 * bcu, lv.mid, vm_next.hover, bcu, 65% + 35% * vm_next.hover)
             }
         }
         //  The settings button: a gear, between the player's buttons and the controls button.
@@ -131,15 +130,7 @@ part BarIcons {
             group {
                 pivot: set.x, bar.y
                 scale: 1 + 0.14 * set_hit.hover
-                ellipse { at: set.x, bar.y; radius: 3.6 * u; stroke: 1.7 * u; color: mix(ink, mint, clamp(ds, 0, 1)) }
-                ellipse { at: set.x, bar.y; radius: 1.2 * u; color: mix(ink, mint, clamp(ds, 0, 1)) }
-                repeat i in 0..8 {
-                    group {
-                        pivot: set.x, bar.y
-                        rotate: i * 45deg
-                        box { at: set.x, bar.y - 6 * u; size: 2 * u, 2.6 * u; corner: 0.7 * u; color: mix(ink, mint, clamp(ds, 0, 1)) }
-                    }
-                }
+                PBGear(set.x, bar.y, set_hit.hover, bu, clamp(ds, 0, 1))
             }
         }
         //  Down the left the launcher's button sits between the settings and controls buttons.
@@ -149,10 +140,9 @@ part BarIcons {
             opacity: (65% + 35% * max(sr_hit.hover, clamp(dl, 0, 1))) * bs.sr
             move: (lf.x - sr.x) * lm, (lv.sr - bar.y) * lm
             group {
-                pivot: sr.x + 2 * u, bar.y + 2 * u
+                pivot: sr.x + 2 * bu, bar.y + 2 * bu
                 scale: 1 + 0.14 * sr_hit.hover
-                ellipse { at: sr.x - 1.2 * u, bar.y - 1.2 * u; radius: 4 * u; stroke: 1.7 * u; color: mix(ink, mint, clamp(dl, 0, 1)) }
-                line { from: sr.x + 1.8 * u, bar.y + 1.8 * u; to: sr.x + 5 * u, bar.y + 5 * u; width: 1.9 * u; color: mix(ink, mint, clamp(dl, 0, 1)) }
+                PBSearch(sr.x, bar.y, sr_hit.hover, bu, clamp(dl, 0, 1))
             }
         }
         //  The controls button, between the settings button and the clock: two sliders.
@@ -164,10 +154,7 @@ part BarIcons {
             group {
                 pivot: ctl.x, bar.y
                 scale: 1 + 0.14 * ctl_hit.hover
-                box { at: ctl.x, bar.y - 3.5 * u; size: 13 * u, 1.6 * u; corner: 0.8 * u; color: mix(ink, mint, clamp(dk, 0, 1)) }
-                box { at: ctl.x, bar.y + 3.5 * u; size: 13 * u, 1.6 * u; corner: 0.8 * u; color: mix(ink, mint, clamp(dk, 0, 1)) }
-                ellipse { at: ctl.x + 2.5 * u, bar.y - 3.5 * u; radius: 2.6 * u; color: mix(ink, mint, clamp(dk, 0, 1)) }
-                ellipse { at: ctl.x - 2.5 * u, bar.y + 3.5 * u; radius: 2.6 * u; color: mix(ink, mint, clamp(dk, 0, 1)) }
+                PBCtl(ctl.x, bar.y, ctl_hit.hover, bu, clamp(dk, 0, 1))
             }
         }
     }

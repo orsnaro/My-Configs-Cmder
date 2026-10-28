@@ -28,6 +28,9 @@ scene Snap {
     text shot_path = ""    // the picture: its file, `?` and a number
     image shot = from shot_path, 1920, 1080
     image shotv = from shot_path, 1080, 1920      // the same picture for a monitor standing on its side: the cell has the shape it is drawn in, or it is squashed
+    //  and for an ultrawide one (21:9, wider than 2:1): in the 16:9 cell it was fitted with a band above and below, and the cell stretched to the
+    //  screen showed it smaller in the middle, with the real screen above and below it. At 3440 x 1440 it is also the monitor's own resolution.
+    image shotw = from shot_path, 3440, 1440
     event do_copy ->
     event do_save ->
     event do_quit ->
@@ -341,13 +344,13 @@ scene Snap {
     //  ── Moving and resizing the selection ──────────────────────────────────────────────────────────────────────
     //  The body carries it. The handles come after, so they win where they overlap it. A handle pulls its own side or corner; the rest stays where it was when the press began.
     //  Only with Move: with the other tools a press inside the selection draws (below).
-    zone box zsel { from: sx + 6, sy + 6; size: max(1, sw - 12), max(1, sh - 12); cursor: grab; active: phase == 2 and tool == 1 }
+    zone box zsel { from: sx + 6, sy + 6; size: max(1, sw - 12), max(1, sh - 12); cursor: if(zsel.pressed > 0.5, grabbing, grab); active: phase == 2 and tool == 1 }
     on press zsel { bx = sx; by = sy }
     on drag zsel { sx = clamp(bx + drag.dx, vx, vx + W * vs - sw); sy = clamp(by + drag.dy, vy, vy + H * vs - sh) }
 
     //  ── Drawing ─────────────────────────────────────────────────────────────────────────────────────────────────
     //  Select: a press picks the mark under it (the logic looks), a drag moves it.
-    zone box zmove { from: sx + 6, sy + 6; size: max(1, sw - 12), max(1, sh - 12); cursor: grab; active: phase == 2 and tool == 0; label: "Pick a mark" }
+    zone box zmove { from: sx + 6, sy + 6; size: max(1, sw - 12), max(1, sh - 12); cursor: if(zmove.pressed > 0.5, grabbing, grab); active: phase == 2 and tool == 0; label: "Pick a mark" }
     on press zmove { px = pointer.x; py = pointer.y; mvx = 0; mvy = 0; emit sel_at }
     on drag zmove while selm >= 0 { mvx = drag.dx; mvy = drag.dy }
     on release zmove while selm >= 0 { emit sel_move }
@@ -655,7 +658,7 @@ scene Snap {
         }
         box { at: abx + 118, ty; size: 14, 12; corner: 2; stroke: 1.8; color: ink; opacity: if(drag_ready, 100%, 38%) }
         path { at: abx + 118, ty; color: ink; opacity: if(drag_ready, 100%, 38%); move -5, 4; line -1, -1; line 2, 2; line 5, -1; line 5, 4; close }
-        zone box zdrag { at: abx + 112, ty; size: 36, 36; corner: 13; cursor: grab; carries: "{drag_path}"; active: drag_ready; label: "Drag the picture out" }
+        zone box zdrag { at: abx + 112, ty; size: 36, 36; corner: 13; cursor: if(zdrag.pressed > 0.5, grabbing, grab); carries: "{drag_path}"; active: drag_ready; label: "Drag the picture out" }
         on carry zdrag { emit do_dropped }
         //  Copy the text: lines of text in a page.
         box { at: abx + 152, ty; size: 18, 22; corner: 3; stroke: 1.8; color: ink; opacity: if(busy == 1, 38%, 100%) }

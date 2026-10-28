@@ -4,7 +4,7 @@ part MediaFloat {
     //  pin. With nothing playing there is no card at all. `mfl` is 0 in the panel and 1 floating, `mf.cx`, `mf.cy` is where its middle is.
     //  Docked it is clipped to the drawer's shape and grows with it, as the rest of the panel; floating, neither.
     //  Held, the clip is the whole screen: the panel's would take the grab zone away the moment the pointer left it, upwards first.
-    let mfc = max(clamp(mfl, 0, 1), if(mf_hold, 1, 0))
+    let mfc = max(clamp(mfl, 0, 1), if(mf_hold, 1, 0)) * mf.mine
     group {
         clip inset 2 box { at: mix(mix(mix(pcx, dm.gx, lm), screen.width - mix(pcx, dm.gx, lm), rt), screen.width / 2, mfc), mix(mix(mix(bar.y + dm.hh / 2, lp.cy, lm), yo + vb - mix(bar.y + dm.hh / 2, lp.cy, lm), bt), vc, mfc); size: mix(mix(dm.w, dm.gw, lm), screen.width + 200, mfc), mix(mix(dm.hh, dm.gh, lm), screen.height + 200, mfc); corner: mix(26 * cu, 0, mfc) }
         group {
@@ -26,13 +26,13 @@ part MediaFloat {
 
             //  The plate it has in the panel: the volume plate's veil. Floating, the glass under it is its plate.
             //  Obsidian: a solid plate a step lighter than the shell, with a small tight shadow, in place of the veil.
-            body { color: mix(obsidian, ink, (veil) * 1.6); opacity: obs * (1 - mfl); shadow: 0, 2 * cu, 7 * cu, 40%, #000000; show: obs * (1 - mfl) > 0.004; box { at: mf.cx, mf.cy; size: 288 * cu, 148 * cu; corner: 14 * cu } }
-            box { at: mf.cx, mf.cy; size: 288 * cu, 148 * cu; corner: 14 * cu; color: ink; opacity: (veil) * (1 - obs) * (1 - mfl) }
+            body { color: mix(obsidian, ink, (veil) * 1.6); opacity: obs * (1 - mfl); shadow: 0, 2 * cu, 7 * cu, 40%, #000000; show: obs * (1 - mfl) > 0.004; box { at: mf.cx, mf.cy; size: 288 * cu, 148 * cu; corner: pr } }
+            box { at: mf.cx, mf.cy; size: 288 * cu, 148 * cu; corner: pr; color: ink; opacity: (veil) * (1 - obs) * (1 - mfl) }
 
             //  Take it by anywhere that is not a button, and pull it off the panel; let go over the open panel and it goes back. While it is held its zone is the
             //  whole screen: the surface's input region is only what has a zone, so with no panel open a drag would be lost where the card is not. The buttons and the seek bar are declared after it, so they win.
-            zone box mf_grab { at: if(mf_hold, mf.zx, mf.cx), if(mf_hold, mf.zy, mf.cy); size: if(mf_hold, mf.zw, 288 * cu), if(mf_hold, mf.zh, 148 * cu); cursor: grab; active: mf.vis > 0.5; label: "Move the player" }
-            on press mf_grab { mf_bx = mf.cx; mf_by = mf.cy; mf_hx = mf.cx; mf_hy = mf.cy; mf_gx = mf.cx; mf_gy = mf.cy; mf_hold = true }
+            zone box mf_grab { at: if(mf_hold, mf.zx, mf.cx), if(mf_hold, mf.zy, mf.cy); size: if(mf_hold, mf.zw, 288 * cu), if(mf_hold, mf.zh, 148 * cu); cursor: if(mf_grab.pressed > 0.5, grabbing, grab); active: mf.vis > 0.5; label: "Move the player" }
+            on press mf_grab { mf_scr = screen.index; mf_bx = mf.cx; mf_by = mf.cy; mf_hx = mf.cx; mf_hy = mf.cy; mf_gx = mf.cx; mf_gy = mf.cy; mf_hold = true }
             on press mf_grab while not mf_out { mf_px: mf.cx ~0ms; mf_py: mf.cy ~0ms }
             on drag mf_grab while mf_hold { mf_gx = clamp(mf_bx + drag.dx, mfb.l + 154 * cu * mf_gs, mfb.r - 154 * cu * mf_gs); mf_gy = clamp(mf_by + drag.dy, mfb.t + 84 * cu * mf_gs, mfb.b - 84 * cu * mf_gs) }
             on drag mf_grab while mf_hold and not mf_out and length(drag.dx, drag.dy) > 16 * cu { mf_out = true }
@@ -55,13 +55,13 @@ part MediaFloat {
             //  Floating it shows a small grip along its top, and a pin that puts it back in the panel.
             box { at: mf.cx, mf.cy - 69 * cu; size: 34 * cu, 4 * cu; corner: 2 * cu; color: ink; opacity: mfl * (20% + 35% * max(mf_grab.hover, if(mf_hold, 1, 0))) }
             group {
-                show: mfl > 0.05
+                show: mfl > 0.05 and mf.mine > 0.5
                 opacity: mfl
                 ellipse { at: mf.cx + 128 * cu, mf.cy - 63 * cu; radius: 8 * cu; color: ink; opacity: 8% + 14% * mf_pin.hover }
                 ellipse { at: mf.cx + 128 * cu, mf.cy - 65 * cu; radius: 2.6 * cu; stroke: 1.2 * cu; color: ink; opacity: 70% + 30% * mf_pin.hover }
                 line { from: mf.cx + 128 * cu, mf.cy - 62.4 * cu; to: mf.cx + 128 * cu, mf.cy - 58 * cu; width: 1.2 * cu; color: ink; opacity: 70% + 30% * mf_pin.hover }
                 zone box mf_pin { at: mf.cx + 128 * cu, mf.cy - 63 * cu; size: 20 * cu, 20 * cu; corner: 10 * cu; cursor: pointer; active: mfl > 0.5; label: "Put the player back in its panel" }
-                on press mf_pin { mf_out = false; panel = player }
+                on press mf_pin { mf_out = false; panel_scr = mf_scr; panel = player }
             }
 
             //  Playing, or paused with something loaded: the full card.

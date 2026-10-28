@@ -25,9 +25,9 @@ part TrialStatus {
         text bar_date { at: tb.date, tb.weekday_y; anchor: center; size: 8.5; weight: 500; measure: tb_day_w; color: faint; family: "Space Grotesk" }
         text trial_date_dm { at: tb.date, tb.date_y; anchor: center; size: 8.5; weight: 500; measure: tb_date_w; color: faint; family: "Space Grotesk" }
 
-        text "system_update" { at: tb.update_icon, tb.row; anchor: center; size: 18; weight: 400; color: faint; family: "Material Symbols Outlined" }
+        text "system_update" { at: tb.update_icon, tb.row; anchor: center; size: 18; weight: 400; measure: tb_update_icon_w; color: faint; family: "Material Symbols Outlined" }
         box { from: tb.update_l, tb.row - 14 * u; size: tb.update_pill_w, 28 * u; corner: 7 * u; color: mint; opacity: 4% }
-        text trial_updates { at: tb.update_count, tb.row; anchor: left center; align: left; size: 11.5; width: 18 * u; lines: 1; color: mint; family: "Space Grotesk" }
+        text trial_updates { at: tb.update_count, tb.row; anchor: left center; align: left; size: 11.5; measure: tb_update_count_w; lines: 1; color: mint; family: "Space Grotesk" }
         zone box trial_updates_hit { at: tb.update_pill, tb.row; size: tb.update_pill_w, bar.h; cursor: pointer; label: "Open interactive system updater" }
         on press trial_updates_hit { emit trial_updates_open }
 
@@ -47,9 +47,9 @@ part TrialStatus {
         text "bedtime" { at: tb.night, tb.row; anchor: center; size: 18; weight: 400; color: mint; family: "Material Symbols Outlined" }
         zone box trial_night_hit { at: tb.night, tb.row; size: 28 * u, bar.h; cursor: pointer; label: "Night settings — existing schedule stays in control during this trial" }
         on press trial_night_hit { pending = none; panel_scr = screen.index; set_page = pg_night; panel = settings }
-        text "notifications" { at: tb.alert_icon, tb.row; anchor: center; size: 18; weight: 400; color: faint; family: "Material Symbols Outlined" }
+        text "notifications" { at: tb.alert_icon, tb.row; anchor: center; size: 18; weight: 400; measure: tb_alert_icon_w; color: faint; family: "Material Symbols Outlined" }
         box { from: tb.alert_l, tb.row - 14 * u; size: tb.alert_pill_w, 28 * u; corner: 7 * u; color: mint; opacity: 4% }
-        text "{nt_hist.count}" { at: tb.alert_count, tb.row; anchor: left center; align: left; size: 11.5; width: 18 * u; lines: 1; color: mint; family: "Space Grotesk" }
+        text "{nt_hist.count}" { at: tb.alert_count, tb.row; anchor: left center; align: left; size: 11.5; measure: tb_alert_count_w; lines: 1; color: mint; family: "Space Grotesk" }
         zone box trial_alert_hit { at: tb.alert_pill, tb.row; size: tb.alert_pill_w, bar.h; cursor: pointer; label: "Notification history and Do Not Disturb" }
         on press trial_alert_hit { pending = none; panel_scr = screen.index; panel = controls; emit trial_alerts_open }
 

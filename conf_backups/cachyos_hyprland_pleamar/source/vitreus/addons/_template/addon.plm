@@ -1,0 +1,65 @@
+language 0.1
+import "addon-palette.plm"
+
+//  A Vitreus add-on: a scene of its own, started while its switch is on (Settings > Add-ons) and started again if it stops.
+//  Change this one into yours; give this file a name no other add-on uses (its id is a good one) and name it in addon.toml (`scene`).
+//
+//  Vitreus tells a running add-on, as the facts and texts below (a scene that does not declare one ignores it):
+//    - its colours, `pal_*` (palette.plm turns them into `ink`, `faint`, `mint`, `tint`... so a theme restyles the add-on at once);
+//    - the room the bar takes round the screen, `room_t/r/b/l` (keep clear of it), and the theme's shape, `look` (0 Glass, 1 Retro, 2 UwU, 3 Cyber, 4 Milk);
+//    - the forecast the shell already has, `wx_*` (the days: `wx_d0_label`, `wx_d0_hi`, `wx_d0_lo`, `wx_d0_kind` .. `wx_d6_*`).
+//  A scene says what else it needs in `permissions` (every program it runs, every service it reads); this one needs nothing.
+//
+//  Style: see ../_template_drawer/STYLE.md (the rules) and addon-pencil.plm (the drawing). The boiled pencil is preferred for an add-on's icons and graphics (hand-drawn lines, each drawn twice, the second fainter and a hair off, an accent wash inside, strokes
+//  redrawn about eight times a second with `floor(time * 8)`: see PCup, PBell and PEnvelope in vitreus.plm). SVGs or images of your own are allowed in its place.
+
+scene MyAddon {
+    surface { size: 260, 90; anchor: top_right; margin: 32; level: bottom }
+
+    fact pal_ink_r = 0.9608
+    fact pal_ink_g = 0.9686
+    fact pal_ink_b = 0.9608
+    fact pal_faint_r = 0.7608
+    fact pal_faint_g = 0.7804
+    fact pal_faint_b = 0.8000
+    fact pal_mint_r = 0.6196
+    fact pal_mint_g = 0.8392
+    fact pal_mint_b = 0.7412
+    fact pal_mintlo_r = 0.4235
+    fact pal_mintlo_g = 0.7373
+    fact pal_mintlo_b = 0.6118
+    fact pal_minthi_r = 0.8627
+    fact pal_minthi_g = 0.9725
+    fact pal_minthi_b = 0.9255
+    fact pal_onmint_r = 0.0627
+    fact pal_onmint_g = 0.0863
+    fact pal_onmint_b = 0.1020
+    fact pal_tint_r = 0.1059
+    fact pal_tint_g = 0.1294
+    fact pal_tint_b = 0.1529
+    fact pal_panel_r = 0.0863
+    fact pal_panel_g = 0.1020
+    fact pal_panel_b = 0.1216
+    fact pal_deep_r = 0.0431
+    fact pal_deep_g = 0.0549
+    fact pal_deep_b = 0.0667
+    fact pal_off_r = 0.2275
+    fact pal_off_g = 0.2510
+    fact pal_off_b = 0.2824
+    fact pal_alert_r = 0.9373
+    fact pal_alert_g = 0.2667
+    fact pal_alert_b = 0.2667
+    fact room_t = 0
+    fact room_r = 0
+    fact room_b = 0
+    fact room_l = 0
+    fact look = 0
+    fact wx_ok = false
+    text wx_temp = ""
+    text wx_desc = ""
+
+    box { at: 130, 45; size: 252, 82; corner: 18; color: tint; opacity: 85% }
+    box { at: 130, 45; size: 252, 82; corner: 18; stroke: 1.5; color: mint; opacity: 70% }
+    text "Your add-on goes here" { at: 130, 34; anchor: center; size: 17; weight: 700; color: ink; family: "Space Grotesk" }
+    text wx_temp { at: 130, 60; anchor: center; size: 15; color: faint; family: "Space Grotesk" }
+}

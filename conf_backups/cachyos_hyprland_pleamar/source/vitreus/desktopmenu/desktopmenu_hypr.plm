@@ -1,155 +1,17 @@
 language 0.1
-import "../palette.plm"
 
-//  HYPRLAND'S COPY of desktopmenu.plm (same card, same rows; keep them in step). Here the surface is on the background layer, which hears the mouse, and the wallpaper's zone is always
-//  live, so a right press on the bare wallpaper opens the menu by itself. desktopmenu.plm is the pleamar-wm one (top layer, opened by the window manager's `desk` facts).
-//
-//  The desktop's right-click menu: press the right button on the bare wallpaper and a card of glass opens where the pointer is, with a tick-box for each thing that lives on the desktop (the
-//  webcam bubble, the clock, the system monitor, the audio visualiser), each in brackets, with an X between them when it is on, and a plus to start a new sticky note. A press anywhere else, or Escape, closes it.
-//  It is a surface of its own on the background layer, under the other desktop cards and under every window, so it only sees the clicks that land on the wallpaper itself.
-//  The last row, Edit, puts the desktop in edit mode: the cells of its grid are marked, the clock and the system monitor outline what they take and can be dragged to other cells (each
-//  of those scenes does the dragging and keeps its place, see `edit` in desktopclock.plm), and a click on the bare wallpaper, the Done button or Escape ends it.
-//  What the rows do is said to Vitreus (`pleamar --say vitreus "emit ..."`, see desktopmenu.luau).
-//
-//  It starts with the desktop (a line in ~/.config/pleamar/autostart, which install.sh adds), or by hand:   pleamar --scene .../desktopmenu/desktopmenu.plm --no-hud
+//  HYPRLAND ONLY: a right press on the bare wallpaper opens the desktop editor (desktopedit/). Under pleamar-wm the window manager's `desk` facts do that directly (see vitreus.luau),
+//  so this scene is not used there. There is no menu any more: this is just the surface that hears the press.
 
 scene DesktopMenu {
-    surface { size: full, full; anchor: top_left; margin: 0; level: background; screens: each max 4; reserve: -1; keyboard: on_demand }
+    surface { size: full, full; anchor: top_left; margin: 0; level: background; screens: each max 4; reserve: -1; keyboard: none }
 
-    permissions { run: "pleamar", "pgrep", "sh" }
+    permissions { run: "pleamar", "sh" }
 
-    fact open = false          // the menu is out
-    fact mx = 0                // where it was asked for
-    fact my = 0
-    fact mmon = 0              // which monitor it was asked for on
-    fact hov = -1              // the row under the pointer (a row's `.hover` cannot be read in a scene with a copy per monitor, so its rules say it)
-    fact cam_on = false        // the state of what the switches show (the logic asks when the menu opens)
-    fact clock_on = false
-    fact sys_on = false
-    fact cava_on = false
-    fact obs = false           // Vitreus has its glass off: the card is flat obsidian
-    fact editing = false       // Edit: the grid is marked and the widgets can be moved (the logic tells them, desktopmenu.luau)
-    event menu_do ->           // a row, by position
+    fact mmon = 0              // which monitor it was pressed on
+    event edit_req ->
 
-    spring pop = 230, 17
-    prop mo = 0 ~pop
-    follow mo = if(open, 1, 0)
-    prop ob = 0 ~calm
-    follow ob = if(obs, 1, 0)
-    prop s0 = 0 ~calm
-    prop s2 = 0 ~calm
-    prop s3 = 0 ~calm
-    prop s4 = 0 ~calm
-    follow s0 = if(cam_on, 1, 0)
-    follow s2 = if(clock_on, 1, 0)
-    follow s3 = if(sys_on, 1, 0)
-    follow s4 = if(cava_on, 1, 0)
-
-    let cw = 244
-    let rh = 40
-    let rows = 6
-    let ch = rows * rh + 16
-    let cx0 = clamp(mx, 10, max(10, screen.width - cw - 10))
-    let cy0 = clamp(my, 10, max(10, screen.height - ch - 10))
-
-    //  The wallpaper: a press on it opens the menu (right) or puts it away (any), under the card's own zones.
-    //  (A square as big as the longest side of any monitor: `screen.width` and `screen.height` are those of the first one, so on a monitor standing on its side the zone covered only part of it.)
-    //  (Under pleamar-wm a surface on the background layer hears no mouse, so it is on top, and has no zone to hear it with except while the menu is out or Edit is on; the wallpaper's zone only holds while the menu is out,
-    //  so in Edit the widgets underneath can still be taken, and only Done and Escape end it.)
+    //  (A square as big as the longest side of any monitor: `screen.width` and `screen.height` are those of the first one.)
     zone box wall { from: 0, 0; size: 2560, 2560 }
-    on press right wall { mx = pointer.x; my = pointer.y; mmon = screen.index; emit menu_do(0) }   // (a right press opens the desktop editor, desktopedit/; the card below is not used)
-    on press wall { open = false; editing = false }
-    on key Escape while open or editing { open = false; editing = false }
-
-    //  The card's rows, over the wallpaper's zone (declared after it, so they win the press; and before the card is drawn, which reads their hover).
-    repeat i in 0..6 {
-        let ry = cy0 + 8 + i * rh + rh / 2
-        zone box mrow.$i { at: cx0 + cw / 2, ry; size: cw - 12, rh - 4; corner: 14; cursor: pointer; active: open and mo > 0.6 }
-        on press mrow.$i { emit menu_do(i); open = false }
-        on hover mrow.$i for 1ms { hov = i }
-        on leave mrow.$i { hov = -1 }
-    }
-
-    group {
-        show: mo > 0.01 and screen.index == mmon      // (one copy of this scene per monitor, all sharing `open`: only the monitor it was asked on draws the card)
-        pivot: cx0, cy0
-        scale: 0.92 + 0.08 * mo
-        opacity: clamp(mo * 1.6, 0, 1)
-        body {
-            color: tint
-            glass: 1
-            lens: false
-            rim: 70%
-            shine: 0, 0
-            shadow: 0, 8, 22, 34%
-            opacity: 85% * (1 - ob)
-            show: ob < 0.996
-            box { from: cx0, cy0; size: cw, ch; corner: 20 }
-        }
-        body {
-            color: mix(mix(tint, #000000, 0.7), ink, 0.3)
-            rim: 0%
-            opacity: 100% * ob
-            shadow: 0, 8, 22, 45%, #000000
-            show: ob > 0.004
-            box { from: cx0, cy0; size: cw, ch; corner: 20 }
-        }
-        repeat i in 0..6 {
-            let ry = cy0 + 8 + i * rh + rh / 2
-            prop rh_.$i = 0 ~calm
-            follow rh_.$i = if(hov == i, 1, 0)
-            let hv = rh_.$i
-            let on = pick(i, 0, s0, s2, s3, s4, 0)
-            box { at: cx0 + cw / 2, ry; size: cw - 12, rh - 4; corner: 14; color: ink; opacity: 9% * hv }
-            text pick(i, "Edit", "Webcam", "Desktop clock", "System monitor", "Audio visualiser", "New sticky note") { at: cx0 + 20, ry; anchor: left center; size: 15; weight: 600; color: ink; family: "Space Grotesk" }
-            //  brackets at the right, with an X between them when it is on:  [ ]  or  [X]
-            text "[" { at: cx0 + cw - 44, ry; anchor: center center; size: 20; weight: 600; color: mix(ink, mint, on); opacity: if(i > 0 and i < 5, 75% + 25% * on, 0); family: "Space Grotesk" }
-            text "]" { at: cx0 + cw - 18, ry; anchor: center center; size: 20; weight: 600; color: mix(ink, mint, on); opacity: if(i > 0 and i < 5, 75% + 25% * on, 0); family: "Space Grotesk" }
-            text "X" { at: cx0 + cw - 31, ry; anchor: center center; size: 16; weight: 700; color: mint; opacity: on; family: "Space Grotesk" }
-            text "+" { at: cx0 + cw - 31, ry; anchor: center center; size: 22; weight: 600; color: ink; opacity: if(i == 5, 80%, 0); family: "Space Grotesk" }
-            //  Edit: four small squares, the grid
-            repeat q in 0..4 {
-                box { at: cx0 + cw - 31 + (mod(q, 2) - 0.5) * 9, ry + (floor(q / 2) - 0.5) * 9; size: 6, 6; corner: 1.5; color: ink; opacity: if(i == 0, 80%, 0) }
-            }
-        }
-    }
-
-    //  Edit mode: a dot at each corner of the cells (the widgets' grid: 16 columns and 9 rows inside a 40 px margin), and a pill at the top with what to do and the Done button.
-    prop edm = 0 ~calm
-    follow edm = if(editing, 1, 0)
-    let eg.w = (screen.width - 80) / 16
-    let eg.h = (screen.height - 80) / 9
-    group {
-        show: edm > 0.01
-        opacity: edm
-        repeat i in 0..170 {
-            ellipse { at: 40 + mod(i, 17) * eg.w, 40 + floor(i / 17) * eg.h; radius: 2; color: ink; opacity: 28% }
-        }
-        let ep.x = screen.width / 2
-        let ep.y = 70
-        body {
-            color: tint
-            glass: 1
-            lens: false
-            rim: 70%
-            shine: 0, 0
-            shadow: 0, 8, 22, 34%
-            opacity: 85% * (1 - ob)
-            show: ob < 0.996
-            box { at: ep.x, ep.y; size: 470, 46; corner: 23 }
-        }
-        body {
-            color: mix(mix(tint, #000000, 0.7), ink, 0.3)
-            rim: 0%
-            opacity: 100% * ob
-            shadow: 0, 8, 22, 45%, #000000
-            show: ob > 0.004
-            box { at: ep.x, ep.y; size: 470, 46; corner: 23 }
-        }
-        text "Drag the widgets to move them" { at: ep.x - 94, ep.y; anchor: center center; size: 15; weight: 600; color: ink; family: "Space Grotesk" }
-        box { at: ep.x + 178, ep.y; size: 84, 32; corner: 16; color: mint; opacity: 26% + 14% * edone.hover }
-        text "Done" { at: ep.x + 178, ep.y; anchor: center center; size: 15; weight: 700; color: mint; family: "Space Grotesk" }
-    }
-    zone box edone { at: screen.width / 2 + 178, 70; size: 84, 32; corner: 16; cursor: pointer; active: editing }
-    on press edone { editing = false }
+    on press right wall { mmon = screen.index; emit edit_req }
 }

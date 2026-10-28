@@ -15,7 +15,13 @@ def bodies(source: str) -> list[dict[str, str]]:
 def evaluate(expression: str, facts: dict[str, float | bool]) -> float | bool:
     expression = re.sub(r'(\d+(?:\.\d+)?)%', r'(\1 / 100)', expression)
     return eval(expression.replace('false', 'False').replace('true', 'True'),
-                {'__builtins__': {}}, dict(facts, clamp=lambda v, a, b: max(a, min(b, v))))
+                 {'__builtins__': {}}, dict(facts, clamp=lambda v, a, b: max(a, min(b, v))))
+
+
+def native_layers() -> list[dict[str, str]]:
+    # v0.2.0 adds separate visualizer geometry variants; compare the six base material recipes.
+    return [layer for layer in bodies((ROOT / 'pages/bar_glass.plm').read_text())
+            if 'fw_act < 0.5' in layer.get('show', '')][:6]
 
 
 class LiteMaterialTests(unittest.TestCase):
@@ -28,7 +34,7 @@ class LiteMaterialTests(unittest.TestCase):
         return layers[:6]
 
     def test_shared_material_controls_produce_the_native_layer_visibility_and_opacity(self) -> None:
-        native = bodies((ROOT / 'pages/bar_glass.plm').read_text())[:6]
+        native = native_layers()
         compact = self.layers()
         cases = (
             ({'obs': 0}, (0,)),
@@ -41,7 +47,7 @@ class LiteMaterialTests(unittest.TestCase):
         )
         for changes, expected in cases:
             facts: dict[str, float | bool] = dict(obs=0, glass_auto=False, glass_op=.38,
-                                                hy_blur=4, pk=0, cas_k=0, uwu_k=0, pv=0)
+                                                hy_blur=4, pk=0, cas_k=0, uwu_k=0, pv=0, fw_act=0)
             facts.update(changes)
             with self.subTest(facts=changes):
                 got = tuple(i for i, layer in enumerate(compact[:6]) if evaluate(layer['show'], facts))
@@ -53,11 +59,12 @@ class LiteMaterialTests(unittest.TestCase):
 
     def test_glass_parameters_follow_main_controls_instead_of_side_defaults(self) -> None:
         compact = self.layers()
-        native = bodies((ROOT / 'pages/bar_glass.plm').read_text())[:6]
+        native = native_layers()
         facts: dict[str, float | bool] = dict(glass_bend=True, glass_clear=.27,
-                                            glass_refr=.63, glass_disp=.42, glass_rim=1.4, pv=.2)
+                                            glass_refr=.63, glass_disp=.42, glass_rim=1.4, pv=.2,
+                                            glass_dome=.3, glass_milk=.2)
         for index in (0, 1):
-            for field in ('glass', 'lens', 'refraction', 'dispersion', 'rim'):
+            for field in ('glass', 'lens', 'refraction', 'dispersion', 'rim', 'dome', 'milk'):
                 with self.subTest(layer=index, field=field):
                     self.assertAlmostEqual(evaluate(compact[index][field], facts),
                                            evaluate(native[index][field], facts))

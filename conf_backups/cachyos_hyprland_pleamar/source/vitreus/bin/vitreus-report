@@ -7,7 +7,7 @@
 #   vitreus-report              (the same, when Vitreus is installed)
 #   vitreus-report --stdout     print the report instead of writing a file
 #
-# What it reads, and nothing else: the system's name and version, the graphics card, the monitors' sizes, which Vitreus and pleamar
+# What it reads, and nothing else: the system's name and version, the graphics card and its Vulkan driver, the monitors' sizes, which Vitreus and pleamar
 # versions are there, whether their files are in place, what is running, and the ends of Vitreus's log, the installer's log and the
 # system's warnings about it. It does NOT read your notifications, clipboard, calendar, weather place, wallpapers, window titles,
 # browser or any file of yours. Afterwards your user name, home folder, computer name, network addresses, e-mail addresses and the
@@ -101,6 +101,26 @@ tailf() { # tailf file lines [filter-out-regex]
     printf 'AQ_DRM_DEVICES=%s  PLEAMAR_GPU=%s\n' "${AQ_DRM_DEVICES:-}" "${PLEAMAR_GPU:-}"
     awk '/MemTotal/ { printf "memory: %d MB\n", $2 / 1024 }' /proc/meminfo 2> /dev/null
 
+    # pleamar draws with Vulkan, and needs the card's own driver for it (vulkan-radeon, vulkan-intel, NVIDIA's): with none it finds no adapter and the shell does not start.
+    sec "Vulkan (the shell draws with it: it needs a driver for the card)"
+    printf 'driver files (a card with none of its own cannot be drawn on):\n'
+    ls /usr/share/vulkan/icd.d /etc/vulkan/icd.d 2> /dev/null | sed 's/^/  /' | head -20
+    if [ -z "$(ls /usr/share/vulkan/icd.d /etc/vulkan/icd.d 2> /dev/null)" ]; then printf '  NONE: no Vulkan driver is installed\n'; fi
+    if have pacman; then
+        pacman -Q mesa vulkan-icd-loader vulkan-radeon vulkan-intel nvidia-utils nvidia nvidia-open 2> /dev/null | sed 's/^/  package: /'
+        for p in vulkan-radeon vulkan-intel; do pacman -Q "$p" > /dev/null 2>&1 || printf '  not installed: %s\n' "$p"; done
+    elif have dpkg; then
+        dpkg -l mesa-vulkan-drivers libvulkan1 2> /dev/null | awk '/^ii/ { printf "  package: %s %s\n", $2, $3 }'
+    elif have rpm; then
+        rpm -q mesa-vulkan-drivers vulkan-loader 2> /dev/null | sed 's/^/  package: /'
+    fi
+    if have vulkaninfo; then
+        printf 'what Vulkan can see:\n'
+        tmo vulkaninfo --summary 2>&1 | grep -E '^(GPU[0-9]+|Devices|Instance)|apiVersion|driverVersion|deviceType|deviceName|driverName|driverInfo|ERROR|error|No ' | head -30 | sed 's/^/  /'
+    else
+        printf '(vulkaninfo is not installed: vulkan-tools on Arch, to see what Vulkan finds)\n'
+    fi
+
     sec "Monitors"
     if have hyprctl; then
         tmo hyprctl monitors 2>&1 | grep -E '^Monitor|@.* at |physical size|^\s*(scale|transform|focused|disabled|mirrorOf|vrr|currentFormat|dpmsStatus):' | head -40
@@ -139,7 +159,7 @@ tailf() { # tailf file lines [filter-out-regex]
 
     sec "Does each scene load?"
     if have pleamar && [ -d "$dest" ]; then
-        for s in vitreus.plm lockscreen/lockscreen.plm wptrans/wptrans.plm desktopclock/desktopclock.plm desktopsysmon/desktopsysmon.plm desktopcava/desktopcava.plm; do
+        for s in vitreus.plm lockscreen/lockscreen.plm wptrans/wptrans.plm desktopclock/desktopclock.plm desktopsysmon/desktopsysmon.plm;  do
             [ -f "$dest/$s" ] || { printf '%s: missing\n' "$s"; continue; }
             tmo pleamar --check "$dest/$s" 2>&1 | grep -v '^note' | tail -4
         done

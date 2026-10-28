@@ -1,0 +1,249 @@
+#!/usr/bin/env python3
+"""hyprctl for niri: `hyprctl [-j] monitors | activewindow | clients | workspaces | dispatch ... | eval hl.monitor(...)`, answered from `niri msg --json` in Hyprland's words (the ones Vitreus reads:
+monitors with name, id, size, scale, transform, focused; the focused window; the windows as Hyprland's text lists them; the workspaces; and the dispatchers that focus, close and move a window). Anything else
+fails (exit 1), which is what a program asking hyprctl has to be ready for on a desktop that is not Hyprland. Reached through pleamar-wm/hyprctl."""
+import json, os, re, subprocess, sys
+
+def niri(*args):
+    r = subprocess.run(["niri", "msg", "--json", *args], capture_output=True, text=True, timeout=5)
+    if r.returncode != 0:
+        raise RuntimeError(r.stderr.strip() or "niri msg failed")
+    return json.loads(r.stdout) if r.stdout.strip() else None
+
+# niri's transform names, in Hyprland's numbers (0 normal, 1..3 rotated, 4 flipped, 5..7 flipped and rotated)
+TRANSFORM = {"Normal": 0, "90": 1, "180": 2, "270": 3, "Flipped": 4, "Flipped90": 5, "Flipped180": 6, "Flipped270": 7}
+
+def monitors():
+    outs = niri("outputs") or {}
+    try:
+        focused = (niri("focused-output") or {}).get("name")
+    except RuntimeError:
+        focused = None
+    try:
+        workspaces = niri("workspaces") or []
+    except RuntimeError:
+        workspaces = []
+    active = {w.get("output"): w for w in workspaces if w.get("is_active")}
+    result = []
+    for i, name in enumerate(sorted(outs, key=lambda n: (outs[n].get("logical") or {}).get("x", 0))):
+        o = outs[name]
+        modes, cur = o.get("modes") or [], o.get("current_mode")
+        mode = modes[cur] if cur is not None and cur < len(modes) else (modes[0] if modes else {"width": 0, "height": 0, "refresh_rate": 60000})
+        lg = o.get("logical") or {}
+        aw = active.get(name) or {}
+        make, model, serial = o.get("make") or "", o.get("model") or "", o.get("serial") or ""
+        result.append({
+            "id": i, "name": name, "description": " ".join(x for x in (make, model, serial) if x), "make": make, "model": model, "serial": serial,
+            "width": mode["width"], "height": mode["height"], "refreshRate": round(mode["refresh_rate"] / 1000, 3),
+            "x": lg.get("x", 0), "y": lg.get("y", 0), "scale": lg.get("scale", 1.0), "transform": TRANSFORM.get(lg.get("transform", "Normal"), 0),
+            "focused": name == focused, "activeWorkspace": {"id": aw.get("idx", 1), "name": str(aw.get("idx", 1))},
+            "availableModes": ["%dx%d@%.2fHz" % (m["width"], m["height"], m["refresh_rate"] / 1000) for m in modes],
+        })
+    return result
+
+def windows():
+    wins = niri("windows") or []
+    wss = {w["id"]: w for w in (niri("workspaces") or [])}
+    # the focus order: the focused one first (Hyprland's focusHistoryID 0), then the rest as niri lists them
+    wins.sort(key=lambda w: 0 if w.get("is_focused") else 1)
+    out = []
+    for n, w in enumerate(wins):
+        ws = wss.get(w.get("workspace_id")) or {}
+        out.append((n, w, ws))
+    return out
+
+def niri_numbers():
+    """(gap, struts) as niri has them: `gaps` from config.kdl, the struts as the last block says (the shell's vitreus.kdl is included after it)."""
+    gap, struts = 16.0, {"left": 0.0, "right": 0.0, "top": 0.0, "bottom": 0.0}
+    base = os.path.join(os.environ.get("XDG_CONFIG_HOME") or os.path.expanduser("~/.config"), "niri")
+    for name in ("config.kdl", "vitreus.kdl"):
+        try:
+            with open(os.path.join(base, name)) as f:
+                text = re.sub(r"//[^\n]*", "", f.read())
+        except OSError:
+            continue
+        m = re.search(r"^\s*gaps\s+([0-9.]+)", text, re.M)
+        if m:
+            gap = float(m.group(1))
+        for blk in re.finditer(r"struts\s*\{([^}]*)\}", text):
+            for side, v in re.findall(r"(left|right|top|bottom)\s+(-?[0-9.]+)", blk.group(1)):
+                struts[side] = float(v)
+    return gap, struts
+
+def geometry(wins, wss, mons):
+    """Where each tiled window is on its monitor, as {id: (x, y, w, h)}. niri's IPC gives sizes and the place in the columns but not the place on the screen, so it is worked out the way niri lays
+    columns out: from the strut and the gap, one column after another, a column's tiles one under another; and the view scrolled only as far as the column in focus needs to be seen (where it
+    has scrolled to is not told, so a long row of columns that was moved about can be off). Floating windows have no place to give."""
+    gap, st = niri_numbers()
+    size = {m["id"]: (m["width"] / (m["scale"] or 1), m["height"] / (m["scale"] or 1)) for m in mons}
+    mon_id = {m["name"]: m["id"] for m in mons}
+    out = {}
+    for ws in wss.values():
+        mid = mon_id.get(ws.get("output"))
+        if mid is None:
+            continue
+        mw, mh = size[mid]
+        cols = {}
+        for w in wins:
+            lay = w.get("layout") or {}
+            pos = lay.get("pos_in_scrolling_layout")
+            if w.get("workspace_id") == ws["id"] and pos and not w.get("is_floating"):
+                cols.setdefault(pos[0], []).append((pos[1], w))
+        x, edges = 0.0, {}
+        for c in sorted(cols):
+            width = max(w["layout"]["tile_size"][0] for _, w in cols[c])
+            edges[c] = (x, x + width)
+            x += width + gap
+        view = mw - st["left"] - st["right"] - 2 * gap
+        active = next((w for w in wins if w["id"] == ws.get("active_window_id")), None)
+        ac = ((active or {}).get("layout") or {}).get("pos_in_scrolling_layout")
+        off = 0.0
+        if ac and ac[0] in edges:
+            left, right = edges[ac[0]]
+            if right - off > view:
+                off = right - view
+            if left - off < 0:
+                off = left
+        for c, tiles in cols.items():
+            y = st["top"] + gap
+            for _, w in sorted(tiles, key=lambda t: t[0]):
+                tw, th = w["layout"]["tile_size"]
+                ww, wh = w["layout"]["window_size"]
+                ox, oy = w["layout"].get("window_offset_in_tile") or (0, 0)
+                out[w["id"]] = (round(st["left"] + gap + edges[c][0] - off + ox), round(y + oy), ww, wh)
+                y += th + gap
+    return out
+
+def workspaces():
+    wss = niri("workspaces") or []
+    counts = {}
+    for w in niri("windows") or []:
+        counts[w.get("workspace_id")] = counts.get(w.get("workspace_id"), 0) + 1
+    return [{"id": w["idx"], "name": w.get("name") or str(w["idx"]), "monitor": w.get("output") or "", "windows": counts.get(w["id"], 0),
+             "active": bool(w.get("is_active")), "focused": bool(w.get("is_focused"))} for w in wss]
+
+def dispatch(arg):
+    """The few dispatchers Vitreus sends, in Hyprland's Lua words, as niri's actions."""
+    def act(*a):
+        sys.exit(subprocess.run(["niri", "msg", "action", *a], capture_output=True, timeout=5).returncode)
+    m = re.search(r'hl\.dsp\.focus\(\{\s*window\s*=\s*"address:0x([0-9a-fA-F]+)"', arg)
+    if m:
+        act("focus-window", "--id", str(int(m.group(1), 16)))
+    m = re.search(r'hl\.dsp\.focus\(\{\s*workspace\s*=\s*(\d+)', arg)
+    if m:
+        act("focus-workspace", m.group(1))
+    if re.search(r'hl\.dsp\.window\.close\(\)', arg):
+        act("close-window")
+    m = re.search(r'hl\.dsp\.window\.move\(\{\s*workspace\s*=\s*(\d+)[^}]*window\s*=\s*"address:0x([0-9a-fA-F]+)"', arg)
+    if m:
+        act("move-window-to-workspace", "--window-id", str(int(m.group(2), 16)), "--focus", "false", m.group(1))
+    sys.exit(1)
+
+TRANSFORM_NAME = ["normal", "90", "180", "270", "flipped", "flipped-90", "flipped-180", "flipped-270"]
+
+def evaluate(code):
+    """`hyprctl eval` with hl.monitor({ output, mode, position, scale, transform }) lines (the Display page's): each as `niri msg output` commands.
+    Answers `ok` when every command was taken, the way Hyprland does."""
+    def out(name, *a):
+        r = subprocess.run(["niri", "msg", "output", name, *a], capture_output=True, text=True, timeout=10)
+        if r.returncode != 0:
+            print((r.stderr or r.stdout).strip() or "niri did not take it")
+            sys.exit(1)
+    found = False
+    for line in code.splitlines():
+        m = re.search(r'hl\.monitor\(\{(.*)\}\)', line)
+        if not m:
+            continue
+        found = True
+        body = m.group(1)
+        name = re.search(r'output\s*=\s*"([^"]+)"', body)
+        if not name:
+            continue
+        name = name.group(1)
+        mode = re.search(r'mode\s*=\s*"(\d+x\d+)(?:@(\d+(?:\.\d+)?))?"', body)
+        if mode:
+            out(name, "mode", mode.group(1) + ("@" + mode.group(2) if mode.group(2) else ""))
+        scale = re.search(r'scale\s*=\s*("auto"|[\d.]+)', body)
+        if scale and scale.group(1) != '"auto"':
+            out(name, "scale", scale.group(1))
+        tr = re.search(r'transform\s*=\s*(\d)', body)
+        if tr:
+            out(name, "transform", TRANSFORM_NAME[int(tr.group(1)) % 8])
+        pos = re.search(r'position\s*=\s*"(-?\d+)x(-?\d+)"', body)
+        if pos:
+            out(name, "position", "set", pos.group(1), pos.group(2))
+    if not found:
+        sys.exit(1)
+    print("ok")
+
+def addr(w):
+    return "%x" % w["id"]
+
+def main():
+    args = [a for a in sys.argv[1:] if a != "-j"]
+    as_json = "-j" in sys.argv[1:]
+    cmd = args[0] if args else ""
+    if cmd == "monitors":
+        mons = monitors()
+        if as_json:
+            print(json.dumps(mons))
+        else:
+            for m in mons:
+                print("Monitor %s (ID %d):" % (m["name"], m["id"]))
+                print("\t%dx%d@%.5f at %dx%d" % (m["width"], m["height"], m["refreshRate"], m["x"], m["y"]))
+                print("\tscale: %.2f" % m["scale"])
+                print("\ttransform: %d" % m["transform"])
+                print("\tfocused: %s" % ("yes" if m["focused"] else "no"))
+                print()
+    elif cmd == "workspaces":
+        print(json.dumps(workspaces()))
+    elif cmd == "eval" and len(args) > 1:
+        evaluate("\n".join(args[1:]))
+    elif cmd == "dispatch" and len(args) > 1:
+        dispatch(" ".join(args[1:]))
+    elif cmd == "activewindow":
+        focused = next((w for _, w, _ in windows() if w.get("is_focused")), None)
+        if as_json:
+            print(json.dumps({} if focused is None else {
+                "address": "0x" + addr(focused), "title": focused.get("title") or "", "class": focused.get("app_id") or "", "initialClass": focused.get("app_id") or "",
+                "pid": focused.get("pid") or 0, "mapped": True, "floating": bool(focused.get("is_floating")), "fullscreen": 0,
+                "workspace": {"id": focused.get("workspace_id", 0), "name": str(focused.get("workspace_id", 0))}}))
+        elif focused is None:
+            print("Invalid")
+        else:
+            print("Window %s -> %s:" % (addr(focused), focused.get("title") or ""))
+            print("\tclass: %s" % (focused.get("app_id") or ""))
+    elif cmd == "clients":
+        for n, w, ws in windows():
+            wid = ws.get("idx", w.get("workspace_id", 0))
+            if as_json:
+                continue
+            print("Window %s -> %s:" % (addr(w), w.get("title") or ""))
+            print("\tmapped: 1")
+            print("\tat: 0,0")
+            print("\tsize: 0,0")
+            print("\tworkspace: %s (%s)" % (wid, wid))
+            print("\tfloating: %d" % (1 if w.get("is_floating") else 0))
+            print("\tpid: %s" % (w.get("pid") or 0))
+            print("\tclass: %s" % (w.get("app_id") or ""))
+            print("\ttitle: %s" % (w.get("title") or ""))
+            print("\tfocusHistoryID: %d" % n)
+            print()
+        if as_json:
+            wins = niri("windows") or []
+            wss = {w["id"]: w for w in (niri("workspaces") or [])}
+            mons = monitors()
+            mon_id = {m["name"]: m["id"] for m in mons}
+            where = geometry(wins, wss, mons)
+            print(json.dumps([{"address": "0x" + addr(w), "mapped": True, "hidden": w["id"] not in where, "title": w.get("title") or "", "class": w.get("app_id") or "", "pid": w.get("pid") or 0,
+                               "floating": bool(w.get("is_floating")), "fullscreen": 0, "monitor": mon_id.get(ws.get("output"), 0),
+                               "at": list(where.get(w["id"], (0, 0, 0, 0))[:2]), "size": list(where.get(w["id"], (0, 0, 0, 0))[2:]),
+                               "workspace": {"id": ws.get("idx", 0), "name": str(ws.get("idx", 0))}, "focusHistoryID": n}
+                              for n, w, ws in windows()]))
+    else:
+        sys.exit(1)
+
+try:
+    main()
+except (RuntimeError, OSError, subprocess.SubprocessError, ValueError, KeyError):
+    sys.exit(1)

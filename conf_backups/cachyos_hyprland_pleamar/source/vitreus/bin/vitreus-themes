@@ -1,0 +1,89 @@
+#!/usr/bin/env python3
+"""vitreus-themes DATADIR: reads every theme (*.toml) and writes DATADIR/themes.json for the shell, its font setup and the window-corner code.
+
+Vitreus's own themes are the files in <shell>/themes (Glass, Retro, UwU, Cyber); a person's are the files in ~/.config/pleamar/vitreus-themes (the
+template is <shell>/themes/_template.toml). A file that starts with "_" is skipped. A broken file is left out and named in "errors", so one bad
+theme never costs the others. Prints nothing; exit 1 only when it cannot write the result."""
+import json, os, re, sys, tomllib
+
+data = sys.argv[1]
+here = os.path.dirname(os.path.realpath(__file__))
+own = os.path.join(here, "..", "themes")
+user = os.path.join(os.path.expanduser("~"), ".config", "pleamar", "vitreus-themes")
+
+ORDER = ["ink", "faint", "mint", "mintlo", "minthi", "onmint", "tint", "panel", "deep", "off", "alert"]
+STOCK = {"ink": "#f5f7f5", "faint": "#c2c7cc", "mint": "#9ed6bd", "mintlo": "#6cbc9c", "minthi": "#dcf8ec", "onmint": "#10161a",
+         "tint": "#1b2127", "panel": "#161a1f", "deep": "#0b0e11", "off": "#3a4048", "alert": "#ef4444"}
+BASES = ("glass", "retro", "uwu", "cyber", "milk")
+LOOK = {"glass": None, "retro": 8, "uwu": 9, "cyber": 10, "milk": 11}     # the numbers iris.json has always used for the looks
+
+def colour(v, where):
+    if isinstance(v, str):
+        m = re.fullmatch(r"#?([0-9a-fA-F]{3}|[0-9a-fA-F]{6})", v.strip())
+        if m:
+            h = m.group(1).lower()
+            if len(h) == 3:
+                h = "".join(c * 2 for c in h)
+            return "#" + h
+    raise ValueError("%s: \"%s\" is not a colour like #1b2127" % (where, v))
+
+def read(path, builtin):
+    with open(path, "rb") as f:
+        t = tomllib.load(f)
+    stem = os.path.splitext(os.path.basename(path))[0]
+    tid = re.sub(r"[^a-z0-9_-]+", "-", stem.lower()).strip("-") or "theme"
+    base = t.get("base", "glass")
+    base = base if base in BASES else "glass"
+    name = str(t.get("name", stem))[:24]
+    if not isinstance(t.get("palette", {}), dict):
+        raise ValueError("[palette] has to be a table of colours")
+    pal = None
+    if "palette" in t or not builtin:           # a person's theme always has colours (the stock ones where it names none); Glass has the wallpaper's
+        p = t.get("palette", {})
+        unknown = [k for k in p if k not in STOCK]
+        if unknown:
+            raise ValueError("palette has no colour called " + ", ".join(unknown) + " (the names are " + ", ".join(ORDER) + ")")
+        pal = {k: colour(p[k], "palette." + k) if k in p else STOCK[k] for k in ORDER}
+    elif base != "glass":
+        raise ValueError("a theme that is not Glass needs a [palette]")
+    cols = t.get("card", {}).get("colors")
+    if cols is None:
+        src = pal or STOCK
+        cols = [src["tint"], src["panel"], src["ink"], src["mint"], src["alert"]]
+    if not (isinstance(cols, list) and len(cols) == 5):
+        raise ValueError("[card] colors has to list five colours")
+    cols = [colour(c, "card.colors") for c in cols]
+    rnd = t.get("corner_rounding")
+    if rnd is not None:
+        if isinstance(rnd, bool) or not isinstance(rnd, (int, float)):
+            raise ValueError("corner_rounding has to be a number of pixels")
+        rnd = max(0, min(30, int(rnd)))
+    return {"id": tid, "name": name, "tagline": str(t.get("tagline", ""))[:24], "builtin": builtin, "base": base, "look": LOOK[base],
+            "font": str(t["font"]) if t.get("font") else None, "round": rnd, "palette": pal, "card": cols, "file": path}
+
+themes, errors, seen = [], [], set()
+for folder, builtin in ((own, True), (user, False)):
+    try:
+        names = sorted(n for n in os.listdir(folder) if n.endswith(".toml") and not n.startswith("_"))
+    except OSError:
+        continue
+    for n in names:
+        try:
+            th = read(os.path.join(folder, n), builtin)
+            if th["id"] in seen:
+                raise ValueError("another theme is already called " + th["id"])
+            seen.add(th["id"])
+            themes.append(th)
+        except tomllib.TOMLDecodeError as e:
+            errors.append("%s: %s" % (n, e))
+        except (ValueError, OSError) as e:
+            errors.append("%s: %s" % (n, e))
+
+# Vitreus's own, in their old order (Glass first), then the person's, by file name.
+rank = {"glass": 0, "retro": 1, "uwu": 2, "cyber": 3}
+themes.sort(key=lambda t: (0, rank.get(t["id"], 9)) if t["builtin"] else (1, 0))
+os.makedirs(data, exist_ok=True)
+tmp = os.path.join(data, "themes.json.tmp")
+with open(tmp, "w") as f:
+    json.dump({"themes": themes, "errors": errors, "folder": user}, f)
+os.replace(tmp, os.path.join(data, "themes.json"))

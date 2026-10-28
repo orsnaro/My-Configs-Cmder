@@ -1,0 +1,23 @@
+# Cyber: a neon HUD. Near-black glass, cyan for the accent and magenta for the second
+# neon (`deep`, which the theme's outlines and brackets use).
+name = "Cyber"
+tagline = "Neon HUD"
+base = "cyber"
+font = "Orbitron"
+corner_rounding = 3
+
+[palette]
+ink    = "#d6f7ff"
+faint  = "#6f93a8"
+mint   = "#00e5ff"
+mintlo = "#00a9c4"
+minthi = "#7df3ff"
+onmint = "#001018"
+tint   = "#04070d"
+panel  = "#0a1220"
+deep   = "#ff2bd6"
+off    = "#26384a"
+alert  = "#ff3b5c"
+
+[card]
+colors = ["#05080f", "#0d2438", "#ff2bd6", "#00e5ff", "#ff3b5c"]

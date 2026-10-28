@@ -1,0 +1,40 @@
+# ── A Vitreus add-on with a drawer ─────────────────────────────────────────────────────────────────────
+# Copy this whole folder to  ~/.config/pleamar/vitreus-addons/<id>/  (the id is the folder's
+# name: lowercase letters, digits and dashes) and change it. It appears under
+# Settings > Add-ons as a card of its own, with a switch; updating Vitreus never touches that folder.
+# A folder there that starts with "_" is ignored, and so is this one where it stands.
+#
+# An add-on is a pleamar scene of its own, started and kept running by Vitreus while its
+# switch is on. It draws its own surface and declares its own `permissions` (every program
+# it runs, every service it reads): read them before turning someone else's add-on on, it
+# is not sandboxed. A mistake in this file is shown under the list and the add-on is left out.
+
+name        = "My drawer"                    # the title of the card (up to ~28 characters)
+description = "What it does, in one line"      # the line under the title (up to ~80 characters; one line is shown)
+author      = "Your Name <you@example.com>"      # shown small, with the version, under the description
+version     = "0.1"
+
+# The scene to run, in this folder (leave it out and it is <id>.plm). Rename addon.plm to something of your own (your id is a good name) and
+# put it here: two add-ons whose scene files have the same name cannot both run.
+scene = "addon.plm"
+
+# Style: read STYLE.md in this folder (and use addon-pencil.plm, which draws it). An add-on included in Vitreus itself has to follow it; one you write and share on your own is free to look as you like. Vitreus prefers the boiled pencil for an add-on's icon and graphics: hand-drawn, slightly crooked lines, each drawn twice (the second pass fainter and a hair off) with a wash
+# of the accent colour inside, and, in the scene, strokes redrawn about eight times a second (`floor(time * 8)`; see PCup, PBell and PEnvelope in vitreus.plm, and the pencil
+# components of the Home Assistant add-on). The shell wobbles the pill icon itself under the pointer. An add-on may instead use its own SVG or PNG icons and artwork: that is allowed.
+#
+# The icon on the add-on pill, the pill of icons in the corner the app dock is not in (an .svg or .png in this folder, about 24 px: a single colour that suits dark and light
+# themes, like #f5f7f5 on white, is the safest, since the shell does not recolour it). A click on it opens the panel below. A panel needs it: without one the add-on is left out.
+icon = "icon.svg"
+
+# A panel out of that pill (see the scene for what the shell gives it and what it cannot do yet: the title bar with its X, the glass that stands against the frame, the
+# corner handles that resize it, one monitor). The size is the first one, in pixels: width 240 to 1600, height 160 to 1600, or 0 to leave it to the shell (about the size of the
+# control centre); the user can resize the panel and the new size is kept. Take this section out for an add-on that is only a window: its icon then switches the window on and off (`slot_open`).
+[drawer]
+width  = 0
+height = 420
+
+# An add-on that frames wallpapers (a matte frame, blur, any effect): whenever Vitreus sets a wallpaper it first asks this add-on for the picture awww should show, and waits
+# (the old wallpaper stays, for up to 30 s, longer while the add-on says it is busy). One add-on frames at a time: the first that is on. logic/wallpaper_hook.luau has the
+# messages (`wph_cur` is sent again every 10 s with the same path: act only when it differs from the last one you saw); the scene needs `"pleamar"` in its `run:` permissions. Take it out for an add-on that does not touch wallpapers.
+# [wallpaper]
+# frames = true

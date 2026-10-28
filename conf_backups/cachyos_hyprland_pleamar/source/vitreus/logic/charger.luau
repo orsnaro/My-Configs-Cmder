@@ -34,6 +34,24 @@ return function()
         return eta and (base .. " · " .. span(eta) .. " left") or base
     end
 
+    -- Low-battery alerts: one critical notification when the charge falls to 10 %, another at 5 % (critical ones ignore Do Not Disturb).
+    -- `alerted` is the lowest level already announced; it is re-armed as soon as the battery is not draining or is back above 10 %.
+    -- A jump past a level (the machine slept at 12 %, woke at 4 %) says only the level it is at.
+    local LEVELS = { { 5, "Battery critically low" }, { 10, "Battery low" } }
+    local alerted = math.huge
+    local function alert(status, capacity)
+        if status ~= "Discharging" or not capacity or capacity > 10 then alerted = math.huge; return end
+        for _, l in ipairs(LEVELS) do
+            if capacity <= l[1] then
+                if l[1] < alerted then
+                    alerted = l[1]
+                    run("notify-send", { "-u", "critical", "-a", "Vitreus", l[2], capacity .. "% left. Plug in the charger." }, function() end)
+                end
+                return
+            end
+        end
+    end
+
     local function look()
         if not files then return end
         run("cat", files, function(out, code)
@@ -42,6 +60,7 @@ return function()
             for line in out:gmatch("[^\n]+") do v[#v + 1] = line end
             local status = v[1]:match("^%s*(.-)%s*$")
             fact.chg_now = (status == "Charging" or status == "Full")
+            alert(status, tonumber(v[2]))
             text.bat_state = describe(status, tonumber(v[2]), tonumber(v[3]), tonumber(v[4]), tonumber(v[5]))
         end)
     end

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+import math
 import re
 import unittest
 
@@ -17,12 +18,18 @@ class Geometry:
         geometry = ROOT / 'pages/trial_geometry.plm'
         if geometry.exists():
             scene += '\n' + geometry.read_text()
+        title = ROOT / 'pages/bar_title.plm'
+        if title.exists():
+            scene += '\n' + title.read_text()
         scene += '\n' + (ROOT / 'pages/bar_icons.plm').read_text()
         self.expressions = dict(re.findall(r'^\s*let ([\w.]+) = ([^\n]+)', scene, re.M))
         self.values: dict[str, float] = {
             'screen.width': 2560, 'tn': tray_count, 'tm': tm, 'th.t': 0, 'lf.w': 0,
             'lm': 0, 'cu': 1.35, 'ob.y': 0, 'trial_workspaces.count': 9,
             'wrn': 0, 'tasks.count': 0, 'tb_title_w.width': 0,
+            'bar_zs': 1, 'sg': 0, 'nt_size': 1,
+            'tb_update_icon_w.width': 18, 'tb_update_count_w.width': 13,
+            'tb_alert_icon_w.width': 18, 'tb_alert_count_w.width': 13,
         }
         self.values['ob.x'] = self.value('tb.ws') + 10 * self.value('u')
 
@@ -32,7 +39,8 @@ class Geometry:
         if name not in self.expressions:
             raise AssertionError(f'missing scene geometry anchor: {name}')
         expression = self.expressions[name].split('//', 1)[0].strip().replace('if(', 'choose(')
-        functions = {'min': min, 'max': max, 'mix': lambda a, b, t: a + (b - a) * t,
+        functions = {'min': min, 'max': max, 'floor': math.floor, 'mix': lambda a, b, t: a + (b - a) * t,
+                     'clamp': lambda v, a, b: max(a, min(b, v)),
                      'choose': lambda c, a, b: a if c else b, 'and': None, 'or': None, 'not': None}
 
         def replace(match: re.Match[str]) -> str:
@@ -195,8 +203,8 @@ class TrialLayoutTests(unittest.TestCase):
         self.assertIn('family: "Material Symbols Outlined"', style)
         self.assertIn('image t.icon', block)
         self.assertIn('show: not t.symbol_on or lm >= 0.5', block)
-        self.assertIn('on press touch { emit click(t.index) }', block)
-        self.assertIn('on press right touch { emit menu(t.index) }', block)
+        self.assertRegex(block, r'on press touch \{[^}]*emit click\(t.index\)')
+        self.assertRegex(block, r'on press right touch \{[^}]*emit menu\(t.index\)')
 
     def test_hardware_clears_the_workspace_row_including_hover(self) -> None:
         for count in (6, 7, 9, 10, 12):
@@ -395,10 +403,10 @@ class TrialLayoutTests(unittest.TestCase):
     def native_controls_half(self, g: Geometry) -> float:
         """The native sliders' horizontal press width from bar_glass, not a copied number."""
         glass = (ROOT / 'pages/bar_glass.plm').read_text()
-        match = re.search(r'zone box ctl_hit \{[^\n]*size: mix\(([\d.]+) \* u, [\d.]+ \* u, lm\)', glass)
+        match = re.search(r'zone box ctl_hit \{[^\n]*size: mix\(([\d.]+) \* (b?u), [\d.]+ \* b?u, lm\)', glass)
         self.assertIsNotNone(match, 'native controls zone must state its horizontal width')
         assert match is not None
-        return float(match.group(1)) * g.value('u') / 2
+        return float(match.group(1)) * g.value(match.group(2)) / 2
 
     def native_arm(self, scene: str, name: str) -> str:
         """The horizontal (lm < 0.5) branch of a native bar anchor, read from the scene."""
@@ -640,16 +648,13 @@ class TrialLayoutTests(unittest.TestCase):
                 self.assertIn('size: 11.5;', style)
                 self.assertIn('mint', style)
         g = Geometry(3)
-        #  The number hugs its icon; both controls share one pill with an 18u slot (three digits fit).
+        #  The natural-width number hugs its icon without a left-heavy unused digit slot.
         for icon, count in [('tb.update_icon', 'tb.update_count'),
-                            ('tb.alert_icon', 'tb.alert_count')]:
+                             ('tb.alert_icon', 'tb.alert_count')]:
             with self.subTest(pair=(icon, count)):
-                self.assertAlmostEqual(g.value(count) - g.value(icon), 8 * g.value('u'))
+                self.assertAlmostEqual(g.value(count) - g.value(icon), 9 + 2 * g.value('u'))
         self.assertAlmostEqual(g.value('tb.alert_pill_w'), g.value('tb.update_pill_w'))
         self.assertAlmostEqual(g.value('tb.alert_pill_w'), 38 * g.value('u'))
-        self.assertAlmostEqual(g.value('tb.alert_count') - g.value('tb.alert_l'), 17 * g.value('u'))
-        self.assertIn('width: 18 * u;', self.text_style(source, 'trial_updates'))
-        self.assertIn('width: 18 * u;', self.text_style(source, '"{nt_hist.count}"'))
         self.assertLess(g.value('tb.mic'), g.value('tb.update_l'))
         self.assertLess(g.value('tb.update_l') + g.value('tb.update_pill_w'),
                         g.value('tb.keyboard') - 17 * g.value('u'))
@@ -780,11 +785,11 @@ class TrialLayoutTests(unittest.TestCase):
                     self.assertAlmostEqual(plate_top, baseline_top)
 
 
-    def test_bar_window_title_is_cut_at_30_characters_on_the_system_info_side(self) -> None:
+    def test_compact_title_footprint_stays_on_the_system_info_side(self) -> None:
         scene = (ROOT / 'vitreus.plm').read_text()
         self.assertIn('text win_title30 = ""', scene)
         self.assertEqual(scene.count('text win_title30 {'), 2,
-                         'the top strip and the left strip both show the shortened title')
+                          'vertical title rendering must keep its compact fallbacks')
         self.assertIn('measure tb_title_w', scene)
         geometry = (ROOT / 'pages/trial_geometry.plm').read_text()
         self.assertIn('let tb.metrics = max(tb.ws + 188 * u, tb.ws_row_r + 14 * u)', geometry)
@@ -797,15 +802,14 @@ class TrialLayoutTests(unittest.TestCase):
         self.assertIn('let tb.media_ctl = (tb.media_l + tb.media_r) / 2', geometry)
         self.assertIn('let tb.volume = tb.media_l - 31 * u', geometry)
         self.assertIn('let win.x = if(lm < 0.5, tb.ptitle_l,', scene)
-        self.assertIn('let win.w = if(lm < 0.5, max(1, tb.ptitle_r - tb.ptitle_l),', scene)
-        self.assertIn('let win.xs = if(lm < 0.5, win.x + 6 * u,', scene)
+        self.assertIn('let win.w = mix(if(lm < 0.5, max(1, tb.ptitle_r - tb.ptitle_l),', scene)
+        self.assertRegex(scene, r'let win\.w = [^\n]*sg\.tw, sg\)',
+                         'the new Notches layout retains its own title stretch')
+        self.assertIn('let win.xs = mix(if(lm < 0.5, win.x + 6 * u,', scene)
+        self.assertRegex(scene, r'let win\.xs = [^\n]*sg\.tl \+ 6 \* bu, sg\)')
         self.assertIn('let mcx = if(lm < 0.5, tb.media_ctl,', (ROOT / 'pages/bar_glass.plm').read_text())
         glass = (ROOT / 'pages/bar_glass.plm').read_text()
         self.assertIn('measure: tb_title_w', glass)
-        logic = (ROOT / 'vitreus.luau').read_text()
-        self.assertIn('local function cut_utf8(s, limit)', logic)
-        self.assertIn('text.win_title30 = cut_utf8(title, 30)', logic)
-        self.assertIn('utf8.offset(s, limit + 1)', logic)
         self.assertIn('size: 12; weight: 500; width: max(0, win.hw - 12 * u - mctl);', scene)
 
         g = Geometry(3, tm=1)                       # the bar along the top, with its frame

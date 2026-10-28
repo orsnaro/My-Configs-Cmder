@@ -1,0 +1,525 @@
+#!/usr/bin/env python3
+"""Google TV / Android TV remote helper for the Vitreus TV Remote add-on.
+
+Speaks the Android TV Remote protocol v2 (the one the Google TV phone app uses): pairing on port 6467
+with a code the TV shows, then the remote on port 6466. Python standard library only; the protobuf
+messages are written by hand below because only a few fields are needed.
+
+The panel talks to it in JSON lines: one command per line on stdin, one event per line on stdout.
+  in : {"cmd":"connect","host":"192.168.x.x"}   {"cmd":"pair","host":"..."}   {"cmd":"code","code":"1A2B3C"}
+       {"cmd":"key","key":"UP"}   {"cmd":"text","text":"hello"}   {"cmd":"app","link":"https://..."}   {"cmd":"stop"}
+  out: {"ev":"state","stage":"idle|connecting|ready|pair_wait_code|pairing_failed|error", ...}
+
+The client certificate (what the TV remembers as "paired") lives in the data folder given as argv[1], mode 600.
+"""
+import hashlib
+import json
+import os
+import socket
+import ssl
+import subprocess
+import sys
+import threading
+import time
+
+DATA = sys.argv[1] if len(sys.argv) > 1 else os.path.expanduser("~/.local/share/pleamar/tvremote")
+CERT = os.path.join(DATA, "client-cert.pem")
+KEY = os.path.join(DATA, "client-key.pem")
+def paired_file(host):
+    """Made when a code was accepted by that TV: before that there is nothing to connect to it with."""
+    return os.path.join(DATA, "paired-" + host)
+
+
+def is_paired(host):
+    legacy = os.path.join(DATA, "paired")                                # the one TV of the first version
+    if not os.path.exists(paired_file(host)) and os.path.exists(legacy):
+        os.rename(legacy, paired_file(host))
+    return os.path.exists(paired_file(host))
+
+KEYS = {
+    "UP": 19, "DOWN": 20, "LEFT": 21, "RIGHT": 22, "OK": 23, "BACK": 4, "HOME": 3, "MENU": 82,
+    "VOL_UP": 24, "VOL_DOWN": 25, "MUTE": 164, "POWER": 26, "PLAY_PAUSE": 85, "NEXT": 87, "PREV": 88,
+    "REWIND": 89, "FORWARD": 90, "SETTINGS": 176, "INPUT": 178, "CH_UP": 166, "CH_DOWN": 167,
+    "GUIDE": 172, "INFO": 165, "DEL": 67, "ENTER": 66, "SEARCH": 84, "WAKEUP": 224, "SLEEP": 223,
+}
+
+
+def emit(**kw):
+    sys.stdout.write(json.dumps(kw) + "\n")
+    sys.stdout.flush()
+
+
+# ── protobuf, by hand ───────────────────────────────────────────────────────────────────────────
+def varint(n):
+    out = bytearray()
+    while True:
+        b = n & 0x7F
+        n >>= 7
+        if n:
+            out.append(b | 0x80)
+        else:
+            out.append(b)
+            return bytes(out)
+
+
+def f_int(field, v):
+    return varint(field << 3) + varint(v)
+
+
+def f_bytes(field, b):
+    if isinstance(b, str):
+        b = b.encode()
+    return varint(field << 3 | 2) + varint(len(b)) + b
+
+
+def parse(buf):
+    """-> {field: [value, ...]}, values are ints (varint) or bytes (length-delimited)."""
+    out, i = {}, 0
+    while i < len(buf):
+        tag = 0
+        shift = 0
+        while True:
+            b = buf[i]
+            i += 1
+            tag |= (b & 0x7F) << shift
+            shift += 7
+            if not b & 0x80:
+                break
+        field, wt = tag >> 3, tag & 7
+        if wt == 0:
+            v = 0
+            shift = 0
+            while True:
+                b = buf[i]
+                i += 1
+                v |= (b & 0x7F) << shift
+                shift += 7
+                if not b & 0x80:
+                    break
+        elif wt == 2:
+            ln = 0
+            shift = 0
+            while True:
+                b = buf[i]
+                i += 1
+                ln |= (b & 0x7F) << shift
+                shift += 7
+                if not b & 0x80:
+                    break
+            v = buf[i:i + ln]
+            i += ln
+        elif wt == 5:
+            v = buf[i:i + 4]
+            i += 4
+        elif wt == 1:
+            v = buf[i:i + 8]
+            i += 8
+        else:
+            raise ValueError("bad wire type %d" % wt)
+        out.setdefault(field, []).append(v)
+    return out
+
+
+def recv_exact(sock, n):
+    buf = b""
+    while len(buf) < n:
+        chunk = sock.recv(n - len(buf))
+        if not chunk:
+            raise ConnectionError("closed")
+        buf += chunk
+    return buf
+
+
+def recv_msg(sock):
+    ln, shift = 0, 0
+    while True:
+        b = recv_exact(sock, 1)[0]
+        ln |= (b & 0x7F) << shift
+        shift += 7
+        if not b & 0x80:
+            break
+    return recv_exact(sock, ln)
+
+
+def send_msg(sock, payload):
+    sock.sendall(varint(len(payload)) + payload)
+
+
+# ── certificates ────────────────────────────────────────────────────────────────────────────────
+def ensure_cert():
+    os.makedirs(DATA, mode=0o700, exist_ok=True)
+    if os.path.exists(CERT) and os.path.exists(KEY):
+        return
+    subprocess.run(
+        ["openssl", "req", "-x509", "-newkey", "rsa:2048", "-nodes", "-keyout", KEY, "-out", CERT,
+         "-days", "7300", "-subj", "/CN=vitreus-tv-remote"],
+        check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    os.chmod(KEY, 0o600)
+    os.chmod(CERT, 0o600)
+
+
+def der_tlv(b, i):
+    tag = b[i]
+    ln = b[i + 1]
+    j = i + 2
+    if ln & 0x80:
+        nb = ln & 0x7F
+        ln = int.from_bytes(b[j:j + nb], "big")
+        j += nb
+    return tag, j, ln
+
+
+def rsa_numbers(der):
+    """(n, e) of the RSA key in a DER certificate: the first SEQUENCE{INTEGER, INTEGER} after rsaEncryption."""
+    oid = bytes.fromhex("06092a864886f70d0101010500")
+    k = der.find(oid)
+    if k < 0:
+        raise ValueError("no RSA key in certificate")
+    i = k + len(oid)
+    tag, j, ln = der_tlv(der, i)            # BIT STRING
+    j += 1                                    # unused-bits byte
+    tag, j, ln = der_tlv(der, j)            # SEQUENCE
+    tag, j, ln = der_tlv(der, j)            # INTEGER n
+    n = int.from_bytes(der[j:j + ln], "big")
+    j += ln
+    tag, j, ln = der_tlv(der, j)            # INTEGER e
+    e = int.from_bytes(der[j:j + ln], "big")
+    return n, e
+
+
+def hexbytes(i):
+    h = "%x" % i
+    if len(h) % 2:
+        h = "0" + h
+    return bytes.fromhex(h)
+
+
+def connect_tls(host, port, timeout=8):
+    ctx = ssl.SSLContext(ssl.PROTOCOL_TLS_CLIENT)
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    ctx.load_cert_chain(CERT, KEY)
+    raw = socket.create_connection((host, port), timeout=timeout)
+    return ctx.wrap_socket(raw, server_hostname=host)
+
+
+# ── pairing (port 6467) ─────────────────────────────────────────────────────────────────────────
+def pairing_envelope(field, body):
+    return f_int(1, 2) + f_int(2, 200) + f_bytes(field, body)
+
+
+class Pairing:
+    def __init__(self, host):
+        self.sock = connect_tls(host, 6467)
+        self.sock.settimeout(15)
+        send_msg(self.sock, pairing_envelope(10, f_bytes(1, "atvremote") + f_bytes(2, "Vitreus")))
+        recv_msg(self.sock)                                              # pairing_request_ack
+        enc = f_int(1, 3) + f_int(2, 6)                                  # hexadecimal, 6 symbols
+        send_msg(self.sock, pairing_envelope(20, f_bytes(1, enc) + f_int(3, 1)))
+        recv_msg(self.sock)                                              # the TV's options
+        send_msg(self.sock, pairing_envelope(30, f_bytes(1, enc) + f_int(2, 1)))
+        recv_msg(self.sock)                                              # configuration ack: the code is on the TV now
+
+    def finish(self, code):
+        code = code.strip().upper()
+        if len(code) != 6:
+            raise ValueError("the code has six characters")
+        raw = bytes.fromhex(code)
+        cn, ce = rsa_numbers(ssl.PEM_cert_to_DER_cert(open(CERT).read()))
+        sn, se = rsa_numbers(self.sock.getpeercert(True))
+        h = hashlib.sha256()
+        for part in (hexbytes(cn), hexbytes(ce), hexbytes(sn), hexbytes(se), raw[1:]):
+            h.update(part)
+        digest = h.digest()
+        if digest[0] != raw[0]:
+            raise ValueError("that code is not right")
+        send_msg(self.sock, pairing_envelope(40, f_bytes(1, digest)))
+        reply = parse(recv_msg(self.sock))
+        if 2 in reply and reply[2][0] != 200:
+            raise ValueError("the TV refused the code")
+
+    def close(self):
+        try:
+            self.sock.close()
+        except OSError:
+            pass
+
+
+# ── the remote (port 6466) ──────────────────────────────────────────────────────────────────────
+class Remote:
+    def __init__(self, host):
+        self.host = host
+        self.sock = None
+        self.lock = threading.Lock()
+        self.alive = False
+        self.stale = False                          # set when another TV was chosen: nothing more is reported from this one
+
+    def close(self):
+        self.stale = True
+        with self.lock:
+            if self.sock is not None:
+                try:
+                    self.sock.shutdown(socket.SHUT_RDWR)
+                except OSError:
+                    pass
+
+    def send(self, payload):
+        with self.lock:
+            if self.sock is None:
+                raise ConnectionError("not connected")
+            send_msg(self.sock, payload)
+
+    def key(self, code):
+        # RemoteKeyInject (field 10): key_code = 1, direction = 2 (3 = a short press)
+        self.send(f_bytes(10, f_int(1, code) + f_int(2, 3)))
+
+    def app(self, link):
+        self.send(f_bytes(90, f_bytes(1, link)))
+
+    def run(self):
+        """Connect and read until the connection ends; calls emit() for state."""
+        self.sock = connect_tls(self.host, 6466)
+        self.sock.settimeout(20)                    # the TV pings every few seconds: silence this long means it is gone
+        self.alive = True
+        state = {"model": "", "vendor": "", "on": False, "app": "", "vol": -1, "max": 100, "muted": False}
+        try:
+            while True:
+                m = parse(recv_msg(self.sock))
+                if self.stale:
+                    return
+                if 1 in m:                                              # configure: the TV says who it is
+                    cfg = parse(m[1][0])
+                    if 2 in cfg:
+                        di = parse(cfg[2][0])
+                        state["model"] = di.get(1, [b""])[0].decode(errors="replace")
+                        state["vendor"] = di.get(2, [b""])[0].decode(errors="replace")
+                    dev = (f_bytes(1, "Vitreus") + f_bytes(2, "Vitreus") + f_int(3, 1) + f_bytes(4, "1")
+                           + f_bytes(5, "vitreus.tvremote") + f_bytes(6, "1.0.0"))
+                    self.send(f_bytes(1, f_int(1, 622) + f_bytes(2, dev)))
+                elif 2 in m:                                            # set_active
+                    self.send(f_bytes(2, f_int(1, 622)))
+                elif 8 in m:                                            # ping
+                    val = parse(m[8][0]).get(1, [0])[0]
+                    self.send(f_bytes(9, f_int(1, val)))
+                elif 40 in m:                                           # start: on or off
+                    state["on"] = bool(parse(m[40][0]).get(1, [0])[0])
+                    emit(ev="state", stage="ready", **state)
+                elif 20 in m:                                           # ime key inject: the app in front
+                    info = parse(m[20][0])
+                    if 1 in info:
+                        app = parse(info[1][0]).get(12, [b""])[0].decode(errors="replace")
+                        state["app"] = app
+                        emit(ev="state", stage="ready", **state)
+                elif 50 in m:                                           # volume
+                    v = parse(m[50][0])
+                    state["max"] = v.get(6, [100])[0]
+                    state["vol"] = v.get(7, [-1])[0]
+                    state["muted"] = bool(v.get(8, [0])[0])
+                    emit(ev="state", stage="ready", **state)
+                elif 3 in m:                                            # error
+                    emit(ev="log", msg="the TV reported an error")
+        finally:
+            self.alive = False
+            with self.lock:
+                try:
+                    self.sock.close()
+                except OSError:
+                    pass
+                self.sock = None
+
+
+# ── finding TVs: mDNS, the service every Google TV / Android TV announces ───────────────────────
+def dns_name(buf, i):
+    """-> (name, index after it); follows compression pointers."""
+    labels, jumped, end = [], False, i
+    for _ in range(64):
+        ln = buf[i]
+        if ln == 0:
+            i += 1
+            break
+        if ln & 0xC0 == 0xC0:
+            ptr = ((ln & 0x3F) << 8) | buf[i + 1]
+            if not jumped:
+                end = i + 2
+            jumped = True
+            i = ptr
+            continue
+        labels.append(buf[i + 1:i + 1 + ln].decode(errors="replace"))
+        i += 1 + ln
+    if not jumped:
+        end = i
+    return ".".join(labels), end
+
+
+def scan(seconds=3.0):
+    """Ask the network for _androidtvremote2._tcp and return [{"host", "name"}] for what answers."""
+    q = b"".join(bytes([len(x)]) + x.encode() for x in ("_androidtvremote2", "_tcp", "local")) + b"\x00"
+    packet = bytes(12)[:4] + b"\x00\x01" + bytes(6) + q + b"\x00\x0c" + b"\x80\x01"     # PTR, class IN with the unicast-reply bit
+    found = {}
+    sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        sock.setsockopt(socket.IPPROTO_IP, socket.IP_MULTICAST_TTL, 255)
+        sock.bind(("", 0))
+        deadline = time.time() + seconds
+        next_ask = 0
+        while time.time() < deadline:
+            if time.time() >= next_ask:
+                sock.sendto(packet, ("224.0.0.251", 5353))
+                next_ask = time.time() + 1.0
+            sock.settimeout(0.25)
+            try:
+                data, (ip, _) = sock.recvfrom(9000)
+            except socket.timeout:
+                continue
+            except OSError:
+                break
+            try:
+                qd, an, ns, ar = (int.from_bytes(data[k:k + 2], "big") for k in (4, 6, 8, 10))
+                i = 12
+                for _ in range(qd):
+                    _, i = dns_name(data, i)
+                    i += 4
+                for _ in range(an + ns + ar):
+                    _, i = dns_name(data, i)
+                    rtype = int.from_bytes(data[i:i + 2], "big")
+                    ln = int.from_bytes(data[i + 8:i + 10], "big")
+                    rd = i + 10
+                    if rtype == 12:                                              # PTR: the instance's name
+                        inst, _ = dns_name(data, rd)
+                        if "_androidtvremote2" in inst:
+                            found[ip] = inst.split("._androidtvremote2")[0]
+                    i = rd + ln
+            except (IndexError, ValueError):
+                continue
+    finally:
+        sock.close()
+    return [{"host": h, "name": n} for h, n in sorted(found.items())]
+
+
+CHARS = {" ": 62, ".": 56, ",": 55, "-": 69, "/": 76, "@": 77, "'": 75, ";": 74, "=": 70}
+for i, c in enumerate("abcdefghijklmnopqrstuvwxyz"):
+    CHARS[c] = 29 + i
+for i, c in enumerate("0123456789"):
+    CHARS[c] = 7 + i
+
+
+def main():
+    remote = None
+    pairing = None
+    host = ""
+    want = {"on": False}
+
+    def start_remote(h):
+        nonlocal remote
+        if remote is not None and remote.alive and remote.host == h and not remote.stale:
+            return
+        if remote is not None:
+            remote.close()
+        remote = Remote(h)
+
+        def loop(r):
+            backoff = 2
+            while want["on"] and r is remote and not r.stale:
+                emit(ev="state", stage="connecting")
+                try:
+                    r.run()
+                except ssl.SSLError as e:
+                    # a TV that does not know our certificate closes the handshake
+                    if r is remote and not r.stale:
+                        emit(ev="state", stage="needs_pairing", msg=str(e))
+                    return
+                except (OSError, ConnectionError, ValueError) as e:
+                    if r is remote and not r.stale:
+                        emit(ev="state", stage="error", msg=str(e))
+                if not want["on"] or r is not remote or r.stale:
+                    return
+                time.sleep(backoff)
+                backoff = min(backoff * 2, 20)
+        threading.Thread(target=loop, args=(remote,), daemon=True).start()
+
+    ensure_cert()
+    emit(ev="hello")
+    for line in sys.stdin:
+        try:
+            c = json.loads(line)
+        except ValueError:
+            continue
+        cmd = c.get("cmd")
+        try:
+            if cmd == "connect":
+                host = c.get("host", host)
+                if remote is not None and remote.host != host:
+                    remote.close()
+                if not is_paired(host):
+                    want["on"] = False
+                    emit(ev="state", stage="needs_pairing")
+                    continue
+                want["on"] = True
+                start_remote(host)
+            elif cmd == "reconnect":
+                host = c.get("host", host)
+                if remote is not None:
+                    remote.close()
+                if is_paired(host):
+                    want["on"] = True
+                    start_remote(host)
+                else:
+                    emit(ev="state", stage="needs_pairing")
+            elif cmd == "scan":
+                emit(ev="found", tvs=scan())
+            elif cmd == "unpair":
+                try:
+                    os.remove(paired_file(c.get("host", "")))
+                except OSError:
+                    pass
+            elif cmd == "pair":
+                host = c.get("host", host)
+                want["on"] = False
+                if remote is not None:
+                    remote.close()
+                if pairing:
+                    pairing.close()
+                pairing = Pairing(host)
+                emit(ev="state", stage="pair_wait_code")
+            elif cmd == "code":
+                if pairing is None:
+                    emit(ev="state", stage="pairing_failed", msg="start pairing first")
+                    continue
+                try:
+                    pairing.finish(c.get("code", ""))
+                except ValueError as e:
+                    emit(ev="state", stage="pair_wait_code", msg=str(e))
+                    continue
+                pairing.close()
+                pairing = None
+                open(paired_file(host), "w").close()
+                emit(ev="state", stage="paired")
+                want["on"] = True
+                time.sleep(0.8)
+                start_remote(host)
+            elif cmd == "key":
+                if remote and remote.alive:
+                    k = c.get("key", "")
+                    remote.key(KEYS[k] if k in KEYS else int(k))
+            elif cmd == "text":
+                if remote and remote.alive:
+                    for ch in c.get("text", "").lower():
+                        if ch in CHARS:
+                            remote.key(CHARS[ch])
+                            time.sleep(0.03)
+            elif cmd == "app":
+                if remote and remote.alive:
+                    remote.app(c.get("link", ""))
+            elif cmd == "stop":
+                want["on"] = False
+                break
+        except (ConnectionError, OSError, ssl.SSLError) as e:
+            if cmd == "pair":
+                emit(ev="state", stage="pairing_failed", msg=str(e))
+                pairing = None
+            else:
+                emit(ev="log", msg="%s: %s" % (cmd, e))
+
+
+if __name__ == "__main__":
+    main()

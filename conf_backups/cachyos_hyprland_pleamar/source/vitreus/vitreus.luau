@@ -12,10 +12,11 @@ end)
 
 -- Workspaces only: what moves is moved by the renderer.
 ws_urgent = {}
+addon_scenes = {}                          -- the sockets of the running add-ons (logic/addons.luau), told the palette, the bar's room, the look and the weather
 sys.watch("workspaces", function(w)
     local busy = {}
     for _, d in ipairs(w.list) do busy[d.id] = d.windows > 0 end
-    for i = 1, 5 do fact["ws." .. i .. ".busy"] = busy[i] or false end
+    for i = 1, 10 do fact["ws." .. i .. ".busy"] = busy[i] or false end
     fact["ws.active"] = w.active
     -- No window on the workspace in view (one that is not in the list at all is empty too): see `ws_empty` in the scene.
     local here = false
@@ -33,7 +34,16 @@ run("printenv", { "HYPRLAND_INSTANCE_SIGNATURE" }, function(out, code)
     -- The Settings show the Hyprland page on Hyprland and the Pleamar-WM one anywhere else (as the rest of this file takes it: no Hyprland means pleamar-wm).
     fact.wm_hypr = on_hyprland
     fact.wm_pwm = not on_hyprland
+    -- niri: its environment says so (NIRI_SOCKET). Neither the Hyprland page nor the Pleamar-WM one is in the Settings there, and the windows and workspaces are asked of
+    -- `hyprctl`, which is pleamar-wm/hyprctl-niri's answer in Hyprland's words (see below).
+    if not on_hyprland then
+        run("printenv", { "NIRI_SOCKET" }, function(o, c)
+            on_niri = c == 0 and (o or "") ~= ""
+            if on_niri then fact.wm_pwm = false; fact.wm_niri = true end
+        end)
+    end
 end)
+on_niri = false
 -- Asking one of our other scenes (the lock screen, the desktop clock and system monitor) for several of its values at once. `pleamar --say`
 -- answers one question per command, and starting a command from this shell costs about 30 ms, so a settings page that asked ten questions froze
 -- the shell for a third of a second each time it opened. A scene listens on a socket and answers one line per line it is sent, in order: one
@@ -109,7 +119,7 @@ end
 -- it over its socket: which one is shown, and which one each window is on.
 function wm_get(name, done) run("pleamar", { "--say", "wm", "get " .. name }, function(out) done(tonumber((out or ""):match("%-?[%d.]+")) or ((out or ""):match("true") and 1) or ((out or ""):match("false") and 0) or nil) end) end
 desk_seen = nil                          -- the last count of right presses on the bare desktop that was looked at
-bar_mon = { name = nil }                 -- the monitor the bar is on ("all" for every one), set by logic/bar_monitors.luau
+bar_mon = { name = nil, set = nil }      -- the monitor the bar is on ("all" for two), and the set of the names of the ones it is on; set by logic/bar_monitors.luau
 function wm_workspaces()
     -- One connection for every question (`say_many`): a `pleamar --say` process for each one, ten times a second, was what made the shell stutter.
     -- The workspace shown is per monitor: the bar's own, which is the one named in its `screens:` (the order of pleamar-wm's monitors is
@@ -138,7 +148,7 @@ function wm_workspaces()
                     if w then busy[w] = true end
                 end
             end
-            for k = 1, 5 do
+            for k = 1, 10 do
                 local v = busy[k] or false
                 if fact["ws." .. k .. ".busy"] ~= v then fact["ws." .. k .. ".busy"] = v end
             end
@@ -147,8 +157,13 @@ function wm_workspaces()
                 -- (the window manager's facts start from 0 again when its scene is read in again: that is not a press)
                 if desk_seen ~= nil and dn > 0 and dn ~= desk_seen then
                     local x, y, m = tonumber((r[19] or ""):match("%-?[%d.]+")) or 0, tonumber((r[20] or ""):match("%-?[%d.]+")) or 0, tonumber((r[21] or ""):match("%-?[%d.]+")) or 0
-                    run("pleamar", { "--say", "desktopmenu", "fact mx " .. math.floor(x), "fact my " .. math.floor(y), "fact mmon " .. math.floor(m), "fact open true" }, function(_, code)
-                        if code ~= 0 then exec_on_desktop('vitreus-keep "$HOME/.config/pleamar/shells/vitreus/desktopmenu/desktopmenu.plm"') end
+                    -- (the desktop editor, desktopedit/, is what a right press opens; it is started if it is not running)
+                    local function say_editor(cb) run("pleamar", { "--say", "desktopedit", "fact emon " .. math.floor(m), "fact open true" }, cb) end
+                    say_editor(function(_, code)
+                        if code ~= 0 then
+                            exec_on_desktop('vitreus-keep "$HOME/.config/pleamar/shells/vitreus/desktopedit/desktopedit.plm"')
+                            after(3000, function() say_editor(function() end) end)
+                        end
                     end)
                 end
                 desk_seen = dn
@@ -156,11 +171,37 @@ function wm_workspaces()
         end)
     end)
 end
+-- niri: its workspaces (one list on each monitor, numbered from 1) are asked of `hyprctl workspaces -j`, which pleamar-wm/hyprctl-niri answers from `niri msg`. The
+-- one on the bar's monitor (or the focused one when the bar is on all of them) is the one shown; a workspace is busy when a window is on it.
+function niri_workspaces()
+    run("hyprctl", { "workspaces", "-j" }, function(out, code)
+        if code ~= 0 or not out then return end
+        local ok, list = pcall(json.decode, out)
+        if not ok or type(list) ~= "table" then return end
+        local want = bar_mon.name
+        local mine = false
+        if want ~= nil and want ~= "all" then for _, w in ipairs(list) do if w.monitor == want then mine = true end end end      -- (a name that is not plugged in: the focused monitor's)
+        local active, busy = nil, {}
+        for _, w in ipairs(list) do
+            if (not mine or w.monitor == want) and (w.windows or 0) > 0 then busy[w.id] = true end
+            if w.active and ((mine and w.monitor == want) or (not mine and w.focused)) then active = w.id end
+        end
+        if active and fact["ws.active"] ~= active then fact["ws.active"] = active end
+        for k = 1, 10 do
+            local v = busy[k] or false
+            if fact["ws." .. k .. ".busy"] ~= v then fact["ws." .. k .. ".busy"] = v end
+        end
+        local empty = not (active and busy[active])
+        if fact.ws_empty ~= empty then fact.ws_empty = empty end
+    end)
+end
 after(1500, function()
-    if not on_hyprland then every(500, wm_workspaces) end
+    if on_niri then every(1000, niri_workspaces)
+    elseif not on_hyprland then every(500, wm_workspaces) end
 end)
 function goto_workspace(i)
     if on_hyprland then sys.call("workspaces.focus", i)
+    elseif on_niri then run("hyprctl", { "dispatch", "hl.dsp.focus({ workspace = " .. tonumber(i) .. " })" }, function() niri_workspaces() end)
     else run("pleamar", { "--say", "wm", "emit workspace " .. tonumber(i) }, function() wm_workspaces() end) end
 end
 on("go", goto_workspace)
@@ -226,6 +267,7 @@ local cava = nil
 local last = 0
 local spec_last = {}
 local watching = false      -- the player's panel is open: when the equalizer is worth feeding (or while its card floats, `eq_float`)
+function fw_on() return fact.fw_on == true or fact.fw_on == 1 end    -- the bottom frame rises into waves with the music (`fw_on`: Frame layout)
 function eq_float() return fact.mf_out == true or fact.mf_out == 1 or fact.dash_open == true end    -- the media card is floating on the desktop (a global: this chunk is at Luau's limit of locals)
 
 -- cava wants its config as a file. It is kept here rather than in a file next to the scene, so
@@ -235,8 +277,9 @@ function eq_float() return fact.mf_out == true or fact.mf_out == 1 or fact.dash_
 -- `os.getenv`, so the environment is asked of the system once. A player that starts before the
 -- answer arrives waits for it.
 local CAVA_CONF = table.concat({
-    "[general]", "bars = 24", "framerate = 30",
+    "[general]", "bars = 24", "framerate = 60",
     "[input]", "method = pipewire",
+    "[smoothing]", "noise_reduction = 25",     -- cava's own smoothing, low: the springs of `spec.s.*` (vitreus.plm) smooth what is drawn, and the bass keeps its spikes
     "[output]", "method = raw", "raw_target = /dev/stdout", "data_format = ascii",
     "ascii_max_range = 1000", "bar_delimiter = 59", "frame_delimiter = 10",
 }, "\n") .. "\n"
@@ -272,7 +315,7 @@ listen = function()
         if #b < 2 then return end
         local bass = math.min(1, (b[1] + b[2] + (b[3] or 0)) / 3)
         -- the equalizer in the media card: only worth sending while that panel is showing
-        if watching or eq_float() then
+        if watching or eq_float() or fw_on() then
             for i = 1, 24 do
                 local v = math.min(1, b[i] or 0)
                 if math.abs(v - (spec_last[i] or 0)) > 0.02 then
@@ -306,7 +349,7 @@ end
 -- monitor's rate for as long as music played. (Globals: this chunk is at Luau's limit of locals.)
 cava_playing = false
 function cava_want()
-    if cava_playing and (fact.bar_anchor == "top" or fact.bar_anchor == "bottom" or watching or eq_float()) then listen() else hush() end
+    if cava_playing and (fact.bar_anchor == "top" or fact.bar_anchor == "bottom" or watching or eq_float() or fw_on()) then listen() else hush() end
 end
 
 -- The cover. Every player publishes it the same way (MPRIS `mpris:artUrl`), and
@@ -468,13 +511,28 @@ on("mcmd", function(k)
 end)
 
 -- The volume slider: the scene turns the pointer into 0..1, the mixer takes it.
-on("setvol", function(v)
-    sys.call("audio.volume", v)
-end)
-
-on("setbright", function(v)
-    sys.call("brightness.level", v)
-end)
+-- A drag sends a value for every step of the pointer; each used to start its own call, and they queued up behind each other (the slider answered up to a second late). Now only
+-- the latest value waits its turn: one call at most every 40 ms, and the last one always goes.
+local function coalesced(service)
+    local pending, busy = nil, false
+    local function pump()
+        if pending ~= nil then
+            local v = pending
+            pending = nil
+            sys.call(service, v)
+            after(40, pump)
+        else
+            busy = false
+        end
+    end
+    return function(v)
+        pending = v
+        if not busy then busy = true; pump() end
+    end
+end
+on("setvol", coalesced("audio.volume"))
+on("setbright", coalesced("brightness.level"))
+on("setmic", coalesced("audio.input"))
 
 -- An event's payload crosses over as a plain number (1/0), not a Luau
 -- boolean, even for something written `not net.wifi` in the scene - and
@@ -794,6 +852,8 @@ on("face_set", function(i)
         FACE.ver = (FACE.ver or 0) + 1
         text.sm_avatar = face .. "?" .. FACE.ver
         fact.sm_has_avatar = true
+        -- the login screen shows the same picture: it reads it from a folder install.sh made for it (nothing happens if there is none)
+        run("cp", { "-f", face, "/usr/local/share/vitreus-greeter/avatar.png" }, function() end)
     end)
 end)
 
@@ -856,9 +916,10 @@ local function caf_refresh()
 end
 
 local function caf_poll(after_poll)
-    run("pgrep", { "-x", "hypridle" }, function(_, code)
-        caf_on = code ~= 0
-        -- hypridle is back on its own (or was never stopped): whatever timer was running has no meaning
+    -- Awake is the idle inhibitor (vitreus-inhibit) running: it is what keeps pleamar-wm's screens on, and what the tile shows.
+    run("pgrep", { "-x", "vitreus-inhibit" }, function(_, code)
+        caf_on = code == 0
+        -- the helper is gone on its own (or was never started): whatever timer was running has no meaning
         if not caf_on and caf_until > 0 and not caf_busy then
             caf_until, caf_len = 0, 0
             caf_save()
@@ -868,23 +929,30 @@ local function caf_poll(after_poll)
     end)
 end
 
--- Keep the machine awake (stop hypridle), or let it sleep again (start it), then read what happened.
+-- Keep the machine awake (the inhibitor runs, and hypridle, where there is one, is stopped), or let it sleep again (the
+-- inhibitor ends and hypridle is started), then read what happened.
 local function caf_set(awake)
     if trial_policy then return end
     caf_busy = true
     local done = function() caf_poll(function() caf_busy = false end) end
     if awake then
         run("pkill", { "-x", "hypridle" }, function()
-            run("systemctl", { "--user", "stop", "hypridle.service" }, done)
+            run("systemctl", { "--user", "stop", "hypridle.service" }, function()
+                -- the helper is looked for first: a second press must not start a second one
+                run("pgrep", { "-x", "vitreus-inhibit" }, function(_, found)
+                    if found ~= 0 then run("setsid", { "-f", "vitreus-inhibit" }, function() after(400, done) end) else done() end
+                end)
+            end)
         end)
     else
-        -- systemctl returns before the daemon is there to be found: looked for at once, it was not, and Awake stayed lit until a
-        -- second press. A moment's wait first.
-        run("systemctl", { "--user", "start", "hypridle.service" }, function() after(400, done) end)
+        run("pkill", { "-x", "vitreus-inhibit" }, function()
+            -- systemctl returns before the daemon is there to be found: a moment's wait before reading.
+            run("systemctl", { "--user", "start", "hypridle.service" }, function() after(400, done) end)
+        end)
     end
 end
 
-run("which", { "hypridle" }, function(_, code)
+run("which", { "vitreus-inhibit" }, function(_, code)
     caf_avail = code == 0
     fact.caf_avail = caf_avail
     if code == 0 then
@@ -904,7 +972,7 @@ run("which", { "hypridle" }, function(_, code)
                 end
             end
         end)
-        -- Whether hypridle is running: every five seconds while the Controls panel (where the Caffeine tile is) is open, every thirty otherwise.
+        -- Whether the inhibitor is running: every five seconds while the Controls panel (where the Caffeine tile is) is open, every thirty otherwise.
         caf_ticks = 0
         every(5000, function()
             caf_ticks = caf_ticks + 1
@@ -1900,10 +1968,14 @@ end
 -- icon is the icon of the app whose `.desktop` file that window's class belongs to (by id,
 -- StartupWMClass or name), else the class as an icon name.
 local apps_by_class = {}
+local known_icons = nil
+local parse_clients, cut_utf8, focus_window
+-- Keep window tracking internals scoped: the merged shell otherwise exceeds Luau's 200-local limit.
+do
 local task_addrs = {}
 local last_task_sig = nil
 
-local function parse_clients(out)
+parse_clients = function(out)
     local list, cur = {}, nil
     for line in out:gmatch("[^\n]+") do
         local addr = line:match("^Window (%x+) %->")
@@ -1973,7 +2045,7 @@ function refresh_tasks_wm()
 end
 
 local function refresh_tasks()
-    if not on_hyprland then return refresh_tasks_wm() end
+    if not on_hyprland and not on_niri then return refresh_tasks_wm() end
     run("hyprctl", { "clients" }, function(out, code)
         if code ~= 0 then return end
         local list = {}
@@ -2028,10 +2100,8 @@ local function tasks_changed()
     end)
 end
 
---  The bar shows at most 30 characters of the focused window's title; the scene uses
---  this text while the full title stays in the window service for measuring and tasks.
---  Count code points, not bytes: cutting a UTF-8 sequence makes the scene reject the text.
-local function cut_utf8(s, limit)
+--  UTF-8-safe truncation is also used by the launcher's response previews.
+cut_utf8 = function(s, limit)
     local len = utf8.len(s)
     if not len then return "" end
     if len <= limit then return s end
@@ -2039,15 +2109,14 @@ local function cut_utf8(s, limit)
     return stop and s:sub(1, stop - 1) or ""
 end
 
-sys.watch("window", function(w)
-    local title = ((w and w.title) or ""):gsub("%s+$", "")
-    text.win_title30 = cut_utf8(title, 30)
-end)
+bar_title = require("logic/bar_title")()
 
 --  Which events change the strip: windows opening, closing, changing title or workspace, moving
 --  between workspaces, and the keyboard changing hands.
 local function watch_tasks(line)
     local ev = line:match("^(%w+)>>")
+    -- Addresses distinguish focused windows even when their class/title are identical.
+    if ev == "activewindowv2" then bar_title.focus(line:match(">>(.*)$") or "") end
     if ev == "openwindow" or ev == "closewindow" or ev == "activewindow"
         or ev == "windowtitle" or ev == "movewindow" or ev == "workspace" then
         tasks_changed()
@@ -2062,7 +2131,7 @@ function window_urgent(addr)
         for _, w in ipairs(parse_clients(out)) do
             if w.addr == addr then
                 local n = tonumber((w.workspace or ""):match("^(-?%d+)"))
-                if n and n >= 1 and n <= 5 and n ~= tonumber(fact["ws.active"]) then
+                if n and n >= 1 and n <= 10 and n ~= tonumber(fact["ws.active"]) then
                     ws_urgent[n] = true
                     fact["ws." .. n .. ".urgent"] = true
                 end
@@ -2070,6 +2139,12 @@ function window_urgent(addr)
             end
         end
     end)
+end
+-- Which mark a special workspace gets on the bar: 1 for `special:music`, 2 for `special:private`, 0 for the rest (the sparkle).
+local function special_kind(name)
+    local n = name:gsub("^special:", "")
+    if n == "music" then return 1 elseif n == "private" then return 2 end
+    return 0
 end
 local sc_active, sc_gen = 0, 0                       -- screencasts running now, and a counter that tells a later event from the one a timer was set for
 function watch_urgent()
@@ -2081,7 +2156,10 @@ function watch_urgent()
                 watch_tasks(line)
                 -- A special workspace (the scratchpads) shown or put away: `activespecial>>special:magic,<name>`, with no name when it is put away.
                 local spn = line:match("^activespecial>>([^,]*),")
-                if spn then fact["ws.special"] = spn ~= "" end
+                if spn then
+                    fact["ws.special"] = spn ~= ""
+                    fact["ws.spk"] = special_kind(spn)
+                end
                 local addr = line:match("^urgent>>(%x+)")
                 if addr then window_urgent(addr) end
                 -- the screen being shared or recorded through the portal (logic/privacy.luau has the rest of the privacy lights)
@@ -2135,7 +2213,10 @@ after(2000, function()
     watch_urgent()
     refresh_tasks()
     -- One may already be in view when the shell starts.
-    hypr_monitors(0, function(out) if out and out:match('"specialWorkspace":%s*{[^}]*"name":%s*"special:') then fact["ws.special"] = true end end)
+    hypr_monitors(0, function(out)
+        local sn = out and out:match('"specialWorkspace":%s*{[^}]*"name":%s*"(special:[^"]*)"')
+        if sn then fact["ws.special"] = true; fact["ws.spk"] = special_kind(sn) end
+    end)
 end)
 
 sys.watch("apps", function(list)
@@ -2149,7 +2230,6 @@ end)
 --  The icon theme's own names, once, so a notification whose `icon` is not in
 --  the theme falls back to the bell instead of leaving a blank tile. If the
 --  helper is unavailable, `known_icons` stays nil and names are trusted as before.
-local known_icons = nil
 run("vitreus-icon-names", {}, function(out, code)
     if code ~= 0 then return end
     local set = {}
@@ -2164,12 +2244,13 @@ on("fact:tasks_watch", function(v)
     cava_want()
 end)
 on("fact:bar_anchor", function() cava_want() end)
+on("fact:fw_on", function() cava_want() end)
 on("fact:dash_open", function() cava_want() end)
 every(1000, function() if watching then refresh_tasks() end end)
 -- This Hyprland takes its dispatchers in Lua. `close` has no way to name a window that is not the
 -- focused one (a selector it does not understand is ignored, and the focused window closes), so a
 -- row's close button first focuses that window, checks it really has the focus, and only then closes.
-local function focus_window(addr, then_fn)
+focus_window = function(addr, then_fn)
     run("hyprctl", { "dispatch", 'hl.dsp.focus({ window = "address:0x' .. addr .. '" })' }, then_fn or function() end)
 end
 function wm_say(line, fn) run("pleamar", { "--say", "wm", line }, fn or function() end) end
@@ -2195,6 +2276,7 @@ on("task_close", function(i)
     end)
 end)
 
+end
 -- ── The volume and notification drawer ───────────────────────────────────────────────────
 -- Two transient panels share one drawer under the bar. Neither may take a panel the user opened:
 -- the volume shows only when nothing is open, and a notification waits its turn (in a queue) until
@@ -2793,7 +2875,9 @@ function iris_fx.push_pal(pal)
         facts[#facts + 1] = string.format("fact pal_%s_b %.4f", k, b)
     end
     -- (the desktop editor, desktopedit/, reads them the same way)
-    for _, scene in ipairs({ "desktopclock", "desktopedit", "desktopcards" }) do
+    local scenes = { "desktopclock", "desktopedit", "desktopcards" }
+    for _, sk in ipairs(addon_scenes or {}) do scenes[#scenes + 1] = sk end
+    for _, scene in ipairs(scenes) do
         local args = { "--say", scene }
         for _, f in ipairs(facts) do args[#args + 1] = f end
         palette_push(scene, args)
@@ -2804,17 +2888,21 @@ end
 -- along the top), told to the desktop scenes so that the grid their widgets sit on starts inside it and nothing can be put under the bar.
 iris_fx.rooms = {
     left = { 24, 24, 24, 76 }, right = { 24, 76, 24, 24 }, top = { 76, 24, 24, 24 }, bottom = { 24, 24, 76, 24 },   -- top, right, bottom, left
+    seg = { 59, 24, 24, 24 },                                                                                         -- the top frame in pieces: thin, with room at the top for the pieces only
 }
 function iris_fx.push_room()
     local r = { 0, 0, 0, 0 }
-    if fact.bar_frame == true then r = iris_fx.rooms[fact.bar_anchor] or r
+    if fact.bar_frame == true then r = iris_fx.rooms[(fact.bar_seg == true) and "seg" or fact.bar_anchor] or r
     elseif fact.bar_anchor == "top" then r = { 56, 0, 0, 0 } end
-    for _, scene in ipairs({ "desktopclock", "desktopsysmon", "desktopcards", "desktopedit" }) do
+    local scenes = { "desktopclock", "desktopsysmon", "desktopcards", "desktopedit" }
+    for _, sk in ipairs(addon_scenes or {}) do scenes[#scenes + 1] = sk end
+    for _, scene in ipairs(scenes) do
         run("pleamar", { "--say", scene, "fact room_t " .. r[1], "fact room_r " .. r[2], "fact room_b " .. r[3], "fact room_l " .. r[4] }, function() end)
     end
 end
 on("fact:bar_anchor", function() iris_fx.push_room() end)
 on("fact:bar_frame", function() iris_fx.push_room() end)
+on("fact:bar_seg", function() iris_fx.push_room() end)
 
 on("pal_push", function() iris_fx.push_pal(); iris_fx.push_room() end)
 
@@ -2874,7 +2962,42 @@ end
 -- What Hyprland is told: the window borders from the palette, and, with the bar down the left (bar_fx.left), the room the strip and the frame
 -- take round the windows (gaps_out: the layer's own reserved zone is not moved when the surface changes edge). It is sent at once and kept in
 -- vitreus_colors.lua, which hyprland.lua loads last (the installer adds the line). Up on the top, the gaps go back to what they were (bar_fx.orig, read once).
-bar_fx = { left = false, edge = "top", orig = nil, on = "all", mons = {} }   -- `left`: a strip and a frame are in use, on `edge` (left, right, top or bottom)
+-- Which docks are out (set by logic/dock.luau and logic/addons.luau): the windows keep clear of them (`wm_frame_sync`).
+dock_fx = { c = false, a = false, nc = 0, na = 0, enabled = true }     -- `enabled`: Settings > Bar > "Corner docks overlap windows" (off)
+-- The corner dock and the add-on pill stand over the windows' area, against the edge opposite the bar (the bottom for the Island and the top frame, the top for the
+-- bottom frame; down a side strip it is the far edge, the right one for the strip on the left and the left one for the strip on the right, where each pill stands upright in the top
+-- or the bottom corner and reaches in as far as it is thick). While one is out, that edge keeps the room for it: how far from the screen's edge the windows start, in pixels:
+-- the frame's 8 * u, the pill (`cdk.t`, 34 * bu high, or `cdk.L`, 30 * bu for each icon and 8 * bu, wide; bu being 1.35 at the bar's size) and a few pixels.
+-- `nc`, `na`: how many icons the dock and the add-on pill hold while they are out (0 when not). `room()` is `{ top = n, right = n, bottom = n, left = n }` for the edges that need it.
+function dock_fx.room()
+    local r = {}
+    local c, a = dock_fx.c, dock_fx.a
+    if not dock_fx.enabled or not (c or a) then return r end
+    local anchor = fact.bar_anchor
+    local bu = 1.35 * (bar_fx and bar_fx.size or 1)
+    if anchor == "left" or anchor == "right" then
+        r[anchor == "left" and "right" or "left"] = math.floor(1.35 * 8 + 34 * bu + 13 + 0.5)       -- (the pills stand upright down a side strip: as thick as along the top)
+    else
+        r[anchor == "bottom" and "top" or "bottom"] = math.floor(1.35 * 8 + 34 * bu + 13 + 0.5)
+    end
+    return r
+end
+-- Raises the gaps `g` ({ top, right, bottom, left }) where a dock needs the room. Not for the gaps as they were (`left == false`), and not for what is written to Hyprland's file.
+function dock_fx.raise(g)
+    local r = dock_fx.room()
+    local out = { g[1], g[2], g[3], g[4] }
+    if r.top then out[1] = math.max(out[1], r.top) end
+    if r.right then out[2] = math.max(out[2], r.right) end
+    if r.bottom then out[3] = math.max(out[3], r.bottom) end
+    if r.left then out[4] = math.max(out[4], r.left) end
+    return out
+end
+function dock_fx.on() local r = dock_fx.room(); return r.top ~= nil or r.right ~= nil or r.bottom ~= nil or r.left ~= nil end
+function dock_fx.changed()
+    if iris_fx and iris_fx.apply_hypr then iris_fx.apply_hypr() end
+    if wm_frame_sync then wm_frame_sync() end
+end
+bar_fx = { left = false, edge = "top", orig = nil, on = "all", mons = {}, thin = false, size = 1 }   -- `left`: a strip and a frame are in use, on `edge` (left, right, top or bottom)
 bar_fx.restart = [[
 P="$1"; L="$2"
 export PATH="$HOME/.local/bin:$PATH"
@@ -2893,13 +3016,18 @@ exec pleamar --scene "$P" --no-hud >>"$L" 2>&1
 -- and `bar_fx.on` where the bar is ("all", or a monitor's name); the Bar page below keeps both. A rule for each monitor (`m[NAME]`) says what its
 -- own gaps are, and the global gaps are what a monitor without a rule gets, so a monitor plugged in later does not borrow the bar's room.
 -- `left` says where the bar is for this code (false: the gaps as they were before us); left out, it is where the bar is now.
-function iris_fx.gaps_code(left)
-    if left == nil then left = bar_fx.left end
+function iris_fx.island_min() return (bar_fx.size or 1) < 0.995 and not bar_fx.left and bar_fx.edge == "top" end   -- the Island below 100 %: no reserved strip (a reserve is a plain number)
+function iris_fx.island_room() return math.floor(8 + 1.35 * 40 * (bar_fx.size or 1) + 0.5) end                  -- what it keeps above the windows instead: 8 and the bar (62 at 100 %): the window gap does the rest
+function iris_fx.gaps_code(left, nodock)
+    local isl = left == nil and iris_fx.island_min()     -- (asked for the gaps as they were: `left` false, then none of this)
+    local docked = left == nil and not nodock and dock_fx.on()      -- (`left` false asks for the gaps as they were, and `nodock` for what Hyprland keeps in its file: with no docks)
+    if left == nil then left = bar_fx.left or isl end
     local o = bar_fx.orig
     -- Wait for the one read in logic/bar_position: applying the room before it lands would make that room the next run's "original".
     if not o then return nil end
     local px = math.floor(1.35 * 8 + 0.5) + 13            -- the frame's thickness (8 * u) and a gap
-    local lp = math.floor(1.35 * 46 + 0.5) + 14
+    local bz = bar_fx.size or 1                           -- Settings > Bar > Size: the bar's size, 0.7 to 1 (`bz` in vitreus.plm)
+    local lp = math.floor(1.35 * 46 * bz + 0.5) + 14
     local function cfg(g)
         return string.format("hl.config({ general = { gaps_out = { top = %d, right = %d, bottom = %d, left = %d } } })", g[1], g[2], g[3], g[4])
     end
@@ -2908,26 +3036,170 @@ function iris_fx.gaps_code(left)
     end
     local WIDE = { top = { lp, px, px, px }, right = { px, lp, px, px }, bottom = { px, px, lp, px }, left = { px, px, px, lp } }   -- top, right, bottom, left: the wide one is the strip's
     local bar_gaps = WIDE[bar_fx.edge] or WIDE.left
-    local everywhere = (bar_fx.on or "all") == "all"
-    local parts = { cfg((left and everywhere) and bar_gaps or o) }
+    if bar_fx.seg then bar_gaps = { math.floor(1.35 * 36 * bz + 0.5) + 10, px, px, px } end       -- the top frame in pieces: thin, but the windows start below the pieces (36 * u) and a gap
+    if isl then bar_gaps = { o[1] + iris_fx.island_room(), o[2], o[3], o[4] } end
+    local everywhere = (bar_fx.on or "all") == "all"      -- the bar is on every monitor there is
+    local base = (left and everywhere) and bar_gaps or o
+    if docked and everywhere then base = dock_fx.raise(base) end
+    local parts = { cfg(base) }
     for _, name in ipairs(bar_fx.mons or {}) do
         if name:match("^[%w%._%-]+$") then
-            local has_bar = left and (everywhere or bar_fx.on == name)
-            parts[#parts + 1] = rule(name, has_bar and bar_gaps or o)
+            local has_bar = left and (everywhere or (bar_fx.sel ~= nil and bar_fx.sel[name] == true))
+            -- a monitor with only the frame (Settings > Bar, "Frame on the other monitors"; logic/bar_monitors.luau) gets the frame's room on every side
+            local g = has_bar and bar_gaps or ((left and bar_fx.thin and not isl) and { px, px, px, px } or o)
+            -- the docks are on the monitors the bar is on, framed or not
+            if docked and (everywhere or (bar_fx.sel ~= nil and bar_fx.sel[name] == true)) then g = dock_fx.raise(g) end
+            parts[#parts + 1] = rule(name, g)
         end
     end
     return table.concat(parts, " ")
 end
+-- niri: the same room round the windows, as `struts` in a KDL file of its own (niri reloads its config when a file it includes changes), and the palette's accent as
+-- the focus ring. The user's config.kdl has `include "vitreus.kdl"` at the end (the installer adds it). A strut is what the windows keep clear of on top of niri's own
+-- `gaps` (read from the config; 16 is niri's default), so it is the room Hyprland would be given, less that gap. Each monitor the bar is on gets its own `output` block.
+-- Settings > niri (below): what the page has changed, kept in niri-set.json. A key that is nil is niri's own (config.kdl's), so nothing is written for it.
+niri_set = { gaps = nil, round = nil, border = nil, sens = nil, follow = nil, nat = nil, anim = nil, center = nil, colw = nil, single = nil }
+-- It is read when first needed, not when this file is loaded: at that moment the data folder is not there to read yet, and vitreus.kdl was written without the page's values.
+niri_set_loaded = false
+function iris_fx.niri_load()
+    if niri_set_loaded then return end
+    local ok, saved = pcall(sys.ask, "files.read", "niri-set.json", "json")
+    if ok and type(saved) == "table" then
+        niri_set_loaded = true
+        for _, k in ipairs({ "gaps", "round", "border", "sens", "follow", "nat", "anim", "center", "colw", "single" }) do      -- (a table of nil keys has none to walk with pairs)
+            if saved[k] ~= nil then niri_set[k] = saved[k] end
+        end
+    end
+end
+function iris_fx.niri_set_code()
+    iris_fx.niri_load()
+    local n = niri_set
+    local lay, rule, inp, extra = {}, {}, {}, {}
+    if n.gaps then lay[#lay + 1] = string.format("gaps %d", n.gaps) end
+    if n.center ~= nil then lay[#lay + 1] = string.format('center-focused-column "%s"', ({ [0] = "never", "always", "on-overflow" })[n.center] or "never") end
+    -- (a flag can be turned on here, not off again: a config.kdl that has it keeps it)
+    if n.single then lay[#lay + 1] = "always-center-single-column" end
+    if n.colw ~= nil then lay[#lay + 1] = string.format("default-column-width { proportion %s; }", ({ [0] = "0.33333", "0.5", "0.66667", "1.0" })[n.colw] or "0.5") end
+    if n.round then rule[#rule + 1] = string.format("geometry-corner-radius %d\n    clip-to-geometry true", n.round) end
+    if n.anim == false then extra[#extra + 1] = "animations {\n    off\n}" end
+    if n.follow and n.follow > 0 then inp[#inp + 1] = "focus-follows-mouse" end
+    local dev = {}
+    if n.nat then dev[#dev + 1] = "natural-scroll" end
+    if n.sens and n.sens ~= 0 then dev[#dev + 1] = string.format("accel-speed %.2f", n.sens) end
+    return lay, rule, inp, dev, extra
+end
+function iris_fx.niri_code(gap)
+    local px = math.floor(1.35 * 8 + 0.5) + 13
+    local bz = bar_fx.size or 1
+    local lp = math.floor(1.35 * 46 * bz + 0.5) + 14
+    local WIDE = { top = { lp, px, px, px }, right = { px, lp, px, px }, bottom = { px, px, lp, px }, left = { px, px, px, lp } }
+    local bar_gaps = WIDE[bar_fx.edge] or WIDE.left
+    if bar_fx.seg then bar_gaps = { math.floor(1.35 * 36 * bz + 0.5) + 10, px, px, px } end
+    local isl = iris_fx.island_min()
+    local everywhere = (bar_fx.on or "all") == "all"
+    local function struts(g)
+        local t = {}
+        for i = 1, 4 do t[i] = math.max(0, math.floor(g[i] - gap + 0.5)) end
+        return string.format("struts {\n            top %d\n            right %d\n            bottom %d\n            left %d\n        }", t[1], t[2], t[3], t[4])
+    end
+    local function room(has_bar)
+        local g
+        if has_bar then
+            g = bar_fx.left and bar_gaps or { isl and iris_fx.island_room() or 0, 0, 0, 0 }
+            g = dock_fx.raise(g)
+        else
+            g = (bar_fx.left and bar_fx.thin) and { px, px, px, px } or { 0, 0, 0, 0 }
+        end
+        return g
+    end
+    local parts = { "// Written by Vitreus (the room round the windows, and the focus ring from the palette); edits here are overwritten.\n// config.kdl includes it: include \"vitreus.kdl\"\n" }
+    local pal = iris_fx.last_pal
+    local ring_in = {}
+    if niri_set.border == 0 then ring_in[1] = "off"
+    else
+        if niri_set.border then ring_in[#ring_in + 1] = string.format("width %d", niri_set.border) end
+        if pal then
+            ring_in[#ring_in + 1] = string.format('active-color "%s"', pal.mint)
+            ring_in[#ring_in + 1] = string.format('inactive-color "%s"', pal.off)
+        end
+    end
+    local ring = #ring_in > 0 and ("\n        focus-ring {\n            " .. table.concat(ring_in, "\n            ") .. "\n        }") or ""
+    local lay, rule, inp, dev, extra = iris_fx.niri_set_code()
+    local lay_txt = ""
+    for _, l in ipairs(lay) do lay_txt = lay_txt .. "\n        " .. l end
+    parts[#parts + 1] = "layout {" .. lay_txt .. ring .. "\n        " .. struts(room(everywhere)) .. "\n}\n"
+    -- A window that opens maximized to the edges (Chrome asks for it) is laid over the whole monitor, struts and all: so nothing opens that way.
+    parts[#parts + 1] = "window-rule {\n    open-maximized-to-edges false" .. (#rule > 0 and ("\n    " .. table.concat(rule, "\n    ")) or "") .. "\n}\n"
+    for _, e in ipairs(extra) do parts[#parts + 1] = e .. "\n" end
+    if #inp > 0 or #dev > 0 then
+        local t = "input {"
+        for _, l in ipairs(inp) do t = t .. "\n    " .. l end
+        if #dev > 0 then
+            t = t .. "\n    touchpad {\n        " .. table.concat(dev, "\n        ") .. "\n    }"
+            local m = {}
+            for _, l in ipairs(dev) do if l:match("^accel") then m[#m + 1] = l end end
+            if #m > 0 then t = t .. "\n    mouse {\n        " .. table.concat(m, "\n        ") .. "\n    }" end
+        end
+        parts[#parts + 1] = t .. "\n}\n"
+    end
+    -- What Settings > Display kept for each monitor (display.json, `saved`: mode, scale, transform, position), in niri's words.
+    local TRANSFORM = { [0] = "normal", "90", "180", "270", "flipped", "flipped-90", "flipped-180", "flipped-270" }
+    local disp = {}
+    local okd, fd = pcall(sys.ask, "files.read", "display.json", "json")
+    if okd and type(fd) == "table" and type(fd.saved) == "table" then disp = fd.saved end
+    local names, seen, is_mon = {}, {}, {}
+    for _, name in ipairs(bar_fx.mons or {}) do is_mon[name] = true; if not seen[name] then seen[name] = true; names[#names + 1] = name end end
+    local extra = {}
+    for name in pairs(disp) do if not seen[name] then seen[name] = true; extra[#extra + 1] = name end end
+    table.sort(extra)
+    for _, name in ipairs(extra) do names[#names + 1] = name end
+    for _, name in ipairs(names) do
+        if name:match("^[%w%._%-]+$") then
+            local lines = {}
+            local d = disp[name]
+            if type(d) == "table" and d.res and d.hz then lines[#lines + 1] = string.format('    mode "%s@%d.000"', d.res, d.hz) end
+            if type(d) == "table" and type(d.scale) == "number" then lines[#lines + 1] = string.format("    scale %s", (string.format("%.6f", d.scale):gsub("0+$", ""):gsub("%.$", ""))) end
+            if type(d) == "table" and TRANSFORM[d.transform or 0] then lines[#lines + 1] = string.format('    transform "%s"', TRANSFORM[d.transform or 0]) end
+            if type(d) == "table" and d.x and d.y then lines[#lines + 1] = string.format("    position x=%d y=%d", d.x, d.y) end
+            local has_bar = everywhere or (bar_fx.sel ~= nil and bar_fx.sel[name] == true)
+            if not everywhere and is_mon[name] then
+                lines[#lines + 1] = string.format("    layout {\n        %s\n    }", struts(room(has_bar)))
+            end
+            if #lines > 0 then parts[#parts + 1] = string.format('output "%s" {\n%s\n}\n', name, table.concat(lines, "\n")) end
+        end
+    end
+    return table.concat(parts, "")
+end
+function iris_fx.apply_niri()
+    with_dirs(function(d)
+        local cfg = d.conf:gsub("/pleamar/shells/vitreus$", "/niri")
+        run("grep", { "-m1", "-E", "^[[:space:]]*gaps[[:space:]]+[0-9.]+", cfg .. "/config.kdl" }, function(out)
+            iris_fx.niri_load()
+            local gap = niri_set.gaps or tonumber((out or ""):match("gaps%s+([%d%.]+)")) or 16
+            local code = iris_fx.niri_code(gap)
+            pcall(sys.call, "files.write", "vitreus.kdl", code)
+            run("mkdir", { "-p", cfg }, function()
+                -- Copied whole then renamed over (cp truncates first: niri can read the half-written file and miss the rewrite), then niri is told to read it again.
+                run("cp", { "-f", d.data .. "/vitreus.kdl", cfg .. "/vitreus.kdl.tmp" }, function()
+                    run("mv", { "-f", cfg .. "/vitreus.kdl.tmp", cfg .. "/vitreus.kdl" }, function()
+                        run("niri", { "msg", "action", "load-config-file" }, function() end)
+                    end)
+                end)
+            end)
+        end)
+    end)
+end
 function iris_fx.apply_hypr()
     if trial_policy then return end
+    if on_niri then return iris_fx.apply_niri() end
     local pal = iris_fx.last_pal
     local parts, keep = {}, {}
     if pal then local c = iris_fx.border_code(pal); parts[#parts + 1] = c; keep[#keep + 1] = c end
     local g = iris_fx.gaps_code()
-    if g then parts[#parts + 1] = g; if bar_fx.left then keep[#keep + 1] = g end end
+    if g then parts[#parts + 1] = g; if bar_fx.left or iris_fx.island_min() then keep[#keep + 1] = iris_fx.gaps_code(nil, true) end end
     -- The gaps are Hyprland's settings, so they outlive the shell (a layer's reserved zone does not). gaps-undo.lua says how to give
     -- them back, and bin/vitreus-keep sends it when it stops for good; empty with the bar on the top, where there is nothing to undo.
-    pcall(sys.call, "files.write", "gaps-undo.lua", bar_fx.left and (iris_fx.gaps_code(false) or "") or "")
+    pcall(sys.call, "files.write", "gaps-undo.lua", (bar_fx.left or iris_fx.island_min() or dock_fx.on()) and (iris_fx.gaps_code(false) or "") or "")
     if #parts == 0 then return end
     run("hyprctl", { "eval", table.concat(parts, " ") }, function() end)
     with_dirs(function(d)
@@ -3131,6 +3403,19 @@ function wpv.flush()
     if n then wpv.settle(n[1]) end
 end
 
+-- The wallpaper hook (logic/wallpaper_hook.luau): `rec` is the picture an add-on made for the screen and the wallpaper it was made from, read here at
+-- once, so the first look at awww (below) knows that picture is that wallpaper (else Iris would read the frame, and the page would show it as the
+-- wallpaper). `busy`: an add-on is making one, and awww still shows the old wallpaper, which is not a change from outside. A global: this chunk is at Luau's limit of locals.
+wph = { busy = false, rec = nil, frame = nil }
+do
+    local ok, r = pcall(sys.ask, "files.read", "wallpaper-frame.json", "json")
+    if ok and type(r) == "table" and type(r.out) == "string" and type(r.src) == "string" then wph.rec = r end
+end
+function wph.src_of(p)
+    local r = wph.rec
+    if p and r and r.out == p then return r.src end
+    return nil
+end
 -- The wallpaper is asked of awww every half second; when it changes, Iris is run on the new one.
 local wp_on_change = function(path) end       -- the wallpaper page, further down, takes this over
 -- A wallpaper that the hexagon dissolve is bringing in: awww is told about it only when the dissolve is over, a couple of seconds on, and
@@ -3140,10 +3425,22 @@ local wp_pending, wp_pending_until = nil, 0
 -- The wallpaper picker's cards change the wallpaper while they are shifted through; the colours are only worked out once one is kept. Until then what
 -- awww shows is not a change made from outside (a global: this chunk is at Luau's limit of locals).
 wp_prev = { on = false, touched = false, cancel = false, orig = nil, shown = nil }
+-- The glass bends a copy of the wallpaper instead of a capture of the screen (the scene's `lens = image`, in vitreus.plm): half
+-- the screen's size is plenty under the frosting. Pleamar looks at the file twice a second and reads it again when it changes (a half-written one fails to decode and is tried again). Called wherever the wallpaper changes
+-- (the watcher below, and `wp_apply`, which marks the change as seen so the watcher never notices it). A global: this chunk is at Luau's limit of locals.
+function lens_image(path)
+    if not path then return end
+    run("printenv", { "HOME" }, function(h)
+        h = (h or ""):gsub("%s+$", "")
+        if h == "" then return end
+        run("magick", { path .. "[0]", "-auto-orient", "-resize", "960x540^", "-gravity", "center", "-extent", "960x540", "PNG:" .. h .. "/.cache/pleamar/vitreus/lens.png" }, function() end)
+    end)
+end
 local function check_wallpaper()
     run("awww", { "query" }, function(out, code)
         if code ~= 0 or not out then return end
         if wp_prev.on then return end
+        if wph.busy then return end          -- an add-on is making the picture: awww shows the old one, which is not a change from outside
         local path = out:match("currently displaying: image: ([^\n]+)")
         if wp_pending then
             if path == wp_pending then wp_pending = nil
@@ -3153,7 +3450,8 @@ local function check_wallpaper()
         end
         -- awww shows a video's poster; the wallpaper is the video. One that is playing while awww shows something else was replaced
         -- from outside.
-        local shown = wpv.from_poster(path) or path
+        local framed = wph.src_of(path)      -- a picture an add-on made: the wallpaper is the one it was made from
+        local shown = wpv.from_poster(path) or framed or path
         if path and wpv.cur and shown ~= wpv.cur and not wpv.next then
             wpv.cur = nil
             wpv_save()
@@ -3161,38 +3459,72 @@ local function check_wallpaper()
         end
         if path and shown ~= iris_last_wp then
             iris_last_wp = shown
+            lens_image(path)
             wp_on_change(shown)
-            run_iris(path, not (iris_cfg.enabled and not iris_cfg.preset))
+            run_iris(framed or path, not (iris_cfg.enabled and not iris_cfg.preset))
         end
     end)
 end
 
--- Settings > Theme has looks: Glass (`iris_cfg.look` is nil), Retro (8) and UwU (9); picking one also takes that theme's own palette (`iris_cfg.preset` is its number). The palette can then
--- be changed to the wallpaper's (Iris, `preset` nil) without leaving the look. Everything that follows
--- the palette follows it: the shell, the lock screen, pleamar-wm's border, Hyprland's borders.
--- Retro (preset 8): moulded putty plastic, not glass. Its colours skip the legibility floor (which is for light text on dark glass): the text is a
--- dark ink on the plastic, the accent a Famicom red, and `deep` (the hard shadow, the outlines) is the ink itself.
+-- Settings > Theme has themes, each a file in themes/ (Vitreus's own) or in ~/.config/pleamar/vitreus-themes/ (a person's; themes/_template.toml is the
+-- model to copy). bin/vitreus-themes reads them and leaves `themes.json` here; this is that list. A theme wears one of four shapes (`look`: Glass nil,
+-- Retro 8, UwU 9, Cyber 10, the numbers iris.json has always used) and has a palette of its own, or none (Glass takes the wallpaper's: Iris).
+-- Picking one takes its palette (`iris_cfg.preset` is its look, or 100 for a person's theme on the Glass shape). The palette can then be changed to the
+-- wallpaper's (Iris, `preset` nil) without leaving the theme. Everything that follows the palette follows it: the shell, the lock screen, pleamar-wm's
+-- border, Hyprland's borders. `iris_cfg.theme` is the theme's id (nil: Glass); its font, window corners and fonts.json entry are all keyed by it.
 iris_fx.CASSETTE = 8
--- UwU (preset 9): bubblegum plastic, bright and over the top. Cream bodies, a deep grape for text and outlines, hot pink for the accent.
 iris_fx.UWU = 9
--- Cyber (preset 10): a neon HUD. Near-black glass, cyan for the accent and magenta for the second neon (`deep`, which the theme's outlines and brackets use).
 iris_fx.CYBER = 10
-iris_fx.uwu = { ink = "#5a2a8c", faint = "#9a6bc4", mint = "#ff5fae", mintlo = "#e03a93", minthi = "#ff9ccf", onmint = "#ffffff",
-                tint = "#ffe3f2", panel = "#ffc9e6", deep = "#4a2b6b", off = "#e7c8f0", alert = "#ff3d6e" }
-iris_fx.cyber = { ink = "#d6f7ff", faint = "#6f93a8", mint = "#00e5ff", mintlo = "#00a9c4", minthi = "#7df3ff", onmint = "#001018",
-                  tint = "#04070d", panel = "#0a1220", deep = "#ff2bd6", off = "#26384a", alert = "#ff3b5c" }
-iris_fx.cassette = { ink = "#2b2833", faint = "#6a665a", mint = "#e63a3a", mintlo = "#a8242b", minthi = "#ff7b5c", onmint = "#fff3dc",
-                     tint = "#d6d0bd", panel = "#bfb9a5", deep = "#2b2833", off = "#a39e8e", alert = "#d81b60" }
+iris_fx.MILK = 11
+iris_fx.CUSTOM = 100
+vtheme = { list = {}, by_id = {}, errors = {}, folder = "" }
+vtheme.look_id = { [8] = "retro", [9] = "uwu", [10] = "cyber", [11] = "milk" }
+function vtheme.load()
+    local ok, f = pcall(sys.ask, "files.read", "themes.json", "json")
+    if not ok or type(f) ~= "table" or type(f.themes) ~= "table" then return false end
+    local list, by_id = {}, {}
+    for _, t in ipairs(f.themes) do
+        if type(t) == "table" and type(t.id) == "string" and type(t.name) == "string" and not by_id[t.id] then
+            list[#list + 1] = t
+            by_id[t.id] = t
+        end
+    end
+    if #list == 0 then return false end
+    vtheme.list, vtheme.by_id = list, by_id
+    vtheme.loaded = true
+    vtheme.errors = type(f.errors) == "table" and f.errors or {}
+    vtheme.folder = type(f.folder) == "string" and f.folder or ""
+    return true
+end
+-- Without themes.json (the keeper makes it before the shell starts; a shell started by hand, or one just updated, may not have it yet) there is Glass, the
+-- helper is asked, and the theme that was in use is trusted until the list is there: `current()` stands in for it, so nothing is reset meanwhile.
+vtheme.loaded = false
+if not vtheme.load() then
+    vtheme.list = { { id = "glass", name = "Glass", tagline = "Wallpaper", base = "glass", font = "Space Grotesk", round = 22, builtin = true } }
+    vtheme.by_id = { glass = vtheme.list[1] }
+end
+function vtheme.of_look(look) return vtheme.look_id[look] or "glass" end
+function vtheme.current()
+    local id = iris_cfg.theme or "glass"
+    return vtheme.by_id[id] or (not vtheme.loaded and { id = id, name = id, tagline = "", base = "glass" }) or vtheme.list[1]
+end
+function vtheme.index(t) for k, v in ipairs(vtheme.list) do if v == t then return k end end return 1 end
+function vtheme.font_of(id) local t = vtheme.by_id[id]; return t and t.font or "Space Grotesk" end
+function vtheme.round_of(id) local t = vtheme.by_id[id]; return t and t.round end
 do
     local ok, saved = pcall(sys.ask, "files.read", "iris.json", "json")
     if ok and type(saved) == "table" then
         if saved.enabled ~= nil then iris_cfg.enabled = saved.enabled and true or false end
         local pr = tonumber(saved.preset)
-        if pr and (math.floor(pr) == iris_fx.CASSETTE or math.floor(pr) == iris_fx.UWU or math.floor(pr) == iris_fx.CYBER) then iris_cfg.preset = math.floor(pr) end
-        -- The look (Glass, Retro, UwU) is its own setting, apart from where the colours come from: Iris may colour a Retro or UwU shell and it stays one.
+        if pr and (math.floor(pr) == iris_fx.CASSETTE or math.floor(pr) == iris_fx.UWU or math.floor(pr) == iris_fx.CYBER or math.floor(pr) == iris_fx.MILK or math.floor(pr) == iris_fx.CUSTOM) then iris_cfg.preset = math.floor(pr) end
+        -- The look (the shape of the shell) is its own setting, apart from where the colours come from: Iris may colour a Retro or UwU shell and it stays one.
         local lk = tonumber(saved.look)
-        if lk and (math.floor(lk) == iris_fx.CASSETTE or math.floor(lk) == iris_fx.UWU or math.floor(lk) == iris_fx.CYBER) then iris_cfg.look = math.floor(lk)
-        elseif lk == nil then iris_cfg.look = iris_cfg.preset end      -- an older file: the look was the palette
+        if lk and (math.floor(lk) == iris_fx.CASSETTE or math.floor(lk) == iris_fx.UWU or math.floor(lk) == iris_fx.CYBER or math.floor(lk) == iris_fx.MILK) then iris_cfg.look = math.floor(lk)
+        elseif lk == nil then iris_cfg.look = iris_cfg.preset ~= iris_fx.CUSTOM and iris_cfg.preset or nil end      -- an older file: the look was the palette
+        -- The theme itself. An older file has only the look, which names one of Vitreus's own; a theme whose file has gone leaves Glass.
+        if type(saved.theme) == "string" then iris_cfg.theme = saved.theme
+        elseif iris_cfg.look then iris_cfg.theme = vtheme.of_look(iris_cfg.look) end
+        if vtheme.loaded and iris_cfg.theme and not vtheme.by_id[iris_cfg.theme] then iris_cfg.theme, iris_cfg.look, iris_cfg.preset = nil, nil, nil end
     else
         pcall(sys.call, "files.write", "iris.json", iris_cfg)     -- so there is a file to edit
     end
@@ -3202,34 +3534,83 @@ do
     local INTENSITIES = { "subtle", "medium", "bold" }
     -- The desktop clock and system monitor draw themselves as plastic with Retro and UwU: they are told the theme (0 Glass, 1 Retro, 2 UwU).
     local function push_look()
-        local v = iris_cfg.look == iris_fx.CASSETTE and 1 or iris_cfg.look == iris_fx.UWU and 2 or iris_cfg.look == iris_fx.CYBER and 3 or 0
+        local v = iris_cfg.look == iris_fx.CASSETTE and 1 or iris_cfg.look == iris_fx.UWU and 2 or iris_cfg.look == iris_fx.CYBER and 3 or iris_cfg.look == iris_fx.MILK and 4 or 0
+        addon_look = v
         run("pleamar", { "--say", "desktopclock", "fact look " .. v }, function() end)
         run("pleamar", { "--say", "desktopsysmon", "fact look " .. v }, function() end)
         run("pleamar", { "--say", "desktopcards", "fact look " .. v }, function() end)
         run("pleamar", { "--say", "desktopnotes", "fact look " .. v }, function() end)
-        run("pleamar", { "--say", "desktopcava", "fact look " .. v }, function() end)
+        run("pleamar", { "--say", "files", "fact look " .. v }, function() end)
+        run("pleamar", { "--say", "cursortrail", "fact look " .. v }, function() end)
+        for _, sk in ipairs(addon_scenes or {}) do run("pleamar", { "--say", sk, "fact look " .. v }, function() end) end      -- the sparkle trail behind the mouse: UwU only
     end
     local function show()
         push_look()
         after(1200, push_look)         -- the palette file is rewritten with the theme and the desktop widgets reload: tell them again once they are back
         fact.iris_on = iris_cfg.enabled and not iris_cfg.preset
-        fact.theme_sel = iris_cfg.look or (iris_cfg.enabled and 0 or 7)       -- 0 Glass, 8 Retro, 9 UwU (7: Iris switched off on the Wallpaper page, greys)
+        fact.theme_sel = iris_cfg.theme and (vtheme.index(vtheme.current()) - 1) or (iris_cfg.enabled and 0 or -1)       -- the card's place on the Theme page (-1: Iris switched off on the Wallpaper page, greys)
         fact.cas = iris_cfg.look == iris_fx.CASSETTE
         fact.uwu = iris_cfg.look == iris_fx.UWU
         fact.cyber_on = iris_cfg.look == iris_fx.CYBER
-        if hy_theme_changed then hy_theme_changed(iris_cfg.look == iris_fx.CASSETTE and "retro" or iris_cfg.look == iris_fx.UWU and "uwu" or iris_cfg.look == iris_fx.CYBER and "cyber" or "glass") end
+        fact.milk = iris_cfg.look == iris_fx.MILK
+        if hy_theme_changed then hy_theme_changed(vtheme.current().id) end
         for k, name in ipairs(INTENSITIES) do if name == iris_cfg.intensity then fact.iris_int = k - 1 end end
     end
     local function save()
-        pcall(sys.call, "files.write", "iris.json", { enabled = iris_cfg.enabled, intensity = iris_cfg.intensity, preset = iris_cfg.preset, look = iris_cfg.look })
+        pcall(sys.call, "files.write", "iris.json", { enabled = iris_cfg.enabled, intensity = iris_cfg.intensity, preset = iris_cfg.preset, look = iris_cfg.look, theme = iris_cfg.theme })
     end
     local function follow_wallpaper()
         if iris_last_wp then run_iris(iris_last_wp) else check_wallpaper() end
     end
+    -- The cards of the Theme page: each theme's name, its small line and its five stripes (three numbers a colour: the model has no colour field).
+    -- Glass is `live`: its stripes are the wallpaper's, which the scene already holds. A line under the cards says what is wrong with a file of the
+    -- person's, or where to put one.
+    local CARDS = 16
+    local function fill_cards()
+        local rows = {}
+        for k, t in ipairs(vtheme.list) do
+            if k > CARDS then break end
+            local row = { name = t.name, tag = t.tagline or "", live = t.palette == nil }
+            for j = 1, 5 do
+                local r, g, b = hex_to_rgb(type(t.card) == "table" and t.card[j] or "#808080")
+                row["c" .. (j - 1) .. "r"], row["c" .. (j - 1) .. "g"], row["c" .. (j - 1) .. "b"] = r, g, b
+            end
+            rows[#rows + 1] = row
+        end
+        model.themes = rows
+        local errs = vtheme.errors
+        if #errs > 0 then
+            text.th_note = errs[1] .. (#errs > 1 and ("  (+" .. (#errs - 1) .. " more)") or "")
+        elseif #vtheme.list > CARDS then
+            text.th_note = "Only the first " .. CARDS .. " themes are shown"
+        else
+            text.th_note = "Your themes: ~/.config/pleamar/vitreus-themes"
+        end
+        fact.th_err = #errs > 0
+    end
+    -- The files are read again (a person's file may have been added or changed): the list, the cards and, if the theme in use was edited, its colours.
+    local function refresh_themes()
+        local folder = sys.ask("files.folder")
+        if type(folder) ~= "string" then return end
+        run("vitreus-themes", { folder }, function(_, code)
+            local first = not vtheme.loaded
+            if code ~= 0 or not vtheme.load() then return end
+            if iris_cfg.theme and not vtheme.by_id[iris_cfg.theme] then iris_cfg.theme, iris_cfg.look, iris_cfg.preset = nil, nil, nil; save(); follow_wallpaper() end
+            local cur = vtheme.current()
+            if iris_cfg.preset and not cur.palette then iris_cfg.preset = nil; save(); follow_wallpaper()
+            elseif iris_cfg.preset then iris_fx.apply_palette(cur.palette) end
+            fill_cards()
+            show()
+            if fonts_refresh then fonts_refresh(first) end
+        end)
+    end
+    on("themes_refresh", refresh_themes)
+    if vtheme.loaded and iris_cfg.preset and not vtheme.current().palette then iris_cfg.preset = nil end      -- a theme that has lost its palette follows the wallpaper
+    fill_cards()
+    fact.th_first = math.max(0, math.min((iris_cfg.theme and vtheme.index(vtheme.current()) or 1) - 4, #vtheme.list - 4))       -- the strip opens with the theme in use in view
+    after(500, refresh_themes)       -- a shell started by hand may have no themes.json yet
     show()
-    if iris_cfg.preset == iris_fx.CASSETTE then iris_fx.apply_palette(iris_fx.cassette)
-    elseif iris_cfg.preset == iris_fx.UWU then iris_fx.apply_palette(iris_fx.uwu)
-    elseif iris_cfg.preset == iris_fx.CYBER then iris_fx.apply_palette(iris_fx.cyber)
+    if iris_cfg.preset and vtheme.current().palette then iris_fx.apply_palette(vtheme.current().palette)       -- (before the list is there, palette.json already has the colours)
     elseif not iris_cfg.enabled then iris_fx.apply_mono() end
     -- The switch on the Wallpaper page. Off: greys at once. On: Iris is run on the wallpaper in use, and the colours come back (a theme's own palette is
     -- let go too: the switch says Iris is off while one is in use, and turning it on is asking for the wallpaper's colours). The look stays: Retro or UwU
@@ -3249,24 +3630,21 @@ do
             iris_fx.apply_mono()
         end
     end)
-    -- Settings > Theme: 0 Glass (the wallpaper's colours), 8 Retro, 9 UwU.
+    -- Settings > Theme: a card is a theme, by its place in the list (0 is Glass, the wallpaper's colours).
     on("theme_pick", function(k)
-        k = math.floor((tonumber(k) or 0) + 0.5)
-        if k == 0 then
-            iris_cfg.look, iris_cfg.preset, iris_cfg.enabled = nil, nil, true
+        local t = vtheme.list[math.floor((tonumber(k) or 0) + 0.5) + 1]
+        if not t then return end
+        iris_cfg.theme = t.id ~= "glass" and t.id or nil
+        iris_cfg.look = t.look
+        iris_cfg.enabled = true
+        if t.palette then
+            iris_cfg.preset = t.look or iris_fx.CUSTOM
+            iris_fx.apply_palette(t.palette)
+        else
+            iris_cfg.preset = nil
+            if t.id == "glass" then iris_cfg.look, iris_cfg.preset, iris_cfg.enabled = nil, nil, true end
             if not iris_last_wp then iris_fx.apply_glass_fallback() end
             follow_wallpaper()
-        elseif k == iris_fx.CASSETTE then
-            iris_cfg.look, iris_cfg.preset, iris_cfg.enabled = k, k, true
-            iris_fx.apply_palette(iris_fx.cassette)
-        elseif k == iris_fx.UWU then
-            iris_cfg.look, iris_cfg.preset, iris_cfg.enabled = k, k, true
-            iris_fx.apply_palette(iris_fx.uwu)
-        elseif k == iris_fx.CYBER then
-            iris_cfg.look, iris_cfg.preset, iris_cfg.enabled = k, k, true
-            iris_fx.apply_palette(iris_fx.cyber)
-        else
-            return
         end
         save()
         show()
@@ -3286,12 +3664,11 @@ do
 end
 -- ── Settings > Theme: the font picker ─────────────────────────────────────────────────────────────────────
 -- Each theme has a typeface: Space Grotesk on Glass, Audiowide on Retro, or whichever is picked here (`fonts.json`: { glass = name, retro = name }). A
--- scene's font names are fixed, so a different typeface is shown by starting the shell with a font setup (see bin/vitreus-fonts, which the keeper runs):
--- Apply saves the choice and stops the shell, and its keeper starts it again. The dropdown is a window of eight rows (`top`) over the list as the search
+-- scene's font names are fixed, so a different typeface is shown by starting the shell with a font setup (bin/vitreus-start runs bin/vitreus-fonts):
+-- Apply saves the choice and requests a restart from the main service. The dropdown is a window of eight rows (`top`) over the list as the search
 -- has narrowed it (`view`); a picture of the chosen typeface (ImageMagick, from its file) is the preview, since a scene can only draw in its own font.
 -- The arrows move the choice with the dropdown open or shut, and typing opens it and searches.
 do
-    local DEFAULTS = { glass = "Space Grotesk", retro = "Audiowide", uwu = "Mochiy Pop One", cyber = "Orbitron" }
     local ROWS = 8
     local saved = {}                       -- what the shell is drawn in; a theme with no entry has its default
     local all = { { label = "", value = nil } }       -- the theme's default first, then the installed families, sorted
@@ -3301,8 +3678,9 @@ do
     local inuse                            -- the family the running shell is drawn in (set once the choice is read; only a start changes it)
     local top = 0                          -- the first row shown
     local pv_n, pv_token = 0, 0
-    local function theme() return iris_cfg.look == iris_fx.CASSETTE and "retro" or iris_cfg.look == iris_fx.UWU and "uwu" or iris_cfg.look == iris_fx.CYBER and "cyber" or "glass" end
-    local function label() return theme() == "retro" and "Retro" or theme() == "uwu" and "UwU" or theme() == "cyber" and "Cyber" or "Glass" end
+    local function theme() return vtheme.current().id end
+    local function label() return vtheme.current().name end
+    local function default_font() return vtheme.font_of(theme()) end
     local function index_of(v)
         for i, e in ipairs(view) do if e.value == v then return i end end
         return nil
@@ -3320,10 +3698,10 @@ do
         fact.font_none = n == 0
     end
     local function show()
-        all[1].label = "Default · " .. DEFAULTS[theme()]
+        all[1].label = "Default · " .. default_font()
         text.font_for = "Font for " .. label()
-        text.font_name = chosen or DEFAULTS[theme()]
-        local same = (chosen or DEFAULTS[theme()]) == inuse
+        text.font_name = chosen or default_font()
+        local same = (chosen or default_font()) == inuse
         if same then
             text.font_note = chosen and "In use" or ("The default for " .. label())
         else
@@ -3351,7 +3729,7 @@ do
     -- (Both fc programs run without FONTCONFIG_FILE: the shell's own font setup makes "Space Grotesk" the typeface in use, which would answer for it.)
     -- The preview: the typeface's file (fc-match answers with the one the name stands for), drawn as three lines in the text colour.
     local function preview()
-        local fam = chosen or DEFAULTS[theme()]
+        local fam = chosen or default_font()
         local pat = ":family=" .. fam:gsub("[-:,=\\]", "\\%0")
         run("env", { "-u", "FONTCONFIG_FILE", "fc-match", pat, "-f", "%{file}" }, function(file, code)
             if code ~= 0 or not file or file == "" then return end
@@ -3375,17 +3753,17 @@ do
     end
     local ok, file = pcall(sys.ask, "files.read", "fonts.json", "json")
     if ok and type(file) == "table" then
-        if type(file.glass) == "string" and file.glass ~= "" then saved.glass = file.glass end
-        if type(file.retro) == "string" and file.retro ~= "" then saved.retro = file.retro end
-        if type(file.uwu) == "string" and file.uwu ~= "" then saved.uwu = file.uwu end
-        if type(file.cyber) == "string" and file.cyber ~= "" then saved.cyber = file.cyber end
+        for id, family in pairs(file) do
+            if type(id) == "string" and type(family) == "string" and family ~= "" then saved[id] = family end      -- by theme id: glass, retro, uwu, cyber, a person's
+        end
     end
     chosen = saved[theme()]
-    inuse = chosen or DEFAULTS[theme()]
+    inuse = chosen or default_font()
     show()
     -- A theme was just picked: the picker shows that theme's font (and Apply, if it is not the one in use).
-    function fonts_refresh()
+    function fonts_refresh(started_with_stub)
         chosen = saved[theme()]
+        if started_with_stub then inuse = chosen or default_font() end      -- the list of themes came after the shell: the font it runs in is the theme's own
         if #all > 0 then
             narrow()
             keep_in_view()
@@ -3463,7 +3841,7 @@ do
     end)
     on("font_scroll", function(w)
         w = tonumber(w) or 0
-        top = math.max(0, math.min(math.max(0, #view - ROWS), top - math.floor(w * 3 + (w > 0 and 0.5 or -0.5))))
+        top = math.max(0, math.min(math.max(0, #view - ROWS), top - math.floor(w * 3 + 0.5)))
         rows()
     end)
     -- The scrollbar as a handle: `frac` is where the pointer is along the track (0 top, 1 bottom); the thumb's middle goes there.
@@ -3479,7 +3857,7 @@ do
         d = tonumber(d) or 0
         if #view == 0 then return end
         local i = index_of(chosen) or (d > 0 and 0 or #view + 1)
-        i = math.max(1, math.min(#view, i + math.floor(d + (d > 0 and 0.5 or -0.5))))
+        i = math.max(1, math.min(#view, i + math.floor(d + 0.5)))
         chosen = view[i].value
         keep_in_view()
         show()
@@ -3493,15 +3871,26 @@ do
         preview()
     end)
     on("font_apply", function()
-        if (chosen or DEFAULTS[theme()]) == inuse and chosen == saved[theme()] then return end
-        saved[theme()] = chosen
-        pcall(sys.call, "files.write", "fonts.json", { glass = saved.glass, retro = saved.retro, uwu = saved.uwu, cyber = saved.cyber })
+        if (chosen or default_font()) == inuse and chosen == saved[theme()] then return end
+        if fact.font_applying then return end
+        local id, previous = theme(), saved[theme()]
+        saved[id] = chosen
+        if not pcall(sys.call, "files.write", "fonts.json", saved) then
+            saved[id] = previous
+            text.font_note = "Couldn't save the font choice. Try again."
+            return
+        end
+        fact.font_applying = true
+        after(10000, function() fact.font_applying = false end)      -- if nothing started the shell again, the button is not left stuck
         show()
-        -- The lock screen is drawn in the same typeface, so it starts again too, unless the session is locked right now (that would unlock it).
+        text.font_note = "Applying font…"
+        -- The main has a systemd owner, not a keeper. Leave widgets and the lock process alone.
         after(500, function()
-            run("pleamar", { "--say", "lockscreen", "get locked" }, function(locked)
-                local pat = tostring(locked):match("true") and "(vitreus\\.plm|desktop)" or "(vitreus\\.plm|desktop|lockscreen/lockscreen\\.plm)"
-                run("pkill", { "-f", "pleamar --scene .*/vitreus/" .. pat }, function() end)
+            run("systemctl", { "--user", "--no-block", "restart", "pleamar.service" }, function(_, code)
+                if code ~= 0 then
+                    fact.font_applying = false
+                    text.font_note = "Couldn't restart the shell. Try Apply again."
+                end
             end)
         end)
     end)
@@ -3531,10 +3920,10 @@ end)
 
 -- ── Settings: the wallpaper picker ───────────────────────────────────────────────────────
 -- The folder is `<Pictures>/Wallpapers` (`xdg-user-dir PICTURES`, else `$HOME/Pictures`). It is listed
--- once and shown twelve at a time: the scene only ever holds one page of thumbnails, since the folder
+-- once and shown sixteen at a time: the scene only ever holds one page of thumbnails, since the folder
 -- can hold hundreds of full-size images. Choosing one asks awww to fade to it; the wallpaper watcher
 -- above then sees the change, which is also what re-runs Iris.
-local WP_PER_PAGE = 12
+local WP_PER_PAGE = 16
 local wp_files = {}
 local wp_view = {}                        -- wp_files narrowed by the colour filter: what the gallery pages over
 local wp_page = 0
@@ -3727,24 +4116,30 @@ local function wp_apply(path, how, started, hex, quiet)
     -- `src`: the picture awww is given: the wallpaper itself, or a video's poster (made first, once)
     wpv.src(path, function(src)
         if not src then return end
-        local function by_awww()
-            local args = { "img", src }
-            for _, a in ipairs(how or { "--transition-type", "fade", "--transition-duration", "0.8" }) do args[#args + 1] = a end
-            run("awww", args, function()
-                if not quiet then wpv.settle(path) end
-                if started then started() end     -- `started`: awww has the picture, the change is under way
-            end)
+        -- `pic`: what awww is given: `src`, or the picture the add-on that frames wallpapers made of it (a quick try from the cards is never sent: it can take seconds)
+        local function show(pic)
+            local function by_awww()
+                local args = { "img", pic }
+                for _, a in ipairs(how or { "--transition-type", "fade", "--transition-duration", "0.8" }) do args[#args + 1] = a end
+                run("awww", args, function()
+                    if not quiet then wpv.settle(path) end
+                    if started then started() end     -- `started`: awww has the picture, the change is under way
+                end)
+            end
+            if hex then
+                -- the video (or the stop of the one playing) waits for the end of the dissolve: see `check_wallpaper`
+                wp_hex(pic, hex.x, hex.y, function() wpv.next = { path }; if started then started() end end, by_awww)
+            else
+                by_awww()
+            end
         end
-        if hex then
-            -- the video (or the stop of the one playing) waits for the end of the dissolve: see `check_wallpaper`
-            wp_hex(src, hex.x, hex.y, function() wpv.next = { path }; if started then started() end end, by_awww)
-        else
-            by_awww()
-        end
+        -- (a request an add-on is still working on when a newer one comes is dropped, and says `started` so whoever waits for it is not left waiting)
+        if quiet or not wph.frame then show(src) else wph.frame(path, src, show, function() if started then started() end end) end
         if quiet then return end
         wp_on_change(path)
         -- The path is known: Iris starts now, while the fade plays, not when the watcher next notices the
         -- change. Marking it seen stops the watcher running it a second time.
+        lens_image(src)
         if iris_last_wp ~= path then
             iris_last_wp = path
             run_iris(src, not (iris_cfg.enabled and not iris_cfg.preset))      -- a named palette or the greys: only the Theme card follows
@@ -4016,22 +4411,39 @@ wp_load()
 -- of it shaded; below 30 % no blur is asked of the compositor). It is a number from 0 to 1 that the
 -- scene reads, kept in `glass.json` a moment after the last change so a drag does not write a file per pixel.
 -- Four more, all of them multipliers or switches the scene reads: `rim` (how bright the light along the edge is, 0 to 2, 1 as it
--- was), `refr` (how thick the glass is, 0 to 2) and `disp` (the rainbow at the edge, 0 to 2.5) only show when `bend` is on,
+-- was), `refr` (how thick the glass is, 0 to 3) and `disp` (the rainbow at the edge, 0 to 2.5) only show when `bend` is on,
 -- which swaps the compositor's blur for glass that really bends what is behind it. The blur's own strength is Hyprland's, and
 -- lives in the Hyprland section below (it puts its setter in `glass.set_blur`).
 -- `clear` (0 clear glass .. 1 frosted, pleamar's `frost:`) and `auto` (frost only where what is behind is busy) are the glass that bends's own
 -- frost, and only show with `bend`. (There was once a "glass amount" slider, the scene's `glass:`: it overlapped Opacity and the Glass switch, and is always 100 % now.)
-local glass = { opacity = 1, rim = 1, refr = 1, disp = 1, bend = false, obsidian = false, clear = 1, auto = false }
+local glass = { opacity = 1, rim = 1, refr = 1, disp = 1, dome = 0, milk = 0, bend = false, live = false, bend_mon = nil, obsidian = false, clear = 1, auto = false, cap_ms = 300 }
 local GLASS_OP_MIN = 0.3
 local glass_save_waiting = false
 
+-- "Bend on": the glass bends on every monitor, or only on the one named in `glass.bend_mon`. Each copy of the bar knows its monitor by `screen.K.name`
+-- (empty until it knows: it bends then), the page's tiles are the Bar page's (`bar_m.i.name`). Only sets what changed.
+local function glass_mons()
+    for k = 0, 3 do
+        local name = text["screen." .. k .. ".name"]
+        local on = glass.bend_mon == nil or name == nil or name == "" or name == glass.bend_mon
+        if fact["glass_b" .. k] ~= on then fact["glass_b" .. k] = on end
+        local lit = glass.bend_mon ~= nil and text["bar_m." .. k .. ".name"] == glass.bend_mon
+        if fact["glass_bm." .. k] ~= lit then fact["glass_bm." .. k] = lit end
+    end
+end
 local function glass_refresh()
+    glass_mons()
     fact.glass_op = glass.opacity
     text.glass_op_text = string.format("%d%%", math.floor(glass.opacity * 100 + 0.5))
     fact.glass_rim = glass.rim
     fact.glass_refr = glass.refr
     fact.glass_disp = glass.disp
-    fact.glass_bend = glass.bend
+    fact.glass_dome = glass.dome
+    fact.glass_milk = glass.milk
+    fact.glass_bend = glass.bend or glass.live      -- the lens: either switch turns it on (Live bend does not need X-Bend)
+    fact.glass_x = glass.bend
+    fact.glass_live = glass.live
+    fact.lens_interval_ms = glass.cap_ms             -- pleamar reads this one: the least time between two captures for Live bend
     fact.glass_clear = glass.clear
     fact.glass_auto = glass.auto
     text.glass_clear_text = string.format("%d%%", math.floor(glass.clear * 100 + 0.5))
@@ -4039,6 +4451,9 @@ local function glass_refresh()
     text.glass_rim_text = string.format("%d%%", math.floor(glass.rim * 100 + 0.5))
     text.glass_refr_text = string.format("%d%%", math.floor(glass.refr * 100 + 0.5))
     text.glass_disp_text = string.format("%d%%", math.floor(glass.disp * 100 + 0.5))
+    text.glass_dome_text = string.format("%d%%", math.floor(glass.dome * 100 + 0.5))
+    text.glass_milk_text = string.format("%d%%", math.floor(glass.milk * 100 + 0.5))
+    text.glass_cap_text = string.format("%d ms", glass.cap_ms)
 end
 -- The desktop clock and system monitor are scenes of their own: they are told when the glass goes off or on (they ask for it themselves when they start).
 function glass.push_obs()
@@ -4046,9 +4461,8 @@ function glass.push_obs()
     run("pleamar", { "--say", "desktopclock", "fact obs " .. v }, function() end)
     run("pleamar", { "--say", "desktopsysmon", "fact obs " .. v }, function() end)
     run("pleamar", { "--say", "desktopcards", "fact obs " .. v }, function() end)
-    run("pleamar", { "--say", "desktopcava", "fact obs " .. v }, function() end)
+    run("pleamar", { "--say", "files", "fact obs " .. v }, function() end)
     run("pleamar", { "--say", "desktopnotes", "fact obs " .. v }, function() end)
-    run("pleamar", { "--say", "desktopmenu", "fact obs " .. v }, function() end)
 end
 local function glass_save_soon()
     glass.push_obs()
@@ -4056,7 +4470,7 @@ local function glass_save_soon()
     glass_save_waiting = true
     after(500, function()
         glass_save_waiting = false
-        pcall(sys.call, "files.write", "glass.json", { opacity = glass.opacity, rim = glass.rim, refr = glass.refr, disp = glass.disp, bend = glass.bend, obsidian = glass.obsidian, clear = glass.clear, auto = glass.auto })
+        pcall(sys.call, "files.write", "glass.json", { opacity = glass.opacity, rim = glass.rim, refr = glass.refr, disp = glass.disp, dome = glass.dome, milk = glass.milk, bend = glass.bend, live = glass.live, bend_mon = glass.bend_mon, obsidian = glass.obsidian, clear = glass.clear, auto = glass.auto, cap_ms = glass.cap_ms })
     end)
 end
 
@@ -4065,12 +4479,17 @@ do
     if ok and type(saved) == "table" then
         if type(saved.opacity) == "number" then glass.opacity = math.max(GLASS_OP_MIN, math.min(1, saved.opacity)) end
         if type(saved.rim) == "number" then glass.rim = math.max(0, math.min(2, saved.rim)) end
-        if type(saved.refr) == "number" then glass.refr = math.max(0, math.min(2, saved.refr)) end
+        if type(saved.refr) == "number" then glass.refr = math.max(0, math.min(3, saved.refr)) end
         if type(saved.disp) == "number" then glass.disp = math.max(0, math.min(2.5, saved.disp)) end
+        if type(saved.dome) == "number" then glass.dome = math.max(0, math.min(1.5, saved.dome)) end
+        if type(saved.milk) == "number" then glass.milk = math.max(0, math.min(1, saved.milk)) end
         if type(saved.bend) == "boolean" then glass.bend = saved.bend end
+        if type(saved.live) == "boolean" then glass.live = saved.live end
+        if type(saved.bend_mon) == "string" and saved.bend_mon ~= "" then glass.bend_mon = saved.bend_mon end
         if type(saved.obsidian) == "boolean" then glass.obsidian = saved.obsidian end
         if type(saved.clear) == "number" then glass.clear = math.max(0, math.min(1, saved.clear)) end
         if type(saved.auto) == "boolean" then glass.auto = saved.auto end
+        if type(saved.cap_ms) == "number" then glass.cap_ms = math.max(50, math.min(1000, saved.cap_ms)) end
     end
     glass_refresh()
 end
@@ -4085,9 +4504,21 @@ end)
 -- A slider's track is 0 to 1; these turn it into the value, in steps of 5 %.
 function glass.step(t, top) return math.floor(math.max(0, math.min(1, t)) * top * 20 + 0.5) / 20 end
 on("glass_rim_set", function(t) glass.rim = glass.step(t, 2); glass_refresh(); glass_save_soon() end)
-on("glass_refr_set", function(t) glass.refr = glass.step(t, 2); glass_refresh(); glass_save_soon() end)
+on("glass_refr_set", function(t) glass.refr = glass.step(t, 3); glass_refresh(); glass_save_soon() end)
 on("glass_disp_set", function(t) glass.disp = glass.step(t, 2.5); glass_refresh(); glass_save_soon() end)
+on("glass_dome_set", function(t) glass.dome = glass.step(t, 1.5); glass_refresh(); glass_save_soon() end)
+on("glass_cap_set", function(t) glass.cap_ms = 50 + math.floor(math.max(0, math.min(1, t)) * 19 + 0.5) * 50; glass_refresh(); glass_save_soon() end)
+on("glass_milk_set", function(t) glass.milk = glass.step(t, 1); glass_refresh(); glass_save_soon() end)
 on("glass_obs_toggle", function() glass.obsidian = not glass.obsidian; glass_refresh(); glass_save_soon() end)
+on("glass_bend_mon", function(i)
+    local name = text["bar_m." .. math.floor(i) .. ".name"]
+    if name == nil or name == "" then return end
+    glass.bend_mon = (glass.bend_mon ~= name) and name or nil
+    glass_refresh(); glass_save_soon()
+end)
+-- the monitors' names arrive after the shell starts, and change when one is plugged in
+every(2000, glass_mons)
+on("glass_live_toggle", function() glass.live = not glass.live; glass_refresh(); glass_save_soon() end)
 on("glass_bend_toggle", function() glass.bend = not glass.bend; glass_refresh(); glass_save_soon() end)
 on("glass_clear_set", function(t) glass.clear = glass.step(t, 1); glass_refresh(); glass_save_soon() end)
 on("glass_auto_toggle", function() glass.auto = not glass.auto; glass_refresh(); glass_save_soon() end)
@@ -4173,9 +4604,14 @@ local function disp_spec_code(specs)
     local parts = {}
     for name, d in pairs(specs) do
         local scale = d.scale == "auto" and '"auto"' or disp_num(d.scale, 6)
+        local extra = ""
+        -- Older profiles omit these fields: leave the existing monitor rule alone.
+        if d.vrr ~= nil then extra = extra .. ", vrr = " .. tostring(d.vrr) end
+        if d.bitdepth ~= nil then extra = extra .. ", bitdepth = " .. tostring(d.bitdepth) end
+        if d.cm then extra = extra .. string.format(", cm = %q", d.cm) end
         parts[#parts + 1] = string.format(
-            'hl.monitor({ output = "%s", mode = "%s@%d", position = "%dx%d", scale = %s, transform = %d, sdrbrightness = %s, sdrsaturation = %s })',
-            name, d.res, d.hz, d.x, d.y, scale, d.transform or 0, disp_num(d.sdrb or 1, 2), disp_num(d.sdrs or 1, 2))
+            'hl.monitor({ output = "%s", mode = "%s@%s", position = "%dx%d", scale = %s, transform = %d, sdrbrightness = %s, sdrsaturation = %s%s })',
+            name, d.res, disp_num(d.hz, 3), d.x, d.y, scale, d.transform or 0, disp_num(d.sdrb or 1, 2), disp_num(d.sdrs or 1, 2), extra)
     end
     table.sort(parts)
     return table.concat(parts, "\n")
@@ -4183,8 +4619,8 @@ end
 
 local function disp_spec_of(m)            -- what a monitor is at this moment, as a spec
     local res = m.w .. "x" .. m.h
-    return { res = res, hz = math.floor(m.hz + 0.5), x = m.x, y = m.y, scale = m.scale, transform = m.transform,
-             sdrb = m.sdrb, sdrs = m.sdrs }
+    return { res = res, hz = m.hz, x = m.x, y = m.y, scale = m.scale, transform = m.transform,
+             sdrb = m.sdrb, sdrs = m.sdrs, vrr = m.vrr, bitdepth = m.bitdepth, cm = m.cm }
 end
 
 local function disp_copy(d)
@@ -4198,6 +4634,7 @@ local function disp_changed(m, d)
     return cur.res ~= d.res or cur.hz ~= d.hz or cur.x ~= d.x or cur.y ~= d.y or math.abs(cur.scale - (d.scale == "auto" and cur.scale or d.scale)) > 0.001
         or d.scale == "auto" or cur.transform ~= d.transform or math.abs((cur.sdrb or 1) - (d.sdrb or 1)) > 0.004
         or math.abs((cur.sdrs or 1) - (d.sdrs or 1)) > 0.004
+        or (d.vrr ~= nil and cur.vrr ~= d.vrr)
 end
 
 -- What the page shows: the canvas (each monitor a box, all fitted into 400 x 118), the rows of choices for the
@@ -4207,6 +4644,7 @@ local function disp_render()
     fact.disp_count = n
     if disp_sel > n then disp_sel = math.max(1, n) end
     fact.disp_sel = disp_sel - 1
+    fact.disp_vrr_available = n > 0 and not on_niri and not disp_ro
     local dirty = false
     for _, m in ipairs(disp_mons) do
         if disp_changed(m, disp_draft[m.name]) then dirty = true end
@@ -4292,7 +4730,7 @@ local function disp_render()
     for i = 0, 5 do
         local hz = hzs[i + 1]
         fact["disp_hz." .. i .. ".on"] = hz ~= nil
-        fact["disp_hz." .. i .. ".lit"] = hz ~= nil and hz == d.hz
+        fact["disp_hz." .. i .. ".lit"] = hz ~= nil and math.abs(hz - d.hz) < 0.51
         text["disp_hz." .. i .. ".text"] = hz and (hz .. " Hz") or ""
     end
     -- the monitors, for the inspector's pills
@@ -4309,6 +4747,7 @@ local function disp_render()
     fact.disp_rot = (d.transform or 0) < 4 and (d.transform or 0) or -1
     fact.disp_sdrb = d.sdrb or 1
     fact.disp_sdrs = d.sdrs or 1
+    fact.disp_vrr = (d.vrr or m.vrr or 0) > 0
     text.disp_sdrb_text = disp_num(d.sdrb or 1, 2)
     text.disp_sdrs_text = disp_num(d.sdrs or 1, 2)
     -- the topology and the profiles
@@ -4473,6 +4912,9 @@ local function disp_read(done, max_age)
                 name = j.name, desc = j.description or "", key = disp_key_of(j), w = j.width, h = j.height, hz = j.refreshRate or 60,
                 x = j.x, y = j.y, scale = j.scale or 1, transform = j.transform or 0, modes = modes,
                 sdrb = j.sdrBrightness or 1, sdrs = j.sdrSaturation or 1,
+                vrr = (j.vrr == true or j.vrr == 1) and 1 or 0,
+                bitdepth = type(j.currentFormat) == "string" and (j.currentFormat:find("101010", 1, true) and 10 or 8) or nil,
+                cm = j.colorManagementPreset,
             }
         end
         disp_mons = mons
@@ -4517,6 +4959,7 @@ local function disp_write_file()
         local hypr = d.conf:gsub("/pleamar/shells/vitreus$", "/hypr")
         run("cp", { "-f", d.data .. "/vitreus_monitors.lua", hypr .. "/vitreus_monitors.lua" }, function() end)
         pcall(sys.call, "files.write", "display.json", { saved = disp_saved })
+        if on_niri then iris_fx.apply_niri() end           -- niri keeps them in vitreus.kdl, beside the room round the windows
     end)
 end
 
@@ -4581,10 +5024,14 @@ local function disp_apply()
     local specs = {}
     -- every position is measured from the top left of the whole arrangement
     local mx, my = math.huge, math.huge
+    local moved = false
     for _, m in ipairs(disp_mons) do
         local d = disp_draft[m.name]
         mx, my = math.min(mx, d.x), math.min(my, d.y)
+        if d.x ~= m.x or d.y ~= m.y then moved = true end
     end
+    -- A VRR/mode-only change must not shift the desktop's coordinate origin.
+    if not moved then mx, my = 0, 0 end
     for _, m in ipairs(disp_mons) do
         local d = disp_copy(disp_draft[m.name])
         d.x, d.y = d.x - mx, d.y - my
@@ -4663,6 +5110,10 @@ on("disp_rot_mon", function(i)
     disp_edit(function(_, d) d.transform = ((d.transform or 0) % 4 + 1) % 4 end)
 end)
 on("disp_pick_rot", function(i) disp_edit(function(_, d) d.transform = i end) end)
+on("disp_vrr_toggle", function()
+    if disp_ro or on_niri or disp_trial > 0 then return end
+    disp_edit(function(m, d) d.vrr = (d.vrr or m.vrr or 0) > 0 and 0 or 1 end)
+end)
 -- The sliders: SDR brightness from 1.0 to 2.0, saturation from 0.9 to 1.1, in hundredths.
 on("disp_sdrb_set", function(t) disp_edit(function(_, d) d.sdrb = math.floor((1 + math.max(0, math.min(1, t))) * 100 + 0.5) / 100 end) end)
 on("disp_sdrs_set", function(t) disp_edit(function(_, d) d.sdrs = math.floor((0.9 + 0.2 * math.max(0, math.min(1, t))) * 100 + 0.5) / 100 end) end)
@@ -4912,6 +5363,7 @@ local function wx_show(w)
     end
     model.wx_days = rows
     fact.wx_ok = true
+    if addon_push_wx then addon_push_wx() end
     return true
 end
 
@@ -5012,13 +5464,13 @@ end
 -- written to vitreus_hypr.lua, which hyprland.lua loads after hypr_style.lua (the installer adds the line, also to an older install) so it wins on the next start.
 do
     local LAYOUTS = { "dwindle", "master", "scrolling" }
-    local hy = { layout = 3, gaps = 5, round = 10, border = 3, blur = 3, blur_on = true, passes = 1, resize = false, tear = false, anim = true, sens = 0, follow = 1, nat = false }
+    local hy = { layout = 3, gaps = 5, round = 10, border = 3, blur = 3, blur_on = true, passes = 1, resize = false, tear = false, anim = true, sens = 0, follow = 1, nat = false, center = 0, colw = 1, single = false }
+    local hy_dirty, hy_waiting = false, false
 
     -- The windows' corners follow the theme: each theme has its own rounding (concentric with the shell's frame: Retro and Cyber are squarer, by the 73 % the drawers take),
     -- and the slider edits the current theme's, which is kept in hy-round.json and comes back when that theme is picked again.
     -- The frame's inner corner is `rc` in vitreus.plm: (26 - 19 * sq) * 1.35, 35 px on Glass and UwU, 9 on Retro and Cyber. A window sits about 13 px inside it
     -- (24 gap - 8 * 1.35 frame), so the window's own corner, concentric with the frame's, is that minus 13: 22 and (almost) square.
-    local HY_ROUND_DEFAULT = { glass = 22, uwu = 22, retro = 3, cyber = 3 }
     local hy_round_by = {}
     local hy_theme = nil
     do
@@ -5044,6 +5496,9 @@ do
         fact.hy_sens = hy.sens
         fact.hy_follow = hy.follow
         fact.hy_nat = hy.nat
+        fact.ni_center = hy.center
+        fact.ni_colw = hy.colw
+        fact.ni_single = hy.single
         text.hy_gaps_text = string.format("%d px", hy.gaps)
         text.hy_round_text = string.format("%d px", hy.round)
         text.hy_border_text = string.format("%d px", hy.border)
@@ -5073,6 +5528,69 @@ do
         end)
     end
 
+    -- niri: the same facts, from and to niri-set.json / vitreus.kdl (see `iris_fx.niri_code`) in place of hyprctl. What config.kdl has is what the page shows until it is changed.
+    local niri_apply_waiting, niri_ready = false, false
+    local niri_read
+    local function niri_changed()
+        iris_fx.niri_load()
+        if not niri_ready then            -- nothing of niri's has been read yet: read it first, so the values written are config.kdl's but for the one that changed
+            local r = hy.round
+            niri_read(function() niri_ready = true; hy.round = r; niri_changed() end)
+            return
+        end
+        hy_show()
+        local n = niri_set
+        n.gaps, n.round, n.border, n.sens, n.follow = hy.gaps, hy.round, hy.border, hy.sens, hy.follow
+        n.nat, n.anim, n.center, n.colw, n.single = hy.nat, hy.anim, hy.center, hy.colw, hy.single
+        pcall(sys.call, "files.write", "niri-set.json", n)
+        if niri_apply_waiting then return end
+        niri_apply_waiting = true
+        after(250, function()
+            niri_apply_waiting = false
+            iris_fx.apply_niri()
+        end)
+    end
+    niri_read = function(after_read)
+        iris_fx.niri_load()
+        with_dirs(function(d)
+            local cfg = d.conf:gsub("/pleamar/shells/vitreus$", "/niri") .. "/config.kdl"
+            run("cat", { cfg }, function(out, code)
+                local t = {}
+                for line in ((code == 0 and out) or ""):gmatch("[^\n]+") do t[#t + 1] = (line:gsub("//.*$", "")) end
+                local txt = table.concat(t, "\n")
+                local function has(pat) return txt:find(pat) ~= nil end
+                hy.gaps = tonumber(txt:match("\n%s*gaps%s+([%d%.]+)")) or 16
+                hy.round = 0
+                hy.border = tonumber(txt:match("focus%-ring%s*{[^}]-width%s+([%d%.]+)")) or 4
+                if has("focus%-ring%s*{%s*off") then hy.border = 0 end
+                hy.follow = has("\n%s*focus%-follows%-mouse") and 1 or 0
+                hy.nat = has("\n%s*natural%-scroll")
+                hy.anim = not has("animations%s*{[^}]-\n%s*off")
+                local c = txt:match('center%-focused%-column%s+"([%a%-]+)"')
+                hy.center = c == "always" and 1 or (c == "on-overflow" and 2 or 0)
+                hy.single = has("\n%s*always%-center%-single%-column")
+                local pr = tonumber(txt:match("default%-column%-width%s*{%s*proportion%s+([%d%.]+)"))
+                hy.colw = pr and (pr < 0.4 and 0 or (pr < 0.6 and 1 or (pr < 0.9 and 2 or 3))) or 1
+                hy.sens = 0
+                -- what the page itself has changed wins
+                local n = niri_set
+                if n.gaps then hy.gaps = n.gaps end
+                if n.round then hy.round = n.round end
+                if n.border then hy.border = n.border end
+                if n.sens then hy.sens = n.sens end
+                if n.follow ~= nil then hy.follow = n.follow end
+                if n.nat ~= nil then hy.nat = n.nat end
+                if n.anim ~= nil then hy.anim = n.anim end
+                if n.center ~= nil then hy.center = n.center end
+                if n.colw ~= nil then hy.colw = n.colw end
+                if n.single ~= nil then hy.single = n.single end
+                niri_ready = true
+                hy_show()
+                if after_read then after_read() end
+            end)
+        end)
+    end
+
     local hy_read
     local hy_gen = 0
     local hy_write_pending, hy_write_token = false, 0
@@ -5097,6 +5615,7 @@ do
         hy_write_file()
     end
     local function hy_changed()
+        if on_niri then return niri_changed() end
         hy_show()
         hy_dirty = true
         hy_gen = hy_gen + 1
@@ -5121,6 +5640,7 @@ do
         "decoration:blur:passes", "general:resize_on_border", "general:allow_tearing", "animations:enabled", "input:sensitivity",
         "input:follow_mouse", "input:touchpad:natural_scroll", "decoration:blur:enabled" }
     hy_read = function()
+        if on_niri then return niri_read() end
         local cmd = {}
         for i, n in ipairs(HY_OPTS) do cmd[i] = "getoption " .. n end
         run("hyprctl", { "--batch", table.concat(cmd, " ; ") }, function(out, code)
@@ -5151,11 +5671,11 @@ do
     hy_show()
     hy_read()
 
-    hy_theme = iris_cfg.look == iris_fx.CASSETTE and "retro" or iris_cfg.look == iris_fx.UWU and "uwu" or iris_cfg.look == iris_fx.CYBER and "cyber" or "glass"   -- at start Hyprland already holds what was kept
+    hy_theme = vtheme.current().id   -- at start Hyprland already holds what was kept
     hy_theme_changed = function(key)
         if key == hy_theme then return end
         hy_theme = key
-        hy.round = hy_round_by[key] or HY_ROUND_DEFAULT[key] or hy.round
+        hy.round = hy_round_by[key] or (on_niri and niri_set.round) or vtheme.round_of(key) or hy.round     -- (on niri a value set on the page is kept, whatever theme comes up)
         hy_changed()
     end
 
@@ -5181,11 +5701,21 @@ do
         hy.blur_on = v > 0
         hy.blur = math.max(1, v)
         hy.passes = passes or (1 + math.floor((hy.blur - 1) / 6))
+        if on_niri then hy_show() return end         -- (no blur to set on niri)
         hy_changed()
     end
     glass.set_blur = set_blur
     on("glass_blur_set", function(t) set_blur(math.max(0, math.min(1, t)) * 20) end)
     on("hy_follow_set", function(i) hy.follow = math.max(0, math.min(3, math.floor(i + 0.5))); hy_changed() end)
+    on("ni_center_set", function(i) hy.center = math.max(0, math.min(2, math.floor(i + 0.5))); hy_changed() end)
+    on("ni_colw_set", function(i) hy.colw = math.max(0, math.min(3, math.floor(i + 0.5))); hy_changed() end)
+    on("ni_toggle", function(k)
+        k = math.floor(k + 0.5)
+        if k == 0 then hy.single = not hy.single
+        elseif k == 1 then hy.anim = not hy.anim
+        else hy.nat = not hy.nat end
+        hy_changed()
+    end)
     on("hy_toggle", function(k)
         k = math.floor(k + 0.5)
         if k == 0 then hy.resize = not hy.resize
@@ -5204,7 +5734,6 @@ end
 do
     local wm = { layout = 0, lays = {}, share = 0.56, gap = 12, free = false, rain = false, snow = false, bw = 1.5, ba = 70, rad = 12, shd = 100, tb = 22, tbo = 72, wa = 100, wi = 100, fr = 80, wst = 0, tbt = true }
     -- The windows' corners follow the theme here too, as on Hyprland (same per-theme values, kept apart in wm-round.json): the slider edits the current theme's.
-    local WM_ROUND_DEFAULT = { glass = 22, uwu = 22, retro = 3, cyber = 3 }
     local wm_round_by, wm_theme = {}, "glass"
     do
         local ok, saved = pcall(sys.ask, "files.read", "wm-round.json", "json")
@@ -5213,7 +5742,7 @@ do
         end
     end
     local function wm_theme_key()
-        return iris_cfg.look == iris_fx.CASSETTE and "retro" or iris_cfg.look == iris_fx.UWU and "uwu" or iris_cfg.look == iris_fx.CYBER and "cyber" or "glass"
+        return vtheme.current().id
     end
     -- The layout is each monitor's own, by its name (wm.lays); wm.layout is the one a monitor gets that has none chosen yet. `wm_names` are the
     -- monitors in the window manager's own order (its `lay.N`), `wm_sel` the one the Layout chips are for.
@@ -5274,6 +5803,7 @@ do
         top = { top = 76, right = 24, bottom = 24, left = 24 },
         bottom = { top = 24, right = 24, bottom = 76, left = 24 },
     }
+    local FRAME_SEG = { top = 59, right = 24, bottom = 24, left = 24 }
     local EDGES = { "top", "right", "bottom", "left" }
     function wm_frame_sync()
         if on_hyprland then return end
@@ -5283,11 +5813,19 @@ do
             for name, id in mons:gmatch("Monitor (%S+) %(ID (%d+)%)") do names[tonumber(id)] = name end
             local framed = fact.bar_frame == true and bar_mon.name ~= nil
             local room = FRAME_ROOMS[fact.bar_anchor] or FRAME_ROOM
+            if fact.bar_seg == true and fact.bar_anchor == "top" then room = FRAME_SEG end   -- the top frame in pieces: windows start below the pieces, as on Hyprland (`iris_fx.gaps_code`)
+            local island_min = not framed and bar_mon.name ~= nil and iris_fx.island_min() and fact.bar_anchor == "top"   -- the Island below 100 % reserves nothing: its room is kept here
             local want, cmds = {}, {}
+            local dock = dock_fx.room()
             for id = 0, 3 do
-                local has = framed and names[id] ~= nil and (bar_mon.name == "all" or bar_mon.name == names[id])
+                local has = framed and names[id] ~= nil and (bar_mon.set ~= nil and bar_mon.set[names[id]] == true)
+                -- a monitor with only the frame (Settings > Bar, "Frame on the other monitors") gets the frame's room on every side
+                local thin = framed and not has and names[id] ~= nil and fact.bar_others == true
                 for _, e in ipairs(EDGES) do
-                    want[#want + 1] = has and math.max(0, room[e] - wm.gap) or 0
+                    want[#want + 1] = has and math.max(0, room[e] - wm.gap) or (thin and math.max(0, FRAME_ROOM.top - wm.gap) or 0)
+                    if island_min and e == "top" and names[id] ~= nil and (bar_mon.set ~= nil and bar_mon.set[names[id]] == true) then want[#want] = iris_fx.island_room() end
+                    -- the docks are on the monitors the bar is on only
+                    if dock[e] and names[id] ~= nil and bar_mon.set ~= nil and bar_mon.set[names[id]] == true then want[#want] = math.max(want[#want], math.max(0, dock[e] - wm.gap)) end
                     cmds[#cmds + 1] = "get fr." .. id .. "." .. e
                 end
             end
@@ -5304,6 +5842,9 @@ do
             end)
         end)
     end
+
+    on("fact:bar_seg", function() wm_frame_sync() end)
+    on("fact:bar_others", function() wm_frame_sync() end)
 
     local function wm_send()
         if not wm_names_ok then
@@ -5344,7 +5885,11 @@ do
         wm_frame_sync()
     end
 
+    -- Nothing is written to wm.json until the saved choices have been read back (below, a few seconds after the shell starts): a theme is applied at once on
+    -- starting, and saving then wrote the first values (no layouts at all) over the file, which the restore then read.
+    local wm_restored = false
     local function wm_save()
+        if not wm_restored then return end
         pcall(sys.call, "files.write", "wm.json", { layout = wm.layout, lays = wm.lays, share = wm.share, gap = wm.gap, free = wm.free, rain = wm.rain, snow = wm.snow, bw = wm.bw, ba = wm.ba, rad = wm.rad, shd = wm.shd, tb = wm.tb, tbo = wm.tbo, wa = wm.wa, wi = wm.wi, fr = wm.fr, wst = wm.wst, tbt = wm.tbt })
     end
 
@@ -5384,7 +5929,7 @@ do
         -- Pleamar-WM answers only when it is the window manager; on Hyprland each of these would start a command to get nothing back.
         if on_hyprland then return end
         -- One connection for all of them (`say_many`): a `pleamar --say` program for each of these fifteen made the page stall when it opened.
-        local names = { "gap", "ratio", "monname.0", "free.0", "rain", "snow", "bw", "ba", "rad", "shd", "tb", "tbo", "wo_a", "wo_i", "wfr", "wst", "tbt" }
+        local names = { "gap", "ratio", "monname.0", "free.0", "rain", "snow", "bw", "ba", "rad", "shd", "tb", "tbo", "wo_a", "wo_i", "wfr", "wst", "tbt", "vit" }
         local cmds = {}
         for i, n in ipairs(names) do cmds[i] = "get " .. n end
         -- (after those: each monitor's name and the layout it has now, to show what is really there)
@@ -5392,6 +5937,9 @@ do
         say_many("wm", cmds, function(r)
             if not r then return end
             local base = #names
+            -- The scene was read in again (a theme or the wallpaper changed its palette) and has its first values, not the ones chosen: taking those as what is
+            -- there would forget every layout and setting. The chosen ones go back in instead.
+            if (tonumber(((r[base] or ""):match("%-?[%d.]+"))) or 0) ~= 1 then wm_send(); return end
             wm_names = {}
             for m = 0, 3 do
                 local n = (r[base + m * 2 + 1] or ""):match("^%s*([%w%._%-]+)")
@@ -5456,6 +6004,7 @@ do
     after(3000, function()
         if on_hyprland then return end
         local ok, saved = pcall(sys.ask, "files.read", "wm.json", "json")
+        wm_restored = true
         if ok and type(saved) == "table" then
             wm.layout = math.max(0, math.min(7, tonumber(saved.layout) or 0))
             wm.lays = {}
@@ -5474,7 +6023,7 @@ do
             wm.wst = math.max(0, math.min(3, math.floor(tonumber(saved.wst) or wm.wst)))
             if saved.tbt ~= nil then wm.tbt = saved.tbt == true end
             wm_theme = wm_theme_key()
-            wm.rad = wm_round_by[wm_theme] or WM_ROUND_DEFAULT[wm_theme] or wm.rad
+            wm.rad = wm_round_by[wm_theme] or vtheme.round_of(wm_theme) or wm.rad
             wm_show()
             wm_send()
         end
@@ -5517,7 +6066,7 @@ do
         if prev_theme_changed then prev_theme_changed(key) end
         if on_hyprland or key == wm_theme then return end
         wm_theme = key
-        wm.rad = wm_round_by[key] or WM_ROUND_DEFAULT[key] or wm.rad
+        wm.rad = wm_round_by[key] or vtheme.round_of(key) or wm.rad
         wm_changed()
     end
 
@@ -5557,8 +6106,8 @@ end
     local schedule_preview_fwd
     local S = { desc = {}, apps = {}, res = {}, sel = 1, start = 1, last = nil, seq = 0, counts = {}, emoji = nil, clip = nil }
     local ROWS = 6
-    local MODES = { ["#"] = "files", [">"] = "commands", [":"] = "emoji", ["^"] = "clipboard", ["~"] = "wallpapers", ["@"] = "windows", ["?"] = "web", ["!"] = "web", ["$"] = "snippets", ["="] = "calc" }
-    local LABEL = { apps = "Apps", calc = "Calc", files = "Files", commands = "Commands", emoji = "Emoji", clipboard = "Clipboard", wallpapers = "Wallpapers", windows = "Windows", web = "Web", snippets = "Snippets" }
+    local MODES = { ["#"] = "files", [">"] = "commands", [":"] = "emoji", ["^"] = "clipboard", ["~"] = "wallpapers", ["@"] = "windows", ["?"] = "web", ["!"] = "web", ["$"] = "snippets", ["="] = "calc", ["+"] = "packages" }
+    local LABEL = { apps = "Apps", calc = "Calc", files = "Files", commands = "Commands", emoji = "Emoji", clipboard = "Clipboard", wallpapers = "Wallpapers", windows = "Windows", web = "Web", snippets = "Snippets", packages = "Packages" }
     local HINT = {
         apps = "Search apps…  # files  > commands  : emoji  ^ clipboard  ~ wallpapers",
     }
@@ -5579,6 +6128,7 @@ end
             rows[#rows + 1] = {
                 title = r.title, sub = r.sub or "", desc = r.desc or "", hasdesc = (r.desc or "") ~= "", glyph = r.glyph or (r.title or "?"):sub(1, 1):upper(),
                 sel = (S.start + i) == S.sel, hasicon = (r.icon or "") ~= "", icon = r.icon or "", deletable = r.del ~= nil,
+                pinnable = r.app ~= nil, pin = r.app ~= nil and cdk_pinned(r.app),
             }
         end
         model.lres = rows
@@ -5613,7 +6163,30 @@ end
         pcall(sys.call, "files.write", "launcher.json", { counts = S.counts })
     end
 
-    sys.watch("apps", function(list) S.apps = list or {}; if S.last ~= nil and S.mode == "apps" then S.last = nil end end)
+    -- Older runtimes key desktop entries by display name, leaving renamed apps duplicated.
+    local function normalize_file_managers(list)
+        local names = { ["org.kde.dolphin"] = "Files (Dolphin)", ["org.gnome.Nautilus"] = "Nautilus" }
+        local apps, seen = {}, {}
+        for _, app in ipairs(list or {}) do
+            local id = (app.id or ""):gsub("%.desktop$", "")
+            local name = names[id]
+            if not name then
+                apps[#apps + 1] = app
+            elseif not seen[id] then
+                local entry = {}
+                for key, value in pairs(app) do entry[key] = value end
+                entry.name = name
+                apps[#apps + 1] = entry
+                seen[id] = true
+            end
+        end
+        return apps
+    end
+
+    sys.watch("apps", function(list)
+        S.apps = normalize_file_managers(list)
+        if S.last ~= nil and S.mode == "apps" then S.last = nil end
+    end)
 
     -- What each app says about itself (the Comment of its .desktop file, else its GenericName): one pass over the
     -- folders the apps live in, with `find` running `grep` on the files it finds.
@@ -5934,7 +6507,6 @@ end
     end)
     on("dclock_toggle", function() toggle_scene("desktopclock", "desktopclock") end)
     on("dsys_toggle", function() toggle_scene("desktopsysmon", "desktopsysmon") end)
-    on("dcava_toggle", function() toggle_scene("desktopcava", "desktopcava") end)
 
     -- ── commands ──
     local function open_settings(page)
@@ -5983,16 +6555,11 @@ end
                 run("pleamar", { "--say", "desktopsysmon", "fact shown " .. (on and "false" or "true") }, function() end)
             end)
         end, "system monitor desktop widget card cpu memory gpu network show hide on off" },
-        { "Desktop audio visualiser: toggle", "action", function() spawn('pleamar --say vitreus "emit dcava_toggle"') end, "audio visualiser visualizer cava spectrum music bars wave equalizer desktop widget show hide on off" },
+        { "Audio visualiser: toggle", "action", function() spawn('pleamar --say vitreus "emit fw_toggle"') end, "audio visualiser visualizer cava spectrum music bars wave equalizer desktop widget show hide on off" },
         { "Webcam: toggle", "action", function() spawn('pleamar --say vitreus "emit cam_toggle"') end, "webcam camera self view mirror face round window record screen show hide on off" },
         { "Webcam: mirror on/off", "action", function() spawn('pleamar --say webcam "emit cam_mirror"') end, "webcam camera mirror flip self view" },
-        { "Desktop menu: start", "action", function()
-            -- The right-click menu on the wallpaper (desktopmenu/) is a scene of its own; this starts it for this session if it is not running (it is in the autostart file after an install).
-            run("pleamar", { "--say", "desktopmenu", "get open" }, function(_, code)
-                if code ~= 0 then exec_on_desktop('vitreus-keep "$HOME/.config/pleamar/shells/vitreus/desktopmenu/' .. (on_hyprland and "desktopmenu_hypr" or "desktopmenu") .. '.plm"') end
-            end)
-        end, "desktop menu right click context wallpaper start" },
         { "Sticky note: new", "action", function() spawn('pleamar --say vitreus "emit sticky_new"') end, "sticky note sticker new add notes desktop paper write" },
+        { "Files", "action", function() spawn('PATH="$HOME/.local/bin:$PATH" vitreus-files') end, "files file manager folder folders browse explorer home documents downloads search sonda nautilus" },
         { "Ask about the clipboard", "action", function()
             -- The last thing copied goes to the Desk's Ask tab as an attachment, to be sent with whatever is typed there (never by itself).
             run("cliphist", { "list" }, function(o)
@@ -6360,7 +6927,96 @@ end
         end)
     end
 
+
+    -- ── packages (Arch) ──
+    -- `+` then a name: the repositories are searched with `pacman -Ss`, or with `paru` or `yay` when there is one, which looks in the AUR too. Enter installs the package in a terminal window of its own: it
+    -- may ask for a password, or which of several to take, and the terminal is the progress. The exact name comes first, the official repositories before the AUR, then names that start with what was typed.
+    local PK = { tool = nil }
+    local function pk_tool(fn)
+        if PK.tool then return fn(PK.tool) end
+        run("which", { "paru" }, function(_, c1)
+            if c1 == 0 then PK.tool = "paru"; return fn("paru") end
+            run("which", { "yay" }, function(_, c2)
+                if c2 == 0 then PK.tool = "yay"; return fn("yay") end
+                run("which", { "pacman" }, function(_, c3)
+                    PK.tool = c3 == 0 and "pacman" or "none"
+                    fn(PK.tool)
+                end)
+            end)
+        end)
+    end
+    local function pk_rank(rows, q)
+        local needle = q:lower()
+        local function group(r) return r.name:lower() == needle and 0 or (r.repo == "aur" and 2 or 1) end
+        local function match(r)
+            local n = r.name:lower()
+            if n:sub(1, #needle) == needle then return 0 end
+            if n:find(needle, 1, true) then return 1 end
+            return r.desc:lower():find(needle, 1, true) and 2 or 3
+        end
+        for i, r in ipairs(rows) do r.i = i; r.g = group(r); r.m = match(r) end
+        table.sort(rows, function(a, b)
+            if a.g ~= b.g then return a.g < b.g end
+            if a.m ~= b.m then return a.m < b.m end
+            return a.i < b.i
+        end)
+    end
+    local function pk_install(r)
+        if r.installed then                                       -- already there: say so, as a notification, instead of doing nothing
+            run("notify-send", { "-a", "Vitreus", r.name .. " is already installed" }, function() end)
+            return
+        end
+        local inner = 'tool="$1"; pkg="$2"; if [ "$tool" = pacman ]; then sudo pacman -S -- "$pkg"; else "$tool" -S -- "$pkg"; fi; ec=$?; '
+            .. 'if [ "$ec" -eq 0 ]; then notify-send -a Vitreus "$pkg installed"; else notify-send -a Vitreus "$pkg install failed (exit $ec)"; fi; '
+            .. 'echo; printf "Press Enter to close… "; read _x; exit "$ec"'
+        local args = "_ " .. PK.tool .. " " .. r.name
+        spawn('t=$(command -v kitty foot alacritty ghostty konsole xterm | head -n1); [ -n "$t" ] || exit 1; case "$t" in *kitty) "$t" sh -c \'' .. inner .. '\' ' .. args
+            .. ' ;; *) "$t" -e sh -c \'' .. inner .. '\' ' .. args .. ' ;; esac')
+    end
+    local function search_packages(q, seq, done)
+        q = trim(q):gsub("^%-+", "")
+        if q == "" then return done({}, "Type a package's name to search the repositories and the AUR") end
+        if #q < 2 then return done({}, "Keep typing…") end
+        text.lmsg = "Searching…"
+        after(280, function()
+            if seq ~= S.seq then return end
+            pk_tool(function(tool)
+                if seq ~= S.seq then return end
+                if tool == "none" then return done({}, "pacman was not found: Packages is for Arch and its relatives") end
+                run(tool, { "--color=never", "-Ss", q }, function(out)
+                    if seq ~= S.seq then return end
+                    local lines, rows = {}, {}
+                    for l in (out or ""):gmatch("[^\n]+") do lines[#lines + 1] = l end
+                    for i, l in ipairs(lines) do
+                        local repo, name, ver = l:match("^([%w%-_.]+)/(%S+)%s+(%S+)")
+                        if repo and name:match("^[%w@._+%-]+$") then
+                            rows[#rows + 1] = { repo = repo, name = name, ver = ver, installed = l:lower():find("[installed", 1, true) ~= nil or l:lower():find("(installed", 1, true) ~= nil,   -- paru and pacman: [Installed]; yay: (Installed…)
+                                                desc = (lines[i + 1] or ""):match("^%s+(.+)$") or "" }
+                        end
+                    end
+                    pk_rank(rows, q)
+                    local out_rows = {}
+                    for i = 1, math.min(#rows, 40) do
+                        local r = rows[i]
+                        out_rows[i] = { title = r.name, sub = r.ver, desc = (r.installed and "Installed  ·  " or "") .. r.repo .. (r.desc ~= "" and ("  ·  " .. r.desc:sub(1, 90)) or ""),
+                                        glyph = r.installed and "✓" or "+", run = function() return pk_install(r) end }
+                    end
+                    done(out_rows, "No package matches")
+                end)
+            end)
+        end)
+    end
+
     -- ── what is typed → what is shown ──
+    -- The kind of search shown in the header chip; a change of kind also tells the scene (`sr_n`: the Search icon turns a quarter).
+    local shown_mode, mode_turns = nil, 0
+    local function set_mode(label)
+        if label ~= shown_mode then
+            if shown_mode ~= nil then mode_turns = mode_turns + 1; fact.sr_n = mode_turns end
+            shown_mode = label
+        end
+        text.lmode = label
+    end
     local function search()
         local raw = lq()
         S.last = raw
@@ -6376,7 +7032,7 @@ end
             local c = try_units(q) or try_calc(q)
             local list = search_apps(q)
             if c then table.insert(list, 1, c); mode = "calc" end
-            text.lmode = LABEL[mode]
+            set_mode(LABEL[mode])
             fact.lp_on = false
             done(list)
             -- open windows that match, a few, after the apps (they come from Hyprland a moment later)
@@ -6391,7 +7047,7 @@ end
             end
             return
         end
-        text.lmode = LABEL[mode]
+        set_mode(LABEL[mode])
         fact.lp_on = (mode == "files" or mode == "clipboard" or mode == "wallpapers")
         if mode == "calc" then
             local c = try_units(q) or try_calc(q)
@@ -6399,6 +7055,7 @@ end
         elseif mode == "web" then search_web(q, seq, done)
         elseif mode == "windows" then window_rows(q, 30, function(rows) done(rows, "No open window matches") end)
         elseif mode == "snippets" then search_snippets(q, done)
+        elseif mode == "packages" then search_packages(q, seq, done)
         elseif mode == "commands" then done(search_commands(q))
         elseif mode == "wallpapers" then done(search_wallpapers(q))
         elseif mode == "emoji" then search_emoji(q, done)
@@ -6463,8 +7120,12 @@ end
     on("launch_delsel", function() remove_result(S.res[S.sel]) end)
     on("launch_pick", function(i) run_result(S.res[S.start + math.floor(i + 0.5)]) end)
     on("launch_run", function() run_result(S.res[S.sel]) end)
+    on("launch_ctx", function(i)
+        local r = S.res[S.start + math.floor(i + 0.5)]
+        if r and r.app and cdk_toggle(r.app) ~= nil then render(true) end
+    end)
     on("launch_hint", function(i)
-        text.lq = ({ "#", ">", ":", "^", "~", "@", "?", "$", "=" })[math.floor(i + 0.5) + 1] or ""
+        text.lq = ({ "#", ">", ":", "^", "~", "@", "?", "$", "=", "+" })[math.floor(i + 0.5) + 1] or ""
         focus("lq")
     end)
 end)()
@@ -6566,8 +7227,14 @@ end)()
 -- bar monitors: see logic/bar_monitors.luau
 if not trial_policy then require("logic/bar_monitors")(with_dirs) end
 
+-- panels from a key, on the focused monitor: see logic/panel_monitor.luau
+require("logic/panel_monitor")()
+
 -- bar position: see logic/bar_position.luau
 if not trial_policy then require("logic/bar_position")() end
+
+-- bar size: see logic/bar_size.luau
+require("logic/bar_size")()
 
 -- bar layout: see logic/bar_layout.luau
 require("logic/bar_layout")()
@@ -6580,6 +7247,19 @@ require("logic/tray")(set_panel)
 
 -- nightmode: see logic/nightmode.luau
 if not trial_policy then require("logic/nightmode")(with_dirs) end
+
+-- the audio visualiser (the bottom edge rising into the music): see logic/visualizer.luau
+require("logic/visualizer")()
+
+-- add-ons people write (Settings > Widgets > Add-ons): see logic/addons.luau
+require("logic/addons")()
+
+-- the wallpaper hook for the add-on that frames wallpapers: see logic/wallpaper_hook.luau
+require("logic/wallpaper_hook")(wp_apply, function() return wp_cur end)
+
+-- how big a notification is (Settings > Notifications): see logic/notif_size.luau
+require("logic/notif_size")()
+
 -- Settings > Keybinds.
 if not trial_policy then require("logic/keybinds")() end
 
@@ -6590,7 +7270,7 @@ if not trial_policy then require("logic/keybinds")() end
 -- once. How big the hexagons are, and where each one goes, is worked out by the scene from how many there are (see
 -- the end of vitreus.plm).
 ;(function()
-    local RULE = 8                                      -- which version made the file: an older one is made again
+    local RULE = 10                                     -- which version made the file: an older one is made again (the two before only have their colours read again: `recolour`)
     local TW, TH = 120, 139                              -- the hexagon picture, in pixels (a pointy-top hexagon is 0.866 as wide as tall)
     local PAD = 2                                        -- the transparent margin round it (the file is TW + 2 PAD by TH + 2 PAD: see vitreus.plm)
     local HERO = 260                                     -- the square picture the hexagon is cut from
@@ -6618,6 +7298,42 @@ if not trial_policy then require("logic/keybinds")() end
         return h % 360
     end
 
+    -- What a 32-colour histogram says of a wallpaper: its hue, its saturation and its brightness. The hue is the DOMINANT one, not an average of all of them: a snowy
+    -- blue village with orange roofs has two opposite hues, and their average cancels out to an angle that is in neither (it came out pink). Each colour counts by its
+    -- area, its saturation and its brightness (so a big pale-blue sky outweighs a few orange roofs, and a bright neon sign outweighs the dark it hangs in); the hue is the
+    -- middle of the 60-degree stretch of the wheel that holds the most, as the mean of what lies in it.
+    local function colours_of(f, res)
+        local total, sat_sum, val_sum = 0, 0, 0
+        local entries = {}
+        for count, r, g, b in res:gmatch("(%d+):%s*%(%s*([%d%.]+)%s*,%s*([%d%.]+)%s*,%s*([%d%.]+)") do
+            local n = tonumber(count)
+            local h, sa, v = hsv(tonumber(r), tonumber(g), tonumber(b))
+            total = total + n
+            val_sum = val_sum + n * v
+            if v > 0.12 then sat_sum = sat_sum + n * sa end
+            entries[#entries + 1] = { h = h, w = n * sa * math.max(v, 0.1) }
+        end
+        if total <= 0 then return nil end
+        local best, most = 0, -1
+        for c = 0, 350, 10 do
+            local sum = 0
+            for _, e in ipairs(entries) do
+                if math.abs((e.h - c + 180) % 360 - 180) <= 30 then sum = sum + e.w end
+            end
+            if sum > most then best, most = c, sum end
+        end
+        local x, y, wsum = 0, 0, 0
+        for _, e in ipairs(entries) do
+            if math.abs((e.h - best + 180) % 360 - 180) <= 30 then
+                x = x + e.w * math.cos(math.rad(e.h))
+                y = y + e.w * math.sin(math.rad(e.h))
+                wsum = wsum + e.w
+            end
+        end
+        local hue = (wsum > 1e-6 and (x * x + y * y) > 1e-9) and (math.deg(atan2(y, x)) % 360) or seed_hue(f)
+        return { h = hue, s = sat_sum / total, v = val_sum / total }
+    end
+
     local function hex_of(f) return G.dir .. "/" .. name_of(f) .. ".hex.png" end
 
     -- One wallpaper: its square picture and its colours (one ImageMagick pass), then its hexagon: that picture cut to the
@@ -6643,23 +7359,8 @@ if not trial_policy then require("logic/keybinds")() end
                         "-thumbnail", "100x100", "-colors", "32", "-format", "%c", "histogram:info:" },
             function(res, code)
                 if code == 0 and res then
-                    local total, sat_sum, val_sum, x, y, wsum = 0, 0, 0, 0, 0, 0
-                    for count, r, g, b in res:gmatch("(%d+):%s*%(%s*([%d%.]+)%s*,%s*([%d%.]+)%s*,%s*([%d%.]+)") do
-                        local n = tonumber(count)
-                        local h, sa, v = hsv(tonumber(r), tonumber(g), tonumber(b))
-                        total = total + n
-                        val_sum = val_sum + n * v
-                        if v > 0.12 then sat_sum = sat_sum + n * sa end
-                        -- the hue that counts is the vivid one: a dark scene with a neon sign is that sign's colour
-                        local w = n * sa ^ 1.6 * (0.25 + v)
-                        x = x + w * math.cos(math.rad(h))
-                        y = y + w * math.sin(math.rad(h))
-                        wsum = wsum + w
-                    end
-                    if total > 0 then
-                        local hue = (wsum > 1e-6 and (x * x + y * y) > 1e-9) and (math.deg(atan2(y, x)) % 360) or seed_hue(f)
-                        G.data[f] = { h = hue, s = sat_sum / total, v = val_sum / total }
-                    end
+                    local d = colours_of(f, res)
+                    if d then G.data[f] = d end
                 end
                 done()
             end)
@@ -6713,10 +7414,46 @@ if not trial_policy then require("logic/keybinds")() end
         model.wp_picker = rows
     end
 
+    -- Only a wallpaper's colours, again (its hexagon is already made): after the way the hue is worked out changed (the file's rule before this one), two at a time in the
+    -- background, and the tray is laid out once more when they are done.
+    local function recolour(f, done)
+        wpv.src(f, function(src)
+            if not src then done() return end
+            run("magick", { "-limit", "thread", "1", "-define", "jpeg:size=200x200", src .. "[0]", "-thumbnail", "100x100^", "-gravity", "center", "-extent", "100x100",
+                            "-colors", "32", "-format", "%c", "histogram:info:" }, function(res, code)
+                if code == 0 and res then
+                    local d = colours_of(f, res)
+                    if d then G.data[f] = d end
+                end
+                done()
+            end)
+        end)
+    end
+    local function recolour_all()
+        if not G.redo then return end
+        G.redo = false
+        local todo = {}
+        for _, f in ipairs(wp_files) do if G.data[f] and G.have[name_of(f)] then todo[#todo + 1] = f end end
+        local at, busy = 1, 0
+        local function step()
+            while busy < 2 and at <= #todo do
+                local f = todo[at]
+                at = at + 1
+                busy = busy + 1
+                recolour(f, function()
+                    busy = busy - 1
+                    if at > #todo and busy == 0 then save(); build() else step() end
+                end)
+            end
+        end
+        step()
+    end
+
     local function finish()
         save()
         G.laid = true
         build()
+        recolour_all()
     end
 
     local function pump()
@@ -6744,10 +7481,11 @@ if not trial_policy then require("logic/keybinds")() end
                 run("find", { G.dir, "-maxdepth", "1", "-name", "*.hex.png", "-printf", "%f\n" }, function(out)
                     for line in (out or ""):gmatch("[^\n]+") do G.have[line:gsub("%.hex%.png$", "")] = true end
                     local ok, saved = pcall(sys.ask, "files.read", "wallpaper-picker.json", "json")
-                    if ok and type(saved) == "table" and saved.rule == RULE then
+                    if ok and type(saved) == "table" and (type(saved.rule) == "number" and saved.rule >= RULE - 2 and saved.rule <= RULE) then
                         for f, e in pairs(saved) do
                             if type(e) == "table" and e.h then G.data[f] = e end
                         end
+                        G.redo = saved.rule ~= RULE
                     end
                     local missing = 0
                     for _, f in ipairs(wp_files) do
@@ -6760,6 +7498,7 @@ if not trial_policy then require("logic/keybinds")() end
                     if missing == 0 then
                         G.laid = true
                         build()
+                        recolour_all()
                     else
                         G.total = missing
                         text.wp_picker_status = string.format("Reading your wallpapers…  0 of %d", missing)
@@ -7218,8 +7957,9 @@ end)()
         want_gen = want_gen + 1
         local g = want_gen
         read_clients(function()
+            if g ~= want_gen or open then return end                     -- a newer ask came while this one read: that one decides
             match()
-            if #front_ids == 0 then return end
+            if #front_ids == 0 then return sys.call("thumbnails.want") end   -- nothing here to copy: let go of the last workspace's windows
             THUMB_UNTIL = os.time() + math.ceil(ms / 1000) + 4           -- these captures are ours: the screen-sharing light ignores them
             sys.call("thumbnails.want", front_ids)
             after(ms,function() if g == want_gen and not open then sys.call("thumbnails.want") end end)
@@ -7952,6 +8692,9 @@ end
 -- privacy lights: see logic/privacy.luau
 require("logic/privacy")()
 
+-- corner docks: see logic/dock.luau
+require("logic/dock")()
+
 -- shelf: see logic/shelf.luau
 require("logic/shelf")(with_dirs)
 
@@ -8007,4 +8750,5 @@ do
     local quiet = { none = true, volume = true, notif = true }
     on("fact:panel", function(v) if not quiet[tostring(v)] then chime() end end)
     on("fact:desk_open", function(v) if v == true then chime() end end)   -- the Desk is not one of the panels: it has its own fact
+    on("fact:ax_chime", function() chime() end)   -- an add-on's drawer: the logic opens it, so the scene counts its openings
 end

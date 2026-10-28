@@ -2,5 +2,5 @@
 //  What pleamar-wm's scene takes from it: the colour of the focused window's border.
 
 library WmPalette {
-    let wm_border = #fbfcf2
+    let wm_border = #fbf7f4
 }

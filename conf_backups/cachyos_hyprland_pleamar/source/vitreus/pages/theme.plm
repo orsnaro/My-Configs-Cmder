@@ -1,149 +1,106 @@
 part Theme {
-        //  The Theme page: four looks (logic: `theme_pick`). Glass: liquid glass in the colours Iris reads off the wallpaper. Retro: moulded plastic in its own palette. UwU: candy-coloured plastic with cat ears, stars, hearts and paws. Cyber: near-black glass with neon HUD marks, digital rain and terminal readouts.
+        //  The Theme page: a card for each theme (logic: `theme_pick`), one file each in themes/ (Glass, Retro, UwU, Cyber) or in ~/.config/pleamar/vitreus-themes (a person's own; themes/_template.toml
+        //  is the model). Glass: liquid glass in the colours Iris reads off the wallpaper. Retro: moulded plastic in its own palette. UwU: candy-coloured plastic with cat ears, stars, hearts and paws. Cyber: near-black glass with neon HUD marks, digital rain and terminal readouts.
         //  The lock screen, the window borders and the rest follow whichever is chosen.
         group {
             show: set_pgp > 0.01
             opacity: set_pgp
-            group { scale: rs; pivot: floor(spx + 14 * pu + 0.5), floor(sby + 16 * pu + 0.5); text "Theme" { at: floor(spx + 14 * pu + 0.5), floor(sby + 16 * pu + 0.5); anchor: left center; size: 17.5; weight: 700; color: ink; family: "Space Grotesk" } }
-            group { scale: rs; pivot: floor(spx + 424 * pu + 0.5), floor(sby + 16 * pu + 0.5); text "Changes apply right away." { at: floor(spx + 424 * pu + 0.5), floor(sby + 16 * pu + 0.5); anchor: right center; size: 13.5; color: faint; opacity: 80%; family: "Space Grotesk" } }
-            //  The looks, as four cards: each shows its five colours as broad slanted stripes, fading from the panel colour on the left, where the words are.
-            //  The card the looks and the font sit in, like the ones under it.
-            body { color: mix(obsidian, ink, (6%) * 1.6); opacity: obs; shadow: 0, 2 * pu, 7 * pu, 40%, #000000; show: obs > 0.004; box { at: spx + 219 * pu, sby + 121 * pu; size: 438 * pu, 174 * pu; corner: 14 * pu } }
-            box { at: spx + 219 * pu, sby + 121 * pu; size: 438 * pu, 174 * pu; corner: 14 * pu; color: ink; opacity: (6%) * (1 - obs) }
-            //  Glass
+            group { scale: rs; pivot: floor(spx + 14 * pu + 0.5), floor(sby + 16 * pu + 0.5); text "Theme" { at: floor(spx + 14 * pu + 0.5), floor(sby + 16 * pu + 0.5); anchor: left center; size: 19.5; weight: 700; color: ink; family: "Space Grotesk" } }
+            group { scale: rs; pivot: floor(spx + 424 * pu + 0.5), floor(sby + 16 * pu + 0.5); text "Changes apply right away." { at: floor(spx + 424 * pu + 0.5), floor(sby + 16 * pu + 0.5); anchor: right center; size: 15; color: faint; opacity: 80%; family: "Space Grotesk" } }
+            //  Glass, Retro, UwU, Cyber and whatever is in ~/.config/pleamar/vitreus-themes: a card each (the `themes` model, filled by the logic from the theme files),
+            //  four in view at a time in a strip that moves with the wheel over it or with the arrows under it. The selected card has a ring and a tick.
             group {
-                clip inset 0 box { at: spx + 62 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu }
-                body { gradient: spx + 62 * pu - 48 * pu, sby + 84 * pu to spx + 62 * pu + 48 * pu, sby + 84 * pu, mix(wcol.tint, mix(#000000, tint, pk), 0.66), mix(wcol.tint, mix(#000000, tint, pk), 0.54) 55%, mix(wcol.tint, mix(#000000, tint, pk), 0.1); path { at: spx + 62 * pu, sby + 84 * pu; move -72.4 * pu, -38 * pu; line -44.3 * pu, -38 * pu; line -65 * pu, 38 * pu; line -93 * pu, 38 * pu; close } }
-                body { gradient: spx + 62 * pu - 48 * pu, sby + 84 * pu to spx + 62 * pu + 48 * pu, sby + 84 * pu, mix(wcol.panel, mix(#000000, tint, pk), 0.66), mix(wcol.panel, mix(#000000, tint, pk), 0.54) 55%, mix(wcol.panel, mix(#000000, tint, pk), 0.1); path { at: spx + 62 * pu, sby + 84 * pu; move -47.3 * pu, -38 * pu; line -19.2 * pu, -38 * pu; line -39.9 * pu, 38 * pu; line -67.9 * pu, 38 * pu; close } }
-                body { gradient: spx + 62 * pu - 48 * pu, sby + 84 * pu to spx + 62 * pu + 48 * pu, sby + 84 * pu, mix(wcol.ink, mix(#000000, tint, pk), 0.66), mix(wcol.ink, mix(#000000, tint, pk), 0.54) 55%, mix(wcol.ink, mix(#000000, tint, pk), 0.1); path { at: spx + 62 * pu, sby + 84 * pu; move -22.2 * pu, -38 * pu; line 5.9 * pu, -38 * pu; line -14.8 * pu, 38 * pu; line -42.8 * pu, 38 * pu; close } }
-                body { gradient: spx + 62 * pu - 48 * pu, sby + 84 * pu to spx + 62 * pu + 48 * pu, sby + 84 * pu, mix(wcol.mint, mix(#000000, tint, pk), 0.66), mix(wcol.mint, mix(#000000, tint, pk), 0.54) 55%, mix(wcol.mint, mix(#000000, tint, pk), 0.1); path { at: spx + 62 * pu, sby + 84 * pu; move 3 * pu, -38 * pu; line 31 * pu, -38 * pu; line 10.3 * pu, 38 * pu; line -17.7 * pu, 38 * pu; close } }
-                body { gradient: spx + 62 * pu - 48 * pu, sby + 84 * pu to spx + 62 * pu + 48 * pu, sby + 84 * pu, mix(wcol.alert, mix(#000000, tint, pk), 0.66), mix(wcol.alert, mix(#000000, tint, pk), 0.54) 55%, mix(wcol.alert, mix(#000000, tint, pk), 0.1); path { at: spx + 62 * pu, sby + 84 * pu; move 28.1 * pu, -38 * pu; line 56.1 * pu, -38 * pu; line 35.4 * pu, 38 * pu; line 7.4 * pu, 38 * pu; close } }
-                box { at: spx + 62 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; color: #ffffff; opacity: 8% * theme_hit.0.hover }
+                clip inset 0 box { at: spx + 219 * pu, sby + 84 * pu; size: 410 * pu, 80 * pu }
+                repeat i in 0..16 {
+                    let cx = spx + (62 + 104.67 * (i - th_pos)) * pu
+                    let cy = sby + 84 * pu
+                    let swa = rgb(if(themes.$i.live, wcol_tint_r, themes.$i.c0r), if(themes.$i.live, wcol_tint_g, themes.$i.c0g), if(themes.$i.live, wcol_tint_b, themes.$i.c0b))
+                    let swb = rgb(if(themes.$i.live, wcol_panel_r, themes.$i.c1r), if(themes.$i.live, wcol_panel_g, themes.$i.c1g), if(themes.$i.live, wcol_panel_b, themes.$i.c1b))
+                    let swc = rgb(if(themes.$i.live, wcol_ink_r, themes.$i.c2r), if(themes.$i.live, wcol_ink_g, themes.$i.c2g), if(themes.$i.live, wcol_ink_b, themes.$i.c2b))
+                    let swd = rgb(if(themes.$i.live, wcol_mint_r, themes.$i.c3r), if(themes.$i.live, wcol_mint_g, themes.$i.c3g), if(themes.$i.live, wcol_mint_b, themes.$i.c3b))
+                    let swe = rgb(if(themes.$i.live, wcol_alert_r, themes.$i.c4r), if(themes.$i.live, wcol_alert_g, themes.$i.c4g), if(themes.$i.live, wcol_alert_b, themes.$i.c4b))
+                    group {
+                        show: i < themes.count and cx > spx - 60 * pu and cx < spx + 480 * pu
+                        group {
+                            clip inset 0 box { at: cx, cy; size: 96 * pu, 76 * pu; corner: 14 * pu }
+                            body { gradient: cx - 48 * pu, cy to cx + 48 * pu, cy, mix(swa, mix(#000000, tint, pk), 0.66), mix(swa, mix(#000000, tint, pk), 0.54) 55%, mix(swa, mix(#000000, tint, pk), 0.1); path { at: cx, cy; move -72.4 * pu, -38 * pu; line -44.3 * pu, -38 * pu; line -65.0 * pu, 38 * pu; line -93.0 * pu, 38 * pu; close } }
+                            body { gradient: cx - 48 * pu, cy to cx + 48 * pu, cy, mix(swb, mix(#000000, tint, pk), 0.66), mix(swb, mix(#000000, tint, pk), 0.54) 55%, mix(swb, mix(#000000, tint, pk), 0.1); path { at: cx, cy; move -47.3 * pu, -38 * pu; line -19.2 * pu, -38 * pu; line -39.9 * pu, 38 * pu; line -67.9 * pu, 38 * pu; close } }
+                            body { gradient: cx - 48 * pu, cy to cx + 48 * pu, cy, mix(swc, mix(#000000, tint, pk), 0.66), mix(swc, mix(#000000, tint, pk), 0.54) 55%, mix(swc, mix(#000000, tint, pk), 0.1); path { at: cx, cy; move -22.2 * pu, -38 * pu; line 5.9 * pu, -38 * pu; line -14.8 * pu, 38 * pu; line -42.8 * pu, 38 * pu; close } }
+                            body { gradient: cx - 48 * pu, cy to cx + 48 * pu, cy, mix(swd, mix(#000000, tint, pk), 0.66), mix(swd, mix(#000000, tint, pk), 0.54) 55%, mix(swd, mix(#000000, tint, pk), 0.1); path { at: cx, cy; move 3.0 * pu, -38 * pu; line 31.1 * pu, -38 * pu; line 10.4 * pu, 38 * pu; line -17.6 * pu, 38 * pu; close } }
+                            body { gradient: cx - 48 * pu, cy to cx + 48 * pu, cy, mix(swe, mix(#000000, tint, pk), 0.66), mix(swe, mix(#000000, tint, pk), 0.54) 55%, mix(swe, mix(#000000, tint, pk), 0.1); path { at: cx, cy; move 28.1 * pu, -38 * pu; line 56.2 * pu, -38 * pu; line 35.5 * pu, 38 * pu; line 7.5 * pu, 38 * pu; close } }
+                            box { at: cx, cy; size: 96 * pu, 76 * pu; color: #ffffff; opacity: 8% * theme_hit.$i.hover }
+                        }
+                        box { at: cx, cy; size: 96 * pu, 76 * pu; corner: 14 * pu; stroke: 1.6 * pu; color: mint; opacity: if(theme_sel == i, 90%, 0) }
+                        group { scale: rs; pivot: floor(cx - 40 * pu + 0.5), floor(cy - 17 * pu + 0.5); text themes.$i.name { at: floor(cx - 40 * pu + 0.5), floor(cy - 17 * pu + 0.5); anchor: left center; size: 17; weight: 700; width: (80 * pu) / rs; lines: 1; color: ink; family: "Space Grotesk" } }
+                        group { scale: rs; pivot: floor(cx - 40 * pu + 0.5), floor(cy + 4 * pu + 0.5); text themes.$i.tag { at: floor(cx - 40 * pu + 0.5), floor(cy + 4 * pu + 0.5); anchor: left center; size: 13.5; weight: 500; width: (80 * pu) / rs; lines: 1; color: faint; family: "Space Grotesk" } }
+                        ellipse { at: cx + -34 * pu, cy + 24 * pu; radius: 6.4 * pu; color: swa }
+                        ellipse { at: cx + -34 * pu, cy + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
+                        ellipse { at: cx + -17 * pu, cy + 24 * pu; radius: 6.4 * pu; color: swb }
+                        ellipse { at: cx + -17 * pu, cy + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
+                        ellipse { at: cx + 0 * pu, cy + 24 * pu; radius: 6.4 * pu; color: swc }
+                        ellipse { at: cx + 0 * pu, cy + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
+                        ellipse { at: cx + 17 * pu, cy + 24 * pu; radius: 6.4 * pu; color: swd }
+                        ellipse { at: cx + 17 * pu, cy + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
+                        ellipse { at: cx + 34 * pu, cy + 24 * pu; radius: 6.4 * pu; color: swe }
+                        ellipse { at: cx + 34 * pu, cy + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
+                        ellipse { at: cx + 36 * pu, cy - 25 * pu; radius: 7 * pu; color: mint; opacity: if(theme_sel == i, 100%, 0) }
+                        path { at: cx + 36 * pu, cy - 25 * pu; stroke: 1.5 * pu; color: onmint; opacity: if(theme_sel == i, 100%, 0); move -3 * pu, 0; line -0.9 * pu, 2.5 * pu; line 3.2 * pu, -2.7 * pu }
+                        zone box theme_hit.$i { at: cx, cy; size: 96 * pu, 76 * pu; corner: 14 * pu; cursor: pointer; active: abs(cx - (spx + 219 * pu)) < 205 * pu; label: "Theme" }
+                        on press theme_hit.$i { emit theme_pick(i) }
+                        on scroll theme_hit.$i { th_first = clamp(th_first - sign(wheel), 0, max(0, themes.count - 4)) }
+                    }
+                }
             }
-            box { at: spx + 62 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu; stroke: 1.6 * pu; color: mint; opacity: if(theme_sel == 0, 90%, 0) }
-            group { scale: rs; pivot: floor(spx + 62 * pu - 40 * pu + 0.5), floor(sby + 84 * pu - 17 * pu + 0.5); text "Glass" { at: floor(spx + 62 * pu - 40 * pu + 0.5), floor(sby + 84 * pu - 17 * pu + 0.5); anchor: left center; size: 15.5; weight: 700; color: ink; family: "Space Grotesk" } }
-            group { scale: rs; pivot: floor(spx + 62 * pu - 40 * pu + 0.5), floor(sby + 84 * pu + 4 * pu + 0.5); text "Wallpaper" { at: floor(spx + 62 * pu - 40 * pu + 0.5), floor(sby + 84 * pu + 4 * pu + 0.5); anchor: left center; size: 12; weight: 500; width: (80 * pu) / rs; lines: 1; color: faint; family: "Space Grotesk" } }
-            ellipse { at: spx + 62 * pu + -34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: wcol.tint }
-            ellipse { at: spx + 62 * pu + -34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 62 * pu + -17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: wcol.panel }
-            ellipse { at: spx + 62 * pu + -17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 62 * pu + 0 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: wcol.ink }
-            ellipse { at: spx + 62 * pu + 0 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 62 * pu + 17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: wcol.mint }
-            ellipse { at: spx + 62 * pu + 17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 62 * pu + 34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: wcol.alert }
-            ellipse { at: spx + 62 * pu + 34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 62 * pu + 36 * pu, sby + 84 * pu - 25 * pu; radius: 7 * pu; color: mint; opacity: if(theme_sel == 0, 100%, 0) }
-            path { at: spx + 62 * pu + 36 * pu, sby + 84 * pu - 25 * pu; stroke: 1.5 * pu; color: onmint; opacity: if(theme_sel == 0, 100%, 0); move -3 * pu, 0; line -0.9 * pu, 2.5 * pu; line 3.2 * pu, -2.7 * pu }
-            zone box theme_hit.0 { at: spx + 62 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu; cursor: pointer; label: "Glass theme" }
-            on press theme_hit.0 { emit theme_pick(0) }
-            //  Retro
-            group {
-                clip inset 0 box { at: spx + 167 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu }
-                body { gradient: spx + 167 * pu - 48 * pu, sby + 84 * pu to spx + 167 * pu + 48 * pu, sby + 84 * pu, mix(#d6d0bd, mix(#000000, tint, pk), 0.66), mix(#d6d0bd, mix(#000000, tint, pk), 0.54) 55%, mix(#d6d0bd, mix(#000000, tint, pk), 0.1); path { at: spx + 167 * pu, sby + 84 * pu; move -72.4 * pu, -38 * pu; line -44.3 * pu, -38 * pu; line -65 * pu, 38 * pu; line -93 * pu, 38 * pu; close } }
-                body { gradient: spx + 167 * pu - 48 * pu, sby + 84 * pu to spx + 167 * pu + 48 * pu, sby + 84 * pu, mix(#bfb9a5, mix(#000000, tint, pk), 0.66), mix(#bfb9a5, mix(#000000, tint, pk), 0.54) 55%, mix(#bfb9a5, mix(#000000, tint, pk), 0.1); path { at: spx + 167 * pu, sby + 84 * pu; move -47.3 * pu, -38 * pu; line -19.2 * pu, -38 * pu; line -39.9 * pu, 38 * pu; line -67.9 * pu, 38 * pu; close } }
-                body { gradient: spx + 167 * pu - 48 * pu, sby + 84 * pu to spx + 167 * pu + 48 * pu, sby + 84 * pu, mix(#2b2833, mix(#000000, tint, pk), 0.66), mix(#2b2833, mix(#000000, tint, pk), 0.54) 55%, mix(#2b2833, mix(#000000, tint, pk), 0.1); path { at: spx + 167 * pu, sby + 84 * pu; move -22.2 * pu, -38 * pu; line 5.9 * pu, -38 * pu; line -14.8 * pu, 38 * pu; line -42.8 * pu, 38 * pu; close } }
-                body { gradient: spx + 167 * pu - 48 * pu, sby + 84 * pu to spx + 167 * pu + 48 * pu, sby + 84 * pu, mix(#e63a3a, mix(#000000, tint, pk), 0.66), mix(#e63a3a, mix(#000000, tint, pk), 0.54) 55%, mix(#e63a3a, mix(#000000, tint, pk), 0.1); path { at: spx + 167 * pu, sby + 84 * pu; move 3 * pu, -38 * pu; line 31 * pu, -38 * pu; line 10.3 * pu, 38 * pu; line -17.7 * pu, 38 * pu; close } }
-                body { gradient: spx + 167 * pu - 48 * pu, sby + 84 * pu to spx + 167 * pu + 48 * pu, sby + 84 * pu, mix(#d81b60, mix(#000000, tint, pk), 0.66), mix(#d81b60, mix(#000000, tint, pk), 0.54) 55%, mix(#d81b60, mix(#000000, tint, pk), 0.1); path { at: spx + 167 * pu, sby + 84 * pu; move 28.1 * pu, -38 * pu; line 56.1 * pu, -38 * pu; line 35.4 * pu, 38 * pu; line 7.4 * pu, 38 * pu; close } }
-                box { at: spx + 167 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; color: #ffffff; opacity: 8% * theme_hit.8.hover }
+            //  Under the cards: a line about the files (what went wrong with one, or where to put a theme) and, when there are more than four themes, dots for
+            //  where the strip is, with an arrow each side.
+            group { scale: rs; pivot: floor(spx + 14 * pu + 0.5), floor(sby + 134 * pu + 0.5); text th_note { at: floor(spx + 14 * pu + 0.5), floor(sby + 134 * pu + 0.5); anchor: left center; size: 13; width: (270 * pu) / rs; lines: 1; color: if(th_err, alert, faint); opacity: if(th_err, 100%, 70%); family: "Space Grotesk" } }
+            let nvx = spx + 366 * pu
+            let nvh = (themes.count - 1) * 4
+            repeat k in 0..16 {
+                ellipse { at: nvx + (k * 8 - nvh) * pu, sby + 134 * pu; radius: 2 * pu; color: ink; opacity: if(k >= th_pos - 0.5 and k < th_pos + 3.5, 80%, 24%); show: themes.count > 4 and k < themes.count }
             }
-            box { at: spx + 167 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu; stroke: 1.6 * pu; color: mint; opacity: if(theme_sel == 8, 90%, 0) }
-            group { scale: rs; pivot: floor(spx + 167 * pu - 40 * pu + 0.5), floor(sby + 84 * pu - 17 * pu + 0.5); text "Retro" { at: floor(spx + 167 * pu - 40 * pu + 0.5), floor(sby + 84 * pu - 17 * pu + 0.5); anchor: left center; size: 15.5; weight: 700; color: ink; family: "Space Grotesk" } }
-            group { scale: rs; pivot: floor(spx + 167 * pu - 40 * pu + 0.5), floor(sby + 84 * pu + 4 * pu + 0.5); text "Plastic" { at: floor(spx + 167 * pu - 40 * pu + 0.5), floor(sby + 84 * pu + 4 * pu + 0.5); anchor: left center; size: 12; weight: 500; width: (80 * pu) / rs; lines: 1; color: faint; family: "Space Grotesk" } }
-            ellipse { at: spx + 167 * pu + -34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #d6d0bd }
-            ellipse { at: spx + 167 * pu + -34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 167 * pu + -17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #bfb9a5 }
-            ellipse { at: spx + 167 * pu + -17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 167 * pu + 0 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #2b2833 }
-            ellipse { at: spx + 167 * pu + 0 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 167 * pu + 17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #e63a3a }
-            ellipse { at: spx + 167 * pu + 17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 167 * pu + 34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #d81b60 }
-            ellipse { at: spx + 167 * pu + 34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 167 * pu + 36 * pu, sby + 84 * pu - 25 * pu; radius: 7 * pu; color: mint; opacity: if(theme_sel == 8, 100%, 0) }
-            path { at: spx + 167 * pu + 36 * pu, sby + 84 * pu - 25 * pu; stroke: 1.5 * pu; color: onmint; opacity: if(theme_sel == 8, 100%, 0); move -3 * pu, 0; line -0.9 * pu, 2.5 * pu; line 3.2 * pu, -2.7 * pu }
-            zone box theme_hit.8 { at: spx + 167 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu; cursor: pointer; label: "Retro theme" }
-            on press theme_hit.8 { emit theme_pick(8) }
-            //  UwU
-            group {
-                clip inset 0 box { at: spx + 271 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu }
-                body { gradient: spx + 271 * pu - 48 * pu, sby + 84 * pu to spx + 271 * pu + 48 * pu, sby + 84 * pu, mix(#fff2fa, mix(#000000, tint, pk), 0.66), mix(#fff2fa, mix(#000000, tint, pk), 0.54) 55%, mix(#fff2fa, mix(#000000, tint, pk), 0.1); path { at: spx + 271 * pu, sby + 84 * pu; move -72.4 * pu, -38 * pu; line -44.3 * pu, -38 * pu; line -65 * pu, 38 * pu; line -93 * pu, 38 * pu; close } }
-                body { gradient: spx + 271 * pu - 48 * pu, sby + 84 * pu to spx + 271 * pu + 48 * pu, sby + 84 * pu, mix(#ffd9ee, mix(#000000, tint, pk), 0.66), mix(#ffd9ee, mix(#000000, tint, pk), 0.54) 55%, mix(#ffd9ee, mix(#000000, tint, pk), 0.1); path { at: spx + 271 * pu, sby + 84 * pu; move -47.3 * pu, -38 * pu; line -19.2 * pu, -38 * pu; line -39.9 * pu, 38 * pu; line -67.9 * pu, 38 * pu; close } }
-                body { gradient: spx + 271 * pu - 48 * pu, sby + 84 * pu to spx + 271 * pu + 48 * pu, sby + 84 * pu, mix(#4a2b6b, mix(#000000, tint, pk), 0.66), mix(#4a2b6b, mix(#000000, tint, pk), 0.54) 55%, mix(#4a2b6b, mix(#000000, tint, pk), 0.1); path { at: spx + 271 * pu, sby + 84 * pu; move -22.2 * pu, -38 * pu; line 5.9 * pu, -38 * pu; line -14.8 * pu, 38 * pu; line -42.8 * pu, 38 * pu; close } }
-                body { gradient: spx + 271 * pu - 48 * pu, sby + 84 * pu to spx + 271 * pu + 48 * pu, sby + 84 * pu, mix(#ff5fae, mix(#000000, tint, pk), 0.66), mix(#ff5fae, mix(#000000, tint, pk), 0.54) 55%, mix(#ff5fae, mix(#000000, tint, pk), 0.1); path { at: spx + 271 * pu, sby + 84 * pu; move 3 * pu, -38 * pu; line 31 * pu, -38 * pu; line 10.3 * pu, 38 * pu; line -17.7 * pu, 38 * pu; close } }
-                body { gradient: spx + 271 * pu - 48 * pu, sby + 84 * pu to spx + 271 * pu + 48 * pu, sby + 84 * pu, mix(#5fe3d6, mix(#000000, tint, pk), 0.66), mix(#5fe3d6, mix(#000000, tint, pk), 0.54) 55%, mix(#5fe3d6, mix(#000000, tint, pk), 0.1); path { at: spx + 271 * pu, sby + 84 * pu; move 28.1 * pu, -38 * pu; line 56.1 * pu, -38 * pu; line 35.4 * pu, 38 * pu; line 7.4 * pu, 38 * pu; close } }
-                box { at: spx + 271 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; color: #ffffff; opacity: 8% * theme_hit.9.hover }
-            }
-            box { at: spx + 271 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu; stroke: 1.6 * pu; color: mint; opacity: if(theme_sel == 9, 90%, 0) }
-            group { scale: rs; pivot: floor(spx + 271 * pu - 40 * pu + 0.5), floor(sby + 84 * pu - 17 * pu + 0.5); text "UwU" { at: floor(spx + 271 * pu - 40 * pu + 0.5), floor(sby + 84 * pu - 17 * pu + 0.5); anchor: left center; size: 15.5; weight: 700; color: ink; family: "Space Grotesk" } }
-            group { scale: rs; pivot: floor(spx + 271 * pu - 40 * pu + 0.5), floor(sby + 84 * pu + 4 * pu + 0.5); text "Kawaii" { at: floor(spx + 271 * pu - 40 * pu + 0.5), floor(sby + 84 * pu + 4 * pu + 0.5); anchor: left center; size: 12; weight: 500; width: (80 * pu) / rs; lines: 1; color: faint; family: "Space Grotesk" } }
-            ellipse { at: spx + 271 * pu + -34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #fff2fa }
-            ellipse { at: spx + 271 * pu + -34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 271 * pu + -17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #ffd9ee }
-            ellipse { at: spx + 271 * pu + -17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 271 * pu + 0 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #4a2b6b }
-            ellipse { at: spx + 271 * pu + 0 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 271 * pu + 17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #ff5fae }
-            ellipse { at: spx + 271 * pu + 17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 271 * pu + 34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #5fe3d6 }
-            ellipse { at: spx + 271 * pu + 34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 271 * pu + 36 * pu, sby + 84 * pu - 25 * pu; radius: 7 * pu; color: mint; opacity: if(theme_sel == 9, 100%, 0) }
-            path { at: spx + 271 * pu + 36 * pu, sby + 84 * pu - 25 * pu; stroke: 1.5 * pu; color: onmint; opacity: if(theme_sel == 9, 100%, 0); move -3 * pu, 0; line -0.9 * pu, 2.5 * pu; line 3.2 * pu, -2.7 * pu }
-            zone box theme_hit.9 { at: spx + 271 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu; cursor: pointer; label: "UwU theme" }
-            on press theme_hit.9 { emit theme_pick(9) }
-            //  Cyber
-            group {
-                clip inset 0 box { at: spx + 376 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu }
-                body { gradient: spx + 376 * pu - 48 * pu, sby + 84 * pu to spx + 376 * pu + 48 * pu, sby + 84 * pu, mix(#05080f, mix(#000000, tint, pk), 0.66), mix(#05080f, mix(#000000, tint, pk), 0.54) 55%, mix(#05080f, mix(#000000, tint, pk), 0.1); path { at: spx + 376 * pu, sby + 84 * pu; move -72.4 * pu, -38 * pu; line -44.3 * pu, -38 * pu; line -65 * pu, 38 * pu; line -93 * pu, 38 * pu; close } }
-                body { gradient: spx + 376 * pu - 48 * pu, sby + 84 * pu to spx + 376 * pu + 48 * pu, sby + 84 * pu, mix(#0d2438, mix(#000000, tint, pk), 0.66), mix(#0d2438, mix(#000000, tint, pk), 0.54) 55%, mix(#0d2438, mix(#000000, tint, pk), 0.1); path { at: spx + 376 * pu, sby + 84 * pu; move -47.3 * pu, -38 * pu; line -19.2 * pu, -38 * pu; line -39.9 * pu, 38 * pu; line -67.9 * pu, 38 * pu; close } }
-                body { gradient: spx + 376 * pu - 48 * pu, sby + 84 * pu to spx + 376 * pu + 48 * pu, sby + 84 * pu, mix(#ff2bd6, mix(#000000, tint, pk), 0.66), mix(#ff2bd6, mix(#000000, tint, pk), 0.54) 55%, mix(#ff2bd6, mix(#000000, tint, pk), 0.1); path { at: spx + 376 * pu, sby + 84 * pu; move -22.2 * pu, -38 * pu; line 5.9 * pu, -38 * pu; line -14.8 * pu, 38 * pu; line -42.8 * pu, 38 * pu; close } }
-                body { gradient: spx + 376 * pu - 48 * pu, sby + 84 * pu to spx + 376 * pu + 48 * pu, sby + 84 * pu, mix(#00e5ff, mix(#000000, tint, pk), 0.66), mix(#00e5ff, mix(#000000, tint, pk), 0.54) 55%, mix(#00e5ff, mix(#000000, tint, pk), 0.1); path { at: spx + 376 * pu, sby + 84 * pu; move 3 * pu, -38 * pu; line 31 * pu, -38 * pu; line 10.3 * pu, 38 * pu; line -17.7 * pu, 38 * pu; close } }
-                body { gradient: spx + 376 * pu - 48 * pu, sby + 84 * pu to spx + 376 * pu + 48 * pu, sby + 84 * pu, mix(#ff3b5c, mix(#000000, tint, pk), 0.66), mix(#ff3b5c, mix(#000000, tint, pk), 0.54) 55%, mix(#ff3b5c, mix(#000000, tint, pk), 0.1); path { at: spx + 376 * pu, sby + 84 * pu; move 28.1 * pu, -38 * pu; line 56.1 * pu, -38 * pu; line 35.4 * pu, 38 * pu; line 7.4 * pu, 38 * pu; close } }
-                box { at: spx + 376 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; color: #ffffff; opacity: 8% * theme_hit.10.hover }
-            }
-            box { at: spx + 376 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu; stroke: 1.6 * pu; color: mint; opacity: if(theme_sel == 10, 90%, 0) }
-            group { scale: rs; pivot: floor(spx + 376 * pu - 40 * pu + 0.5), floor(sby + 84 * pu - 17 * pu + 0.5); text "Cyber" { at: floor(spx + 376 * pu - 40 * pu + 0.5), floor(sby + 84 * pu - 17 * pu + 0.5); anchor: left center; size: 15.5; weight: 700; color: ink; family: "Space Grotesk" } }
-            group { scale: rs; pivot: floor(spx + 376 * pu - 40 * pu + 0.5), floor(sby + 84 * pu + 4 * pu + 0.5); text "Neon HUD" { at: floor(spx + 376 * pu - 40 * pu + 0.5), floor(sby + 84 * pu + 4 * pu + 0.5); anchor: left center; size: 12; weight: 500; width: (80 * pu) / rs; lines: 1; color: faint; family: "Space Grotesk" } }
-            ellipse { at: spx + 376 * pu + -34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #05080f }
-            ellipse { at: spx + 376 * pu + -34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 376 * pu + -17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #0d2438 }
-            ellipse { at: spx + 376 * pu + -17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 376 * pu + 0 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #ff2bd6 }
-            ellipse { at: spx + 376 * pu + 0 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 376 * pu + 17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #00e5ff }
-            ellipse { at: spx + 376 * pu + 17 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 376 * pu + 34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; color: #ff3b5c }
-            ellipse { at: spx + 376 * pu + 34 * pu, sby + 84 * pu + 24 * pu; radius: 6.4 * pu; stroke: 1 * pu; color: ink; opacity: 28% }
-            ellipse { at: spx + 376 * pu + 36 * pu, sby + 84 * pu - 25 * pu; radius: 7 * pu; color: mint; opacity: if(theme_sel == 10, 100%, 0) }
-            path { at: spx + 376 * pu + 36 * pu, sby + 84 * pu - 25 * pu; stroke: 1.5 * pu; color: onmint; opacity: if(theme_sel == 10, 100%, 0); move -3 * pu, 0; line -0.9 * pu, 2.5 * pu; line 3.2 * pu, -2.7 * pu }
-            zone box theme_hit.10 { at: spx + 376 * pu, sby + 84 * pu; size: 96 * pu, 76 * pu; corner: 14 * pu; cursor: pointer; label: "Cyber theme" }
-            on press theme_hit.10 { emit theme_pick(10) }
+            path { at: nvx - (nvh + 16) * pu, sby + 134 * pu; stroke: 1.6 * pu; color: ink; opacity: (35% + 65% * th_prev_hit.hover) * if(th_first > 0, 1, 0.45); show: themes.count > 4; move 2 * pu, -4 * pu; line -2 * pu, 0; line 2 * pu, 4 * pu }
+            path { at: nvx + (nvh + 16) * pu, sby + 134 * pu; stroke: 1.6 * pu; color: ink; opacity: (35% + 65% * th_next_hit.hover) * if(th_first < themes.count - 4, 1, 0.45); show: themes.count > 4; move -2 * pu, -4 * pu; line 2 * pu, 0; line -2 * pu, 4 * pu }
+            zone box th_prev_hit { at: nvx - (nvh + 16) * pu, sby + 134 * pu; size: 22 * pu, 22 * pu; corner: 11 * pu; cursor: pointer; active: themes.count > 4; label: "Earlier themes" }
+            zone box th_next_hit { at: nvx + (nvh + 16) * pu, sby + 134 * pu; size: 22 * pu, 22 * pu; corner: 11 * pu; cursor: pointer; active: themes.count > 4; label: "Later themes" }
+            on press th_prev_hit { th_first = clamp(th_first - 1, 0, max(0, themes.count - 4)) }
+            on press th_next_hit { th_first = clamp(th_first + 1, 0, max(0, themes.count - 4)) }
             //  The font: a dropdown of the installed typefaces, a picture of the chosen one under it, and Apply (the shell starts again with it).
-            let fnt_y = sby + 164 * pu                       // the trigger's top
+            let fnt_y = sby + 178 * pu                       // the trigger's top
             let fnt_x = spx + 14 * pu
             let fnt_w = 410 * pu                             // as wide as the three looks above
-            group { scale: rs; pivot: floor(spx + 14 * pu + 0.5), floor(sby + 150 * pu + 0.5); text font_for { at: floor(spx + 14 * pu + 0.5), floor(sby + 150 * pu + 0.5); anchor: left center; size: 12; weight: 700; color: faint; family: "Space Grotesk" } }
+            group { scale: rs; pivot: floor(spx + 14 * pu + 0.5), floor(sby + 160 * pu + 0.5); text font_for { at: floor(spx + 14 * pu + 0.5), floor(sby + 160 * pu + 0.5); anchor: left center; size: 13.5; weight: 700; color: faint; family: "Space Grotesk" } }
             body { color: mix(obsidian, ink, (7% + 5% * font_hit.hover + 5% * font_dd) * 1.6); opacity: obs; shadow: 0, 2 * pu, 7 * pu, 40%, #000000; show: obs > 0.004; box { from: fnt_x, fnt_y; size: fnt_w, 34 * pu; corner: 12 * pu } }
             box { from: fnt_x, fnt_y; size: fnt_w, 34 * pu; corner: 12 * pu; color: ink; opacity: (7% + 5% * font_hit.hover + 5% * font_dd) * (1 - obs) }
             box { from: fnt_x, fnt_y; size: fnt_w, 34 * pu; corner: 12 * pu; stroke: 1.2 * pu; color: mint; opacity: 70% * font_dd }
-            group { scale: rs; pivot: floor(fnt_x + 14 * pu + 0.5), floor(fnt_y + 17 * pu + 0.5); text font_name { at: floor(fnt_x + 14 * pu + 0.5), floor(fnt_y + 17 * pu + 0.5); anchor: left center; size: 16; weight: 700; width: (fnt_w - 52 * pu) / rs; lines: 1; color: ink; family: "Space Grotesk" } }
+            group { scale: rs; pivot: floor(fnt_x + 14 * pu + 0.5), floor(fnt_y + 17 * pu + 0.5); text font_name { at: floor(fnt_x + 14 * pu + 0.5), floor(fnt_y + 17 * pu + 0.5); anchor: left center; size: 18; weight: 700; width: (fnt_w - 52 * pu) / rs; lines: 1; color: ink; family: "Space Grotesk" } }
             path { at: fnt_x + fnt_w - 20 * pu, fnt_y + 17 * pu; stroke: 1.6 * pu; color: ink; opacity: 60% + 40% * font_hit.hover; move -4 * pu, (-2 + 4 * font_dd) * pu; line 0, (2 - 4 * font_dd) * pu; line 4 * pu, (-2 + 4 * font_dd) * pu }
             zone box font_hit { from: fnt_x, fnt_y; size: fnt_w, 34 * pu; corner: 12 * pu; cursor: pointer; label: "Font" }
             on press font_hit { toggle font_dd_open; emit font_open; focus font_q }
             //  Apply: only while the choice differs from what is in use. On the label's row, at the right, so the selector keeps its whole width.
             group {
                 show: font_dirty
-                box { at: spx + 384 * pu, sby + 150 * pu; size: 80 * pu, 24 * pu; corner: 12 * pu; color: mint; opacity: 80% + 20% * font_apply_hit.hover }
-                group { scale: rs; pivot: floor(spx + 384 * pu + 0.5), floor(sby + 150 * pu + 0.5); text "Apply" { at: floor(spx + 384 * pu + 0.5), floor(sby + 150 * pu + 0.5); anchor: center; align: center; size: 14; weight: 700; color: onmint; family: "Space Grotesk" } }
-                zone box font_apply_hit { at: spx + 384 * pu, sby + 150 * pu; size: 80 * pu, 24 * pu; corner: 12 * pu; cursor: pointer; label: "Apply the font" }
+                box { at: spx + 384 * pu, sby + 160 * pu; size: 80 * pu, 24 * pu; corner: 12 * pu; color: mint; opacity: if(font_applying, 55%, 80% + 20% * font_apply_hit.hover) }
+                PPillOutline(spx + 384 * pu, sby + 160 * pu, 80 * pu, 24 * pu, 12 * pu, font_apply_hit.hover, clamp(3 * (if(font_applying, 55%, 80% + 20% * font_apply_hit.hover)), 0, 1), pu)
+                group { scale: rs; pivot: floor(spx + 384 * pu + 0.5), floor(sby + 160 * pu + 0.5); text "Applying…" { at: floor(spx + 384 * pu + 0.5), floor(sby + 160 * pu + 0.5); anchor: center; align: center; size: 15.5; weight: 700; color: onmint; family: "Space Grotesk"; show: font_applying } }
+                group { scale: rs; pivot: floor(spx + 384 * pu + 0.5), floor(sby + 160 * pu + 0.5); text "Apply" { show: not font_applying; at: floor(spx + 384 * pu + 0.5), floor(sby + 160 * pu + 0.5); anchor: center; align: center; size: 15.5; weight: 700; color: onmint; family: "Space Grotesk" } }
+                zone box font_apply_hit { at: spx + 384 * pu, sby + 160 * pu; size: 80 * pu, 24 * pu; corner: 12 * pu; cursor: pointer; label: "Apply the font" }
                 on press font_apply_hit { emit font_apply }
             }
             //  The preview: the typeface drawn as it will be, with what it will say.
-            group { scale: rs; pivot: floor(spx + 14 * pu + 0.5), floor(sby + 232 * pu + 0.5); text "PREVIEW" { at: floor(spx + 14 * pu + 0.5), floor(sby + 232 * pu + 0.5); anchor: left center; size: 12; weight: 700; color: faint; family: "Space Grotesk" } }
-            group { scale: rs; pivot: floor(spx + 424 * pu + 0.5), floor(sby + 232 * pu + 0.5); text font_note { at: floor(spx + 424 * pu + 0.5), floor(sby + 232 * pu + 0.5); anchor: right center; align: right; size: 12.5; width: (260 * pu) / rs; lines: 1; color: mint; family: "Space Grotesk" } }
-            body { color: mix(obsidian, ink, (6%) * 1.6); opacity: obs; shadow: 0, 2 * pu, 7 * pu, 40%, #000000; show: obs > 0.004; box { at: spx + 219 * pu, sby + 296 * pu; size: 438 * pu, 164 * pu; corner: 14 * pu } }
-            box { at: spx + 219 * pu, sby + 296 * pu; size: 438 * pu, 164 * pu; corner: 14 * pu; color: ink; opacity: (6%) * (1 - obs) }
-            image font_prev { at: spx + 14 * pu, sby + 244 * pu + 6.5 * pu; size: 410 * pu, 127 * pu; tint: ink }
+            group { scale: rs; pivot: floor(spx + 14 * pu + 0.5), floor(sby + 246 * pu + 0.5); text "PREVIEW" { at: floor(spx + 14 * pu + 0.5), floor(sby + 246 * pu + 0.5); anchor: left center; size: 13.5; weight: 700; color: faint; family: "Space Grotesk" } }
+            group { scale: rs; pivot: floor(spx + 424 * pu + 0.5), floor(sby + 246 * pu + 0.5); text font_note { at: floor(spx + 424 * pu + 0.5), floor(sby + 246 * pu + 0.5); anchor: right center; align: right; size: 14; width: (260 * pu) / rs; lines: 1; color: mint; family: "Space Grotesk" } }
+            body { color: mix(obsidian, ink, (6%) * 1.6); opacity: obs; shadow: 0, 2 * pu, 7 * pu, 40%, #000000; show: obs > 0.004; box { at: spx + 219 * pu, sby + 310 * pu; size: 438 * pu, 164 * pu; corner: 14 * pu } }
+            box { at: spx + 219 * pu, sby + 310 * pu; size: 438 * pu, 164 * pu; corner: 14 * pu; color: ink; opacity: (6%) * (1 - obs) }
+            image font_prev { at: spx + 14 * pu, sby + 258 * pu + 6.5 * pu; size: 410 * pu, 127 * pu; tint: ink }
+            //  Sound: the one switch, a short click when a panel opens.
+            body { color: mix(obsidian, ink, (6%) * 1.6); opacity: obs; shadow: 0, 2 * pu, 7 * pu, 40%, #000000; show: obs > 0.004; box { at: spx + 219 * pu, sby + 422 * pu; size: 438 * pu, 40 * pu; corner: 14 * pu } }
+            box { at: spx + 219 * pu, sby + 422 * pu; size: 438 * pu, 40 * pu; corner: 14 * pu; color: ink; opacity: (6%) * (1 - obs) }
+            group { scale: rs; pivot: floor(spx + 14 * pu + 0.5), floor(sby + 422 * pu + 0.5); text "Panel sound" { at: floor(spx + 14 * pu + 0.5), floor(sby + 422 * pu + 0.5); anchor: left center; size: 16.5; weight: 700; color: ink; family: "Space Grotesk" } }
+            group { scale: rs; pivot: floor(spx + 350 * pu + 0.5), floor(sby + 422 * pu + 0.5); text "Play a sound when a panel opens" { at: floor(spx + 350 * pu + 0.5), floor(sby + 422 * pu + 0.5); anchor: right center; size: 14.5; color: faint; family: "Space Grotesk" } }
+            SettingsSwitch(spx + 424 * pu, sby + 422 * pu, snd_pill, snd_hit.pressed, snd_hit.hover, mint)
+            zone box snd_hit { at: spx + 405 * pu, sby + 422 * pu; size: 46 * pu, 30 * pu; cursor: pointer; label: "Panel sound" }
+            on press snd_hit { emit snd_toggle }
             //  The dropdown, drawn last so its rows win the press over everything under it.
             zone box font_catch { at: spx + 219 * pu, sby + 290 * pu; size: 438 * pu, 330 * pu; active: font_dd_open }
             on press font_catch { font_dd_open = false; blur }
@@ -153,7 +110,7 @@ part Theme {
                 opacity: font_dd
                 move: 0, (font_dd - 1) * 6 * pu
                 body {
-                    color: panel
+                    color: card
                     rim: 12%
                     shadow: 0, 6 * pu, 18 * pu, 40%, #000000
                     box { from: fnt_x, fnt_y + 38 * pu; size: fnt_w, 236 * pu; corner: 14 * pu }
@@ -163,11 +120,11 @@ part Theme {
                 ellipse { at: fnt_x + 19 * pu, fnt_y + 38 * pu + 18 * pu; radius: 4 * pu; stroke: 1.4 * pu; color: faint }
                 path { at: fnt_x + 19 * pu, fnt_y + 38 * pu + 18 * pu; stroke: 1.5 * pu; color: faint; move 3 * pu, 3 * pu; line 6 * pu, 6 * pu }
                 input font_q { at: floor(fnt_x + 36 * pu + 0.5), floor(fnt_y + 38 * pu + 19 * pu - 9 + 0.5); width: fnt_w - 60 * pu; size: 15; color: ink; family: "Space Grotesk"; placeholder: "Search fonts"; show: font_dd > 0.5 }
-                group { scale: rs; pivot: floor(fnt_x + 18 * pu + 0.5), floor(fnt_y + 38 * pu + 100 * pu + 0.5); text "No typeface has that" { at: floor(fnt_x + 18 * pu + 0.5), floor(fnt_y + 38 * pu + 100 * pu + 0.5); anchor: left center; size: 14; color: faint; show: font_none; family: "Space Grotesk" } }
+                group { scale: rs; pivot: floor(fnt_x + 18 * pu + 0.5), floor(fnt_y + 38 * pu + 100 * pu + 0.5); text "No typeface has that" { at: floor(fnt_x + 18 * pu + 0.5), floor(fnt_y + 38 * pu + 100 * pu + 0.5); anchor: left center; size: 15.5; color: faint; show: font_none; family: "Space Grotesk" } }
                 repeat i in 0..8 {
                     let ry = fnt_y + 38 * pu + 39 * pu + i * 24 * pu + 12 * pu
                     box { at: fnt_x + (fnt_w - 10 * pu) / 2 + 5 * pu, ry; size: fnt_w - 22 * pu, 22 * pu; corner: 11 * pu; color: if(font_r.$i.lit, mint, ink); opacity: if(font_r.$i.on, if(font_r.$i.lit, 24%, 0%) + 10% * font_row_hit.$i.hover, 0%) }
-                    group { scale: rs; pivot: floor(fnt_x + 16 * pu + 0.5), floor(ry + 0.5); text font_r.$i.text { at: floor(fnt_x + 16 * pu + 0.5), floor(ry + 0.5); anchor: left center; size: 15; weight: 600; width: (fnt_w - 44 * pu) / rs; lines: 1; color: if(font_r.$i.lit, mint, ink); show: font_r.$i.on; family: "Space Grotesk" } }
+                    group { scale: rs; pivot: floor(fnt_x + 16 * pu + 0.5), floor(ry + 0.5); text font_r.$i.text { at: floor(fnt_x + 16 * pu + 0.5), floor(ry + 0.5); anchor: left center; size: 16.5; weight: 600; width: (fnt_w - 44 * pu) / rs; lines: 1; color: if(font_r.$i.lit, mint, ink); show: font_r.$i.on; family: "Space Grotesk" } }
                     zone box font_row_hit.$i { at: fnt_x + (fnt_w - 10 * pu) / 2 + 5 * pu, ry; size: fnt_w - 20 * pu, 24 * pu; corner: 12 * pu; cursor: pointer; active: font_r.$i.on and font_dd_open }
                     on press font_row_hit.$i { emit font_pick(i); font_dd_open = false; blur }
                 }
@@ -178,13 +135,5 @@ part Theme {
                 on press font_bar_hit { emit font_bar(((pointer.y - ty.set) - (fnt_y + 38 * pu + 40 * pu)) / (190 * pu)) }
                 on drag font_bar_hit { emit font_bar(((pointer.y - ty.set) - (fnt_y + 38 * pu + 40 * pu)) / (190 * pu)) }
             }
-            //  Sound: the one switch, a short click when a panel opens.
-            body { color: mix(obsidian, ink, (6%) * 1.6); opacity: obs; shadow: 0, 2 * pu, 7 * pu, 40%, #000000; show: obs > 0.004; box { at: spx + 219 * pu, sby + 422 * pu; size: 438 * pu, 40 * pu; corner: 14 * pu } }
-            box { at: spx + 219 * pu, sby + 422 * pu; size: 438 * pu, 40 * pu; corner: 14 * pu; color: ink; opacity: (6%) * (1 - obs) }
-            group { scale: rs; pivot: floor(spx + 14 * pu + 0.5), floor(sby + 422 * pu + 0.5); text "Panel sound" { at: floor(spx + 14 * pu + 0.5), floor(sby + 422 * pu + 0.5); anchor: left center; size: 15; weight: 700; color: ink; family: "Space Grotesk" } }
-            group { scale: rs; pivot: floor(spx + 350 * pu + 0.5), floor(sby + 422 * pu + 0.5); text "Play a sound when a panel opens" { at: floor(spx + 350 * pu + 0.5), floor(sby + 422 * pu + 0.5); anchor: right center; size: 13; color: faint; family: "Space Grotesk" } }
-            SettingsSwitch(spx + 424 * pu, sby + 422 * pu, snd_pill, snd_hit.pressed, mint)
-            zone box snd_hit { at: spx + 405 * pu, sby + 422 * pu; size: 46 * pu, 30 * pu; cursor: pointer; label: "Panel sound" }
-            on press snd_hit { emit snd_toggle }
         }
 }

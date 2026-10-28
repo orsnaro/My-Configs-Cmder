@@ -19,7 +19,7 @@ return function()
         return DISP[k] or k
     end
     local MODS = { { 1, "Super" }, { 4, "Ctrl" }, { 8, "Alt" }, { 2, "Shift" } }   -- the order a combo is written in
-    local MODBIT = { super = 1, mod4 = 1, win = 1, shift = 2, ctrl = 4, control = 4, alt = 8, mod1 = 8 }
+    local MODBIT = { super = 1, mod = 1, mod4 = 1, win = 1, shift = 2, ctrl = 4, control = 4, alt = 8, mod1 = 8 }
 
     -- What each bind does, by what it says to the shell. Binds that are not here are left out.
     local ACTS = {
@@ -49,6 +49,13 @@ return function()
             ["vitreus emit desk_toggle"] = { { 1, "d" } }, ["vitreus emit dash_toggle"] = { { 3, "d" } }, ["vitreus emit ov_toggle"] = { { 1, "Tab" } },
             ["vitreus emit shot 0"] = { { 0, "Print" }, { 1, "c" } }, ["vitreus emit shot 1"] = { { 2, "Print" } }, ["vitreus emit rec_toggle"] = { { 3, "c" } },
         },
+        niri = {
+            ["vitreus-files"] = { { 1, "e" } },
+            ["vitreus emit launch_toggle"] = { { 1, "space" } }, ["vitreus emit settings_toggle"] = { { 3, "space" } },
+            ["lockscreen fact locked true"] = { { 1, "l" } }, ["vitreus emit wp_picker_toggle"] = { { 1, "b" } },
+            ["vitreus emit desk_toggle"] = { { 1, "d" } }, ["vitreus emit dash_toggle"] = { { 3, "d" } }, ["vitreus emit ov_toggle"] = { { 1, "Tab" } },
+            ["vitreus emit shot 0"] = { { 0, "Print" }, { 1, "c" } }, ["vitreus emit shot 1"] = { { 2, "Print" } }, ["vitreus emit rec_toggle"] = { { 3, "c" } },
+        },
         pwm = {
             ["vitreus emit launch_toggle"] = { { 1, "space" } }, ["vitreus emit settings_toggle"] = { { 3, "space" } },
             ["lockscreen fact locked true"] = { { 1, "l" } }, ["vitreus emit wp_picker_toggle"] = { { 1, "b" } },
@@ -59,14 +66,15 @@ return function()
     }
 
     -- What a bind taken out here starts with: the line stays in the file, commented, so it can be put back.
-    local REMOVED = { hypr = "-- removed in Settings: ", pwm = "#removed# " }
+    local REMOVED = { hypr = "-- removed in Settings: ", pwm = "#removed# ", niri = "// removed in Settings: " }
 
     local K = { rows = {}, sel = 0, mask = 0, key = "" }     -- sel: 1-based, 0 = none
 
-    local function wm() return fact.wm_hypr == true and "hypr" or "pwm" end
+    local function wm() return fact.wm_niri == true and "niri" or (fact.wm_hypr == true and "hypr" or "pwm") end
     local function home() return K.home or "" end
     local function path()
         if wm() == "hypr" then return home() .. "/.config/hypr/hypr_vitreus.lua" end
+        if wm() == "niri" then return home() .. "/.config/niri/niri_vitreus.kdl" end
         return home() .. "/.config/pleamar/keys.conf"
     end
 
@@ -90,10 +98,10 @@ return function()
     local function write_combo(mask, key)
         local names = {}
         for _, m in ipairs(MODS) do
-            if bit32.band(mask, m[1]) ~= 0 then names[#names + 1] = wm() == "hypr" and m[2]:upper() or m[2] end
+            if bit32.band(mask, m[1]) ~= 0 then names[#names + 1] = wm() == "hypr" and m[2]:upper() or (wm() == "niri" and m[2] == "Super" and "Mod" or m[2]) end
         end
         local k = key
-        if wm() == "hypr" then
+        if wm() == "hypr" or wm() == "niri" then
             if #key == 1 then k = key:upper() elseif key == "space" then k = "Space" end    -- as the file has always written them
         end
         names[#names + 1] = k
@@ -149,7 +157,12 @@ return function()
             if code == 0 then
                 for line in (out or ""):gmatch("[^\n]+") do
                     local combo, act
-                    if wm() == "hypr" then
+                    if wm() == "niri" then
+                        local scene, cmd
+                        combo, scene, cmd = line:match("^%s*(%S+)%s*{%s*spawn%-sh%s+\"pleamar %-%-say (%S+) '(.-)'\"")
+                        if not combo then combo, scene = line:match('^%s*(%S+)%s*{%s*spawn%s+"(vitreus%-files)"') end
+                        act = cmd and (scene .. " " .. cmd) or scene
+                    elseif wm() == "hypr" then
                         combo = line:match('^hl%.bind%("([^"]+)"')
                         if combo then
                             local scene, cmd = line:match('pleamar %-%-say (%S+) \\"(.-)\\"')
@@ -213,7 +226,7 @@ return function()
         fact.kb_cap = false
         fact.kb_dirty = false
         text.kb_msg = ""
-        text.kb_where = wm() == "hypr" and "Hyprland  ·  hypr_vitreus.lua" or "Pleamar-WM  ·  keys.conf"
+        text.kb_where = wm() == "hypr" and "Hyprland  ·  hypr_vitreus.lua" or (wm() == "niri" and "niri  ·  niri_vitreus.kdl" or "Pleamar-WM  ·  keys.conf")
         refresh()
     end)
 
@@ -271,6 +284,8 @@ return function()
         local script
         if wm() == "hypr" then
             script = 's|"' .. old .. '"|"' .. new .. '"|g'
+        elseif wm() == "niri" then
+            script = 's|^\\([[:space:]]*\\)' .. old .. '\\([[:space:]]*{\\)|\\1' .. new .. '\\2|'
         else
             script = 's|^\\(unbind[[:space:]]\\{1,\\}\\)' .. old .. '[[:space:]]*$|\\1' .. new .. '|; ' ..
                      's|^\\(bind[[:space:]]\\{1,\\}\\)' .. old .. '\\([[:space:]]\\)|\\1' .. new .. '\\2|'
@@ -282,10 +297,10 @@ return function()
                     K.sel = 0
                     fact.kb_sel = -1
                     fact.kb_dirty = false
-                    text.kb_msg = wm() == "hypr" and "Saved. Hyprland has the new key." or "Saved. Pleamar-WM uses it from its next start."
+                    text.kb_msg = wm() == "hypr" and "Saved. Hyprland has the new key." or (wm() == "niri" and "Saved. niri has the new key." or "Saved. Pleamar-WM uses it from its next start.")
                 end)
             end
-            if wm() == "hypr" then run("hyprctl", { "reload" }, function() done() end) else done() end
+            if wm() == "hypr" then run("hyprctl", { "reload" }, function() done() end) else done() end     -- (niri reloads a file it includes by itself)
         end)
     end
 
@@ -305,6 +320,8 @@ return function()
         local script
         if wm() == "hypr" then
             script = 's|^\\(hl\\.bind("' .. old .. '",\\)|' .. REMOVED.hypr .. '\\1|'
+        elseif wm() == "niri" then
+            script = 's|^\\([[:space:]]*' .. old .. '[[:space:]]*{.*\\)$|' .. REMOVED.niri .. '\\1|'
         else
             script = 's|^\\(bind[[:space:]]\\{1,\\}' .. old .. '[[:space:]].*\\)$|' .. REMOVED.pwm .. '\\1\\nunbind ' .. old .. '|'
         end
@@ -326,7 +343,8 @@ return function()
     -- Its lines are dropped (and the ones Delete left as comments) and one block of the stock ones is written at the end of the file. Pressed
     -- twice (the first press only arms it): it overwrites the keys that were changed.
     local BLOCK = { hypr = { "-- >>> vitreus defaults (Settings > Keybinds)", "-- <<< vitreus defaults" },
-                    pwm = { "# >>> vitreus defaults (Settings > Keybinds)", "# <<< vitreus defaults" } }
+                    pwm = { "# >>> vitreus defaults (Settings > Keybinds)", "# <<< vitreus defaults" },
+                    niri = { "// >>> vitreus defaults (Settings > Keybinds)", "// <<< vitreus defaults" } }
     local function default_lines(w)
         local out = { BLOCK[w][1] }
         local acts = {}
@@ -336,7 +354,10 @@ return function()
             local scene, cmd = act:match("^(%S+) (.+)$")
             for _, d in ipairs(DEFAULTS[w][act]) do
                 local combo = write_combo(d[1], d[2])
-                if w == "hypr" then
+                if w == "niri" then
+                    out[#out + 1] = (act == "vitreus-files") and ("    " .. combo .. ' { spawn "vitreus-files"; }')
+                        or ("    " .. combo .. " { spawn-sh \"pleamar --say " .. scene .. " '" .. cmd .. "'\"; }")
+                elseif w == "hypr" then
                     local run_it = (act == "vitreus-files") and 'PATH=\\"$HOME/.local/bin:$PATH\\" vitreus-files'
                         or ('PATH=\\"$HOME/.local/bin:$PATH\\" pleamar --say ' .. scene .. ' \\"' .. cmd .. '\\"')
                     out[#out + 1] = 'hl.unbind("' .. combo .. '")'
@@ -350,6 +371,7 @@ return function()
             end
         end
         out[#out + 1] = BLOCK[w][2]
+        if w == "niri" then out[#out + 1] = "}" end          -- (niri has one `binds` per file: the block goes inside it, before its closing brace)
         return out
     end
     on("kb_defaults", function()
@@ -368,7 +390,12 @@ return function()
         table.sort(cmds)
         local alt = table.concat(cmds, "|")
         local drop, script2 = {}, {}
-        if w == "hypr" then
+        if w == "niri" then
+            drop = { "-e", "/^[[:space:]]*[^[:space:]]+[[:space:]]*\\{[[:space:]]*(spawn-sh[[:space:]]+\"pleamar --say (vitreus|lockscreen) '(" .. alt .. ")'\"|spawn[[:space:]]+\"vitreus-files\")/d",
+                     "-e", "/^\\/\\/ removed in Settings: /d",
+                     "-e", "/^\\/\\/ >>> vitreus defaults/,/^\\/\\/ <<< vitreus defaults/d",
+                     "-e", "${/^}[[:space:]]*$/d}" }
+        elseif w == "hypr" then
             drop = { "-e", '/^hl\\.bind\\(.*(--say (vitreus|lockscreen) \\\\"(' .. alt .. ')\\\\"|vitreus-files)/d',
                      "-e", "/^-- removed in Settings: /d",
                      "-e", "/^-- >>> vitreus defaults/,/^-- <<< vitreus defaults/d" }
@@ -396,7 +423,7 @@ return function()
                         K.sel = 0
                         fact.kb_sel = -1
                         fact.kb_dirty = false
-                        text.kb_msg = w == "hypr" and "Back to the default keys." or "Back to the default keys. Pleamar-WM uses them from its next start."
+                        text.kb_msg = (w == "hypr" or w == "niri") and "Back to the default keys." or "Back to the default keys. Pleamar-WM uses them from its next start."
                     end)
                 end
                 if w == "hypr" then run("hyprctl", { "reload" }, function() done() end) else done() end

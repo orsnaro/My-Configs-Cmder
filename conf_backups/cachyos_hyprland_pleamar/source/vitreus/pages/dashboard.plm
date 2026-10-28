@@ -44,6 +44,8 @@ part Dashboard {
                 frost: glass_clear
                 refraction: glass_refr
                 dispersion: glass_disp
+                dome: glass_dome
+                milk: glass_milk
                 rim: 14% * glass_rim
                 shine: pointer
                 shadow: 0, 14 * (1 - dsh_under), 36, 34% * (1 - dsh_under), deep
@@ -847,24 +849,26 @@ part Dashboard {
                     //  Glass like the fill, not flat: a rim and a soft glow, darker toward the right, a bright streak along its upper edge and a
                     //  short one down the left.
                     let dVh.o = 0.55 + 0.45 * dV.on
+                    let dVh.y = dV.ly + 16 - 22                                 // thicker: 22 tall instead of 16, growing upward so its foot stays where it was, 5 clear of the fill
+                    let dVh.h = 22
                     body {
                         color: mint
                         rim: 30%
                         shadow: 0, 0, 7, 50%, mint
                         opacity: dVh.o
                         show: dV.on > 0.5
-                        box { from: dV.l - 7, dV.ly; size: dV.w + 14, 16; corner: 8 }
+                        box { from: dV.l - 7, dVh.y; size: dV.w + 14, dVh.h; corner: 0 }
                     }
                     group {
-                        clip box { from: dV.l - 7, dV.ly; size: dV.w + 14, 16; corner: 8 }
+                        clip box { from: dV.l - 7, dVh.y; size: dV.w + 14, dVh.h; corner: 0 }
                         show: dV.on > 0.5
                         repeat c in 0..20 {
-                            box { from: dV.l - 7 + c * (dV.w + 14) / 20, dV.ly; size: (dV.w + 14) / 20 + 0.6, 16; color: #000000; opacity: 0.2 * c / 20 * dVh.o }
+                            box { from: dV.l - 7 + c * (dV.w + 14) / 20, dVh.y; size: (dV.w + 14) / 20 + 0.6, dVh.h; color: #000000; opacity: 0.2 * c / 20 * dVh.o }
                         }
                         repeat c in 0..6 {
-                            box { from: dV.l - 7, dV.ly + c * 1.6; size: dV.w + 14, 2; color: #ffffff; opacity: 0.45 * pow(1 - c / 6, 1.6) * dVh.o }
+                            box { from: dV.l - 7, dVh.y + c * 1.6; size: dV.w + 14, 2; color: #ffffff; opacity: 0.45 * pow(1 - c / 6, 1.6) * dVh.o }
                         }
-                        box { from: dV.l + 4, dV.ly + 4; size: (dV.w + 14) * 0.45, 3; corner: 1.5; color: #ffffff; opacity: 0.3 * dVh.o }
+                        box { from: dV.l + 4, dVh.y + 5; size: (dV.w + 14) * 0.45, 3; corner: 1.5; color: #ffffff; opacity: 0.3 * dVh.o }
                     }
                     text number(dV.lv * 100, 0, "%") { at: dV.l + dV.w / 2, dE.t + 30; anchor: center; size: 20; weight: 600; family: "Space Grotesk"; color: ink; opacity: 0.5 + 0.5 * dV.on; show: dV.on }
                     text "No backlight" { at: dV.l + dV.w / 2, dE.t + 30; anchor: center; size: 11.5; width: dV.w - 16; lines: 2; align: center; family: "Space Grotesk"; color: faint; show: not dV.on }

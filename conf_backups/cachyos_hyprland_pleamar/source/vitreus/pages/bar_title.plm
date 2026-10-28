@@ -1,0 +1,39 @@
+part BarTitle {
+    repeat i in 0..4 {
+        fact title_tip.$i = false
+        measure title_tip_text.$i
+    }
+    let title.room = max(0, win.hw - 12 * u - mctl)
+    let title.overflow = if(lm < 0.5 and bs.title > 0.5 and sb > 0.5 and title.room > 0, max(0, tb_title_full_w.width - title.room), 0)
+
+    let title.tip_ready = title.overflow > 0 and panel == none
+    let title.hover_ready = title.tip_ready and win_hit.hover > 0.5
+    let title.tip_text_w = min(max(1, tb_title_full_w.width), min(480 * u, max(1, screen.width - 44 * u)))
+    let title.tip_w = title.tip_text_w + 20 * u
+    let title.tip_h = title_tip_text.$screen.height + 20 * u
+    let title.tip_x = clamp(floor(win.xs + 0.5), 12 * u, max(12 * u, screen.width - title.tip_w - 12 * u))
+    // The surrounding bar group already moves this above a bottom-mounted bar.
+    let title.tip_y = bar.y + if(bt > 0.5, -bar.h / 2 - 6 * u - title.tip_h, bar.h / 2 + 6 * u)
+
+    // Facts appear/disappear immediately: no spring, clock, fade or capture loop.
+    on hover win_hit for 400ms while title.tip_ready { title_tip.$screen = true }
+    // Readiness can arrive after hover fired (new title, font measurement or layout).
+    on still title.hover_ready for 400ms while title.hover_ready { title_tip.$screen = true }
+    on leave win_hit { title_tip.$screen = false }
+    on press win_hit { title_tip.$screen = false }
+    on change title.tip_ready while not title.tip_ready { title_tip.$screen = false }
+
+    text bar_title_full { at: 0, 0; anchor: left center; size: 12; weight: 500; lines: 1; measure: tb_title_full_w; opacity: 0; family: "Space Grotesk" }
+    text bar_title_full { at: 0, 0; anchor: left top; size: 12; weight: 500; width: title.tip_text_w; measure: title_tip_text.$screen; opacity: 0; family: "Space Grotesk" }
+    group {
+        show: lm < 0.5
+        opacity: bs.title
+        text bar_title_full { at: floor(win.xs + 0.5), floor(bar.y + 0.5); anchor: left center; width: title.room; size: 12; weight: 500; lines: 1; color: ink; shadow: 0, 1, 3, 40%, deep; family: "Space Grotesk" }
+    }
+    group {
+        show: title_tip.$screen and title.tip_ready
+        box { from: title.tip_x, title.tip_y; size: title.tip_w, title.tip_h; corner: 6 * u; color: deep }
+        box { from: title.tip_x, title.tip_y; size: title.tip_w, title.tip_h; corner: 6 * u; stroke: u; color: faint; opacity: 25% }
+        text bar_title_full { at: title.tip_x + 10 * u, title.tip_y + 10 * u; anchor: left top; width: title.tip_text_w; size: 12; weight: 500; color: ink; family: "Space Grotesk" }
+    }
+}

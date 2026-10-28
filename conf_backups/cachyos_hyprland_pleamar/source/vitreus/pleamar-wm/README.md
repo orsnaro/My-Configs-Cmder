@@ -25,4 +25,4 @@ there when it is not interactive, so set the PATH in `~/.bash_profile`, before i
 (pleamar-wm has its own overview on `Super+Tab`), moving and focusing windows from the bar's title, and Night mode (hyprsunset, which is Hyprland's).
 Programs are started directly there, since `hyprctl dispatch exec_cmd` is Hyprland's.
 
-**Updating pleamar-wm:** run `./build-session.py` in this folder after it (all its layouts, such as scrolling, come with it); `wm/session.plm.pre-rebase` is the scene from before the rebase of 2026-10-16.
+**Updating pleamar-wm:** run `./build-session.py` in this folder after it (all its layouts, such as scrolling, come with it); `wm/session.plm.pre-rebase` is the scene from before the rebase of 2026-10-16. On 2026-10-22 the patches were rebased onto pleamar-wm 0.5.9's scene (repeats, folds and arrays; nine layouts, fractal, phone and wires): the shell's `focus_slot` and `close_slot` events, which its task list emits, are patched in too, so clicking or closing a window from the bar works here.

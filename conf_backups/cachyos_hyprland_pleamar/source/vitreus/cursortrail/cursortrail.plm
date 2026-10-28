@@ -1,0 +1,175 @@
+language 0.1
+import "../palette.plm"
+
+//  The UwU cursor trail: a chain of soft pink blobs that follow the mouse, each chasing the pointer at its own speed, the head fastest and the tail slowest (with a blob between each
+//  pair so the chain always touches); the slowest one is all but there after a second, blurred together and cut sharp again by goo.wgsl so they melt into one liquid ribbon. While the theme
+//  is not UwU the chain just rides the mouse, so it never flies in from a corner when the theme changes. At rest it gathers into one blob
+//  under the pointer. A full-screen surface that catches nothing (no zones), drawn only while the `look` fact says UwU.
+//  Vitreus tells it the theme:   pleamar --say cursortrail "fact look 2"   (0 Glass, 1 Retro, 2 UwU, 3 Cyber, 4 Milkbox)
+
+scene CursorTrail {
+    surface { size: full, full; anchor: top_left; margin: 0; level: overlay; screens: each; reserve: -1 }
+    fact look = 0
+    shader goo = file "goo.wgsl"
+    prop shown = 0 ~120ms
+    follow shown = if(look == 2, 1, 0)
+
+    spring gs0 = 3025, 110.0
+    spring gs1 = 2518, 100.4
+    spring gs2 = 2095, 91.5
+    spring gs3 = 1744, 83.5
+    spring gs4 = 1451, 76.2
+    spring gs5 = 1208, 69.5
+    spring gs6 = 1005, 63.4
+    spring gs7 = 837, 57.8
+    spring gs8 = 696, 52.8
+    spring gs9 = 580, 48.1
+    spring gs10 = 482, 43.9
+    spring gs11 = 401, 40.1
+    spring gs12 = 334, 36.6
+    spring gs13 = 278, 33.3
+    spring gs14 = 231, 30.4
+    spring gs15 = 193, 27.8
+    spring gs16 = 160, 25.3
+    spring gs17 = 133, 23.1
+    spring gs18 = 111, 21.1
+    spring gs19 = 92, 19.2
+    spring gs20 = 77, 17.5
+    spring gs21 = 64, 16.0
+    prop gx0 = 0 ~gs0
+    prop gy0 = 0 ~gs0
+    follow gx0 = cursor.x
+    follow gy0 = cursor.y
+    prop gx1 = 0 ~gs1
+    prop gy1 = 0 ~gs1
+    follow gx1 = cursor.x
+    follow gy1 = cursor.y
+    prop gx2 = 0 ~gs2
+    prop gy2 = 0 ~gs2
+    follow gx2 = cursor.x
+    follow gy2 = cursor.y
+    prop gx3 = 0 ~gs3
+    prop gy3 = 0 ~gs3
+    follow gx3 = cursor.x
+    follow gy3 = cursor.y
+    prop gx4 = 0 ~gs4
+    prop gy4 = 0 ~gs4
+    follow gx4 = cursor.x
+    follow gy4 = cursor.y
+    prop gx5 = 0 ~gs5
+    prop gy5 = 0 ~gs5
+    follow gx5 = cursor.x
+    follow gy5 = cursor.y
+    prop gx6 = 0 ~gs6
+    prop gy6 = 0 ~gs6
+    follow gx6 = cursor.x
+    follow gy6 = cursor.y
+    prop gx7 = 0 ~gs7
+    prop gy7 = 0 ~gs7
+    follow gx7 = cursor.x
+    follow gy7 = cursor.y
+    prop gx8 = 0 ~gs8
+    prop gy8 = 0 ~gs8
+    follow gx8 = cursor.x
+    follow gy8 = cursor.y
+    prop gx9 = 0 ~gs9
+    prop gy9 = 0 ~gs9
+    follow gx9 = cursor.x
+    follow gy9 = cursor.y
+    prop gx10 = 0 ~gs10
+    prop gy10 = 0 ~gs10
+    follow gx10 = cursor.x
+    follow gy10 = cursor.y
+    prop gx11 = 0 ~gs11
+    prop gy11 = 0 ~gs11
+    follow gx11 = cursor.x
+    follow gy11 = cursor.y
+    prop gx12 = 0 ~gs12
+    prop gy12 = 0 ~gs12
+    follow gx12 = cursor.x
+    follow gy12 = cursor.y
+    prop gx13 = 0 ~gs13
+    prop gy13 = 0 ~gs13
+    follow gx13 = cursor.x
+    follow gy13 = cursor.y
+    prop gx14 = 0 ~gs14
+    prop gy14 = 0 ~gs14
+    follow gx14 = cursor.x
+    follow gy14 = cursor.y
+    prop gx15 = 0 ~gs15
+    prop gy15 = 0 ~gs15
+    follow gx15 = cursor.x
+    follow gy15 = cursor.y
+    prop gx16 = 0 ~gs16
+    prop gy16 = 0 ~gs16
+    follow gx16 = cursor.x
+    follow gy16 = cursor.y
+    prop gx17 = 0 ~gs17
+    prop gy17 = 0 ~gs17
+    follow gx17 = cursor.x
+    follow gy17 = cursor.y
+    prop gx18 = 0 ~gs18
+    prop gy18 = 0 ~gs18
+    follow gx18 = cursor.x
+    follow gy18 = cursor.y
+    prop gx19 = 0 ~gs19
+    prop gy19 = 0 ~gs19
+    follow gx19 = cursor.x
+    follow gy19 = cursor.y
+    prop gx20 = 0 ~gs20
+    prop gy20 = 0 ~gs20
+    follow gx20 = cursor.x
+    follow gy20 = cursor.y
+    prop gx21 = 0 ~gs21
+    prop gy21 = 0 ~gs21
+    follow gx21 = cursor.x
+    follow gy21 = cursor.y
+    group {
+        opacity: shown * 55%
+        show: shown > 0.01
+        shader: goo, 9
+        ellipse { at: gx0, gy0; radius: 16.0; color: mix(mint, minthi, 0.00) }
+        ellipse { at: (gx0 + gx1) / 2, (gy0 + gy1) / 2; radius: 15.8; color: mix(mint, minthi, 0.02) }
+        ellipse { at: gx1, gy1; radius: 15.5; color: mix(mint, minthi, 0.05) }
+        ellipse { at: (gx1 + gx2) / 2, (gy1 + gy2) / 2; radius: 15.3; color: mix(mint, minthi, 0.07) }
+        ellipse { at: gx2, gy2; radius: 15.1; color: mix(mint, minthi, 0.10) }
+        ellipse { at: (gx2 + gx3) / 2, (gy2 + gy3) / 2; radius: 14.9; color: mix(mint, minthi, 0.12) }
+        ellipse { at: gx3, gy3; radius: 14.6; color: mix(mint, minthi, 0.14) }
+        ellipse { at: (gx3 + gx4) / 2, (gy3 + gy4) / 2; radius: 14.4; color: mix(mint, minthi, 0.17) }
+        ellipse { at: gx4, gy4; radius: 14.2; color: mix(mint, minthi, 0.19) }
+        ellipse { at: (gx4 + gx5) / 2, (gy4 + gy5) / 2; radius: 13.9; color: mix(mint, minthi, 0.21) }
+        ellipse { at: gx5, gy5; radius: 13.7; color: mix(mint, minthi, 0.24) }
+        ellipse { at: (gx5 + gx6) / 2, (gy5 + gy6) / 2; radius: 13.5; color: mix(mint, minthi, 0.26) }
+        ellipse { at: gx6, gy6; radius: 13.3; color: mix(mint, minthi, 0.29) }
+        ellipse { at: (gx6 + gx7) / 2, (gy6 + gy7) / 2; radius: 13.0; color: mix(mint, minthi, 0.31) }
+        ellipse { at: gx7, gy7; radius: 12.8; color: mix(mint, minthi, 0.33) }
+        ellipse { at: (gx7 + gx8) / 2, (gy7 + gy8) / 2; radius: 12.6; color: mix(mint, minthi, 0.36) }
+        ellipse { at: gx8, gy8; radius: 12.3; color: mix(mint, minthi, 0.38) }
+        ellipse { at: (gx8 + gx9) / 2, (gy8 + gy9) / 2; radius: 12.1; color: mix(mint, minthi, 0.40) }
+        ellipse { at: gx9, gy9; radius: 11.9; color: mix(mint, minthi, 0.43) }
+        ellipse { at: (gx9 + gx10) / 2, (gy9 + gy10) / 2; radius: 11.7; color: mix(mint, minthi, 0.45) }
+        ellipse { at: gx10, gy10; radius: 11.4; color: mix(mint, minthi, 0.48) }
+        ellipse { at: (gx10 + gx11) / 2, (gy10 + gy11) / 2; radius: 11.2; color: mix(mint, minthi, 0.50) }
+        ellipse { at: gx11, gy11; radius: 11.0; color: mix(mint, minthi, 0.52) }
+        ellipse { at: (gx11 + gx12) / 2, (gy11 + gy12) / 2; radius: 10.7; color: mix(mint, minthi, 0.55) }
+        ellipse { at: gx12, gy12; radius: 10.5; color: mix(mint, minthi, 0.57) }
+        ellipse { at: (gx12 + gx13) / 2, (gy12 + gy13) / 2; radius: 10.3; color: mix(mint, minthi, 0.60) }
+        ellipse { at: gx13, gy13; radius: 10.1; color: mix(mint, minthi, 0.62) }
+        ellipse { at: (gx13 + gx14) / 2, (gy13 + gy14) / 2; radius: 9.8; color: mix(mint, minthi, 0.64) }
+        ellipse { at: gx14, gy14; radius: 9.6; color: mix(mint, minthi, 0.67) }
+        ellipse { at: (gx14 + gx15) / 2, (gy14 + gy15) / 2; radius: 9.4; color: mix(mint, minthi, 0.69) }
+        ellipse { at: gx15, gy15; radius: 9.1; color: mix(mint, minthi, 0.71) }
+        ellipse { at: (gx15 + gx16) / 2, (gy15 + gy16) / 2; radius: 8.9; color: mix(mint, minthi, 0.74) }
+        ellipse { at: gx16, gy16; radius: 8.7; color: mix(mint, minthi, 0.76) }
+        ellipse { at: (gx16 + gx17) / 2, (gy16 + gy17) / 2; radius: 8.5; color: mix(mint, minthi, 0.79) }
+        ellipse { at: gx17, gy17; radius: 8.2; color: mix(mint, minthi, 0.81) }
+        ellipse { at: (gx17 + gx18) / 2, (gy17 + gy18) / 2; radius: 8.0; color: mix(mint, minthi, 0.83) }
+        ellipse { at: gx18, gy18; radius: 7.8; color: mix(mint, minthi, 0.86) }
+        ellipse { at: (gx18 + gx19) / 2, (gy18 + gy19) / 2; radius: 7.5; color: mix(mint, minthi, 0.88) }
+        ellipse { at: gx19, gy19; radius: 7.3; color: mix(mint, minthi, 0.90) }
+        ellipse { at: (gx19 + gx20) / 2, (gy19 + gy20) / 2; radius: 7.1; color: mix(mint, minthi, 0.93) }
+        ellipse { at: gx20, gy20; radius: 6.9; color: mix(mint, minthi, 0.95) }
+        ellipse { at: (gx20 + gx21) / 2, (gy20 + gy21) / 2; radius: 6.6; color: mix(mint, minthi, 0.98) }
+        ellipse { at: gx21, gy21; radius: 6.4; color: mix(mint, minthi, 1.00) }
+    }
+}

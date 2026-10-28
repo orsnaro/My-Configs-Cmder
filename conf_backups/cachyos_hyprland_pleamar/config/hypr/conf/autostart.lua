@@ -1,3 +1,4 @@
+-- desktop-stack managed
 hl.on("hyprland.start", function ()
     local HOME = os.getenv("HOME")
 
@@ -12,12 +13,12 @@ hl.on("hyprland.start", function ()
     -- Export variables to systemd
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
     -- The permanent shell is managed by systemd, not by a trial watcher.
-    hl.exec_cmd("systemctl --user start pleamar.service")
+    hl.exec_cmd('"' .. HOME .. '/.local/bin/desktop-stack" resume')
 
     -- Vitreus's own lock screen: a separate scene so that restarting the shell cannot unlock the session.
     -- PLEAMAR_SWAPCHAIN=1 is required on pleamar 0.4 or Hyprland kills the lock surface on the first lock.
     -- DRI_PRIME/VK_DRIVER_FILES keep it on the same AMD GPU as the main scene instead of the Intel iGPU.
-    hl.exec_cmd("DRI_PRIME=1 VK_DRIVER_FILES=/usr/share/vulkan/icd.d/radeon_icd.json PLEAMAR_SWAPCHAIN=1 " .. HOME .. "/.config/pleamar/shells/vitreus/bin/vitreus-keep " .. HOME .. "/.config/pleamar/shells/vitreus/lockscreen/lockscreen.plm " .. HOME .. "/.local/share/pleamar/vitreus/lockscreen.log")
+    -- Native lock startup is owned by desktop-stack.
 
     -- Restart portals so they catch the environment
     hl.exec_cmd("systemctl --user stop xdg-desktop-portal xdg-desktop-portal-hyprland")
@@ -65,8 +66,8 @@ hl.on("hyprland.start", function ()
     -- Start hypridle
     hl.exec_cmd("hypridle")
 
-    -- Start hyprsunset (00:00-07:00 blue-light schedule from hyprsunset.conf)
-    hl.exec_cmd("hyprsunset")
+    -- Vitreus starts and controls hyprsunset from its shared saved night-mode settings.
+    -- Do not start a competing daemon/schedule here.
 
     -- Load cliphist history
     hl.exec_cmd("wl-paste --watch cliphist store")

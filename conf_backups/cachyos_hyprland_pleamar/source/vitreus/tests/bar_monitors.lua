@@ -1,6 +1,5 @@
 -- Exercise the monitor controller with synthetic services/paths; no desktop commands run.
--- `opts` rehearses the initial screen: the surface actually running (`screens`), the monitor the
--- machine reports (`mons`) and the pending choice in bar.json (`pref`).
+-- v0.2.0 uses per-monitor copies: selection changes live; only a copy-capacity migration restarts.
 local function fixture(opts)
     opts = opts or {}
     local state = { events = {}, commands = {}, saved = {}, fact = {}, text = {}, sed_code = 0, restart_code = 0 }
@@ -10,7 +9,8 @@ local function fixture(opts)
         { name = 'DP-1', x = 3926, y = 0, transform = 0 },
     }
     local chosen = opts.pref or 'DP-2'
-    local surface = opts.screens or 'screens: "DP-2";'
+    local surface = opts.screens or 'screens: each max 3;'
+    for i, mon in ipairs(mons) do state.text['screen.' .. (i - 1) .. '.name'] = mon.name end
     local env = setmetatable({
         fact = state.fact,
         text = state.text,
@@ -18,7 +18,7 @@ local function fixture(opts)
         bar_mon = {},
         iris_fx = { apply_hypr = function() end },
         on = function(name, fn) state.events[name] = fn end,
-        after = function() end,
+        after = function(ms, fn) if ms == 8000 then state.wake = fn end end,
         every = function() end,
         json = { decode = function() return mons end },
         hypr_monitors = function(_, fn) fn('fixture monitors', 0) end,
@@ -42,47 +42,54 @@ end
 
 local selected = fixture()
 selected.events.bar_pick_scr(0)
-assert(selected.saved['bar.json'].screens == 'HDMI-A-2', 'the selected monitor must be persisted')
-assert(selected.commands[1].cmd == 'sed', 'rewrite the monitor selector before requesting restart')
-assert(selected.commands[1].args[3]:find('HDMI-A-2', 1, true), 'the surface must target the selected monitor')
-local restart = selected.commands[2]
-assert(restart and restart.cmd == 'systemctl', 'monitor changes must restart through the owning service, not a self-quit helper')
-assert(table.concat(restart.args, ' ') == '--user --no-block restart pleamar.service',
-       'queue the managed service restart without blocking on the process being restarted')
-assert(#selected.commands == 2, 'do not launch a competing keeper or unmanaged Pleamar process')
+local saved = selected.saved['bar.json'].screens
+assert(#saved == 2 and saved[1] == 'DP-2' and saved[2] == 'HDMI-A-2', 'persist the native multi-selection')
+assert(#selected.commands == 0, 'changing per-monitor selection must not restart the whole shell')
+assert(selected.fact.bar_lite_hdmi == false and selected.fact.bar_lite_dp1 == true,
+       'only the side monitor without a full bar keeps its lite strip')
+selected.events.bar_pick_scr(1)
+saved = selected.saved['bar.json'].screens
+assert(#saved == 1 and saved[1] == 'HDMI-A-2', 'a selected monitor can be removed from the set')
+selected.events.bar_pick_scr(0)
+assert(#selected.saved['bar.json'].screens == 1, 'the last selected monitor must not be removed')
+assert(selected.text.bar_msg == 'The bar needs a monitor.', 'explain why the last bar cannot be hidden')
 
-local unchanged = fixture()
-unchanged.events.bar_pick_scr(1)
-assert(#unchanged.commands == 0, 'choosing the existing monitor must not restart the bar')
+local migration = fixture({ screens = 'screens: "DP-2";' })
+migration.wake()
+assert(migration.commands[1].cmd == 'sed', 'migrate the old named surface before requesting restart')
+assert(migration.commands[1].args[3]:find('each max 3', 1, true), 'allocate all three connected copies')
+local restart = migration.commands[2]
+assert(restart and restart.cmd == 'systemctl', 'capacity migration must use the existing service owner')
+assert(table.concat(restart.args, ' ') == '--user --no-block restart pleamar.service')
+assert(#migration.commands == 2, 'never launch a competing keeper or unmanaged shell')
 
-local write_failed = fixture()
+local write_failed = fixture({ screens = 'screens: "DP-2";' })
 write_failed.sed_code = 1
-write_failed.events.bar_pick_scr(0)
+write_failed.wake()
 assert(#write_failed.commands == 1, 'a failed surface rewrite must not restart')
 assert(write_failed.text.bar_msg == "Couldn't change where the bar shows.", 'surface rewrite failure must be visible')
 write_failed.sed_code = 0
-write_failed.events.bar_pick_scr(0)
+write_failed.wake()
 assert(write_failed.commands[#write_failed.commands].cmd == 'systemctl', 'a failed rewrite must not leave the selector stuck busy')
 
-local restart_failed = fixture()
+local restart_failed = fixture({ screens = 'screens: "DP-2";' })
 restart_failed.restart_code = 1
-restart_failed.events.bar_pick_scr(0)
+restart_failed.wake()
 assert(restart_failed.text.bar_msg == "Couldn't restart the bar service.", 'a failed restart request must be visible')
 restart_failed.restart_code = 0
-restart_failed.events.bar_pick_scr(0)
-assert(#restart_failed.commands == 4, 'retrying the same monitor after a rejected restart must be possible')
+restart_failed.wake()
+assert(#restart_failed.commands == 4, 'retrying a rejected capacity migration must be possible')
 
--- The two published lite flags follow the surface actually running (`B.file`): the strip of the
--- monitor that shows the full bar closes, and All/fallback-All leaves no overlapping copies.
+-- The lite flags follow the active per-monitor selection; All/fallback-All closes both strips.
 local dp2 = fixture()
 assert(dp2.fact.bar_lite_dp1 == true and dp2.fact.bar_lite_hdmi == true,
        'DP-2 shows the full bar, so both side strips must stay open')
 
-local dp1 = fixture({ screens = 'screens: "DP-1";', pref = 'DP-1' })
+local dp1 = fixture({ pref = 'DP-1' })
 assert(dp1.fact.bar_lite_dp1 == false, 'the strip of the monitor running the full bar must close')
 assert(dp1.fact.bar_lite_hdmi == true, 'the other side strip stays open when the bar is on DP-1')
 
-local hdmi = fixture({ screens = 'screens: "HDMI-A-2";', pref = 'HDMI-A-2' })
+local hdmi = fixture({ pref = 'HDMI-A-2' })
 assert(hdmi.fact.bar_lite_dp1 == true and hdmi.fact.bar_lite_hdmi == false,
        'HDMI-A-2 shows the full bar, so its own strip must close')
 
@@ -90,26 +97,18 @@ local all = fixture({ screens = 'screens: each max 4;', pref = 'all' })
 assert(all.fact.bar_lite_dp1 == false and all.fact.bar_lite_hdmi == false,
        'All/fallback-All must leave no lite strip showing')
 
--- All monitors means every connected monitor, not two of three: the surface copy limit must
--- cover the full supported monitor count.
-local all_choice = fixture({ pref = 'DP-2' })
-all_choice.events.bar_pick_scr(-1)
-local rewrite = all_choice.commands[1]
-assert(rewrite and rewrite.cmd == 'sed', 'choosing All must rewrite the surface screens line')
-assert(rewrite.args[3]:find('screens: each max 4;', 1, true),
-       'All must create a bar copy for every monitor, not stop at two')
-assert(not rewrite.args[3]:find('each max 2', 1, true),
-       'the two-monitor cap is the defect that hid the third bar')
+local four = fixture({ mons = {
+    { name = 'HDMI-A-2', x = 0 }, { name = 'DP-2', x = 1000 },
+    { name = 'DP-1', x = 2000 }, { name = 'DP-3', x = 3000 },
+} })
+four.wake()
+assert(four.commands[1].args[3]:find('each max 4', 1, true), 'hot-plug growth must cover all four supported monitors')
+assert(four.commands[2].cmd == 'systemctl', 'growth uses the same service owner')
 
-local gone = fixture({ screens = 'screens: "HDMI-A-2";', pref = 'HDMI-A-2',
+local gone = fixture({ pref = 'HDMI-A-2',
                        mons = { { name = 'DP-2', x = 1366, y = 0, transform = 0 },
                                 { name = 'DP-1', x = 3926, y = 0, transform = 0 } } })
 assert(gone.fact.bar_lite_dp1 == false and gone.fact.bar_lite_hdmi == false,
        'an unplugged preferred monitor falls back to all, so no lite copy may show')
 
--- The facts describe the bar that is running, never a choice still waiting for its restart.
-local pending = fixture({ screens = 'screens: "DP-2";', pref = 'DP-1' })
-assert(pending.fact.bar_lite_dp1 == true and pending.fact.bar_lite_hdmi == true,
-       'the flags must follow the running file, not the pending preference')
-
-print('bar monitor service-restart and lite-flag contracts: PASS')
+print('bar monitor live-selection, managed-migration and lite-flag contracts: PASS')

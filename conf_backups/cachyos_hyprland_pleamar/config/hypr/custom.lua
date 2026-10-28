@@ -204,6 +204,14 @@ hl.bind("SUPER + RETURN", hl.dsp.exec_cmd("~/.config/ml4w/settings/terminal.sh")
 hl.bind("ALT + RETURN", hl.dsp.exec_cmd("~/.config/ml4w/settings/terminal.sh"),
     { description = "Open the terminal" })
 
+-- Quake escape is a fallback: later app rules choose the destination and
+-- tiled/floating mode. Unassigned apps stay on the normal workspace below.
+hl.window_rule({
+    name = "quake-apps-to-normal-workspace",
+    match = { workspace = "special:quake", class = "negative:^quake-kitty$" },
+    workspace = "m+0 silent",
+})
+
 -- One destination map is shared with the manual reset. Exact class matching
 -- deliberately excludes Quake, ML4W helper terminals and application dialogs.
 local apps = assert(io.open(os.getenv("HOME") .. "/.config/hypr/glaze-apps.tsv", "r"))
@@ -249,11 +257,24 @@ hl.window_rule({ name = "float-ark", match = { class = "^(ark|org.kde.ark)$" }, 
 hl.window_rule({ name = "float-fileroller", match = { class = "^(file-roller|org.gnome.FileRoller)$" }, float = true, center = true, size = "800 600" })
 -- Brave Task Manager reports no window class; match its title instead.
 hl.window_rule({ name = "float-brave-task-manager", match = { title = "^Task Manager - Brave$" }, float = true, center = true })
--- Brave Google OAuth popup shares brave-browser class with main windows.
--- Static float evaluates once at open when title==initialTitle==Untitled,
--- so matching final "Sign in" title can never fire. Untitled initialTitle
--- distinguishes popups from main windows (New Tab - Brave).
-hl.window_rule({ name = "float-brave-google-signin", match = { class = "^brave-browser$", initial_title = "^Untitled - Brave$" }, float = true, center = true, size = "600 700" })
+-- Ordinary hyperlink windows also start as Untitled. Wait for the actual sign-in
+-- title; static floating rules cannot respond to titles that arrive after open.
+local handled_google_signin = {}
+local function float_google_signin(w)
+    if w == nil or not w.mapped or w.class ~= "brave-browser"
+        or w.title ~= "Sign in - Google Accounts - Brave" then return end
+    if handled_google_signin[w.address] then return end
+    -- Mark before dispatch, and do not override later manual tiling or resizing.
+    handled_google_signin[w.address] = true
+    hl.dispatch(hl.dsp.window.float({ action = "on", window = w }))
+    hl.dispatch(hl.dsp.window.resize({ x = 600, y = 700, window = w }))
+    hl.dispatch(hl.dsp.window.center({ window = w }))
+end
+hl.on("window.open", float_google_signin)
+hl.on("window.title", float_google_signin)
+hl.on("window.close", function(w)
+    if w ~= nil then handled_google_signin[w.address] = nil end
+end)
 -- Steam Settings dialog shares the main client's "steam" class; match its title instead.
 hl.window_rule({ name = "float-steam-settings", match = { class = "^steam$", title = "Settings$" }, float = true, center = true })
 -- Obsidian Settings shares the main client's class; float it on the current
@@ -284,12 +305,13 @@ end)
 
 -- Focus overrides: later rules win over the silent TSV ones above.
 -- Code and Kate jump to work (2) + focus; everything else opens silently
--- except the retargeted browser/terminal/notes overrides below.
+-- except the retargeted browser/terminal/notes/Spotify overrides below.
 hl.window_rule({ name = "focus-code", match = { class = "^(code|code-oss)$" }, workspace = "2" })
 hl.window_rule({ name = "focus-kate", match = { class = "^(kate|org.kde.kate)$" }, workspace = "2" })
 hl.window_rule({ name = "focus-browser", match = { class = "^(brave-browser|firefox)$" }, workspace = "3" })
 hl.window_rule({ name = "focus-term", match = { class = "^(kitty|konsole|org.kde.konsole|Alacritty)$" }, workspace = "7" })
 hl.window_rule({ name = "focus-notes", match = { class = "^(obsidian|md.obsidian.Obsidian)$", modal = false, float = false }, workspace = "4" })
+hl.window_rule({ name = "focus-spotify", match = { class = "^brave-open\\.spotify\\.com__-Default$" }, workspace = "8" })
 hl.window_rule({ name = "focus-vortex", match = { class = "^vortex\\.exe$"}, workspace = "9", float = true, size = "1600 900", center = true })
 
 -- Lutris / Wine / Proton games (workspace 9 = gaming).
@@ -301,13 +323,6 @@ hl.window_rule({ name = "focus-vortex", match = { class = "^vortex\\.exe$"}, wor
 hl.window_rule({ name = "gaming-wine-exe", match = { class = "\\.exe$" }, workspace = "9", float = true })
 hl.window_rule({ name = "gaming-steam-app", match = { class = "^steam_app_" }, workspace = "9", float = true })
 hl.window_rule({ name = "gaming-cemu", match = { class = "^[Cc]emu$" }, workspace = "9", float = true })
-
--- Last workspace rule: Quake-time launches stay on the normal workspace below.
-hl.window_rule({
-    name = "quake-apps-to-normal-workspace",
-    match = { workspace = "special:quake", class = "negative:^quake-kitty$" },
-    workspace = "m+0 silent",
-})
 
 -- Focus follows mouse, mouse doesn't follow focus
 hl.config({

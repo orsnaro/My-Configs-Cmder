@@ -2,6 +2,7 @@
 local events, calls, watchers, panels = {}, {}, {}, {}
 fact, text, model = {}, {}, {}
 on = function(name, fn) events[name] = fn end
+run = function(_, _, callback) callback('', 1) end -- No live D-Bus calls in this styling test.
 sys = {
     watch = function(name, fn) watchers[name] = fn end,
     ask = function(name)

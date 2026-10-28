@@ -1,0 +1,10 @@
+# desktop-stack managed: shared mode reader; no resident process.
+desktop_stack_is_qs() {
+    local selected=pleamar
+    if [[ -f "$HOME/.config/ml4w/settings/desktop-stack" ]]; then
+        selected=$(<"$HOME/.config/ml4w/settings/desktop-stack")
+        selected="${selected#"${selected%%[![:space:]]*}"}"
+        selected="${selected%"${selected##*[![:space:]]}"}"
+    fi
+    [[ "$selected" == quickshell ]]
+}

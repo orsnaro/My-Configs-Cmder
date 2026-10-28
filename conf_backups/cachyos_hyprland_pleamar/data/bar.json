@@ -1,3 +1,5 @@
 {
-  "screens": "DP-2"
+  "screens": [
+    "DP-2"
+  ]
 }

@@ -1,18 +1,20 @@
 -- The bar's position (Settings > Bar): along the top (the default, the Island), or a strip on any of the four edges with a frame round
 -- the rest of the screen. The surface's anchor follows `bar_anchor`, so it moves without being recreated. The panels hang from the top edge
 -- in the first, their edge by the strip in the others; `lp_w` is how wide the one last opened is, so that they line up. Kept in bar-position.json
--- (`pos`: "top", "left", "right", "ftop" or "fbottom"; an older file only has `left`).
+-- (`pos`: "top", "left", "right", "ftop", "fbottom" or "seg", the top frame in three pieces; an older file only has `left`).
 return function()
-    -- pos: "top" is the Island; "left", "right", "ftop" and "fbottom" are the strip on that edge with a frame round the rest.
-    local POS = { [0] = "top", "left", "right", "ftop", "fbottom" }
-    local EDGE = { top = { "top", false }, left = { "left", true }, right = { "right", true }, ftop = { "top", true }, fbottom = { "bottom", true } }
+    -- pos: "top" is the Island; "left", "right", "ftop" and "fbottom" are the strip on that edge with a frame round the rest; "seg" is the top one in three pieces of glass.
+    local POS = { [0] = "top", "left", "right", "ftop", "fbottom", "seg" }
+    local EDGE = { top = { "top", false }, left = { "left", true }, right = { "right", true }, ftop = { "top", true }, fbottom = { "bottom", true }, seg = { "top", true } }
     local pos = "top"
     local function show()
         local e = EDGE[pos] or EDGE.top
         fact.bar_anchor = e[1]
         fact.bar_frame = e[2]
+        fact.bar_seg = pos == "seg"
         bar_fx.left = e[2]
         bar_fx.edge = e[1]
+        bar_fx.seg = pos == "seg"
         -- the desktop scenes keep their widgets' grid out of the bar's room (`room_*`): told again whenever the bar moves. (A fact the logic sets itself
         -- does not fire `on("fact:bar_anchor")`, so it has to be said from here.)
         if iris_fx and iris_fx.push_room then iris_fx.push_room() end
@@ -46,5 +48,7 @@ return function()
         pcall(sys.call, "files.write", "bar-position.json", { pos = pos, left = pos == "left" })
         show()
         iris_fx.apply_hypr()
+        -- pleamar-wm keeps its windows out of the frame by `fr.*`, which is otherwise only looked at every 5 s: tell it now.
+        if wm_frame_sync then wm_frame_sync() end
     end)
 end

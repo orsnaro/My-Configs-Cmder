@@ -130,13 +130,20 @@ return function(set_panel)
             -- Asked now, not read from `on_hyprland`: the sandbox keeps a global's value from when the file loaded (false, before `printenv` answered).
             run("printenv", { "HYPRLAND_INSTANCE_SIGNATURE" }, function(out, code)
                 if code == 0 and (out or "") ~= "" then run("hyprctl", { "dispatch", "hl.dsp.exit()" }, function() end)
-                else run("pkill", { "-TERM", "-x", "pleamar-wm" }, function() end) end
+                else
+                    -- niri leaves by its own action (the button was held for a second: no need for its "are you sure" box); pleamar-wm by being ended
+                    run("printenv", { "NIRI_SOCKET" }, function(o, c)
+                        if c == 0 and (o or "") ~= "" then run("niri", { "msg", "action", "quit", "--skip-confirmation" }, function() end)
+                        else run("pkill", { "-TERM", "-x", "pleamar-wm" }, function() end) end
+                    end)
+                end
             end)
         elseif i == 3 then run("systemctl", { "reboot" }, function() end)
         elseif i == 4 then run("systemctl", { "poweroff" }, function() end) end
     end
     on("pow_press", function(i)
         i = math.floor(i + 0.5)
+        -- Release the drawer and keyboard before the existing lock/session action runs.
         set_panel("none")
         after(300, function() do_it(i) end)
     end)

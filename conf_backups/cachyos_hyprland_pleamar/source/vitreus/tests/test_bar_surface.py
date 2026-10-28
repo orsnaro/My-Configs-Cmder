@@ -38,7 +38,8 @@ class BarSurface(unittest.TestCase):
         line = self.surface_line()
         self.assertIn('level: top', line)
         self.assertNotIn('level: overlay', line)
-        self.assertIn('keyboard: exclusive while', line)
+        self.assertIn('keyboard: on_demand while', line,
+                      'each-monitor copies must not all take exclusive keyboard focus')
         self.assertIn('panel != none', line)
         self.assertIn('pk_open', line)
         self.assertNotIn('keyboard: none', line)

@@ -1,0 +1,17 @@
+part BarWaves12 {
+            //  The audio visualiser: the edge of the screen rising into the music, as columns of the same glass standing on the frame's inner edge and melted into it (and into each other) like a drawer's neck.
+            //  Where each stands, which way it points and how long it is are worked out in vitreus.plm (`fwx_*`, `fwy_*`, `fwdx_*`, `fwdy_*`, `fwh_*`) from the options (Settings > Widgets): along the bottom, the top,
+            //  the left or the right, or fanned out of the four corners. Without the frame (the Island) they stand on the screen's edge. Moved off the screen while a column has no length (`show:` does not take a shape off the glass).
+            box { at: fwx_0 + if(fwh_0 > 1, 0, 30000), fwy_0; size: fw.bw, fwh_0 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_0, 0 - fwdy_0) * 1deg; blend: fw.bl * u * bk }
+            box { at: fwx_1 + if(fwh_1 > 1, 0, 30000), fwy_1; size: fw.bw, fwh_1 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_1, 0 - fwdy_1) * 1deg; blend: fw.bl * u * bk }
+            box { at: fwx_2 + if(fwh_2 > 1, 0, 30000), fwy_2; size: fw.bw, fwh_2 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_2, 0 - fwdy_2) * 1deg; blend: fw.bl * u * bk }
+            box { at: fwx_3 + if(fwh_3 > 1, 0, 30000), fwy_3; size: fw.bw, fwh_3 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_3, 0 - fwdy_3) * 1deg; blend: fw.bl * u * bk }
+            box { at: fwx_4 + if(fwh_4 > 1, 0, 30000), fwy_4; size: fw.bw, fwh_4 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_4, 0 - fwdy_4) * 1deg; blend: fw.bl * u * bk }
+            box { at: fwx_5 + if(fwh_5 > 1, 0, 30000), fwy_5; size: fw.bw, fwh_5 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_5, 0 - fwdy_5) * 1deg; blend: fw.bl * u * bk }
+            box { at: fwx_6 + if(fwh_6 > 1, 0, 30000), fwy_6; size: fw.bw, fwh_6 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_6, 0 - fwdy_6) * 1deg; blend: fw.bl * u * bk }
+            box { at: fwx_7 + if(fwh_7 > 1, 0, 30000), fwy_7; size: fw.bw, fwh_7 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_7, 0 - fwdy_7) * 1deg; blend: fw.bl * u * bk }
+            box { at: fwx_8 + if(fwh_8 > 1, 0, 30000), fwy_8; size: fw.bw, fwh_8 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_8, 0 - fwdy_8) * 1deg; blend: fw.bl * u * bk }
+            box { at: fwx_9 + if(fwh_9 > 1, 0, 30000), fwy_9; size: fw.bw, fwh_9 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_9, 0 - fwdy_9) * 1deg; blend: fw.bl * u * bk }
+            box { at: fwx_10 + if(fwh_10 > 1, 0, 30000), fwy_10; size: fw.bw, fwh_10 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_10, 0 - fwdy_10) * 1deg; blend: fw.bl * u * bk }
+            box { at: fwx_11 + if(fwh_11 > 1, 0, 30000), fwy_11; size: fw.bw, fwh_11 + 3 * u; corner: fw.bw * 0.45; rotate: atan2(fwdx_11, 0 - fwdy_11) * 1deg; blend: fw.bl * u * bk }
+}

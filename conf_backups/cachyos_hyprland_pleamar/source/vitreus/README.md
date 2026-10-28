@@ -9,6 +9,7 @@
   <p>
     <a href="https://github.com/k4ditano/pleamar"><img src="https://img.shields.io/badge/pleamar-required-9ed6bd?style=for-the-badge" alt="pleamar" /></a>
     <a href="https://hyprland.org"><img src="https://img.shields.io/badge/Hyprland-33CCFF?style=for-the-badge&logo=hyprland&logoColor=white" alt="Hyprland" /></a>
+    <a href="https://github.com/niri-wm/niri"><img src="https://img.shields.io/badge/niri-5A6BFF?style=for-the-badge" alt="niri" /></a>
     <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge" alt="MIT License" /></a>
   </p>
 
@@ -102,7 +103,7 @@ natepayn3@gmail.com if you have no account. With Vitreus installed it is just `v
 
 ## ✨ Features
 
-* **Two layouts** — an *island* pill along the top, or a *frame*: a strip down the left edge with glass round the screen.
+* **Three layouts** — an *island* pill along the top; a *frame*: a strip on any edge with glass round the screen; or *notches*: a thin frame with the bar in three pieces of glass (workspaces, clock and title, controls) hanging from the top edge, the panels melting into it.
 * **Dashboard** (`SUPER + SHIFT + D`) — one screen of glass cards that surface through the water: volume and brightness, a big clock with reminders,
   weather with a sky that moves, scrollable notifications (swipe to dismiss), your picture and machine, the power state and a power button that
   slides over the session options, a system monitor, and what is playing with a cava ring and a wavy progress bar.
@@ -115,8 +116,8 @@ natepayn3@gmail.com if you have no account. With Vitreus installed it is just `v
   private (addresses, links, long numbers) in one click, and copy it, save it, or drag it straight into another app. It is drawn
   in the shell's look.
 * **Player** — cover art, a live spectrum, and your running windows.
-* **Launcher** (`SUPER + Space`) — apps, files, commands, emoji, clipboard history and wallpapers, with previews. A sum or a conversion (`5 km to mi`, `20 c in f`, `15% of 80`) is answered as you type; `?` or `!yt lofi` searches the web (twenty-one `!bang` sites, and DuckDuckGo's instant answer); `@` switches to an open window; `$` expands snippets and quicklinks from `snippets.json`.
-* **Settings** (`SUPER + SHIFT + Space`) — wallpaper, theme, glass, display, Hyprland, notifications, clock and a system monitor.
+* **Launcher** (`SUPER + Space`) — apps, files, commands, emoji, clipboard history and wallpapers, with previews. A sum or a conversion (`5 km to mi`, `20 c in f`, `15% of 80`) is answered as you type; `?` or `!yt lofi` searches the web (twenty-one `!bang` sites, and DuckDuckGo's instant answer); `@` switches to an open window; `$` expands snippets and quicklinks from `snippets.json`. `+firefox` searches the repositories and, if you have `paru` or `yay`, the AUR (Arch only): Enter installs the package in a terminal window, where it can ask for your password.
+* **Settings** (`SUPER + SHIFT + Space`) — wallpaper, theme, glass, display, your window manager (Hyprland, niri or pleamar-wm), notifications, clock and a system monitor.
 * **Wallpaper picker** (`SUPER + B`) — your wallpapers as a honeycomb of glass hexagons, and (`Tab`) a row of slanted cards that changes the wallpaper live as you step through them, with a colour filter and each picture's size and kind. It opens on the one you used last.
 * **Workspace overview** (`SUPER + TAB`) — a glass card per workspace; drag a window to move it.
 * **Desk** (`SUPER + D`) — a panel out of the right edge: Focus timer, Shelf, Pad (tasks and drawing), a terminal, Ask, and Clip (your
@@ -129,17 +130,80 @@ natepayn3@gmail.com if you have no account. With Vitreus installed it is just `v
 * **Notifications** — history, rules and sounds for each app, quiet hours, and silence while a window is fullscreen.
 * **Authentication** — a polkit agent drawn in the same glass.
 * **Lock screen**, **Night mode**, and a **desktop clock** drawn as glass.
-* **Audio visualiser** — cava's bars on your wallpaper, in six styles (bars, mirror, wave, line, dots, radial), five places (bottom, top, left, right, middle), three sizes and four looks (the shell's glass, accent, light, warm). Switch it from Settings > Widgets or the desktop's right-click menu; it fades out while nothing plays.
-* **Desktop** — right-click the bare wallpaper for a menu: **Webcam** (your camera in a round glass pane over everything; drag it, and pull its edge to resize it, as the Desk's corners do), the clock, the system monitor, the **audio visualiser**, and **New sticky note**. Stickers are glass notes, tinted from your palette, that stay where you put them and can be dragged onto other monitors.
-* **Theme** — four looks, each with its own typeface: **Glass**, which Iris recolours from your wallpaper; **Retro**, moulded
-  plastic; **UwU**, candy plastic with cat ears; and **Cyber**, a neon HUD on black glass.
+* **Login screen** — the lock screen's look as an [SDDM](sddm/README.md) theme: your picture, a big clock, your face and a glass password bar, with the session (Hyprland, pleamar-wm) chosen by the badge under the field. The installer offers it (it needs sudo, and asks before replacing a theme you already use; `--no-login` skips it); `./sddm/install.sh` does it again with another picture.
+* **Audio visualiser** — the bottom edge of the screen rises into the music: cava's bars as columns of the shell's own glass, melted into the frame (or, in the Island layout, into the screen's edge). Switch it on or off, and choose how many columns, how sensitive it is, how tall, and how blended, from Settings > Widgets, the desktop editor's tile, or the launcher; it falls flat while nothing plays.
+* **Files** — a file manager of its own, in the shell's glass (**SUPER + E**, or "Files" in the launcher): places down the left (Recent, Starred, your folders, drives, network, and any you pin), where you are across the top (click it or press Ctrl+L to type a path), tabs, the folder as tiles or lines (sortable, zoomable), a right-click menu, Space to look at a file, Properties (with permissions and Open With), copy/cut/paste/drag with a question when a name is taken, progress and Cancel, Undo (Ctrl+Z), the Trash with Restore, compress and extract, and a search of names or contents. Drag a box to choose several things. It follows the theme (glass off, Retro, UwU, Cyber, Milkbox) and uses `imagemagick`, `ffmpeg`, `poppler` and `libarchive` (`bsdtar`) for pictures and archives.
+* **Desktop** — right-click the bare wallpaper for a menu: **Webcam** (your camera in a round glass pane over everything; drag it, and pull its edge to resize it, as the Desk's corners do), the clock, the system monitor, and **New sticky note**. Stickers are glass notes, tinted from your palette, that stay where you put them and can be dragged onto other monitors.
+* **Theme** — a card for each theme, each with its own typeface: **Glass**, which Iris recolours from your wallpaper; **Retro**, moulded
+  plastic; **UwU**, candy plastic with cat ears and a gooey trail behind the mouse (Hyprland and pleamar-wm: niri cannot tell where the mouse is); **Cyber**, a neon HUD on black glass; **Milkbox**, soft raised drawers in one pale blue-grey, with no outlines; and any you make yourself (see below).
+
+### Making your own theme
+
+A theme is a small `.toml` file: eleven colours, a typeface and how round the window corners are. Vitreus's own are in `themes/`
+(`retro.toml`, `uwu.toml`, `cyber.toml`, `milk.toml`, and `glass.toml`, which only carries Glass's font and corners because the wallpaper is its palette).
+
+1. Copy `themes/_template.toml` to `~/.config/pleamar/vitreus-themes/` under any name (`sunset.toml`) and change it. Every setting is
+   explained in the template.
+2. Open **Settings > Theme** (or open the page again): your theme is a card at the end of the strip. Pick it.
+
+A file that cannot be read is named in the line under the cards and left out; the others are not affected. `base` chooses the shape the colours
+are worn on (`glass`, `retro`, `uwu`, `cyber` or `milk`); a theme cannot add shapes of its own. `bin/vitreus-themes` reads the files and leaves the
+list in `themes.json` in the data folder, which the shell, its font setup and the window-corner code all read.
+
+### Making your own add-on
+
+An add-on is a pleamar scene of your own, a small widget or panel, that Vitreus starts when you turn its switch on and starts
+again if it stops. It lives in its own folder, outside Vitreus's, so updating Vitreus never touches it.
+
+1. Copy the `addons/_template/` folder to `~/.config/pleamar/vitreus-addons/<id>/` (the id is the folder's name: lowercase letters, digits and
+   dashes) and change `addon.toml` and the scene it names.
+2. Open **Settings > Add-ons**: your add-on is a card there, with the title and description from `addon.toml` and its own switch. Turn it on.
+
+An add-on with an `icon` in its `addon.toml` (an `.svg` or `.png` in its folder) gets that icon on the **add-on pill**: a pill of icons, like the corner dock, in the corner the dock
+is not in. Pull either pill across the middle of the screen and the two swap corners. For an add-on that shows a panel, copy `addons/_template_drawer/` instead: its `addon.toml` has a
+`[drawer]` section (a size in pixels, or 0 for about the control centre's), and a click on its icon opens a panel out of the pill, in the same glass as the shell's own. The shell draws
+the panel's title bar (the add-on's name, a grip and an X); your scene draws what is below it, in the place the shell tells it (`slot_x`, `slot_y`, `slot_w`, `slot_h`, `slot_open`), on the monitor it names (`slot_mon`, the monitor's name such as DP-1; the template's logic finds the copy of the scene that has it, which tells two monitors of the same size apart; `slot_sw`, `slot_sh` are that monitor's size). Like the
+Desk, the panel stays until its X (or its icon) shuts it, and it can be pulled away from the pill and left anywhere. An add-on with an icon and no `[drawer]` gets a button that flips
+`slot_open`, so it can show and hide its own window. A panel cannot take text yet, and shows on one monitor. A key can open the first panel with `pleamar --say vitreus "emit ax_toggle"`.
+On the Island the icons can live on the bar instead: drag the **add-ons** piece (four small tiles) from the hidden row of Settings > Bar > Island layout onto the bar, anywhere
+along it. The pill goes, its icons sit on the bar, and each panel drops from the bar under its icon, melted into it like the bar's own panels. With a frame they go back to the pill.
+
+While it runs, Vitreus tells it, as facts and texts of its scene, the palette (so a theme restyles it at once), the room the bar takes, the theme's shape and the forecast; the template declares them all and says what each is. An add-on is not sandboxed: its scene declares the programs it runs and the services it reads in its own `permissions`, and turning it on lets it
+have them, so read someone else's before you do. A folder that cannot be read is named in the line under the rows and left out. `bin/vitreus-addons`
+reads the folders and leaves `addons.json` in the data folder; which are on is kept in `addons-state.json` there.
+
+**Logic, data and programs.** A scene's logic is the `.luau` file with the scene's name beside it (`addon.plm` and `addon.luau`; the drawer template has one). It keeps what it must in the
+scene's own data folder, `~/.local/share/pleamar/<scene's name>/`, with the `files` and `files.write` services (`sys.ask("files.folder")` is the folder's path, `files.read` and `files.write`
+work by file name), and runs programs with `run(...)`: each one has to be named in the scene's `permissions { run: ... }`, and a program that is not on every machine (a helper like
+`bin/vitreus-feedfetch`) is linked into `~/.local/bin` by `install.sh`. A panel can have a text field, which the shell takes the keys for (an add-on's scene never asks for
+the keyboard: on two monitors Hyprland handed it, and the pointer with it, to the wrong copy): the add-on says where the field is with `pleamar --say vitreus "fact axf_on true"` and its
+place (`axf_l`, `axf_t`, `axf_r`, `axf_h`), leaves that spot without a zone of its own, and draws what the shell sends back (`field_q`, `field_kb`, `field_enter`, `field_esc`); the
+template has one, and logic/addons.luau has the messages. The shell tells an add-on the forecast as `wx_*` texts and facts when the scene declares them; an add-on that fetches its own weather should not name its
+own `wx_*` or they would be overwritten (the News & Weather one uses `nw_*`). Give the scene file a name of its own: two add-ons whose scene files share a name cannot both run.
+
+**News & Weather** (`addons/news-weather/`, from jaslrobinson's drawer, issue #22) is a panel add-on built this way: an RSS/Atom reader and an Open-Meteo forecast (48-hour graphs, 16 days, saved places).
+To use it, run `./install.sh` once (it links `vitreus-feedfetch`) and turn it on in Settings > Add-ons (it ships with the shell, so it is listed there; a copy of the same name in `~/.config/pleamar/vitreus-addons/` wins over it); its icon
+appears on the add-on pill. Feeds and places are typed (the feed manager narrows the popular feeds as you write, and finds the feed of an address or `r/subreddit`; the place
+search looks places up), or pasted from the clipboard.
+
+**TV Remote** (`addons/tvremote/`) is a panel add-on that controls a Google TV or Android TV over the network: a d-pad, back, home, settings, volume, mute, play, a few streaming apps, power, and a field whose text is typed into the TV.
+It finds the TVs on the network by itself (mDNS), and the name in its header opens a switcher for several of them (up to five, each paired once: the TV shows a six-character code, which is typed into the panel's field).
+It speaks the protocol of the Google TV phone app through `bin/vitreus-tvremote` (Python standard library and `openssl`; `install.sh` links it into `~/.local/bin`). The certificate the TVs remember as paired is kept in the add-on's data
+folder (`~/.local/share/pleamar/tvremote/`, mode 600): anyone who can read it can control those TVs. The panel scales with its size. Written with the help of an AI assistant (Claude).
+
+**Add-ons that frame wallpapers.** An add-on can declare `[wallpaper] frames = true` in its `addon.toml` (see `addons/_template_drawer/addon.toml`). Whenever Vitreus sets a wallpaper (a pick, Random, the slideshow, the picker; not a card's
+quick try) it first asks that add-on, the first one that is on, for the picture awww should show, and keeps the old wallpaper on screen while it waits (30 s, again from each `wph_busy`). The shell stays the only one that calls awww, and it
+remembers which wallpaper a made picture came from, so Iris and the gallery always read the real wallpaper, never the frame. The messages (`logic/wallpaper_hook.luau`): the shell sends `text wph_path`, `text wph_src` and `emit wph_frame <n>`
+(and `text wph_cur`, the wallpaper in use, when it changes and every 10 s: it is the same path again each time, and a text fires its handler on every set, so an add-on acts only when the path differs from the last one it saw); the add-on answers with `pleamar --say vitreus "text wph_out <path>"` and `"emit wph_done <n>"` (the made picture, or `wph_src` itself for none), `"emit wph_busy <n>"`
+while a slow render goes on, or `"emit wph_again"` to apply the current wallpaper again. Idea and first version: jaslrobinson (issue #26).
 
 ---
 
 ## 📦 Requirements
 
 * [**pleamar**](https://github.com/k4ditano/pleamar) — the runtime Vitreus is written for
-* **Hyprland** or **pleamar-wm**
+* **Hyprland**, **niri** or **pleamar-wm**
+* **A Vulkan driver for your graphics card** — pleamar draws with Vulkan. On Arch that is `vulkan-radeon` (AMD), `vulkan-intel` (Intel) or NVIDIA's driver with `nvidia-utils`; on Debian, Ubuntu and Fedora, `mesa-vulkan-drivers`. A minimal install often has none, and then nothing starts and nothing says why. `install.sh` checks for it and offers to install the AMD and Intel ones; `vulkaninfo --summary` shows what Vulkan can see.
 
 The packages `install.sh` installs (pacman, and the AUR for the last two):
 
@@ -151,8 +215,8 @@ The packages `install.sh` installs (pacman, and the AUR for the last two):
 | `awww` | the wallpaper picker |
 | `iris-colors` (AUR) | theming from the wallpaper |
 | `mpvpaper` (AUR), `ffmpeg` | video wallpapers, and the webcam (`ffmpeg` reads the camera) |
-| `imagemagick` | wallpaper thumbnails and the launcher's picture previews |
-| `cava` | the bass pulse, the equalizer and the desktop audio visualiser |
+| `imagemagick` | wallpaper thumbnails, the launcher's picture previews and the pictures in Files |
+| `cava` | the bass pulse, the equalizer and the audio visualiser |
 | `playerctl` | the player and its cover art |
 | `networkmanager` | Wi-Fi |
 | `bluez`, `bluez-utils` | Bluetooth |
@@ -166,6 +230,7 @@ The packages `install.sh` installs (pacman, and the AUR for the last two):
 | `power-profiles-daemon` | the power profile |
 | `polkit`, `python-gobject` | the authentication dialog |
 | `python-pyte`, `ttf-space-mono-nerd` | the Desk's terminal |
+| `python` 3.11 or newer | reads the theme `.toml` files (`bin/vitreus-themes`) and sets up the font for each theme |
 | `pipewire-audio`, `sound-theme-freedesktop` | notification sounds |
 | `tesseract`, `tesseract-data-eng` | the text of a screenshot, and Snap's Copy text and Redact private info |
 
@@ -213,6 +278,12 @@ when a monitor wakes; the installer does the same for the lock screen, the wallp
 `exec-once = pleamar --autostart` in your config (`hl.on("hyprland.start", …)` in a Lua config). The scene reloads
 itself whenever a file in the folder is saved.
 
+**On niri**, the script adds three lines to the end of `~/.config/niri/config.kdl` (it asks first, keeps a copy as
+`config.kdl.before-vitreus`, and takes them out again on `--uninstall`): `spawn-at-startup "pleamar" "--autostart"`, and
+`include "niri_vitreus.kdl"` and `include "vitreus.kdl"`. The first of these two files, linked into `~/.config/niri`, has the shell's key binds; the
+second is written by the shell: the room the windows keep clear of the bar and docks (as `struts`), the focus ring, and what Settings > niri
+changes. Settings > niri takes the place of the Hyprland page there.
+
 Two things the script does that you would do by hand: link `bin/vitreus-clipimg` into a folder on your `PATH` (the
 launcher's clipboard pictures), and, on Hyprland with a Lua config, load the key binds and what Settings saves:
 
@@ -239,9 +310,28 @@ Vitreus keeps its data in `~/.local/share/pleamar/vitreus`.
 Iris reads your wallpaper and Vitreus recolours itself, with a legibility floor on the
 text. It takes about half a second after a wallpaper change.
 
+### 🖌️ Your own themes
+
+Glass follows the wallpaper through Iris; every other theme is a `.toml` file with its own colours, typeface and window corners.
+Copy `themes/_template.toml` into `~/.config/pleamar/vitreus-themes/`, edit it, and it shows up as a card on **Settings > Theme**
+(see [Making your own theme](#making-your-own-theme)). Your files stay where they are when Vitreus updates. A theme's typeface can be changed
+on the Theme page, and the choice is remembered per theme in `fonts.json` in the data folder.
+
 ---
 
 ## 📄 License
 
 Vitreus is released under the [MIT License](LICENSE). It runs on [pleamar](https://github.com/k4ditano/pleamar), which
 is BSD-3-Clause and is not part of this repository.
+
+---
+
+## ⭐ Star History
+
+<a href="https://www.star-history.com/?repos=natepayn3%2Fvitreus&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=natepayn3/vitreus&type=date&theme=dark&legend=top-left" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=natepayn3/vitreus&type=date&legend=top-left" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=natepayn3/vitreus&type=date&legend=top-left" />
+ </picture>
+</a>

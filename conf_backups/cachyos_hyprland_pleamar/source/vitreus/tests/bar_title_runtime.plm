@@ -1,0 +1,30 @@
+language 0.1
+scene BarTitleRuntime {
+    surface { size: full, full; anchor: top; rate: 75; screens: each max 3 }
+    font file "../fonts/SpaceGrotesk[wght].ttf"
+    text bar_title_full = "A long focused window title with its complete ending, repeated so the tooltip must wrap. A long focused window title with its complete ending, repeated so the tooltip must wrap."
+    fact bar_title_revision = 0
+    measure tb_title_full_w
+    let u = 1.35
+    fact test_title_width = 216.2
+    let win.hw = test_title_width
+    let win.xs = 20
+    let bar.y = 45
+    let bar.h = 40
+    let bt = 0
+    fact panel: none | player = none
+    fact title_clicked = false
+    let mctl = 0
+    let lm = 0
+    let bs.title = 1
+    let sb = 1
+    let ink = #eeeeee
+    let faint = #aaaaaa
+    let deep = #111111
+    box { from: 20, 25; size: 200, 40; corner: 6; color: #273741 }
+    zone box win_hit { from: 20, 25; size: 200, 40; label: "Window title" }
+    on press win_hit { title_clicked = true }
+    on key s { bar_title_full = "Short"; bar_title_revision = bar_title_revision + 1 }
+    on key l { bar_title_full = "Updated focused window title with its complete ending, which still needs a wrapped tooltip. Updated focused window title with its complete ending, which still needs a wrapped tooltip."; test_title_width = 316.2; bar_title_revision = bar_title_revision + 1 }
+    group { include "../pages/bar_title.plm" }
+}

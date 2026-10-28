@@ -1,4 +1,65 @@
-# Verification record — 2026-10-25–26 refresh
+# Verification record — 2026-10-28
+
+No live desktop stack was switched, no individual widget was disabled, and no
+real lock/unlock or reboot/login cycle was performed. Installation was
+file-only and did not invoke desktop/service activation commands.
+
+| Current check | Result |
+| --- | --- |
+| Exported scene Python suite | 205 passed |
+| Exported standalone scene Lua | 24 correctly parameterized invocations passed |
+| Exported Hyprland Lua fixtures | 8 passed |
+| Existing Hyprland shell/isolated QML harnesses | 8 passed; no live window input |
+| Desktop switch/installer/recovery fixtures | 36 passed |
+| Existing migration suite, including restore-cache regressions | 51 passed |
+| Public overlay restore fixtures | 13 passed |
+| Retained Kitty suite | 51 passed; 1 existing focused-GUI test skipped |
+| Exported shell syntax | 57 entrypoints/harnesses passed |
+| Retained Fish syntax / prompt formats | 14 Fish checks / 5 JSON/TOML parses passed |
+| `pleamar --check vitreus.plm` | accepted: 45980 properties, 136507 instructions, 14768 rules, 8887 zones |
+| Actual live-config copy: installer apply in temporary home | 23 updates; 18 syntax/launcher checks passed; repeat installation had zero changes |
+| Actual Hyprland entrypoint with fully stubbed modules | both mode-specific binding/style branches passed; shared geometry stays loaded |
+| Actual private snapshot: restore in temporary home | 1099 actions; zero remaining byte/mode/alias differences, including current terminal config |
+| Exact runtime / private TV pairing key | executable bit / 0600 permissions verified after isolated restore |
+| Actual public overlay: preview and apply in temporary home | manifest verified; preview wrote nothing; apply restored the shared mode helper |
+| Installed `.desktop` validation | both launcher files accepted |
+| Installed state (read-only) | selected `pleamar`, ready `true`; installer preview reports zero pending changes |
+| Unrelated backup preservation | all 523 original file/link fingerprints unchanged |
+| Private storage | parent/root 0700; all 937 payload files 0600; private directory Git-ignored |
+| Public credential-pattern audit | no private-key/OAuth-token/known credential-prefix matches; private file types excluded |
+
+Tests ran with Python `-B` and explicit suite directories. Lua VRR/tray runners
+require named cases; they were run with every case from their Python callers.
+The manual-wallpaper loader test used the explicit slideshow-off fixture below;
+the user's actual slideshow preference was not changed. The isolated QML
+workspace harness starts only its headless fixture, not the QS desktop stack.
+
+Inline review added RED→GREEN regressions ensuring ordinary applications
+launched by Walker are not treated as disposable background children, and
+Python/Bash/Lua mode readers agree on whitespace and invalid multiline input.
+The coordinator also refuses to stop its own managed-service cgroup; native
+Vitreus application launches were checked to dispatch through Hyprland.
+
+The current local snapshot is selected by
+`../.private/pleamar-current.json`; the verified final bundle contains 1065
+private/excluded manifest entries (7 cache/build exclusions). The earlier
+pre-install snapshot and original curated-export archive remain available.
+Normal mode switching never restores these snapshots over newer preferences.
+
+Independent task review was attempted but the configured free-model quota was
+reached. Review continued inline; no other model was selected. A real stack
+switch, reboot, lock/unlock and focused scratch Kitty input remain untested.
+ShellCheck is not installed. Do not present fixture checks as live acceptance.
+
+`git diff --cached --check` reports seven pre-existing whitespace notices in
+newly captured upstream/source files (trailing spaces/blank EOF lines). These
+bytes are deliberately retained for exact backup parity. Authored switcher,
+installer, recovery and test code passes the whitespace check; this is not a
+claim that the complete copied-source diff is whitespace-clean.
+
+## Historical verification record — 2026-10-25–26 refresh
+
+Everything below describes the older export, not new October 28 results.
 
 Run commands from this export unless otherwise specified. No real restore,
 desktop switch, lock/unlock, or focused-window input was run on the live home.

@@ -13,6 +13,68 @@ return function(set_panel)
     local tree = nil            -- its menu, as it came
     local unfolded = {}         -- the submenus that are open, by their place: "2/1"
     local flat = {}             -- row of `tray_menu` -> { entry, place }
+    local recovered = false
+
+    -- Some apps register only once and outlive the watcher. Recover their advertised
+    -- SNI names once, after the service's first snapshot; ordinary updates stay event-driven.
+    local function recover_existing(snapshot)
+        local watcher = "org.kde.StatusNotifierWatcher"
+        local dbus = "org.freedesktop.DBus"
+        local function bus(args, done)
+            local cmd = { "--user", "--json=short", "--timeout=2s" }
+            for _, arg in ipairs(args) do cmd[#cmd + 1] = arg end
+            run("busctl", cmd, function(out, code)
+                local ok, value = false, nil
+                if code == 0 then ok, value = pcall(json.decode, out or "") end
+                done(ok and type(value) == "table" and value.data or nil)
+            end)
+        end
+        local owners, known = {}, {}
+        local function owner(name, done)
+            if name:sub(1, 1) == ":" then return done(name) end
+            if owners[name] ~= nil then return done(owners[name]) end
+            bus({ "call", dbus, "/org/freedesktop/DBus", dbus, "GetNameOwner", "s", name }, function(data)
+                local resolved = type(data) == "table" and type(data[1]) == "string" and data[1] or false
+                owners[name] = resolved
+                done(resolved)
+            end)
+        end
+        bus({ "call", dbus, "/org/freedesktop/DBus", dbus, "ListNames" }, function(data)
+            if type(data) ~= "table" or type(data[1]) ~= "table" then return end
+            local candidates = {}
+            for _, name in ipairs(data[1]) do
+                if type(name) == "string" and name:match("^org%.kde%.StatusNotifierItem[%-%.]") then
+                    candidates[#candidates + 1] = name
+                end
+            end
+            local function visit(i)
+                local name = candidates[i]
+                if not name then return end
+                owner(name, function(resolved)
+                    local key = resolved and (resolved .. "/StatusNotifierItem")
+                    if not key or known[key] then return visit(i + 1) end
+                    bus({ "get-property", name, "/StatusNotifierItem", "org.kde.StatusNotifierItem", "Id" }, function(id)
+                        if type(id) ~= "string" or id == "" then return visit(i + 1) end
+                        known[key] = true
+                        bus({ "call", watcher, "/StatusNotifierWatcher", watcher, "RegisterStatusNotifierItem", "s", name }, function()
+                            visit(i + 1)
+                        end)
+                    end)
+                end)
+            end
+            local function seed(i)
+                local item = snapshot[i]
+                if not item then return visit(1) end
+                local name, path = (item.key or ""):match("^([^/]+)(/.*)$")
+                if not name then return seed(i + 1) end
+                owner(name, function(resolved)
+                    if resolved then known[resolved .. path] = true end
+                    seed(i + 1)
+                end)
+            end
+            seed(1)
+        end)
+    end
 
     local function ident(t)
         if t.id ~= nil and t.id ~= "" then return t.id end
@@ -68,6 +130,10 @@ return function(set_panel)
         -- a stable order: the bus registration order changes with what started first
         table.sort(items, function(a, b) return ident(a) < ident(b) end)
         render()
+        if not recovered then
+            recovered = true
+            recover_existing(items)
+        end
     end)
 
     -- Labels use a leading underscore for the accelerator (`_File`); `__` is a real one.

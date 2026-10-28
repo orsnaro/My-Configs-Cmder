@@ -191,7 +191,7 @@ return function(key, with_dirs)
         fact.about_restarting = true
         restart()
     end)
-    on("about_update", function()
+    local function do_update()
         if A.busy or (fact.about_behind or 0) <= 0 then return end
         -- pleamar first, then Vitreus (`pleamar-update` pulls its source and builds it, which takes minutes): the newest
         -- Vitreus files may need the newest pleamar, so they are only pulled once it is in place, and the shell is
@@ -200,6 +200,9 @@ return function(key, with_dirs)
         local function pleamar_first()
             if A.pl_behind <= 0 then return update_shell() end
             busy(true, "Updating pleamar: building it, this takes a few minutes…", 1800000)
+            -- Installing the new pleamar makes the running one start again by itself (it watches its own binary), which ends this
+            -- logic before the Vitreus step below. So the step is left written down, and the shell that starts again carries it out.
+            pcall(sys.call, "files.write", "update-pending.json", { pending = true })
             -- Every build of pleamar-wm rewrites its Cargo.lock (it records pleamar's version, which upstream commits only now
             -- and then). `pleamar-update` takes a repo with changes as "yours" and does not pull it, so the same updates
             -- would be offered for ever. That file is a build artifact: put it back first.
@@ -207,6 +210,7 @@ return function(key, with_dirs)
                 local r = ({ "pleamar", "pleamar-wm" })[i]
                 if not r then
                     return run("pleamar-update", {}, function(_, code)
+                        pcall(sys.call, "files.write", "update-pending.json", { pending = false })
                         if code ~= 0 then
                             return busy(false, "Couldn't update pleamar. Try `pleamar-update` in a terminal to see why.")
                         end
@@ -258,29 +262,16 @@ return function(key, with_dirs)
                     git({ "show", "HEAD:lockscreen/lockscreen.plm" }, function(lock_head)
                         local bar_mine, lock_mine = screens_in(bar_now, "bar"), screens_in(lock_now, "lock")
                         local bar_stock, lock_stock = screens_in(bar_head, "bar"), screens_in(lock_head, "lock")
-                        local bar_changed = bar_mine ~= nil and bar_stock ~= nil and bar_mine ~= bar_stock
+                        -- The bar's line is not kept: the scene is always one copy per monitor (`screens: each`, the choice is in bar.json), and an old line
+                        -- that names one monitor, put into the new file, leaves out `$screen` and the scene does not load.
+                        local bar_changed = false
                         local lock_changed = lock_mine ~= nil and lock_stock ~= nil and lock_mine ~= lock_stock
                         write_screens(bar_changed and bar_stock or nil, lock_changed and lock_stock or nil, function()
-                            -- Update means the folder becomes exactly what main is: whatever was changed or committed here is
-                            -- overwritten, on purpose (only the screens choice is kept, put into the new files before they replace the old ones).
-                            git({ "fetch", "--quiet" }, function(_, fcode)
-                            -- The scene reloads itself the moment its file is saved, so the stock `screens:` line must never be on disk,
-                            -- not even for the moment between the reset and writing the chosen one: the new files with the chosen lines are
-                            -- made first (in .git) and moved over the reset ones in the same command.
-                            local keep = [[
-cd "$1" || exit 1
-g=$(git rev-parse --git-dir) || exit 1
-if [ -n "$2" ]; then git show @{u}:vitreus.plm | sed -E "/^    surface \{/s/screens: [^;]*;/screens: $2;/" > "$g/keep-bar" || exit 1; fi
-if [ -n "$3" ]; then git show @{u}:lockscreen/lockscreen.plm | sed -E "/^        screens: /s/screens: .*/screens: $3/" > "$g/keep-lock" || exit 1; fi
-git reset --hard --quiet @{u} || exit 1
-[ -n "$2" ] && mv "$g/keep-bar" vitreus.plm
-[ -n "$3" ] && mv "$g/keep-lock" lockscreen/lockscreen.plm
-exit 0]]
-                            run("setsid", { "-w", "sh", "-c", keep, "sh", A.dir, (bar_changed and plausible(bar_mine)) and bar_mine or "", (lock_changed and plausible(lock_mine)) and lock_mine or "" }, function(_, rcode)
-                                local code = fcode ~= 0 and fcode or rcode
+                            -- Keep customization commits and working-tree edits; never reset to the remote.
+                            git({ "pull", "--ff-only" }, function(_, code)
                                 do
                                     if code ~= 0 then
-                                        return busy(false, "Couldn't update: couldn't reach the remote. Check the network and try again.")
+                                        return busy(false, "Couldn't update safely: local changes or a network error. Your customizations were left intact.")
                                     end
                                     -- What this version needs besides the pull (new helpers, autostart lines, binds) is what install.sh
                                     -- does without questions or sudo (--refresh); it also says which packages are missing, and the shell
@@ -296,7 +287,6 @@ exit 0]]
                                     end)
                                 end
                             end)
-                            end)
                         end)
                     end)
                 end)
@@ -304,7 +294,8 @@ exit 0]]
         end)
         end
         pleamar_first()
-    end)
+    end
+    on("about_update", do_update)
 
     -- A quiet check in the background (a minute and a half after the shell starts, then every six hours): when the remote has commits this
     -- checkout does not, ONE critical notification says so and lists what is new (the commits' subjects, newest first). It is sent once
@@ -348,5 +339,11 @@ exit 0]]
         A.dir = d.conf
         A.src = (d.data:gsub("/vitreus$", "/src"))
         read_build()
+        -- An update that was cut short by pleamar starting again (see do_update): the Vitreus half is done now, then the restart.
+        local ok, saved = pcall(sys.ask, "files.read", "update-pending.json", "json")
+        if ok and type(saved) == "table" and saved.pending == true then
+            pcall(sys.call, "files.write", "update-pending.json", { pending = false })
+            check(do_update)
+        end
     end)
 end
