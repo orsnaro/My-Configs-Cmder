@@ -121,15 +121,22 @@ class Backend:
                 if self.run(['systemctl', '--user', 'is-active', '--quiet', 'pleamar.service'], check=False).returncode:
                     return False
                 self.run(['pleamar', '--say', 'vitreus', 'get panel'])
-                return self.run(['pleamar', '--say', 'lockscreen', 'get locked']).stdout.strip() in ('true', 'false')
+                return (self.run(['pleamar', '--say', 'lockscreen', 'get locked']).stdout.strip() in ('true', 'false')
+                        and self.notifications_owned_by('pleamar'))
             for config in (home / '.config/quickshell', home / '.local/share/ml4w-dock'):
                 result = self.run(['qs', '-p', str(config), 'list', '-j'], check=False)
                 if result.returncode or not json.loads(result.stdout):
                     return False
             names = {p.name for p in self.processes()}
-            return {'walker', 'elephant', 'swaync', Path(POLKIT).name} <= names
+            return ({'walker', 'elephant', 'swaync', Path(POLKIT).name} <= names
+                    and self.notifications_owned_by('swaync'))
         except (SwitchError, ValueError):
             return False
+
+    def notifications_owned_by(self, name: str) -> bool:
+        result = self.run(['busctl', '--user', 'status', 'org.freedesktop.Notifications'], check=False)
+        return result.returncode == 0 and any(
+            line.startswith('Exe=') and Path(line[4:]).name == name for line in result.stdout.splitlines())
 
 
 class StackManager:
@@ -201,7 +208,7 @@ class StackManager:
             found = expanded
 
     def preflight(self, mode: str) -> None:
-        commands = ['systemctl', 'hyprctl', 'pleamar'] if mode == 'pleamar' else ['systemctl', 'hyprctl', 'qs', 'walker', 'elephant', POLKIT]
+        commands = ['systemctl', 'hyprctl', 'busctl', 'pleamar'] if mode == 'pleamar' else ['systemctl', 'hyprctl', 'busctl', 'qs', 'walker', 'elephant', POLKIT]
         files = ['.config/systemd/user/pleamar.service', '.local/bin/pleamar',
                  '.config/pleamar/shells/vitreus/vitreus.plm', '.config/pleamar/shells/vitreus/bin/vitreus-keep',
                  '.config/pleamar/shells/vitreus/lockscreen/lockscreen.plm'] if mode == 'pleamar' else [
@@ -245,8 +252,9 @@ class StackManager:
             self.backend.signal(owners)
             for unit in QS_UNITS:
                 if self.unit_exists(unit):
-                    self.backend.run(['systemctl', '--user', 'stop', unit])
+                    # Block D-Bus activation before releasing the notification name.
                     self.backend.run(['systemctl', '--user', 'mask', unit])
+                    self.backend.run(['systemctl', '--user', 'stop', unit])
             self.backend.signal([p for p in members if p not in owners])
         self.backend.signal(night)
         self.backend.wait_stopped(members + night)
@@ -314,8 +322,10 @@ class StackManager:
                 if not self.backend.ready(mode, self.home):
                     self.start(mode)
                 self.wait_ready(mode)
-                if self.members(other, self.backend.processes()):
-                    raise SwitchError('The inactive stack still has running processes')
+                survivors = self.members(other, self.backend.processes())
+                if survivors:
+                    details = ', '.join(f'{p.name} (PID {p.pid})' for p in survivors)
+                    raise SwitchError(f'The inactive stack still has running processes: {details}')
                 self.log(f'Switch complete: {mode}')
             except Exception as error:
                 self.log(f'Switch failed: {error}')

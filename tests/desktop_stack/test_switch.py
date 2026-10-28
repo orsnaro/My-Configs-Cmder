@@ -21,6 +21,9 @@ class FakeBackend:
         self.locked = 'false'
         self.missing: set[str] = set()
         self.unsafe_context = False
+        self.late_process: stack.Process | None = None
+        self.masked: set[str] = set()
+        self.dbus_activation_race = False
 
     def validate_context(self) -> None:
         if self.unsafe_context:
@@ -41,9 +44,17 @@ class FakeBackend:
             output = 'loaded' if argv[3] in {'pleamar.service', 'swaync.service', 'waybar.service'} else 'not-found'
         if argv[:3] == ['systemctl', '--user', 'stop']:
             self.healthy.discard('pleamar' if argv[3] == 'pleamar.service' else 'quickshell')
+            if self.dbus_activation_race and argv[3] == 'swaync.service' and argv[3] not in self.masked:
+                self.items.append(stack.Process(4243, ('swaync',), 'dbus-restart'))
+        if argv[:3] == ['systemctl', '--user', 'mask']:
+            self.masked.add(argv[3])
+        if argv[:3] == ['systemctl', '--user', 'unmask']:
+            self.masked.discard(argv[3])
         if argv[:3] == ['systemctl', '--user', 'start'] and argv[3] == 'pleamar.service':
             if 'pleamar' not in self.fail:
                 self.healthy.add('pleamar')
+                if self.late_process is not None:
+                    self.items.append(self.late_process)
         if '--say' in argv and 'lockscreen' in argv:
             output = self.locked
         return subprocess.CompletedProcess(argv, 0, output, '')
@@ -180,6 +191,33 @@ class StackTests(unittest.TestCase):
         with self.assertRaisesRegex(stack.SwitchError, 'rollback failed'):
             self.manager.switch('quickshell')
         self.assertEqual(self.manager.selected(), 'pleamar')
+
+    def test_inactive_survivor_error_identifies_the_process(self) -> None:
+        self.manager.write_mode('quickshell')
+        self.backend.healthy = {'quickshell'}
+        self.backend.late_process = stack.Process(4242, ('walker',), 'late')
+        with self.assertRaisesRegex(stack.SwitchError, r'walker.*4242'):
+            self.manager.switch('pleamar')
+
+    def test_dbus_cannot_reactivate_swaync_between_stop_and_mask(self) -> None:
+        self.manager.write_mode('quickshell')
+        self.backend.healthy = {'quickshell'}
+        self.backend.dbus_activation_race = True
+        self.process(10, 'swaync')
+        self.manager.switch('pleamar')
+        self.assertFalse(self.manager.members('quickshell', self.backend.processes()))
+        self.assertEqual(self.manager.selected(), 'pleamar')
+
+    def test_readiness_rejects_notification_owner_from_other_stack(self) -> None:
+        backend = stack.Backend(self.home)
+        for owner, expected in (('swaync', False), ('pleamar', True), ('', False)):
+            with self.subTest(owner=owner):
+                def run(argv: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
+                    if argv[0] == 'busctl':
+                        return subprocess.CompletedProcess(argv, 0 if owner else 1, f'PID=44\nExe=/usr/bin/{owner}\n', '')
+                    return subprocess.CompletedProcess(argv, 0, 'false\n', '')
+                with mock.patch.object(backend, 'run', side_effect=run):
+                    self.assertEqual(backend.ready('pleamar', self.home), expected)
 
     def test_concurrent_switch_is_rejected(self) -> None:
         self.manager.state_dir.mkdir(parents=True)
