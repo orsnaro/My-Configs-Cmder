@@ -66,6 +66,12 @@ class Backend:
     def has_command(self, name: str) -> bool:
         return shutil.which(name, path=self.env['PATH']) is not None
 
+    def validate_context(self) -> None:
+        # setsid alone does not escape systemd's service cgroup.
+        groups = {part for line in Path('/proc/self/cgroup').read_text().splitlines() for part in line.split('/')}
+        if groups.intersection({'pleamar.service', *QS_UNITS}):
+            raise SwitchError('Use the application launcher or an external terminal, not a terminal embedded in the stack being stopped')
+
     def run(self, argv: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
         try:
             return subprocess.run(argv, env=self.env, capture_output=True, text=True, timeout=20, check=check)
@@ -295,6 +301,7 @@ class StackManager:
             other = 'pleamar' if mode == 'quickshell' else 'quickshell'
             if mode == previous and self.backend.ready(mode, self.home) and not self.members(other, self.backend.processes()):
                 return
+            self.backend.validate_context()
             self.preflight(mode)
             self.unlocked()
             self.log(f'Switch requested: {previous} -> {mode}')

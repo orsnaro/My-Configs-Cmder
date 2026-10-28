@@ -20,6 +20,11 @@ class FakeBackend:
         self.fail: set[str] = set()
         self.locked = 'false'
         self.missing: set[str] = set()
+        self.unsafe_context = False
+
+    def validate_context(self) -> None:
+        if self.unsafe_context:
+            raise stack.SwitchError('Use the application launcher or an external terminal')
 
     def has_command(self, name: str) -> bool:
         return name not in self.missing
@@ -147,6 +152,21 @@ class StackTests(unittest.TestCase):
             self.manager.switch('quickshell')
         self.assertEqual(self.backend.events, [])
         self.assertEqual(self.manager.selected(), 'pleamar')
+
+    def test_switch_refuses_to_stop_its_own_managed_service_context(self) -> None:
+        self.backend.unsafe_context = True
+        with self.assertRaisesRegex(stack.SwitchError, 'external terminal'):
+            self.manager.switch('quickshell')
+        self.assertEqual(self.backend.events, [])
+        self.assertEqual(self.manager.selected(), 'pleamar')
+
+    def test_real_backend_detects_stack_service_cgroups(self) -> None:
+        backend = stack.Backend(self.home)
+        with mock.patch.object(stack.Path, 'read_text', return_value='0::/user.slice/app.slice/pleamar.service\n'):
+            with self.assertRaises(stack.SwitchError):
+                backend.validate_context()
+        with mock.patch.object(stack.Path, 'read_text', return_value='0::/user.slice/session.slice/wayland-wm@hyprland.desktop.service\n'):
+            backend.validate_context()
 
     def test_startup_failure_rolls_back_selection_and_old_stack(self) -> None:
         self.backend.fail.add('quickshell')
