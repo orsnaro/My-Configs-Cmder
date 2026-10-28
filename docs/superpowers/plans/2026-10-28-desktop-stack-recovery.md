@@ -55,7 +55,7 @@
 - [ ] QS startup: existing `ml4w-autostart`, `elephant`, `walker --gapplication-service`, SwayNC and GNOME polkit agent. QS main config already supplies main and secondary bars; `ml4w-autostart` supplies the dock. Do not introduce a second waybar.
 - [ ] Pleamar startup: unmask/start `pleamar.service` and the existing lock keeper command with `DRI_PRIME=1`, `VK_DRIVER_FILES=/usr/share/vulkan/icd.d/radeon_icd.json`, `PLEAMAR_SWAPCHAIN=1`. Let the main scene start its configured desktop companions. Verify notification ownership/readiness where available.
 - [ ] QS shutdown: stop owned wallpaper-automation loop without changing its saved slideshow preference, stop all same-user QS/Walker/Elephant processes and QS notification/auth helpers. Pleamar shutdown: stop keeper owners first, stop managed service and remaining known scenes, clear the night-mode transform before its daemon is stopped.
-- [ ] Stop/mask only identified opposing stack units; never blanket-disable services. Leave awww, hypridle, cliphist, portals, network/audio, tray applets and user applications untouched.
+- [ ] Stop/mask only identified opposing stack units; never blanket-disable services. Leave awww, hypridle, cliphist, portals, network/audio, tray applets, battery listeners and user applications untouched. During an actual switch, refresh only an already-running GTK theme listener so patched mode guards replace its old in-memory code; preserve its shared duties, safely stop its owned pipeline children, and test this case. Never restart it during installation.
 - [ ] Run `python3 -B -m unittest discover -s tests/desktop_stack -p 'test_switch.py'`. Review spec compliance then code quality.
 
 ### Task 3: Installer, launchers and inactive-stack hook guards
