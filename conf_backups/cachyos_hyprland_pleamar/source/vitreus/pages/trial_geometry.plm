@@ -97,11 +97,14 @@ part TrialGeometry {
     let tb.win_r = tb.tray_l - tb.win_gap
     let tb.win_l = tb.win_r - tb.win_w
     let tb.win = (tb.win_l + tb.win_r) / 2
-    //  The fixed bell and update slots keep 1-3 digits from moving the icon, and the number hugs it.
+    //  Centre each icon/count pair at its measured width, not an unused three-digit slot.
     let tb.updates = tb.update_l + 22 * u
-    let tb.update_icon = tb.update_l + 9 * u
-    let tb.update_count = tb.update_icon + 8 * u
+    let tb.count_gap = 2 * u
+    let tb.update_content_w = tb_update_icon_w.width + tb.count_gap + tb_update_count_w.width
+    let tb.update_icon = tb.update_pill - tb.update_content_w / 2 + tb_update_icon_w.width / 2
+    let tb.update_count = tb.update_icon + tb_update_icon_w.width / 2 + tb.count_gap
     let tb.alert_pill = tb.alert_l + tb.alert_pill_w / 2
-    let tb.alert_icon = tb.alert_l + 9 * u
-    let tb.alert_count = tb.alert_icon + 8 * u
+    let tb.alert_content_w = tb_alert_icon_w.width + tb.count_gap + tb_alert_count_w.width
+    let tb.alert_icon = tb.alert_pill - tb.alert_content_w / 2 + tb_alert_icon_w.width / 2
+    let tb.alert_count = tb.alert_icon + tb_alert_icon_w.width / 2 + tb.count_gap
 }

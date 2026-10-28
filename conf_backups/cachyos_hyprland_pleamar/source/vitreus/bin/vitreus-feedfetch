@@ -1,0 +1,460 @@
+#!/usr/bin/env python3
+"""feedfetch.py CONFIG_JSON CACHEDIR
+
+Fetches the RSS/Atom feeds of a desktopfeed.json config and prints one JSON
+object on stdout:
+
+  { "ok": true, "errors": ["<feed name>: <what happened>", ...],
+    "feeds": [{"name": ..., "url": ..., "ok": true, "count": 12}, ...],
+    "items": [{"id": "abc123", "t": "Title", "src": "XDA", "link": "https://...",
+               "pub": 1729..., "img": "/cache/thumbs/abc123.jpg", "cat": "News"}, ...] }
+
+Items come merged from every feed, newest first (`pub`, 0 last), at most
+`max_items` of them. Thumbnails (media:content, media:thumbnail, an image
+enclosure, or the first <img> of the description) are downloaded into
+CACHEDIR/thumbs and reported by path; what cannot be fetched simply has no
+"img". Only the standard library is used. Nothing here writes to the config.
+"""
+import json
+import re
+import sys
+import gzip
+import time
+import hashlib
+import html as htmlmod
+import os
+import urllib.request
+import urllib.error
+import urllib.parse
+import xml.etree.ElementTree as ET
+from email.utils import parsedate_to_datetime
+from datetime import datetime, timezone
+
+UA = "vitreus-desktopfeed/1.0 (+rss reader)"
+TIMEOUT = 12
+MAX_IMG = 2_000_000
+IMG_EXT = {"image/jpeg": ".jpg", "image/png": ".png", "image/webp": ".webp", "image/gif": ".gif", "image/avif": ".avif"}
+
+# A little directory of feeds that are known to answer, for the add row's suggestions (the widget filters it as
+# you type). Any address works too: --resolve looks for the feed of a site on its own.
+DIRECTORY = [
+    {"name": "Ars Technica", "url": "https://feeds.arstechnica.com/arstechnica/index", "topic": "Tech"},
+    {"name": "The Verge", "url": "https://www.theverge.com/rss/index.xml", "topic": "Tech"},
+    {"name": "XDA", "url": "https://www.xda-developers.com/feed/", "topic": "Tech"},
+    {"name": "Android Central", "url": "https://www.androidcentral.com/feed", "topic": "Android"},
+    {"name": "Android Police", "url": "https://www.androidpolice.com/feed/", "topic": "Android"},
+    {"name": "9to5Google", "url": "https://9to5google.com/feed/", "topic": "Android"},
+    {"name": "Hacker News", "url": "https://hnrss.org/frontpage", "topic": "Tech"},
+    {"name": "TechCrunch", "url": "https://techcrunch.com/feed/", "topic": "Tech"},
+    {"name": "Engadget", "url": "https://www.engadget.com/rss.xml", "topic": "Tech"},
+    {"name": "Phoronix", "url": "https://www.phoronix.com/rss.php", "topic": "Linux"},
+    {"name": "OMG! Ubuntu", "url": "https://www.omgubuntu.co.uk/feed", "topic": "Linux"},
+    {"name": "It's FOSS", "url": "https://itsfoss.com/feed/", "topic": "Linux"},
+    {"name": "BBC News", "url": "https://feeds.bbci.co.uk/news/rss.xml", "topic": "News"},
+    {"name": "CNN", "url": "http://rss.cnn.com/rss/cnn_topstories.rss", "topic": "News"},
+    {"name": "Axios", "url": "https://api.axios.com/feed/top", "topic": "News"},
+    {"name": "BBC World", "url": "https://feeds.bbci.co.uk/news/world/rss.xml", "topic": "News"},
+    {"name": "The Guardian", "url": "https://www.theguardian.com/world/rss", "topic": "News"},
+    {"name": "NYT Home", "url": "https://rss.nytimes.com/services/xml/rss/nyt/HomePage.xml", "topic": "News"},
+    {"name": "NASA", "url": "https://www.nasa.gov/rss/dyn/breaking_news.rss", "topic": "Space"},
+    {"name": "Space.com", "url": "https://www.space.com/feeds/all", "topic": "Space"},
+    {"name": "Phys.org", "url": "https://phys.org/rss-feed/", "topic": "Science"},
+    {"name": "ScienceDaily", "url": "https://www.sciencedaily.com/rss/top/science.xml", "topic": "Science"},
+    {"name": "Marca", "url": "https://www.marca.com/rss/portada.xml", "topic": "Sports"},
+    {"name": "ESPN", "url": "https://www.espn.com/espn/rss/news", "topic": "Sports"},
+]
+
+
+def local(tag):
+    return tag.rsplit("}", 1)[-1].lower()
+
+
+def children(el, name):
+    name = name.lower()
+    return [c for c in el if local(c.tag) == name]
+
+
+def child(el, name):
+    name = name.lower()
+    for c in el:
+        if local(c.tag) == name:
+            return c
+    return None
+
+
+def textof(el):
+    if el is None:
+        return ""
+    return "".join(el.itertext()).strip()
+
+
+def clean_html(s):
+    s = re.sub(r"<[^>]+>", " ", s or "")
+    s = re.sub(r"&nbsp;?", " ", s)
+    for a, b in (("&amp;", "&"), ("&lt;", "<"), ("&gt;", ">"), ("&quot;", '"'), ("&#39;", "'"), ("&apos;", "'")):
+        s = s.replace(a, b)
+    return re.sub(r"\s+", " ", s).strip()
+
+
+def to_epoch(s):
+    if not s:
+        return 0
+    s = s.strip()
+    try:
+        return int(parsedate_to_datetime(s).timestamp())
+    except Exception:
+        pass
+    for fmt in ("%Y-%m-%dT%H:%M:%S%z", "%Y-%m-%dT%H:%M:%SZ", "%Y-%m-%dT%H:%M:%S.%f%z", "%Y-%m-%d %H:%M:%S"):
+        try:
+            dt = datetime.strptime(s, fmt)
+            if dt.tzinfo is None:
+                dt = dt.replace(tzinfo=timezone.utc)
+            return int(dt.timestamp())
+        except Exception:
+            continue
+    return 0
+
+
+def fetch(url, limit=None, timeout=TIMEOUT):
+    req = urllib.request.Request(url, headers={"User-Agent": UA, "Accept-Encoding": "gzip"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        data = r.read(limit or MAX_IMG + 1)
+        if r.headers.get("Content-Encoding") == "gzip":
+            try:
+                data = gzip.decompress(data)
+            except Exception:
+                # a `limit`ed read can cut the stream mid-block: take whatever decompresses (the head is what is read for)
+                import zlib
+                d = zlib.decompressobj(zlib.MAX_WBITS | 32)
+                try:
+                    data = d.decompress(data)
+                except Exception:
+                    pass
+        return data, r.headers.get("Content-Type", "")
+
+
+def first_img_in(html):
+    if not html:
+        return ""
+    html = htmlmod.unescape(html)   # some feeds escape their markup twice (Reddit's Atom does)
+    m = re.search(r'<img[^>]+src=["\']([^"\']+)["\']', html, re.I)
+    if not m:
+        return ""
+    # (Reddit's preview URLs are taken as they are: their `s=` signature signs the size asked for)
+    return m.group(1)
+
+
+def parse(data, feed_name):
+    """Returns (feed_title, [items]). RSS 2.0 and Atom, by local tag names."""
+    root = ET.fromstring(data)
+    kind = local(root.tag)
+    items = []
+    if kind == "rss" or kind == "rdf":
+        channel = child(root, "channel")
+        if channel is None:
+            channel = root
+        feed_title = textof(child(channel, "title")) or feed_name
+        for it in children(channel, "item"):
+            title = clean_html(textof(child(it, "title")))
+            link = textof(child(it, "link"))
+            guid = textof(child(it, "guid")) or link
+            pub = to_epoch(textof(child(it, "pubDate")) or textof(child(it, "date")))
+            desc = textof(child(it, "description"))
+            img = ""
+            # a <media:group> holds the media:content tags one level down (CNN's way)
+            kids = [g for c in it for g in (list(c) if local(c.tag) == "group" else [c])]
+            for c in kids:
+                ln = local(c.tag)
+                if ln in ("thumbnail", "content") and (c.get("url") or "").startswith("http") and not img:
+                    img = c.get("url")
+                if ln == "enclosure" and (c.get("type") or "").startswith("image") and c.get("url"):
+                    img = img or c.get("url")
+            if not img:
+                img = first_img_in(desc)
+            cats = [textof(c) for c in children(it, "category")]
+            cat = cats[0] if cats else ""
+            if title and link:
+                items.append({"guid": guid or link, "t": title, "link": link, "pub": pub, "img": img, "cat": cat, "cats": cats})
+    elif kind == "feed":  # Atom
+        feed_title = textof(child(root, "title")) or feed_name
+        for it in children(root, "entry"):
+            title = clean_html(textof(child(it, "title")))
+            link = ""
+            for c in children(it, "link"):
+                rel = c.get("rel") or "alternate"
+                if rel == "alternate" and c.get("href"):
+                    link = c.get("href")
+                    break
+            guid = textof(child(it, "id")) or link
+            pub = to_epoch(textof(child(it, "published")) or textof(child(it, "updated")))
+            desc = textof(child(it, "summary")) or textof(child(it, "content"))
+            img = first_img_in(desc)
+            for c in children(it, "link"):
+                if (c.get("rel") == "enclosure") and (c.get("type") or "").startswith("image") and c.get("href"):
+                    img = img or c.get("href")
+            cats = [c.get("label") or c.get("term") or "" for c in children(it, "category")]
+            cat = cats[0] if cats else ""
+            if title and link:
+                items.append({"guid": guid or link, "t": title, "link": link, "pub": pub, "img": img, "cat": cat, "cats": cats})
+    else:
+        raise ValueError("not RSS or Atom (root <%s>)" % kind)
+    return feed_title, items
+
+
+def block_words(v):
+    """A config's "block" list as lower-case words (anything that is not a list of strings counts as none)."""
+    return [w.lower() for w in v if isinstance(w, str) and w.strip()] if isinstance(v, list) else []
+
+
+def blocked(it, words):
+    """Whether an item's title, address or any of its categories holds one of the words (Fox News' world feed carries
+    sportsbook promo posts, all under /outkick-betting/)."""
+    if not words:
+        return False
+    hay = " ".join([it.get("t", ""), it.get("link", "")] + list(it.get("cats") or [])).lower()
+    return any(w in hay for w in words)
+
+
+def sniff_ext(data):
+    """The image's extension from its first bytes, for servers that send pictures as application/octet-stream (CNN's do)."""
+    if data[:3] == b"\xff\xd8\xff":
+        return ".jpg"
+    if data[:8] == b"\x89PNG\r\n\x1a\n":
+        return ".png"
+    if data[:4] == b"GIF8":
+        return ".gif"
+    if data[:4] == b"RIFF" and data[8:12] == b"WEBP":
+        return ".webp"
+    if data[4:12] in (b"ftypavif", b"ftypavis"):
+        return ".avif"
+    return ""
+
+
+def thumbnail(url, thumbs):
+    """Downloads an image into the cache, returns its path or ''."""
+    if not url or not url.startswith("http"):
+        return ""
+    h = hashlib.sha1(url.encode()).hexdigest()[:20]
+    for ext in IMG_EXT.values():
+        p = os.path.join(thumbs, h + ext)
+        if os.path.exists(p) and os.path.getsize(p) > 0:
+            return p
+    try:
+        data, ctype = fetch(url, MAX_IMG + 1)
+        ext = IMG_EXT.get((ctype or "").split(";")[0].strip().lower()) or sniff_ext(data)
+        if not ext or len(data) > MAX_IMG or len(data) < 200:
+            return ""
+        p = os.path.join(thumbs, h + ext)
+        with open(p, "wb") as f:
+            f.write(data)
+        return p
+    except Exception:
+        return ""
+
+
+def is_feed(data, fallback_name):
+    """(title, item count) when the bytes parse as RSS/Atom with at least one item, else None."""
+    try:
+        title, items = parse(data, fallback_name)
+        return (title, len(items)) if items else None
+    except Exception:
+        return None
+
+
+def resolve(query):
+    """Find a feed for what was typed: a feed's address, a site's address (feed autodiscovery, then the
+    usual paths), or a name (the directory, then <name>.com). Answers {"ok", "url", "name"}."""
+    q = (query or "").strip()
+    if not q:
+        return {"ok": False, "error": "empty"}
+    tried = set()
+
+    def try_feed(url, fast=False):
+        """(result, None) on success, else (None, why) — why is ("rate", seconds) when the site asks to slow down."""
+        if url in tried:
+            return None, "tried"
+        tried.add(url)
+        try:
+            data, _ = fetch(url, limit=400_000, timeout=6 if fast else TIMEOUT)
+            got = is_feed(data, "")
+            if got:
+                return {"ok": True, "url": url, "name": got[0] or urllib.parse.urlparse(url).netloc}, None
+            return None, "not a feed"
+        except urllib.error.HTTPError as e:
+            if e.code == 429:
+                pause = e.headers.get("x-ratelimit-reset") or e.headers.get("Retry-After")
+                try:
+                    pause = float(pause)
+                except (TypeError, ValueError):
+                    pause = 10.0
+                return None, ("rate", pause)
+            return None, "http %s" % e.code
+        except Exception as e:
+            return None, str(e)
+
+    def try_feed_patient(url, fast=False):
+        """try_feed that waits out a site's rate limit, twice at most (its own reset header, 30 s a wait at most)."""
+        got, err = None, None
+        for _ in range(3):
+            got, err = try_feed(url, fast)
+            if got or not (isinstance(err, tuple) and err[0] == "rate"):
+                break
+            time.sleep(min(err[1] + 1, 30))
+            tried.discard(url)
+        return got
+
+    # a subreddit: r/name, /r/name or reddit.com/r/name — every subreddit has an Atom feed at .rss
+    m = re.match(r"^(?:(?:https?://)?(?:[a-z]+\.)?reddit\.com)?/?r/([A-Za-z0-9_]{2,21})/?(\.rss)?$", q, re.I)
+    if m:
+        got = try_feed_patient("https://www.reddit.com/r/%s/.rss" % m.group(1))
+        if got:
+            got["name"] = "r/" + m.group(1)
+            return got
+        return {"ok": False, "error": "no such subreddit"}
+
+    # some big sites keep their feeds where a homepage can't tell (or block the homepage to programs): known places
+    KNOWN = {
+        "cnn.com": ("http://rss.cnn.com/rss/cnn_topstories.rss", "CNN"),   # rss.cnn.com's TLS is broken; plain http answers
+        "axios.com": ("https://api.axios.com/feed/top", "Axios"),
+    }
+    qhost = re.sub(r"^https?://", "", q).split("/")[0].lower()
+    for dom, (feed_url, feed_name) in KNOWN.items():
+        if qhost == dom or qhost.endswith("." + dom):
+            got = try_feed_patient(feed_url)
+            if got:
+                got["name"] = feed_name
+                return got
+            break
+
+    bases = []
+    if q.startswith("http://") or q.startswith("https://"):
+        got = try_feed_patient(q)
+        if got:
+            return got
+        bases.append(q)
+    elif "." in q and " " not in q:
+        bases.append("https://" + q)
+    else:
+        # a bare name: the directory first, then <name>.com
+        ql = q.lower().replace(" ", "")
+        for d in DIRECTORY:
+            if ql and ql in d["name"].lower().replace(" ", ""):
+                return {"ok": True, "url": d["url"], "name": d["name"]}
+        bases.append("https://" + ql + ".com")
+
+    for base in bases[:1]:
+        base = base.rstrip("/")
+        # the site's page: feeds say where they are (<link rel="alternate" type="application/rss+xml" …>)
+        try:
+            data, _ = fetch(base, limit=400_000, timeout=8)
+            html = data.decode("utf-8", "replace")
+            for m in re.finditer(r"<link[^>]*>", html, re.I):
+                tag = m.group(0).lower()
+                if "alternate" in tag and ("rss" in tag or "atom" in tag):
+                    href = re.search(r'href=["\']([^"\']+)["\']', m.group(0), re.I)
+                    if href:
+                        got, _ = try_feed(urllib.parse.urljoin(base + "/", href.group(1)), fast=True)
+                        if got:
+                            return got
+        except Exception:
+            pass
+        for path in ("/feed/", "/feed", "/rss.xml", "/feed.xml", "/atom.xml", "/rss", "/index.xml", "/feed/rss/", "/feeds/feed.rss"):
+            got, _ = try_feed(base + path, fast=True)
+            if got:
+                return got
+    # one bare word and nothing else fit: maybe it is a subreddit's name
+    if re.match(r"^[A-Za-z0-9_]{2,21}$", q):
+        got = try_feed_patient("https://www.reddit.com/r/%s/.rss" % q, fast=True)
+        if got:
+            got["name"] = "r/" + q
+            return got
+    return {"ok": False, "error": "no feed found"}
+
+
+def main():
+    # other ways in: the directory of known feeds, and feed discovery for a site or address (the widget's add row)
+    if sys.argv[1] == "--directory":
+        json.dump({"list": DIRECTORY}, sys.stdout)
+        return
+    if sys.argv[1] == "--resolve":
+        json.dump(resolve(sys.argv[2]), sys.stdout)
+        return
+
+    cfg_path, cache = sys.argv[1], sys.argv[2]
+    with open(cfg_path) as f:
+        cfg = json.load(f)
+    max_items = int(cfg.get("max_items", 40))
+    per_feed = int(cfg.get("per_feed", 15))
+    want_thumbs = bool(cfg.get("thumbnails", True))
+    block_all = block_words(cfg.get("block"))
+    thumbs = os.path.join(cache, "thumbs")
+    os.makedirs(thumbs, exist_ok=True)
+
+    out_feeds, out_items, errors = [], [], []
+    # every feed's last good answer is kept (lastgood.json): a site that is down or asking to slow down (Reddit does,
+    # often) keeps its last articles instead of leaving a hole until the next cycle
+    lastgood_path = os.path.join(cache, "lastgood.json")
+    try:
+        with open(lastgood_path) as f:
+            lastgood = json.load(f)
+    except Exception:
+        lastgood = {}
+    keep_urls = set()
+    for f in cfg.get("feeds", []):
+        name = (f.get("name") or "").strip() or re.sub(r"^https?://(www\.)?", "", f.get("url", "?")).split("/")[0]
+        url = f.get("url", "")
+        keep_urls.add(url)
+        block = block_all + block_words(f.get("block"))
+        try:
+            data, _ = fetch(url)
+            _, items = parse(data, name)
+            # before the per-feed cut, so what is kept off does not take the room of what would be shown
+            items = [it for it in items if not blocked(it, block)]
+            lastgood[url] = {"name": name, "items": [dict(it) for it in items[:per_feed]]}   # copies: the loop below mutates (`del guid`)
+            failed = False
+        except Exception as e:
+            cached = lastgood.get(url)
+            if cached and cached.get("items"):
+                items = [it for it in cached["items"] if not blocked(it, block)]
+                name = name or cached.get("name", "")
+                failed = True
+            else:
+                out_feeds.append({"name": name, "url": url, "ok": False, "count": 0})
+                errors.append("%s: %s" % (name, e))
+                continue
+        n = 0
+        for it in items[:per_feed]:
+            it["src"] = name
+            it["id"] = hashlib.sha1((it["guid"] or it["link"]).encode()).hexdigest()[:16]
+            if want_thumbs and it.get("img"):
+                it["img"] = thumbnail(it["img"], thumbs)
+            else:
+                it["img"] = ""
+            del it["guid"]
+            it.pop("cats", None)
+            out_items.append(it)
+            n += 1
+        out_feeds.append({"name": name, "url": url, "ok": not failed, "count": n})
+        if failed:
+            errors.append("%s: showing the last good fetch" % name)
+
+    lastgood = {u: v for u, v in lastgood.items() if u in keep_urls}
+    try:
+        with open(lastgood_path, "w") as f:
+            json.dump(lastgood, f)
+    except Exception:
+        pass
+
+    out_items.sort(key=lambda x: x.get("pub") or 0, reverse=True)
+    seen, deduped = set(), []
+    for it in out_items:
+        if it["id"] in seen:
+            continue
+        seen.add(it["id"])
+        deduped.append(it)
+    json.dump({"ok": len(errors) < len(out_feeds) or not out_feeds,
+               "errors": errors, "feeds": out_feeds, "items": deduped[:max_items]}, sys.stdout)
+
+
+if __name__ == "__main__":
+    main()

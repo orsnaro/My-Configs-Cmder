@@ -315,11 +315,57 @@ after(500, prepare_wallpaper)
 local rotations = { 0, 45, 90, 135, 180, 225, 270, 315 }
 local symbols = { "!", "@", "#", "$", "%", "^", "&", "*", "~", "?", "§", "+", "=", "<", ">", "/" }
 local list = {}
+local dying = {}          -- shapes taken back, newest first, still shown while they rewind (about half a second)
+local rewinding = 0       -- a clear is unsaying the shapes one by one: counts the ones still to go, so a new password can cut it short
+
+-- A shape taken back is a spring, the one the Unsaid Word Rewind component uses (stiffness .18, friction .8 a frame, nudged in at -.04): it drops past nothing
+-- and is gone in about four frames, thin and tall, while the ones after it close up. `life` is how much of it is left, 1 to 0.
+local K, D = 0.18, 0.8
+local ticking = false
+
+local function life_of(s) return math.max(s.p, 0) end
+
+local function publish()
+    -- the list holds at most 40; a longer password shows its last 40
+    local shown = {}
+    local first = math.max(1, #list - 39)
+    for i = first, #list do
+        local s = list[i]
+        shown[#shown + 1] = { idx = s.idx, rot = s.rot, outline = s.outline, ci = s.ci, sym = s.sym, life = 1, last = (i == #list) }
+    end
+    for _, s in ipairs(dying) do
+        if #shown >= 40 then break end
+        shown[#shown + 1] = { idx = s.idx, rot = s.rot, outline = s.outline, ci = s.ci, sym = s.sym, life = life_of(s), last = false }
+    end
+    model.shapes = shown
+end
+
+-- The ones on their way out are sprung here, every frame, only while there are any.
+local function tick()
+    if #dying == 0 then ticking = false; return end
+    for i = #dying, 1, -1 do
+        local d = dying[i]
+        d.v = (d.v + (0 - d.p) * K) * D
+        d.p = d.p + d.v
+        if d.p <= 0 then table.remove(dying, i) end
+    end
+    publish()
+    after(16, tick)
+end
+
+-- Take the last shape back: it goes to the front of the ones on their way out.
+local function unsay_one()
+    local s = table.remove(list)
+    if not s then return end
+    s.p, s.v = 1, -0.04
+    table.insert(dying, 1, s)
+    if not ticking then ticking = true; after(16, tick) end
+end
 
 local function set_shapes(n)
-    if n == 0 then
-        list = {}
-    elseif n > #list then
+    if n > #list then
+        rewinding = 0
+        dying = {}                                  -- typing again: what was on its way out is gone
         for _ = #list + 1, n do
             list[#list + 1] = {
                 idx = math.random(0, 15),
@@ -329,16 +375,21 @@ local function set_shapes(n)
                 sym = symbols[math.random(1, #symbols)],  -- and the symbol, for the "special" style
             }
         end
+    elseif n == 0 and #list > 1 then
+        -- cleared in one go: unsaid from the end, one every 70 ms, like holding Backspace
+        rewinding = rewinding + 1
+        local mine = rewinding
+        local function step()
+            if rewinding ~= mine or #list == 0 then return end
+            unsay_one()
+            publish()
+            after(70, step)
+        end
+        step()
     else
-        while #list > n do list[#list] = nil end
+        while #list > n do unsay_one() end
     end
-    -- the list holds at most 40; a longer password shows its last 40
-    local shown = list
-    if #list > 40 then
-        shown = {}
-        for i = #list - 39, #list do shown[#shown + 1] = list[i] end
-    end
-    model.shapes = shown
+    publish()
     fact.pw_len = n
 end
 
@@ -350,6 +401,8 @@ end)
 
 local function reset()
     list = {}
+    dying = {}
+    rewinding = 0
     model.shapes = {}
     fact.pw_len = 0
     fact.authing = false

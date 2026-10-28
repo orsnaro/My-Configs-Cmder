@@ -98,8 +98,9 @@ def say(command):
     if r.returncode != 0:
         return None
     out = r.stdout.rstrip("\n")
-    # `--say` is silent about a fact it does not know when setting it, but `get` answers "? I don't know 'x'".
-    if out.startswith("? "):
+    # `--say` is silent about a fact it does not know when setting it, but `get` answers "? I don't know 'x'". (Only that exact
+    # answer counts: a password that begins with "? " is still a password.)
+    if out.startswith("? I don't know"):
         return None
     return out
 

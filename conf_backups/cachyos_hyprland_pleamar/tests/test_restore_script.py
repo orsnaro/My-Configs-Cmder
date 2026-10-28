@@ -43,6 +43,7 @@ class RestoreScriptTests(unittest.TestCase):
             'config/fish/conf.d/20-customization.fish': 'echo screenshot.omp.json\n',
             'config/ohmyposh/screenshot.omp.json': '{"version": 3}\n',
             'config/ml4w/settings/kitty-cursor-trail.conf': 'cursor_trail 1\n',
+            'config/ml4w/scripts/desktop-stack-mode': 'desktop_stack_is_qs() { return 1; }\n',
             'source/vitreus/vitreus.plm': '// fixture scene\n',
             'source/vitreus/bin/vitreus-example': '#!/bin/sh\nexit 0\n',
             'data/glass.json': '{"obsidian": true}\n',
@@ -117,6 +118,13 @@ class RestoreScriptTests(unittest.TestCase):
         self.assertNotEqual(result.returncode, 0)
         self.assertIn('manifest', result.stderr.lower())
         self.assertEqual(list(self.home.iterdir()), [])
+
+    def test_apply_restores_stack_mode_hook_not_only_ml4w_settings(self) -> None:
+        self.prepare()
+        result = self.run_restore('--apply')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        helper = self.home / '.config/ml4w/scripts/desktop-stack-mode'
+        self.assertTrue(helper.is_file(), 'saved startup/theme guards require their shared mode helper')
 
     def test_unrecorded_payload_is_rejected(self) -> None:
         self.prepare()

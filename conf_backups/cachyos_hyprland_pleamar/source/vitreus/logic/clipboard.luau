@@ -18,7 +18,15 @@ return function(with_dirs)
 
     function flat(s)
         s = s:gsub("[\r\n\t]+", " "):gsub("%s+", " "):gsub("^%s+", ""):gsub("%s+$", "")
-        if #s > 160 then s = s:sub(1, 160) end
+        if #s > 160 then
+            -- Cut between characters: half of one is not a string the scene can take, and one such entry emptied the whole list.
+            local cut = 160
+            while cut > 0 do
+                local b = s:byte(cut + 1)
+                if b and b >= 0x80 and b < 0xC0 then cut = cut - 1 else break end
+            end
+            s = s:sub(1, cut)
+        end
         return s
     end
 

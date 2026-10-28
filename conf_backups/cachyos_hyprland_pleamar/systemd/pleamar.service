@@ -5,6 +5,8 @@ After=graphical-session.target
 PartOf=graphical-session.target
 
 [Service]
+# desktop-stack managed
+ExecCondition="/home/narol/.local/bin/desktop-stack" is pleamar
 Type=simple
 WorkingDirectory=/home/narol
 Environment=HOME=/home/narol

@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
 """vitreus-fonts DATADIR: which typeface the shell is drawn in. pleamar draws every text in "Space Grotesk" (a name fixed in the scenes), so any other
 typeface is shown by starting the shell with a font setup in which that name is the typeface wanted: copies of its files with the family renamed, and
-the real Space Grotesk left out. The choice is the Theme page's (`fonts.json`: {"glass": name, "retro": name}); with none, Glass keeps Space Grotesk
-and Retro uses Audiowide. Prints the path of the fontconfig file to start pleamar with, or nothing (the shell keeps its own font)."""
+the real Space Grotesk left out. The choice is the Theme page's (`fonts.json`: {theme id: name}); with none, the theme's own `font` (themes/*.toml, themes.json) is used. Prints the path of the fontconfig file to start pleamar with, or nothing (the shell keeps its own font)."""
 import glob, json, os, shutil, struct, subprocess, sys
 
 data = sys.argv[1]
@@ -17,10 +16,13 @@ def load(name):
     return got if isinstance(got, dict) else {}      # pleamar writes an empty table as []
 
 iris = load("iris.json")
-preset = iris.get("look", iris.get("preset"))      # the look (Glass, Retro 8, UwU 9); an older file has only the palette
-theme = "retro" if preset == 8 else "uwu" if preset == 9 else "cyber" if preset == 10 else "glass"
+preset = iris.get("look", iris.get("preset"))      # an older file has only the look (Retro 8, UwU 9, Cyber 10)
+theme = iris.get("theme") or {8: "retro", 9: "uwu", 10: "cyber"}.get(preset, "glass")      # the theme's id: its file name in themes/ (or the person's folder)
+themes = {t.get("id"): t for t in load("themes.json").get("themes", []) if isinstance(t, dict)}     # bin/vitreus-themes makes it
+if themes and theme not in themes:
+    theme = "glass"
 choice = load("fonts.json").get(theme)
-family = choice or {"retro": "Audiowide", "uwu": "Mochiy Pop One", "cyber": "Orbitron"}.get(theme)
+family = choice or (themes.get(theme) or {}).get("font")
 if not family or family == "Space Grotesk":
     sys.exit(0)
 

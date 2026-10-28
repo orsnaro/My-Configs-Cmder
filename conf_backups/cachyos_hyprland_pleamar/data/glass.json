@@ -1,9 +1,13 @@
 {
   "auto": false,
   "bend": false,
+  "cap_ms": 300,
   "clear": 1,
   "disp": 0,
-  "obsidian": true,
+  "dome": 0,
+  "live": false,
+  "milk": 0,
+  "obsidian": false,
   "opacity": 0.4,
   "refr": 0.5,
   "rim": 0.6

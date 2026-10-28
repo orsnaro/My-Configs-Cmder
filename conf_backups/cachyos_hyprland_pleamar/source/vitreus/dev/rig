@@ -1,0 +1,85 @@
+#!/bin/sh
+# dev/rig: a copy of the whole shell running in a headless pleamar-wm, to test and look at changes without touching the desktop in use.
+#
+#   dev/rig start [SECONDS]       copy the working tree (committed or not) and the shell's data, and start it (SECONDS: how long it lives, 900)
+#   dev/rig sync                  copy the files edited since into the running copy: the shell reloads them as it does on the desktop (~2 s)
+#   dev/rig say CMD...            `pleamar --say vitreus CMD...` to the copy: «get fact», «fact name v», «emit event [n]», «describe»
+#   dev/rig log [N]               the last N lines (40) of the copy's log
+#   dev/rig stop                  end it and remove the copy
+#
+# Pictures and the mouse: RIG_PNG=/tmp/look.png RIG_AT=5 saves a picture of the copy's screen RIG_AT seconds after it starts, and
+# RIG_INPUT="900,40@2000 down@2500 up@2600" moves the mouse and clicks, in surface coordinates (see `pleamar --docs measuring`, and
+# PLEAMAR_HEADLESS_INPUT in the pleamar skill). Both are read by `start`. RIG_SCREENS sets PLEAMAR_HEADLESS_SCREENS (its monitors).
+#
+# What the copy does not share with the desktop: its own config, data and cache folders under $RIG (/tmp/vrig), its own runtime directory and dbus, no
+# Hyprland (HYPRLAND_INSTANCE_SIGNATURE and WAYLAND_DISPLAY are unset, so `hyprctl` is pleamar-wm's own answer and the shell takes the pleamar-wm paths),
+# and none of the add-ons turned on (their scenes live outside the copy, and turning one on or off there would start or stop the real one).
+# What it does share: the fonts (HOME is left alone), the network, and any program the shell runs by name. Do not press power, lock, restart or
+# monitor actions in it; `pkill` patterns in the shell match the desktop's scenes too.
+# Not reproducible here: the glass's blur (no compositor to ask) and anything that needs Hyprland's own state (the Hyprland page, gaps, borders).
+set -eu
+RIG=${RIG:-/tmp/vrig}
+REAL_HOME=$HOME
+SRC=$(cd "$(dirname "$0")/.." && pwd)
+COPY=$RIG/conf/pleamar/shells/vitreus
+DATA=$RIG/data/pleamar/vitreus
+CACHE=$RIG/cache/pleamar/vitreus
+PIDF=$RIG/pid
+LOG=$RIG/log
+
+rig_env() {
+    export XDG_RUNTIME_DIR=$RIG/run XDG_CONFIG_HOME=$RIG/conf XDG_DATA_HOME=$RIG/data XDG_CACHE_HOME=$RIG/cache
+    unset HYPRLAND_INSTANCE_SIGNATURE WAYLAND_DISPLAY DISPLAY
+    # a home of its own too (the shell reads and writes files in it: ~/.face, ~/.config/niri, the keys' files); the fonts are the real ones
+    mkdir -p "$RIG/home/.local/share" "$RIG/home/.config"
+    [ -e "$RIG/home/.local/share/fonts" ] || ln -s "$REAL_HOME/.local/share/fonts" "$RIG/home/.local/share/fonts"
+    [ -e "$RIG/home/.config/fontconfig" ] || { [ -d "$REAL_HOME/.config/fontconfig" ] && ln -s "$REAL_HOME/.config/fontconfig" "$RIG/home/.config/fontconfig"; } || true
+    export HOME=$RIG/home
+    export PATH="$COPY/pleamar-wm:$COPY/bin:$PATH"       # (pleamar-wm/hyprctl first: the one installed in ~/.local/bin may be an older copy)
+}
+alive() { [ -f "$PIDF" ] && kill -0 "$(cat "$PIDF")" 2> /dev/null; }
+copy_tree() {
+    # the tracked and the untracked files, not .git, the user's palette copies or the logs
+    (cd "$SRC" && tar --exclude=.git --exclude=dev -cf - .) | (cd "$COPY" && tar -xf -)
+}
+
+case "${1:-}" in
+start)
+    if alive; then echo "the rig is already running (dev/rig stop first)"; exit 1; fi
+    rm -rf "$RIG"; mkdir -p "$COPY" "$DATA" "$CACHE" "$RIG/run"; chmod 700 "$RIG/run"
+    copy_tree
+    mkdir -p "$RIG/conf/niri" "$RIG/home/.config/niri"; : > "$RIG/conf/niri/vitreus.kdl"; cp "$COPY/niri_vitreus.kdl" "$RIG/home/.config/niri/niri_vitreus.kdl"        # (what a niri config in the copy may include: the shell writes the room round the windows there)
+    [ -d "$HOME/.local/share/pleamar/vitreus" ] && cp -a "$HOME/.local/share/pleamar/vitreus/." "$DATA/"
+    [ -d "$HOME/.cache/pleamar/vitreus" ] && cp -a "$HOME/.cache/pleamar/vitreus/." "$CACHE/"
+    rm -f "$DATA/addons-state.json"
+    # RIG_CMD: another command to start in place of the shell, `@COPY@` being the copy's folder (the Niri spike starts niri with the shell inside it)
+    echo "$(echo "${RIG_CMD:-pleamar --scene @COPY@/vitreus.plm --no-hud}" | sed "s|@COPY@|$COPY|g")" > "$RIG/autostart"
+    rig_env
+    : > "$LOG"
+    secs=${2:-900}
+    export PLEAMAR_WM_AUTOSTART=$RIG/autostart
+    [ -n "${RIG_PNG:-}" ] && export PLEAMAR_HEADLESS_PNG=$RIG_PNG PLEAMAR_HEADLESS_AT=${RIG_AT:-5}
+    [ -n "${RIG_INPUT:-}" ] && export PLEAMAR_HEADLESS_INPUT=$RIG_INPUT
+    [ -n "${RIG_SCREENS:-}" ] && export PLEAMAR_HEADLESS_SCREENS=$RIG_SCREENS
+    setsid -f sh -c 'echo $$ > "$1"; exec dbus-run-session -- pleamar-wm headless --seconds "$2"' sh "$PIDF" "$secs" > "$LOG" 2>&1 < /dev/null
+    [ -n "${RIG_CMD:-}" ] && { echo "started: $RIG_CMD (no wait for the shell's socket)"; exit 0; }
+    export PLEAMAR_SOCKETS=$RIG/run/pleamar-pleamar-1       # where the copy's scenes listen (the headless compositor's display is pleamar-1)
+    for _ in $(seq 1 45); do
+        sleep 1
+        if "$(command -v pleamar)" --say vitreus "get bar_anchor" > /dev/null 2>&1; then echo "the rig is up (log: dev/rig log; stop: dev/rig stop)"; exit 0; fi
+    done
+    echo "the rig did not answer in 45 s; see dev/rig log"; exit 1 ;;
+sync)
+    alive || { echo "the rig is not running"; exit 1; }
+    copy_tree; echo "copied; it reloads in about 2 s" ;;
+say)
+    shift; alive || { echo "the rig is not running"; exit 1; }
+    rig_env; PLEAMAR_SOCKETS=$RIG/run/pleamar-pleamar-1 exec pleamar --say vitreus "$@" ;;
+log)
+    n=${2:-40}; tail -n "$n" "$LOG" ;;
+stop)
+    if [ -f "$PIDF" ]; then kill -- "-$(cat "$PIDF")" 2> /dev/null || true; fi
+    sleep 1; rm -rf "$RIG"; echo "stopped" ;;
+*)
+    sed -n 2,20p "$0" | sed 's/^# \{0,1\}//'; exit 1 ;;
+esac

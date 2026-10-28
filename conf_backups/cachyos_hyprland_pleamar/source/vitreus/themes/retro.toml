@@ -1,0 +1,23 @@
+# Retro: moulded putty plastic with a Famicom-red accent. The text is a dark ink on the
+# plastic, and `deep` (the hard shadow and the outlines) is the ink itself.
+name = "Retro"
+tagline = "Plastic"
+base = "retro"
+font = "Audiowide"
+corner_rounding = 3
+
+[palette]
+ink    = "#2b2833"
+faint  = "#6a665a"
+mint   = "#e63a3a"
+mintlo = "#a8242b"
+minthi = "#ff7b5c"
+onmint = "#fff3dc"
+tint   = "#d6d0bd"
+panel  = "#bfb9a5"
+deep   = "#2b2833"
+off    = "#a39e8e"
+alert  = "#d81b60"
+
+[card]
+colors = ["#d6d0bd", "#bfb9a5", "#2b2833", "#e63a3a", "#d81b60"]

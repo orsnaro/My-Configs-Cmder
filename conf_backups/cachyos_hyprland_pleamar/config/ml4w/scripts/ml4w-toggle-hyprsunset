@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# desktop-stack managed
+source "$HOME/.config/ml4w/scripts/desktop-stack-mode"
+if desktop_stack_is_qs; then
+    action="${1:-toggle}"
+    case "$action" in toggle|on|off|status) ;; *) exit 2 ;; esac
+    running=false
+    pgrep -u "$(id -u)" -x hyprsunset >/dev/null && running=true
+    if [[ "$action" == status ]]; then echo "$running"; exit 0; fi
+    if [[ "$action" == off || ( "$action" == toggle && "$running" == true ) ]]; then
+        hyprctl hyprsunset identity >/dev/null 2>&1 || true
+        pkill -u "$(id -u)" -x hyprsunset 2>/dev/null || true
+    elif [[ "$running" == false ]]; then
+        hyprsunset >/dev/null 2>&1 &
+    fi
+    exit 0
+fi
+
+# All desktop controls use Vitreus's saved state; daemon existence is not On/Off.
+set -u
+
+usage() {
+    echo "Usage: ${0##*/} [toggle|on|off|status]" >&2
+    exit 2
+}
+
+(( $# <= 1 )) || usage
+action="${1:-toggle}"
+case "$action" in
+    toggle) request="emit night_toggle" ;;
+    on) request="emit night_set 1" ;;
+    off) request="emit night_set 0" ;;
+    status) request="get night_on" ;;
+    *) usage ;;
+esac
+
+if ! command -v pleamar >/dev/null 2>&1; then
+    echo "Error: pleamar is required to control Vitreus night mode." >&2
+    exit 1
+fi
+if ! result=$(pleamar --say vitreus "$request"); then
+    echo "Error: could not contact Vitreus; night mode was not changed." >&2
+    exit 1
+fi
+if [[ "$action" == status ]]; then
+    case "$result" in
+        true|false) echo "$result" ;;
+        *) echo "Error: Vitreus returned an invalid night-mode state." >&2; exit 1 ;;
+    esac
+fi

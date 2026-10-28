@@ -1,0 +1,23 @@
+# Milkbox: soft, raised, all one pale blue-grey. No outlines: everything is the same material, pushed up out of
+# the surface by a light shadow on its top left and a dark one on its bottom right.
+name = "Milkbox"
+tagline = "Soft"
+base = "milk"
+font = "Zen Kurenaido"
+corner_rounding = 24
+
+[palette]
+ink    = "#6c7390"
+faint  = "#9aa1b8"
+mint   = "#7f8cff"
+mintlo = "#6672e6"
+minthi = "#aab3ff"
+onmint = "#ffffff"
+tint   = "#e0e5ee"
+panel  = "#e6eaf2"
+deep   = "#a3acc2"
+off    = "#d3d9e5"
+alert  = "#ee6a86"
+
+[card]
+colors = ["#e0e5ee", "#e6eaf2", "#6c7390", "#7f8cff", "#ee6a86"]

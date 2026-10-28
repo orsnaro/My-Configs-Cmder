@@ -12,7 +12,7 @@ part LiteBars {
     on change bar_lite_dp1 while not bar_lite_dp1 { lite_vol_dp1 = false }
     on change bar_lite_hdmi while not bar_lite_hdmi { lite_vol_hdmi = false }
 
-    component LiteWorkspace(w: record, tile_x: number, tile_d: number, enabled: bool, pick: event) {
+    component LiteWorkspace(w: record, tile_x: number, tile_d: number, enabled: bool, side: number, pick: event) {
         size: 24, 36
         prop ls_active = 0 ~pop
         follow ls_active = if(ws.active == w.id, 1, 0)
@@ -20,6 +20,7 @@ part LiteBars {
         follow ls_hover = touch.hover
         let ls_scale = 1 + max(0.10 * ls_active, 0.25 * ls_hover)
         let ls_dot = 3.0 * (1 + max(0.40 * ls_active, 0.35 * ls_hover))
+        let ls.icon_scale = if(side == 0, 14.5 / 17, 1)    // DP-1's glyphs shrink; tiles and click targets stay unchanged.
         group {
             show: enabled
             body {
@@ -32,7 +33,11 @@ part LiteBars {
             }
             //  The 36px strip's centre; no number label sits below it any more.
             ellipse { at: tile_x, 18; radius: ls_dot; color: mix(ink, mint, ls_active); opacity: 0.65 + 0.35 * ls_active; show: not w.occupied }
-            text w.icon { at: tile_x, 18; anchor: center; size: 17; weight: 400; color: deep; family: "Material Symbols Outlined"; show: w.occupied }
+            group {
+                pivot: tile_x, 18
+                scale: ls.icon_scale
+                text w.icon { at: tile_x, 18; anchor: center; size: 17; weight: 400; color: deep; family: "Material Symbols Outlined"; show: w.occupied }
+            }
 
         }
         zone box touch { at: tile_x, 18; size: 24, 36; cursor: pointer; active: enabled }
@@ -52,6 +57,8 @@ part LiteBars {
             frost: glass_clear
             refraction: glass_refr
             dispersion: glass_disp
+            dome: glass_dome
+            milk: glass_milk
             rim: 10% * glass_rim + 14% * pv * glass_rim
             shine: pointer
             show: obs < 0.996 and not glass_auto
@@ -65,6 +72,8 @@ part LiteBars {
             frost: auto
             refraction: glass_refr
             dispersion: glass_disp
+            dome: glass_dome
+            milk: glass_milk
             rim: 10% * glass_rim + 14% * pv * glass_rim
             shine: pointer
             show: obs < 0.996 and glass_auto
@@ -259,7 +268,7 @@ part LiteBars {
         }
 
         for w in trial_workspaces {
-            LiteWorkspace(w, ls.first + w.slot * ls.step, ls.tile, w.slot < ls.fit, pick: go)
+            LiteWorkspace(w, ls.first + w.slot * ls.step, ls.tile, w.slot < ls.fit, side, pick: go)
         }
 
         text clock_hm { at: ls.clock, ls.mid; anchor: center; align: center; width: ls.clock_half * 2; lines: 1; size: 19; weight: 600; color: mint; family: "Space Grotesk" }

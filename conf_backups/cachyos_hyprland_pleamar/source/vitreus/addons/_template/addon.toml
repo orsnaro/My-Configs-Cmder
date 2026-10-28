@@ -1,0 +1,27 @@
+# ── A Vitreus add-on ─────────────────────────────────────────────────────────────────────
+# Copy this whole folder to  ~/.config/pleamar/vitreus-addons/<id>/  (the id is the folder's
+# name: lowercase letters, digits and dashes) and change it. It appears under
+# Settings > Add-ons as a card of its own, with a switch; updating Vitreus never touches that folder.
+# A folder there that starts with "_" is ignored, and so is this one where it stands.
+#
+# An add-on is a pleamar scene of its own, started and kept running by Vitreus while its
+# switch is on. It draws its own surface and declares its own `permissions` (every program
+# it runs, every service it reads): read them before turning someone else's add-on on, it
+# is not sandboxed. A mistake in this file is shown under the list and the add-on is left out.
+
+name        = "My add-on"                    # the title of the card (up to ~28 characters)
+description = "What it does, in one line"      # the line under the title (up to ~80 characters; one line is shown)
+author      = "Your Name <you@example.com>"      # shown small, with the version, under the description
+version     = "0.1"
+
+# Style: Vitreus prefers the boiled pencil for an add-on's icon and graphics: hand-drawn, slightly crooked lines, each drawn twice (the second pass fainter and a hair off) with a wash
+# of the accent colour inside, and, in the scene, strokes redrawn about eight times a second (`floor(time * 8)`; see PCup, PBell and PEnvelope in vitreus.plm). The shell wobbles the
+# pill icon itself under the pointer. An add-on may instead use its own SVG or PNG icons and artwork: that is allowed.
+#
+# Optional: an icon on the add-on pill (the pill of icons in the corner the app dock is not in; an .svg or .png in this folder, about 24 px, one colour). Its click
+# flips `slot_open` in the scene (declare `fact slot_open = false`), so the add-on can show and hide its window. Take the # off to use it.
+# icon = "icon.svg"
+
+# The scene to run, in this folder (leave it out and it is <id>.plm). Rename addon.plm to something of your own (your id is a good name) and
+# put it here: two add-ons whose scene files have the same name cannot both run.
+scene = "addon.plm"

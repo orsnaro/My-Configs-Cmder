@@ -1,0 +1,15 @@
+# A remote control for Google TVs and Android TVs on your network, in a panel out of the add-on pill: a d-pad, back / home / settings, volume, play, a few apps, power, a field that
+# types into the TV, and a switcher for more than one TV (the name in the header). It finds TVs itself (mDNS) and speaks the Google TV phone app's protocol: pair once per TV with a
+# code the TV shows, then the remote. The helper is bin/vitreus-tvremote (Python standard library and openssl only), linked into ~/.local/bin by install.sh.
+# The saved TVs are in ~/.local/share/pleamar/tvremote/config.json; the certificate that the TVs remember as "paired" is in the same folder, mode 600: anyone who can read it can control them.
+
+name        = "TV Remote"
+description = "Control your Google TV from the panel"
+author      = "natepayn3"
+version     = "0.2"
+scene       = "tvremote.plm"
+icon        = "remote.svg"
+
+[drawer]
+width  = 330
+height = 560

@@ -1,0 +1,12 @@
+[SddmGreeterTheme]
+Name=Vitreus
+Description=The Vitreus lock screen as a login screen: a blurred picture, a big clock, a glass password bar
+Author=natepayn3
+Copyright=2026, natepayn3
+License=MIT
+Type=sddm-theme
+Version=1.0
+QtVersion=6
+MainScript=Main.qml
+ConfigFile=theme.conf
+Theme-Id=vitreus

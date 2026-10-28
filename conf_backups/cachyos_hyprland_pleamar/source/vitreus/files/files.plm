@@ -1,0 +1,1776 @@
+language 0.1
+import "../palette.plm"
+
+//  Files: a file manager in the shell's own glass. Places down the left (the ones you know, the drives, the folders you pinned), where you are across the top (back, forward, up, a path you can click or
+//  type, tabs under it), the folder as tiles or lines in the middle and a bar under it. Everything is drawn from the palette (so any theme is its own) and the file and folder pictures are pencil
+//  drawings, like the shell's icons. The logic (files.luau) does the work with `find`, `cp`, `mv`, `gio` and the like, and says what is chosen, what is going on and what can be undone.
+//
+//  Keys (when the window has the keyboard): Enter opens, F2 renames, Delete trashes, Ctrl+C / X / V, Ctrl+A, Ctrl+I, Ctrl+Z undoes, Ctrl+Shift+N a new folder, Ctrl+H hidden files, F5 refreshes, Space looks
+//  at a file, Ctrl+L types a path, Ctrl+T / Ctrl+W / Ctrl+Tab are the tabs, Ctrl+D pins this folder, Ctrl++ and Ctrl+- zoom, typing a name searches. Backspace or Alt+Up goes up, Alt+Left and Alt+Right back
+//  and forward, Alt+Home goes home, the arrows move the choice (with Shift they extend it, with Ctrl they only move), Escape lets go of it. See `files.luau` for the whole list.
+//
+//  Open it with SUPER + E, or "Files" in the launcher (bin/vitreus-files).
+
+scene Files {
+    surface { size: 1100, 720; kind: window; title: "Files"; app_id: "vitreus.files"; keyboard: on_demand }
+
+    permissions {
+        services: "files", "files.write"
+        run: "find", "magick", "ffmpeg", "ffprobe", "identify", "pdftoppm", "stat", "du", "file", "rm", "rmdir", "hyprctl", "xdg-open", "gio", "cp", "mv", "mkdir", "df", "xdg-user-dir", "printenv", "pleamar", "wl-copy", "wl-paste", "fc-match", "vitreus-files", "cat", "head", "chmod", "ln", "touch", "bsdtar", "grep", "sha256sum", "lsblk", "udisksctl", "awww", "which", "readlink", "kitty", "alacritty", "foot", "wezterm", "konsole", "gnome-terminal", "xterm", "date", "sh"
+    }
+
+    // ── what the logic says ──
+    text dragicon = ""               // the picture that goes under the pointer while a file is dragged out (the logic makes it when a tile is pressed)
+    fact view: grid | lines = grid
+    fact hidden = false              // hidden files shown
+    fact sort: name | size | type | date = name
+    fact sortrev = false             // the order turned round
+    fact dirfirst = true             // folders before files
+    fact zoom = 3                    // how big the tiles are, 1 to 5
+    fact tilebase = 128              // the tile's width that goes with it (the logic knows the steps)
+    fact tilew = 128                 // the tile's width as drawn (the scene says: a wide window stretches them so that a row never has more than twelve)
+    fact total = 0                   // rows of tiles in the folder (or blocks of lines)
+    fact itemsn = 0                  // how many things are in it
+    fact first = 0                   // the first row of the window the logic is showing
+    fact cols = 6                    // tiles across, as the middle is wide
+    fact gen = 0                     // goes up with each folder you go into: the list starts at its top
+    fact sct = 0                     // where the list is scrolled to (pixels): the wheel, the bar and the logic all say it
+    fact can.back = false
+    fact can.fwd = false
+    fact ready = false
+    fact roomw = 700                 // how wide the folder's part is, for the tabs
+    fact vh = 400                    // how tall the folder's window is, for scrolling a chosen tile into view
+    fact clip.on = false             // something is waiting to be pasted
+    fact ask.on = false              // the name dialog (new folder, rename)
+    fact ask.gen = 0
+    fact ask.input = true            // the dialog asks for a name (else it is a question with Cancel and a button)
+    fact ask.danger = false          // and the button is the alert colour
+    fact in.trash = false            // the folder shown is the trash
+    fact in.list = false             // what is shown is a list made of places (a search, recent files, starred ones), not a folder
+    fact menu.on = false             // the right-click menu
+    fact menu.x = 0
+    fact menu.y = 0
+    fact menu.h = 100                // how tall the menu is (the logic adds up its rows and the lines between groups)
+    fact prop.on = false             // the properties card
+    fact prop.h = 320
+    fact pm.on = false               // the card shows the permissions' switches (a single thing that is yours)
+    fact pm.bits = 0                 // rwxrwxrwx as a number of nine bits
+    fact crumbw = 300                // how much room the path has: the logic keeps the last folders that fit
+    fact pen = 0                     // the pointer is on something that boils: the pencil's clock runs only then
+    //  Every zone that boils says `leave` before `enter`, and `hover` again a moment after: when the pointer goes straight from one to the next, both fire in one frame and the one declared last stays (so `enter` has to be),
+    //  and when it is another zone's `leave` that stays, the `hover` sets it right again in 80 ms. Without them the clock stopped under the pointer and the pencil froze.
+    fact obs = false                 // Vitreus has its glass off: flat obsidian (Vitreus says so with `fact obs true`)
+    fact look = 0                    // the shell's theme (Vitreus says so): 0 Glass, 1 Retro, 2 UwU, 3 Cyber; the plastic ones get an outline and a hard shadow
+    text status = ""
+    text empty = "This folder is empty"
+    text free = ""
+    text sortname = "Name"
+    text ask.title = ""
+    text ask.ok = "OK"
+    text ask.msg = ""
+    text askin = ""
+    text sq = ""                      // what is typed in the search field
+    fact searching = false           // the search field is open (it takes the place of the path)
+    fact so.where = 0                // the search: 0 this folder, 1 the whole home folder
+    fact so.what = 0                 // 0 names, 1 what is written in the files
+    fact so.kind = 0                 // 0 anything, 1 folders, 2 pictures, 3 documents, 4 sounds, 5 videos
+    text locin = ""                  // what is typed where the path is
+    fact loc.edit = false            // the path is being typed
+    fact rb.on = false               // a box is being dragged over the folder to choose what is in it
+    fact rb.down = false             // the press that may start it was on the folder itself (a press that closed the menu was not: the zone under the menu's catch-all still sees the pointer move)
+    fact rb.ax = 0                   // where it began and where it is, in the folder's own measures (the list's width, and down from its top)
+    fact rb.ay = 0
+    fact rb.bx = 0
+    fact rb.by = 0
+    fact job.on = false              // something is being copied, moved or put away
+    fact job.p = 0                   // how far it has got, 0 to 1 (-1 when it cannot say)
+    text job.text = ""
+    fact undo.on = false             // the last thing done can be taken back
+    text undo.text = ""
+    fact cf.on = false               // the question about a name that is taken
+    fact cf.all = false              // and the answer is for all the others
+    text cf.name = ""
+    text cf.msg = ""
+    fact pick.on = false             // a list to choose from (open with, a template, what to make an archive of)
+    text pick.title = ""
+    fact pv.on = false               // the look at a file
+    fact pv.kind = 0                 // 0 only what it is, 1 a picture, 2 its words
+    text pv.name = ""
+    text pv.sub = ""
+    text pv.text = ""
+    text pv.path = ""
+    fact pv.n = 0                    // which of how many (so that the arrows say there is more)
+    fact pv.of = 0
+    event search_go ->               // Enter in it: look in the folders under this one too
+    event loc_go ->                  // Enter in the path being typed
+
+    model crumbs max 8 { at: number; name: text; path: text; x: number; w: number; last: bool }
+    model places max 40 { at: number; name: text; path: text; pk: number; here: bool; pinned: bool; kind: number; eject: bool; use: number }
+    model tabs max 10 { at: number; name: text; x: number; w: number; active: bool }
+    model pinfo max 1 { name: text; sub: text; ik: number; thumb: image 192, 144; has.thumb: bool }
+    model prows max 18 { label: text; value: text; tog: bool; on: bool; btn: text; hb: bool; k: number }
+    model menuitems max 28 { label: text; k: number; on: bool; ic: number; key: text; danger: bool; sep: bool; chk: bool }
+    model picks max 14 { at: number; label: text; sub: text; hs: bool; ic: number }
+    model rows max 12 {
+        list cells max 10 {
+            at: number
+            name: text
+            ik: number
+            carry: text
+            thumb: image 192, 144
+            has.thumb: bool
+            picked: bool
+            cur: bool
+            hidden: bool
+            cut: bool
+            link: bool
+            broken: bool
+            star: bool
+            size: text
+            date: text
+            kind: text
+        }
+    }
+
+    event slid ->
+    event set_cols ->
+    event tile ->
+    event tile_up ->
+    event tile_menu ->
+    event tile_mid ->
+    event bg_menu ->
+    event place ->
+    event place_eject ->
+    event crumb ->
+    event act ->
+    event ask_ok ->
+    event menu_close ->
+    event dropped ->
+    event spring ->
+    event place_menu ->
+    event focused ->
+    event band ->
+    event band_end ->
+    event sort_by ->
+    event sopt ->
+    event tab_go ->
+    event tab_close ->
+    event pick_ok ->
+    event cf_pick ->
+    event job_cancel ->
+    event prop_act ->
+    event perm ->
+
+    // ── the pencil's clock, and the theme ──
+    prop time = 0
+    spin time by if(pen > 0.5, 1, 0)
+    prop ob = 0 ~calm
+    follow ob = if(obs or look == 1 or look == 2, 1, 0)
+    prop pl = 0 ~calm
+    follow pl = if(look == 1 or look == 2, 1, 0)
+    prop uk = 0 ~calm
+    follow uk = if(look == 2, 1, 0)
+    prop sq = 0 ~calm
+    follow sq = if(look == 1 or look == 3, 1, 0)       // Retro and Cyber cut their corners squarer, as the bar's drawers do (`rc` in vitreus.plm)
+    let rr = 1 - 0.73 * sq                             // what every corner is multiplied by
+
+    // >>> icons (written by gen_icons.py: edit that, not this)
+    //  A file's or a folder's picture in pencil: a folder, a picture, a PDF, a sound, a video, code, an archive or any other file (`ik`, which the logic sets). `s` is its size (1 is 64 px); `hot` (hover) swells it and redraws it about five times a second. The folder takes the accent and the files the ink, so any palette is theirs.
+    component PFile(cx: number, cy: number, s: number, ik: number, hot: number, o: number) {
+        prop a = 0 ~calm
+        follow a = hot
+        let fr = if(a > 0.02, floor(time * 5), 0)
+        let jb = 0.7 * a * (0.5 + s)
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            scale: 1 + 0.08 * a
+            group {
+                show: ik >= 1
+                path { at: cx + jb * sin(fr * 53 + 3069), cy + jb * sin(fr * 74 + 762); stroke: w1; color: ink; opacity: (o); move -16.86 * s + 0.07, -26.24 * s + -0.12; line 7.23 * s + 0.12, -26.00 * s + 0.00; line 17.01 * s + 0.01, -16.18 * s + -0.09; line 16.88 * s + -0.06, 26.06 * s + 0.03; line -16.72 * s + 0.14, 26.01 * s + 0.00; line -16.97 * s + 0.02, -27.20 * s + -0.10; line -17.23 * s + -0.11, -20.08 * s + -0.04 }
+                path { at: cx + off + jb * sin(fr * 69 + 4348), cy + off + jb * sin(fr * 52 + 3890); stroke: w2; color: ink; opacity: (o) * 0.28; move -16.70 * s + 0.15, -26.25 * s + -0.13; line 6.81 * s + -0.09, -26.15 * s + -0.08; line 17.20 * s + 0.10, -15.70 * s + 0.15; line 16.88 * s + -0.06, 26.30 * s + 0.15; line -16.99 * s + 0.00, 26.25 * s + 0.13; line -16.70 * s + 0.15, -27.29 * s + -0.15; line -16.80 * s + 0.10, -19.71 * s + 0.14 }
+                path { at: cx + jb * sin(fr * 43 + 3028), cy + jb * sin(fr * 48 + 1868); stroke: w1; color: ink; opacity: (o); move 7.15 * s + 0.08, -26.29 * s + -0.14; line 6.73 * s + -0.14, -15.80 * s + 0.10; line 16.70 * s + -0.15, -15.95 * s + 0.02 }
+                path { at: cx + off + jb * sin(fr * 50 + 3718), cy + off + jb * sin(fr * 51 + 4222); stroke: w2; color: ink; opacity: (o) * 0.28; move 7.28 * s + 0.14, -26.30 * s + -0.15; line 6.72 * s + -0.14, -16.21 * s + -0.10; line 16.76 * s + -0.12, -15.99 * s + 0.01 }
+            }
+            group {
+                show: ik == 0
+                path { at: cx + jb * sin(fr * 65 + 3219), cy + jb * sin(fr * 52 + 1564); stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -25.86 * s + 0.07, -11.83 * s + 0.08; line -25.98 * s + 0.01, -21.71 * s + 0.14; line -9.92 * s + 0.04, -21.99 * s + 0.00; line -4.25 * s + -0.12, -14.80 * s + 0.10; line 26.17 * s + 0.08, -14.85 * s + 0.07; line 26.15 * s + 0.07, 21.96 * s + -0.02; line -26.30 * s + -0.15, 21.72 * s + -0.14; line -25.96 * s + 0.02, -13.23 * s + -0.12; line -26.20 * s + -0.10, -8.30 * s + -0.15 }
+                path { at: cx + off + jb * sin(fr * 54 + 2135), cy + off + jb * sin(fr * 48 + 809); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -25.70 * s + 0.15, -12.29 * s + -0.15; line -25.88 * s + 0.06, -22.21 * s + -0.10; line -9.70 * s + 0.15, -22.29 * s + -0.15; line -4.30 * s + -0.15, -15.13 * s + -0.06; line 26.07 * s + 0.03, -15.28 * s + -0.14; line 26.16 * s + 0.08, 21.83 * s + -0.09; line -25.71 * s + 0.15, 22.26 * s + 0.13; line -26.03 * s + -0.02, -12.90 * s + 0.05; line -26.26 * s + -0.13, -7.98 * s + 0.01 }
+                path { at: cx + jb * sin(fr * 56 + 3238), cy + jb * sin(fr * 73 + 4512); stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -25.74 * s + 0.13, -4.95 * s + 0.03; line 26.27 * s + 0.14, -5.23 * s + -0.12 }
+                path { at: cx + off + jb * sin(fr * 45 + 4108), cy + off + jb * sin(fr * 52 + 3554); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -26.03 * s + -0.01, -4.71 * s + 0.14; line 25.76 * s + -0.12, -5.09 * s + -0.04 }
+                path { at: cx + jb * sin(fr * 53 + 3163), cy + jb * sin(fr * 64 + 1841); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move -17.06 * s + -0.03, 18.09 * s + 0.04; line -9.00 * s + -0.00, 5.86 * s + -0.07 }
+                path { at: cx + jb * sin(fr * 49 + 3880), cy + jb * sin(fr * 51 + 4744); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move -7.82 * s + 0.09, 17.85 * s + -0.08; line 0.29 * s + 0.14, 5.99 * s + -0.01 }
+                path { at: cx + jb * sin(fr * 61 + 779), cy + jb * sin(fr * 73 + 819); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move 1.17 * s + 0.08, 18.12 * s + 0.06; line 8.84 * s + -0.08, 6.11 * s + 0.05 }
+                path { at: cx + jb * sin(fr * 70 + 2691), cy + jb * sin(fr * 65 + 449); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move 10.27 * s + 0.13, 18.02 * s + 0.01; line 17.83 * s + -0.09, 6.28 * s + 0.14 }
+                path { at: cx + jb * sin(fr * 57 + 4670), cy + jb * sin(fr * 40 + 3583); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move 19.05 * s + 0.03, 17.81 * s + -0.09; line 26.85 * s + -0.07, 6.11 * s + 0.05 }
+            }
+            group {
+                show: ik == 1
+                path { at: cx + jb * sin(fr * 51 + 403), cy + jb * sin(fr * 47 + 290); stroke: w1; color: mint; opacity: (o); move -11.28 * s + -0.14, 16.70 * s + -0.15; line -4.20 * s + -0.10, 4.30 * s + 0.15; line 2.16 * s + 0.08, 10.70 * s + -0.15; line 6.99 * s + -0.00, 4.82 * s + -0.09; line 11.74 * s + -0.13, 16.71 * s + -0.14 }
+                path { at: cx + off + jb * sin(fr * 50 + 3980), cy + off + jb * sin(fr * 66 + 764); stroke: w2; color: mint; opacity: (o) * 0.28; move -11.26 * s + -0.13, 16.77 * s + -0.11; line -4.08 * s + -0.04, 4.30 * s + 0.15; line 2.23 * s + 0.11, 10.93 * s + -0.03; line 7.18 * s + 0.09, 4.97 * s + -0.01; line 12.28 * s + 0.14, 16.84 * s + -0.08 }
+                ellipse { at: cx + 5.92 * s + -0.04 + jb * sin(fr * 67 + 804), cy + -7.70 * s + 0.15 + jb * sin(fr * 49 + 2637); radius: 3.25 * s; stroke: w1; color: mint; opacity: (o) }
+                ellipse { at: cx + 6.11 * s + 0.05 + off + jb * sin(fr * 40 + 3221), cy + -7.94 * s + 0.03 + off + jb * sin(fr * 61 + 1212); radius: 3.2 * s; stroke: w2; color: mint; opacity: (o) * 0.28 }
+            }
+            group {
+                show: ik == 2
+                path { at: cx + jb * sin(fr * 47 + 890), cy + jb * sin(fr * 47 + 1276); stroke: w1; color: ink; opacity: (o); move -8.70 * s + 0.15, -9.04 * s + -0.02; line 8.72 * s + -0.14, -8.93 * s + 0.03 }
+                path { at: cx + off + jb * sin(fr * 58 + 1526), cy + off + jb * sin(fr * 51 + 3457); stroke: w2; color: ink; opacity: (o) * 0.28; move -8.73 * s + 0.14, -9.27 * s + -0.13; line 9.02 * s + 0.01, -9.20 * s + -0.10 }
+                path { at: cx + jb * sin(fr * 49 + 1800), cy + jb * sin(fr * 75 + 2714); stroke: w1; color: ink; opacity: (o); move -9.23 * s + -0.12, -1.86 * s + 0.07; line 8.94 * s + -0.03, -2.25 * s + -0.13 }
+                path { at: cx + off + jb * sin(fr * 71 + 2016), cy + off + jb * sin(fr * 56 + 1060); stroke: w2; color: ink; opacity: (o) * 0.28; move -8.70 * s + 0.15, -1.70 * s + 0.15; line 9.21 * s + 0.11, -1.83 * s + 0.09 }
+                path { at: cx + jb * sin(fr * 63 + 1623), cy + jb * sin(fr * 44 + 4206); stroke: w1; color: alert; opacity: (o); move -10.91 * s + 0.05, 8.71 * s + -0.14; line 11.29 * s + 0.15, 8.80 * s + -0.10; line 10.90 * s + -0.05, 19.16 * s + 0.08; line -11.18 * s + -0.09, 19.19 * s + 0.09; line -10.79 * s + 0.11, 9.05 * s + 0.02 }
+                path { at: cx + off + jb * sin(fr * 58 + 191), cy + off + jb * sin(fr * 43 + 2864); stroke: w2; color: alert; opacity: (o) * 0.28; move -11.26 * s + -0.13, 8.92 * s + -0.04; line 11.28 * s + 0.14, 8.90 * s + -0.05; line 11.10 * s + 0.05, 18.80 * s + -0.10; line -11.02 * s + -0.01, 19.13 * s + 0.07; line -11.15 * s + -0.08, 8.76 * s + -0.12 }
+            }
+            group {
+                show: ik == 3
+                path { at: cx + jb * sin(fr * 59 + 1951), cy + jb * sin(fr * 59 + 966); stroke: w1; color: mint; opacity: (o); move 3.78 * s + -0.11, -11.76 * s + 0.12; line 4.12 * s + 0.06, 10.30 * s + 0.15 }
+                path { at: cx + off + jb * sin(fr * 60 + 1890), cy + off + jb * sin(fr * 55 + 3242); stroke: w2; color: mint; opacity: (o) * 0.28; move 3.80 * s + -0.10, -11.77 * s + 0.12; line 3.99 * s + -0.00, 10.25 * s + 0.12 }
+                path { at: cx + jb * sin(fr * 58 + 3689), cy + jb * sin(fr * 45 + 3686); stroke: w1; color: mint; opacity: (o); move 3.71 * s + -0.15, -12.02 * s + -0.01; line 10.85 * s + -0.08, -8.13 * s + -0.06; line 11.25 * s + 0.13, -4.17 * s + -0.09 }
+                path { at: cx + off + jb * sin(fr * 66 + 2198), cy + off + jb * sin(fr * 44 + 4221); stroke: w2; color: mint; opacity: (o) * 0.28; move 3.71 * s + -0.15, -12.01 * s + -0.00; line 10.78 * s + -0.11, -7.78 * s + 0.11; line 10.91 * s + -0.04, -3.73 * s + 0.13 }
+                ellipse { at: cx + -1.30 * s + -0.15 + jb * sin(fr * 58 + 2726), cy + 12.30 * s + 0.15 + jb * sin(fr * 70 + 4468); radius: 4.38 * s; stroke: w1; color: mint; opacity: (o) }
+                ellipse { at: cx + -1.27 * s + -0.14 + off + jb * sin(fr * 48 + 2203), cy + 12.11 * s + 0.06 + off + jb * sin(fr * 67 + 2482); radius: 4.2 * s; stroke: w2; color: mint; opacity: (o) * 0.28 }
+            }
+            group {
+                show: ik == 4
+                path { at: cx + jb * sin(fr * 66 + 1994), cy + jb * sin(fr * 66 + 2930); stroke: w1; color: mint; opacity: (o); move -5.76 * s + 0.12, -7.74 * s + 0.13; line 8.80 * s + -0.10, 1.70 * s + -0.15; line -5.72 * s + 0.14, 11.71 * s + -0.14; line -5.71 * s + 0.14, -8.26 * s + -0.13 }
+                path { at: cx + off + jb * sin(fr * 65 + 129), cy + off + jb * sin(fr * 47 + 4209); stroke: w2; color: mint; opacity: (o) * 0.28; move -6.10 * s + -0.05, -8.02 * s + -0.01; line 8.71 * s + -0.14, 2.04 * s + 0.02; line -6.15 * s + -0.07, 12.28 * s + 0.14; line -5.97 * s + 0.01, -7.95 * s + 0.03 }
+            }
+            group {
+                show: ik == 5
+                path { at: cx + jb * sin(fr * 41 + 961), cy + jb * sin(fr * 59 + 719); stroke: w1; color: mint; opacity: (o); move -3.70 * s + 0.15, -8.21 * s + -0.11; line -10.70 * s + 0.15, 0.77 * s + -0.12; line -4.04 * s + -0.02, 10.25 * s + 0.13 }
+                path { at: cx + off + jb * sin(fr * 42 + 577), cy + off + jb * sin(fr * 66 + 2555); stroke: w2; color: mint; opacity: (o) * 0.28; move -3.72 * s + 0.14, -7.87 * s + 0.06; line -11.27 * s + -0.14, 1.30 * s + 0.15; line -4.25 * s + -0.12, 10.26 * s + 0.13 }
+                path { at: cx + jb * sin(fr * 63 + 4664), cy + jb * sin(fr * 76 + 2518); stroke: w1; color: mint; opacity: (o); move 4.10 * s + 0.05, -8.09 * s + -0.04; line 11.17 * s + 0.09, 1.30 * s + 0.15; line 3.72 * s + -0.14, 10.11 * s + 0.05 }
+                path { at: cx + off + jb * sin(fr * 52 + 920), cy + off + jb * sin(fr * 65 + 3364); stroke: w2; color: mint; opacity: (o) * 0.28; move 3.70 * s + -0.15, -8.13 * s + -0.06; line 10.77 * s + -0.11, 1.27 * s + 0.13; line 4.14 * s + 0.07, 9.70 * s + -0.15 }
+                path { at: cx + jb * sin(fr * 51 + 2269), cy + jb * sin(fr * 69 + 2795); stroke: w1; color: ink; opacity: (o); move 1.37 * s + -0.06, -9.71 * s + 0.15; line -1.60 * s + -0.05, 12.26 * s + 0.13 }
+                path { at: cx + off + jb * sin(fr * 48 + 1170), cy + off + jb * sin(fr * 68 + 3286); stroke: w2; color: ink; opacity: (o) * 0.28; move 1.78 * s + 0.14, -10.10 * s + -0.05; line -1.29 * s + 0.11, 11.95 * s + -0.03 }
+            }
+            group {
+                show: ik == 6
+                path { at: cx + jb * sin(fr * 74 + 2062), cy + jb * sin(fr * 69 + 4385); stroke: w1; color: ink; opacity: (o); move -0.20 * s + -0.10, -23.08 * s + -0.04; line -0.01 * s + -0.01, -18.72 * s + 0.14 }
+                path { at: cx + off + jb * sin(fr * 40 + 1040), cy + off + jb * sin(fr * 61 + 4147); stroke: w2; color: ink; opacity: (o) * 0.28; move -0.07 * s + -0.04, -23.26 * s + -0.13; line -0.27 * s + -0.14, -18.87 * s + 0.06 }
+                path { at: cx + jb * sin(fr * 44 + 2850), cy + jb * sin(fr * 40 + 4766); stroke: w1; color: ink; opacity: (o); move -2.20 * s + 0.15, -14.25 * s + -0.12; line 2.42 * s + -0.04, -13.81 * s + 0.10 }
+                path { at: cx + off + jb * sin(fr * 74 + 2355), cy + off + jb * sin(fr * 40 + 4875); stroke: w2; color: ink; opacity: (o) * 0.28; move -2.66 * s + -0.08, -13.75 * s + 0.12; line 2.68 * s + 0.09, -13.75 * s + 0.12 }
+                path { at: cx + jb * sin(fr * 60 + 3490), cy + jb * sin(fr * 56 + 1459); stroke: w1; color: ink; opacity: (o); move 0.30 * s + 0.15, -9.07 * s + -0.03; line -0.30 * s + -0.15, -5.29 * s + -0.14 }
+                path { at: cx + off + jb * sin(fr * 48 + 4918), cy + off + jb * sin(fr * 43 + 3354); stroke: w2; color: ink; opacity: (o) * 0.28; move 0.27 * s + 0.14, -9.03 * s + -0.02; line 0.29 * s + 0.15, -4.70 * s + 0.15 }
+                path { at: cx + jb * sin(fr * 42 + 491), cy + jb * sin(fr * 61 + 4288); stroke: w1; color: ink; opacity: (o); move -2.77 * s + -0.14, -0.08 * s + -0.04; line 2.29 * s + -0.10, -0.25 * s + -0.13 }
+                path { at: cx + off + jb * sin(fr * 54 + 4648), cy + off + jb * sin(fr * 58 + 1398); stroke: w2; color: ink; opacity: (o) * 0.28; move -2.31 * s + 0.10, -0.30 * s + -0.15; line 2.78 * s + 0.14, -0.30 * s + -0.15 }
+                path { at: cx + jb * sin(fr * 68 + 571), cy + jb * sin(fr * 66 + 1980); stroke: w1; color: mint; opacity: (o); move -3.57 * s + -0.04, 8.09 * s + 0.04; line 3.38 * s + -0.06, 7.74 * s + -0.13; line 3.69 * s + 0.09, 19.28 * s + 0.14; line -3.80 * s + -0.15, 18.71 * s + -0.15; line -3.73 * s + -0.11, 7.73 * s + -0.14 }
+                path { at: cx + off + jb * sin(fr * 52 + 1059), cy + off + jb * sin(fr * 71 + 1507); stroke: w2; color: mint; opacity: (o) * 0.28; move -3.48 * s + 0.01, 7.75 * s + -0.12; line 3.65 * s + 0.07, 7.82 * s + -0.09; line 3.23 * s + -0.13, 18.75 * s + -0.12; line -3.46 * s + 0.02, 19.24 * s + 0.12; line -3.45 * s + 0.03, 8.18 * s + 0.09 }
+            }
+            group {
+                show: ik == 7
+                path { at: cx + jb * sin(fr * 45 + 371), cy + jb * sin(fr * 72 + 3206); stroke: w1; color: ink; opacity: (o); move -8.75 * s + 0.12, -7.87 * s + 0.07; line 9.29 * s + 0.14, -8.00 * s + -0.00 }
+                path { at: cx + off + jb * sin(fr * 50 + 2999), cy + off + jb * sin(fr * 54 + 1419); stroke: w2; color: ink; opacity: (o) * 0.28; move -9.29 * s + -0.14, -8.14 * s + -0.07; line 9.09 * s + 0.04, -7.90 * s + 0.05 }
+                path { at: cx + jb * sin(fr * 61 + 532), cy + jb * sin(fr * 61 + 3672); stroke: w1; color: ink; opacity: (o); move -8.75 * s + 0.12, 0.30 * s + 0.15; line 8.77 * s + -0.11, -0.30 * s + -0.15 }
+                path { at: cx + off + jb * sin(fr * 52 + 2618), cy + off + jb * sin(fr * 51 + 1010); stroke: w2; color: ink; opacity: (o) * 0.28; move -9.22 * s + -0.11, -0.06 * s + -0.03; line 9.14 * s + 0.07, -0.29 * s + -0.15 }
+                path { at: cx + jb * sin(fr * 49 + 4167), cy + jb * sin(fr * 73 + 202); stroke: w1; color: ink; opacity: (o); move -9.26 * s + -0.13, 7.88 * s + -0.06; line 9.29 * s + 0.14, 7.72 * s + -0.14 }
+                path { at: cx + off + jb * sin(fr * 54 + 3187), cy + off + jb * sin(fr * 46 + 2028); stroke: w2; color: ink; opacity: (o) * 0.28; move -9.21 * s + -0.11, 7.73 * s + -0.13; line 9.28 * s + 0.14, 7.71 * s + -0.14 }
+                path { at: cx + jb * sin(fr * 76 + 3736), cy + jb * sin(fr * 45 + 1422); stroke: w1; color: ink; opacity: (o); move -9.27 * s + -0.14, 16.30 * s + 0.15; line 2.28 * s + 0.14, 15.96 * s + -0.02 }
+                path { at: cx + off + jb * sin(fr * 50 + 3736), cy + off + jb * sin(fr * 63 + 2172); stroke: w2; color: ink; opacity: (o) * 0.28; move -9.20 * s + -0.10, 16.26 * s + 0.13; line 2.30 * s + 0.15, 16.14 * s + 0.07 }
+            }
+            group {
+                show: ik == 8
+                path { at: cx + jb * sin(fr * 67 + 692), cy + jb * sin(fr * 42 + 2997); stroke: w1; color: mint; opacity: (o); move -9.75 * s + 0.12, -5.98 * s + 0.01; line -2.92 * s + 0.04, 1.29 * s + 0.15; line -9.86 * s + 0.07, 7.73 * s + -0.13 }
+                path { at: cx + off + jb * sin(fr * 50 + 2699), cy + off + jb * sin(fr * 61 + 2778); stroke: w2; color: mint; opacity: (o) * 0.28; move -10.01 * s + -0.01, -6.02 * s + -0.01; line -3.30 * s + -0.15, 0.73 * s + -0.13; line -9.73 * s + 0.13, 8.04 * s + 0.02 }
+                path { at: cx + jb * sin(fr * 42 + 3185), cy + jb * sin(fr * 57 + 1956); stroke: w1; color: mint; opacity: (o); move -0.24 * s + -0.12, 10.30 * s + 0.15; line 10.23 * s + 0.11, 10.25 * s + 0.13 }
+                path { at: cx + off + jb * sin(fr * 75 + 1334), cy + off + jb * sin(fr * 41 + 2465); stroke: w2; color: mint; opacity: (o) * 0.28; move 0.17 * s + 0.08, 9.70 * s + -0.15; line 9.72 * s + -0.14, 9.92 * s + -0.04 }
+            }
+            group {
+                show: ik == 9
+                path { at: cx + jb * sin(fr * 76 + 335), cy + jb * sin(fr * 52 + 1179); stroke: w1; color: mint; opacity: (o); move -9.81 * s + 0.10, -9.85 * s + 0.08; line 3.74 * s + -0.13, -10.29 * s + -0.15 }
+                path { at: cx + off + jb * sin(fr * 51 + 2561), cy + off + jb * sin(fr * 43 + 2185); stroke: w2; color: mint; opacity: (o) * 0.28; move -9.83 * s + 0.08, -10.20 * s + -0.10; line 3.86 * s + -0.07, -10.24 * s + -0.12 }
+                path { at: cx + jb * sin(fr * 51 + 4849), cy + jb * sin(fr * 67 + 1319); stroke: w1; color: ink; opacity: (o); move -9.71 * s + 0.14, -2.86 * s + 0.07; line 10.01 * s + 0.01, -2.79 * s + 0.10 }
+                path { at: cx + off + jb * sin(fr * 40 + 391), cy + off + jb * sin(fr * 72 + 3342); stroke: w2; color: ink; opacity: (o) * 0.28; move -10.12 * s + -0.06, -3.26 * s + -0.13; line 9.71 * s + -0.15, -2.75 * s + 0.13 }
+                path { at: cx + jb * sin(fr * 68 + 706), cy + jb * sin(fr * 50 + 4918); stroke: w1; color: ink; opacity: (o); move -9.72 * s + 0.14, 3.72 * s + -0.14; line 9.83 * s + -0.08, 4.30 * s + 0.15 }
+                path { at: cx + off + jb * sin(fr * 54 + 2896), cy + off + jb * sin(fr * 67 + 1182); stroke: w2; color: ink; opacity: (o) * 0.28; move -10.20 * s + -0.10, 4.25 * s + 0.13; line 9.94 * s + -0.03, 3.94 * s + -0.03 }
+                path { at: cx + jb * sin(fr * 70 + 845), cy + jb * sin(fr * 63 + 4212); stroke: w1; color: ink; opacity: (o); move -9.85 * s + 0.07, 11.30 * s + 0.15; line 10.21 * s + 0.10, 11.27 * s + 0.14 }
+                path { at: cx + off + jb * sin(fr * 50 + 2005), cy + off + jb * sin(fr * 76 + 4070); stroke: w2; color: ink; opacity: (o) * 0.28; move -10.21 * s + -0.11, 10.85 * s + -0.08; line 9.83 * s + -0.08, 11.30 * s + 0.15 }
+                path { at: cx + jb * sin(fr * 53 + 922), cy + jb * sin(fr * 67 + 1752); stroke: w1; color: ink; opacity: (o); move -10.29 * s + -0.14, 18.28 * s + 0.14; line 0.87 * s + -0.07, 17.95 * s + -0.03 }
+                path { at: cx + off + jb * sin(fr * 51 + 1202), cy + off + jb * sin(fr * 70 + 2135); stroke: w2; color: ink; opacity: (o) * 0.28; move -9.84 * s + 0.08, 17.70 * s + -0.15; line 1.17 * s + 0.08, 18.30 * s + 0.15 }
+            }
+        }
+    }
+
+    //  A place's picture in pencil for the sidebar (`pk`): a folder, home, the trash, this computer, downloads, documents, pictures, music, videos, a drive. Still, and a little crooked.
+    component PPlace(cx: number, cy: number, s: number, pk: number, o: number) {
+        let a = 0
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            group {
+                show: pk == 0
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -26.07 * s + -0.03, -12.29 * s + -0.15; line -25.81 * s + 0.09, -22.13 * s + -0.06; line -9.90 * s + 0.05, -22.25 * s + -0.12; line -4.30 * s + -0.15, -14.75 * s + 0.13; line 25.70 * s + -0.15, -14.78 * s + 0.11; line 25.89 * s + -0.06, 22.06 * s + 0.03; line -26.25 * s + -0.12, 22.00 * s + 0.00; line -25.79 * s + 0.11, -12.71 * s + 0.14; line -26.02 * s + -0.01, -7.75 * s + 0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -25.71 * s + 0.15, -12.09 * s + -0.04; line -26.11 * s + -0.05, -22.28 * s + -0.14; line -9.92 * s + 0.04, -21.76 * s + 0.12; line -3.80 * s + 0.10, -15.17 * s + -0.08; line 25.75 * s + -0.12, -15.20 * s + -0.10; line 25.76 * s + -0.12, 21.76 * s + -0.12; line -25.85 * s + 0.08, 22.30 * s + 0.15; line -25.85 * s + 0.08, -12.70 * s + 0.15; line -26.19 * s + -0.09, -7.76 * s + 0.12 }
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -26.05 * s + -0.03, -4.84 * s + 0.08; line 26.27 * s + 0.13, -5.29 * s + -0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -26.30 * s + -0.15, -5.24 * s + -0.12; line 26.27 * s + 0.13, -5.22 * s + -0.11 }
+                path { at: cx, cy; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move -17.21 * s + -0.11, 17.78 * s + -0.11; line -9.30 * s + -0.15, 5.92 * s + -0.04 }
+                path { at: cx, cy; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move -8.21 * s + -0.11, 17.76 * s + -0.12; line 0.28 * s + 0.14, 6.27 * s + 0.14 }
+                path { at: cx, cy; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move 0.71 * s + -0.15, 17.87 * s + -0.07; line 8.84 * s + -0.08, 6.05 * s + 0.02 }
+                path { at: cx, cy; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move 9.80 * s + -0.10, 17.76 * s + -0.12; line 17.81 * s + -0.09, 5.78 * s + -0.11 }
+                path { at: cx, cy; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move 19.29 * s + 0.15, 17.89 * s + -0.05; line 27.12 * s + 0.06, 5.71 * s + -0.15 }
+            }
+            group {
+                show: pk == 1
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -21.70 * s + 0.15, 0.09 * s + 0.04; line 0.17 * s + 0.09, -21.21 * s + -0.11; line 21.85 * s + -0.07, -0.19 * s + -0.09 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -21.71 * s + 0.15, 0.11 * s + 0.05; line -0.18 * s + -0.09, -20.87 * s + 0.06; line 22.30 * s + 0.15, 0.23 * s + 0.11 }
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -15.30 * s + -0.15, -3.79 * s + 0.10; line -14.97 * s + 0.02, 20.72 * s + -0.14; line 14.80 * s + -0.10, 21.20 * s + 0.10; line 14.79 * s + -0.10, -4.30 * s + -0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -14.86 * s + 0.07, -4.30 * s + -0.15; line -15.30 * s + -0.15, 20.71 * s + -0.15; line 14.81 * s + -0.09, 21.30 * s + 0.15; line 14.90 * s + -0.05, -3.71 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -4.29 * s + -0.15, 20.79 * s + -0.11; line -3.82 * s + 0.09, 8.71 * s + -0.15; line 4.19 * s + 0.09, 9.29 * s + 0.15; line 3.70 * s + -0.15, 20.72 * s + -0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -3.71 * s + 0.15, 20.70 * s + -0.15; line -3.84 * s + 0.08, 9.29 * s + 0.15; line 4.04 * s + 0.02, 9.30 * s + 0.15; line 4.21 * s + 0.10, 20.81 * s + -0.10 }
+            }
+            group {
+                show: pk == 2
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -15.30 * s + -0.15, -13.95 * s + 0.02; line 14.82 * s + -0.09, -13.78 * s + 0.11 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -15.28 * s + -0.14, -13.92 * s + 0.04; line 14.96 * s + -0.02, -13.71 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -5.15 * s + -0.08, -14.12 * s + -0.06; line -4.89 * s + 0.05, -21.25 * s + -0.13; line 4.88 * s + -0.06, -21.05 * s + -0.03; line 4.93 * s + -0.04, -14.13 * s + -0.06 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -5.02 * s + -0.01, -13.74 * s + 0.13; line -4.95 * s + 0.03, -21.17 * s + -0.09; line 4.90 * s + -0.05, -21.00 * s + -0.00; line 5.29 * s + 0.15, -13.73 * s + 0.13 }
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -10.86 * s + 0.07, -14.02 * s + -0.01; line -8.71 * s + 0.14, 22.07 * s + 0.04; line 8.91 * s + -0.05, 22.09 * s + 0.04; line 10.70 * s + -0.15, -14.08 * s + -0.04 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -11.13 * s + -0.07, -13.75 * s + 0.12; line -9.06 * s + -0.03, 22.28 * s + 0.14; line 8.87 * s + -0.06, 22.27 * s + 0.14; line 11.16 * s + 0.08, -13.70 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -3.70 * s + -0.10, -6.01 * s + -0.00; line -3.70 * s + -0.10, 16.30 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -3.20 * s + 0.15, -6.18 * s + -0.09; line -3.20 * s + 0.15, 15.71 * s + -0.14 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move 3.57 * s + 0.03, -6.30 * s + -0.15; line 3.33 * s + -0.09, 16.29 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move 3.73 * s + 0.12, -5.73 * s + 0.14; line 3.36 * s + -0.07, 15.80 * s + -0.10 }
+            }
+            group {
+                show: pk == 3
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -25.25 * s + -0.13, -18.86 * s + 0.07; line 25.11 * s + 0.06, -18.70 * s + 0.15; line 25.08 * s + 0.04, 10.30 * s + 0.15; line -24.73 * s + 0.13, 9.74 * s + -0.13; line -24.84 * s + 0.08, -19.84 * s + 0.08 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -24.71 * s + 0.15, -19.09 * s + -0.04; line 25.02 * s + 0.01, -19.29 * s + -0.14; line 25.22 * s + 0.11, 10.21 * s + 0.10; line -24.92 * s + 0.04, 10.17 * s + 0.08; line -24.70 * s + 0.15, -19.71 * s + 0.14 }
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -0.26 * s + -0.13, 9.91 * s + -0.04; line -0.18 * s + -0.09, 18.11 * s + 0.06 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -0.18 * s + -0.09, 9.93 * s + -0.03; line 0.04 * s + 0.02, 17.72 * s + -0.14 }
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -9.92 * s + 0.04, 18.79 * s + -0.11; line 10.10 * s + 0.05, 18.80 * s + -0.10 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -9.79 * s + 0.11, 19.29 * s + 0.14; line 10.24 * s + 0.12, 19.10 * s + 0.05 }
+            }
+            group {
+                show: pk == 4
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -25.79 * s + 0.11, -11.77 * s + 0.12; line -26.28 * s + -0.14, -22.22 * s + -0.11; line -10.22 * s + -0.11, -21.89 * s + 0.06; line -4.25 * s + -0.13, -14.86 * s + 0.07; line 25.71 * s + -0.14, -14.70 * s + 0.15; line 26.24 * s + 0.12, 22.25 * s + 0.13; line -25.77 * s + 0.11, 22.30 * s + 0.15; line -26.26 * s + -0.13, -12.74 * s + 0.13; line -25.80 * s + 0.10, -7.91 * s + 0.04 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -25.72 * s + 0.14, -12.02 * s + -0.01; line -26.17 * s + -0.09, -22.08 * s + -0.04; line -10.00 * s + 0.00, -22.16 * s + -0.08; line -4.30 * s + -0.15, -15.18 * s + -0.09; line 26.30 * s + 0.15, -15.28 * s + -0.14; line 26.30 * s + 0.15, 22.25 * s + 0.12; line -26.08 * s + -0.04, 21.94 * s + -0.03; line -25.76 * s + 0.12, -13.12 * s + -0.06; line -25.75 * s + 0.13, -7.91 * s + 0.05 }
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -26.13 * s + -0.07, -4.72 * s + 0.14; line 25.75 * s + -0.13, -4.95 * s + 0.02 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -25.96 * s + 0.02, -5.26 * s + -0.13; line 26.29 * s + 0.15, -4.87 * s + 0.07 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -0.28 * s + -0.14, -0.10 * s + -0.05; line -0.07 * s + -0.04, 16.22 * s + 0.11 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -0.03 * s + -0.01, -0.21 * s + -0.10; line -0.27 * s + -0.14, 15.74 * s + -0.13 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -6.71 * s + -0.11, 8.85 * s + -0.07; line 0.24 * s + 0.12, 16.27 * s + 0.13; line 6.45 * s + -0.02, 9.30 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -6.63 * s + -0.06, 8.99 * s + -0.00; line -0.18 * s + -0.09, 15.94 * s + -0.03; line 6.69 * s + 0.10, 8.76 * s + -0.12 }
+            }
+            group {
+                show: pk == 5
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -26.11 * s + -0.05, -12.30 * s + -0.15; line -26.18 * s + -0.09, -22.27 * s + -0.13; line -10.15 * s + -0.07, -22.14 * s + -0.07; line -4.29 * s + -0.14, -15.17 * s + -0.08; line 25.74 * s + -0.13, -14.97 * s + 0.02; line 26.21 * s + 0.11, 22.07 * s + 0.03; line -26.29 * s + -0.14, 21.71 * s + -0.15; line -26.16 * s + -0.08, -13.12 * s + -0.06; line -26.26 * s + -0.13, -7.79 * s + 0.11 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -25.77 * s + 0.12, -11.89 * s + 0.05; line -26.30 * s + -0.15, -22.26 * s + -0.13; line -9.73 * s + 0.13, -22.05 * s + -0.02; line -4.19 * s + -0.10, -15.30 * s + -0.15; line 26.30 * s + 0.15, -15.04 * s + -0.02; line 26.26 * s + 0.13, 21.81 * s + -0.10; line -26.30 * s + -0.15, 22.28 * s + 0.14; line -25.85 * s + 0.08, -13.05 * s + -0.02; line -25.73 * s + 0.13, -7.98 * s + 0.01 }
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -26.25 * s + -0.12, -5.02 * s + -0.01; line 25.70 * s + -0.15, -5.00 * s + 0.00 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -25.86 * s + 0.07, -5.29 * s + -0.15; line 26.04 * s + 0.02, -4.76 * s + 0.12 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -9.02 * s + -0.01, 2.15 * s + 0.07; line 9.01 * s + 0.00, 2.08 * s + 0.04 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -8.85 * s + 0.07, 2.19 * s + 0.09; line 9.24 * s + 0.12, 1.79 * s + -0.10 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -8.77 * s + 0.11, 8.99 * s + -0.01; line 9.28 * s + 0.14, 9.13 * s + 0.07 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -9.14 * s + -0.07, 9.16 * s + 0.08; line 9.17 * s + 0.09, 9.29 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -9.27 * s + -0.14, 15.90 * s + -0.05; line 1.70 * s + -0.15, 15.74 * s + -0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -9.23 * s + -0.11, 16.01 * s + 0.01; line 1.79 * s + -0.11, 16.13 * s + 0.06 }
+            }
+            group {
+                show: pk == 6
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -25.71 * s + 0.15, -11.89 * s + 0.05; line -25.72 * s + 0.14, -21.73 * s + 0.13; line -10.26 * s + -0.13, -22.10 * s + -0.05; line -3.97 * s + 0.02, -14.72 * s + 0.14; line 25.84 * s + -0.08, -14.83 * s + 0.09; line 25.70 * s + -0.15, 22.26 * s + 0.13; line -26.23 * s + -0.11, 22.13 * s + 0.06; line -26.27 * s + -0.14, -13.30 * s + -0.15; line -25.94 * s + 0.03, -8.20 * s + -0.10 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -26.07 * s + -0.04, -11.74 * s + 0.13; line -25.88 * s + 0.06, -21.88 * s + 0.06; line -10.30 * s + -0.15, -22.28 * s + -0.14; line -3.73 * s + 0.14, -14.70 * s + 0.15; line 25.75 * s + -0.12, -15.30 * s + -0.15; line 25.70 * s + -0.15, 21.86 * s + -0.07; line -26.21 * s + -0.10, 21.74 * s + -0.13; line -26.01 * s + -0.01, -13.08 * s + -0.04; line -25.74 * s + 0.13, -8.24 * s + -0.12 }
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -25.77 * s + 0.11, -5.04 * s + -0.02; line 26.05 * s + 0.03, -5.02 * s + -0.01 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -25.71 * s + 0.15, -5.16 * s + -0.08; line 25.70 * s + -0.15, -4.80 * s + 0.10 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -12.26 * s + -0.13, 18.25 * s + 0.13; line -3.75 * s + 0.12, 5.78 * s + -0.11; line 1.75 * s + -0.13, 13.28 * s + 0.14; line 7.91 * s + -0.05, 8.09 * s + 0.05; line 14.04 * s + 0.02, 18.27 * s + 0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -11.75 * s + 0.13, 17.73 * s + -0.14; line -4.06 * s + -0.03, 6.15 * s + 0.08; line 2.26 * s + 0.13, 13.26 * s + 0.13; line 8.30 * s + 0.15, 8.19 * s + 0.09; line 13.72 * s + -0.14, 18.29 * s + 0.15 }
+                ellipse { at: cx + 9.23 * s + 0.11, cy + 1.74 * s + -0.13; radius: 2.68 * s; stroke: w1; color: mint; opacity: (o) }
+                ellipse { at: cx + 8.76 * s + -0.12 + off, cy + 2.14 * s + 0.07 + off; radius: 2.6 * s; stroke: w2; color: mint; opacity: (o) * 0.28 }
+            }
+            group {
+                show: pk == 7
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -26.04 * s + -0.02, -11.88 * s + 0.06; line -26.10 * s + -0.05, -22.08 * s + -0.04; line -9.70 * s + 0.15, -22.05 * s + -0.03; line -4.03 * s + -0.01, -14.85 * s + 0.07; line 26.19 * s + 0.10, -15.11 * s + -0.05; line 25.78 * s + -0.11, 22.30 * s + 0.15; line -25.99 * s + 0.00, 21.82 * s + -0.09; line -26.04 * s + -0.02, -12.86 * s + 0.07; line -26.21 * s + -0.11, -8.14 * s + -0.07 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -26.12 * s + -0.06, -11.71 * s + 0.14; line -25.70 * s + 0.15, -21.76 * s + 0.12; line -9.89 * s + 0.05, -21.82 * s + 0.09; line -4.26 * s + -0.13, -15.03 * s + -0.01; line 25.78 * s + -0.11, -14.81 * s + 0.09; line 25.77 * s + -0.11, 22.06 * s + 0.03; line -25.83 * s + 0.09, 21.94 * s + -0.03; line -26.26 * s + -0.13, -12.80 * s + 0.10; line -25.80 * s + 0.10, -8.25 * s + -0.12 }
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -25.75 * s + 0.13, -4.81 * s + 0.10; line 26.00 * s + 0.00, -4.70 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -26.11 * s + -0.05, -4.76 * s + 0.12; line 25.87 * s + -0.06, -4.79 * s + 0.11 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move 5.09 * s + 0.05, 1.72 * s + -0.14; line 5.28 * s + 0.14, 15.74 * s + -0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move 4.71 * s + -0.15, 1.77 * s + -0.11; line 4.70 * s + -0.15, 16.18 * s + 0.09 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move 4.83 * s + -0.09, 2.30 * s + 0.15; line 10.70 * s + -0.15, 6.10 * s + 0.05 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move 5.23 * s + 0.12, 2.10 * s + 0.05; line 11.19 * s + 0.10, 5.72 * s + -0.14 }
+                ellipse { at: cx + 0.10 * s + 0.05, cy + 17.29 * s + 0.15; radius: 3.42 * s; stroke: w1; color: mint; opacity: (o) }
+                ellipse { at: cx + 0.17 * s + 0.09 + off, cy + 17.11 * s + 0.06 + off; radius: 3.6 * s; stroke: w2; color: mint; opacity: (o) * 0.28 }
+            }
+            group {
+                show: pk == 8
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -26.26 * s + -0.13, -11.77 * s + 0.11; line -25.89 * s + 0.06, -22.26 * s + -0.13; line -10.30 * s + -0.15, -21.73 * s + 0.14; line -4.27 * s + -0.14, -15.30 * s + -0.15; line 25.75 * s + -0.12, -15.30 * s + -0.15; line 25.73 * s + -0.13, 21.70 * s + -0.15; line -26.25 * s + -0.12, 21.88 * s + -0.06; line -25.86 * s + 0.07, -12.78 * s + 0.11; line -25.77 * s + 0.11, -7.71 * s + 0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -25.78 * s + 0.11, -11.90 * s + 0.05; line -26.30 * s + -0.15, -21.95 * s + 0.03; line -9.96 * s + 0.02, -22.04 * s + -0.02; line -4.26 * s + -0.13, -15.07 * s + -0.03; line 25.72 * s + -0.14, -15.24 * s + -0.12; line 25.70 * s + -0.15, 21.78 * s + -0.11; line -25.89 * s + 0.05, 22.29 * s + 0.15; line -26.12 * s + -0.06, -12.98 * s + 0.01; line -25.81 * s + 0.09, -8.25 * s + -0.12 }
+                path { at: cx, cy; stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -26.10 * s + -0.05, -4.91 * s + 0.04; line 25.90 * s + -0.05, -5.22 * s + -0.11 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -25.74 * s + 0.13, -4.89 * s + 0.05; line 26.00 * s + -0.00, -5.26 * s + -0.13 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -5.25 * s + -0.13, 2.30 * s + 0.15; line 8.99 * s + -0.01, 9.73 * s + -0.14; line -4.71 * s + 0.14, 17.90 * s + -0.05; line -5.05 * s + -0.03, 2.20 * s + 0.10 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -4.91 * s + 0.05, 2.18 * s + 0.09; line 8.86 * s + -0.07, 10.18 * s + 0.09; line -5.29 * s + -0.15, 17.75 * s + -0.12; line -4.92 * s + 0.04, 1.70 * s + -0.15 }
+            }
+            group {
+                show: pk == 9
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -24.84 * s + 0.08, -8.22 * s + -0.11; line 25.30 * s + 0.15, -7.88 * s + 0.06; line 25.29 * s + 0.15, 16.24 * s + 0.12; line -25.15 * s + -0.07, 16.12 * s + 0.06; line -24.73 * s + 0.14, -8.86 * s + 0.07 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -25.24 * s + -0.12, -7.90 * s + 0.05; line 25.10 * s + 0.05, -7.89 * s + 0.05; line 24.73 * s + -0.14, 16.30 * s + 0.15; line -25.18 * s + -0.09, 15.85 * s + -0.07; line -24.79 * s + 0.11, -9.30 * s + -0.15 }
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -24.70 * s + 0.15, 1.70 * s + -0.15; line 24.82 * s + -0.09, 2.13 * s + 0.06 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -25.19 * s + -0.10, 1.77 * s + -0.11; line 25.24 * s + 0.12, 2.23 * s + 0.11 }
+                ellipse { at: cx + 15.76 * s + -0.12, cy + 9.29 * s + 0.14; radius: 2.22 * s; stroke: w1; color: mint; opacity: (o) }
+                ellipse { at: cx + 16.08 * s + 0.04 + off, cy + 9.16 * s + 0.08 + off; radius: 2.2 * s; stroke: w2; color: mint; opacity: (o) * 0.28 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -18.29 * s + -0.15, 9.07 * s + 0.03; line -5.84 * s + 0.08, 8.94 * s + -0.03 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -17.93 * s + 0.04, 9.16 * s + 0.08; line -5.85 * s + 0.07, 9.27 * s + 0.14 }
+            }
+            group {
+                show: pk == 10
+                ellipse { at: cx + 0.19 * s + 0.09, cy + 0.06 * s + 0.03; radius: 20.79 * s; stroke: w1; color: ink; opacity: (o) }
+                ellipse { at: cx + 0.09 * s + 0.05 + off, cy + 0.24 * s + 0.12 + off; radius: 21 * s; stroke: w2; color: ink; opacity: (o) * 0.28 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -0.24 * s + -0.12, -12.00 * s + 0.00; line 0.21 * s + 0.10, -0.30 * s + -0.15; line 10.28 * s + 0.14, 5.73 * s + -0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -0.03 * s + -0.02, -12.02 * s + -0.01; line -0.18 * s + -0.09, -0.26 * s + -0.13; line 9.93 * s + -0.04, 5.71 * s + -0.15 }
+            }
+            group {
+                show: pk == 11
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -0.28 * s + -0.14, -22.30 * s + -0.15; line 5.82 * s + -0.09, -7.30 * s + -0.15; line 21.73 * s + -0.13, -5.83 * s + 0.09; line 9.79 * s + -0.10, 4.17 * s + 0.09; line 13.97 * s + -0.02, 20.29 * s + 0.14; line 0.08 * s + 0.04, 11.09 * s + 0.05; line -13.83 * s + 0.09, 19.79 * s + -0.11; line -9.81 * s + 0.09, 3.96 * s + -0.02; line -22.20 * s + -0.10, -6.17 * s + -0.08; line -5.82 * s + 0.09, -7.15 * s + -0.08; line 0.05 * s + 0.02, -21.74 * s + 0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move 0.22 * s + 0.11, -21.87 * s + 0.07; line 5.79 * s + -0.10, -7.25 * s + -0.12; line 22.14 * s + 0.07, -6.21 * s + -0.10; line 9.71 * s + -0.14, 3.85 * s + -0.08; line 13.93 * s + -0.04, 20.29 * s + 0.15; line 0.24 * s + 0.12, 10.76 * s + -0.12; line -13.82 * s + 0.09, 19.93 * s + -0.03; line -9.90 * s + 0.05, 4.00 * s + -0.00; line -22.24 * s + -0.12, -5.76 * s + 0.12; line -5.94 * s + 0.03, -7.13 * s + -0.06; line -0.28 * s + -0.14, -21.82 * s + 0.09 }
+            }
+            group {
+                show: pk == 12
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -24.72 * s + 0.14, -19.30 * s + -0.15; line 24.89 * s + -0.05, -19.23 * s + -0.12; line 25.28 * s + 0.14, 10.19 * s + 0.10; line -24.86 * s + 0.07, 9.81 * s + -0.10; line -25.18 * s + -0.09, -20.01 * s + -0.01 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -24.81 * s + 0.10, -19.25 * s + -0.13; line 25.03 * s + 0.01, -19.30 * s + -0.15; line 25.09 * s + 0.05, 10.21 * s + 0.10; line -24.76 * s + 0.12, 9.73 * s + -0.14; line -25.26 * s + -0.13, -20.13 * s + -0.06 }
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -25.16 * s + -0.08, -9.90 * s + 0.05; line 25.28 * s + 0.14, -9.78 * s + 0.11 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -24.87 * s + 0.07, -9.90 * s + 0.05; line 24.73 * s + -0.13, -9.71 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -7.79 * s + 0.11, 17.70 * s + -0.15; line 7.70 * s + -0.15, 18.29 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -8.26 * s + -0.13, 18.21 * s + 0.10; line 7.71 * s + -0.15, 18.21 * s + 0.11 }
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -0.07 * s + -0.04, 10.20 * s + 0.10; line 0.14 * s + 0.07, 18.29 * s + 0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -0.24 * s + -0.12, 10.26 * s + 0.13; line 0.30 * s + 0.15, 17.74 * s + -0.13 }
+            }
+            group {
+                show: pk == 13
+                ellipse { at: cx + 0.30 * s + 0.15, cy + 0.12 * s + 0.06; radius: 19.95 * s; stroke: w1; color: ink; opacity: (o) }
+                ellipse { at: cx + -0.13 * s + -0.07 + off, cy + 0.14 * s + 0.07 + off; radius: 21 * s; stroke: w2; color: ink; opacity: (o) * 0.28 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -20.75 * s + 0.13, 0.08 * s + 0.04; line 20.71 * s + -0.14, 0.30 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -21.30 * s + -0.15, 0.01 * s + 0.01; line 21.10 * s + 0.05, 0.22 * s + 0.11 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -0.03 * s + -0.02, -20.85 * s + 0.07; line -10.30 * s + -0.15, -7.72 * s + 0.14; line -9.77 * s + 0.11, 7.85 * s + -0.07; line -0.02 * s + -0.01, 21.25 * s + 0.12 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move 0.25 * s + 0.12, -21.10 * s + -0.05; line -10.07 * s + -0.03, -8.28 * s + -0.14; line -10.01 * s + -0.00, 8.20 * s + 0.10; line 0.10 * s + 0.05, 20.72 * s + -0.14 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move 0.24 * s + 0.12, -20.78 * s + 0.11; line 10.00 * s + 0.00, -7.78 * s + 0.11; line 10.28 * s + 0.14, 8.22 * s + 0.11; line 0.06 * s + 0.03, 20.72 * s + -0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -0.24 * s + -0.12, -21.23 * s + -0.12; line 9.86 * s + -0.07, -7.83 * s + 0.09; line 9.83 * s + -0.08, 7.70 * s + -0.15; line 0.23 * s + 0.12, 20.79 * s + -0.10 }
+            }
+            group {
+                show: pk == 14
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -22.13 * s + -0.07, -6.21 * s + -0.10; line 21.71 * s + -0.15, -6.18 * s + -0.09; line 22.28 * s + 0.14, 12.17 * s + 0.08; line -22.11 * s + -0.06, 12.30 * s + 0.15; line -21.72 * s + 0.14, -7.30 * s + -0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -21.77 * s + 0.12, -5.82 * s + 0.09; line 21.74 * s + -0.13, -6.11 * s + -0.06; line 21.70 * s + -0.15, 12.26 * s + 0.13; line -21.70 * s + 0.15, 12.30 * s + 0.15; line -21.79 * s + 0.10, -6.72 * s + 0.14 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -13.75 * s + 0.13, 0.05 * s + 0.03; line -6.01 * s + -0.00, -0.27 * s + -0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -13.94 * s + 0.03, -0.13 * s + -0.06; line -6.00 * s + -0.00, -0.20 * s + -0.10 }
+                ellipse { at: cx + 14.20 * s + 0.10, cy + 3.25 * s + 0.13; radius: 2.22 * s; stroke: w1; color: mint; opacity: (o) }
+                ellipse { at: cx + 14.21 * s + 0.11 + off, cy + 2.71 * s + -0.15 + off; radius: 2.2 * s; stroke: w2; color: mint; opacity: (o) * 0.28 }
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -21.97 * s + 0.01, -6.21 * s + -0.11; line -14.00 * s + -0.00, -18.27 * s + -0.14; line 13.74 * s + -0.13, -17.71 * s + 0.14; line 22.27 * s + 0.13, -6.09 * s + -0.04 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -21.72 * s + 0.14, -5.84 * s + 0.08; line -14.28 * s + -0.14, -17.90 * s + 0.05; line 13.71 * s + -0.15, -17.75 * s + 0.13; line 22.01 * s + 0.01, -5.96 * s + 0.02 }
+            }
+            group {
+                show: pk == 15
+                ellipse { at: cx + 0.30 * s + 0.15, cy + -0.27 * s + -0.13; radius: 20.03 * s; stroke: w1; color: ink; opacity: (o) }
+                ellipse { at: cx + -0.27 * s + -0.14 + off, cy + 0.20 * s + 0.10 + off; radius: 21 * s; stroke: w2; color: ink; opacity: (o) * 0.28 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move -9.27 * s + -0.13, -0.14 * s + -0.07; line 9.11 * s + 0.06, -0.26 * s + -0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move -9.06 * s + -0.03, 0.29 * s + 0.14; line 9.11 * s + 0.05, 0.02 * s + 0.01 }
+                path { at: cx, cy; stroke: w1; color: mint; opacity: (o); move 0.28 * s + 0.14, -9.02 * s + -0.01; line -0.22 * s + -0.11, 8.96 * s + -0.02 }
+                path { at: cx + off, cy + off; stroke: w2; color: mint; opacity: (o) * 0.28; move 0.30 * s + 0.15, -9.30 * s + -0.15; line 0.29 * s + 0.15, 8.80 * s + -0.10 }
+            }
+            group {
+                show: pk == 16
+                ellipse { at: cx + -0.26 * s + -0.13, cy + -0.13 * s + -0.06; radius: 19.95 * s; stroke: w1; color: ink; opacity: (o) }
+                ellipse { at: cx + 0.30 * s + 0.15 + off, cy + 0.30 * s + 0.15 + off; radius: 21 * s; stroke: w2; color: ink; opacity: (o) * 0.28 }
+                ellipse { at: cx + -0.01 * s + -0.00, cy + -0.12 * s + -0.06; radius: 4.78 * s; stroke: w1; color: mint; opacity: (o) }
+                ellipse { at: cx + -0.19 * s + -0.10 + off, cy + -0.14 * s + -0.07 + off; radius: 5 * s; stroke: w2; color: mint; opacity: (o) * 0.28 }
+                path { at: cx, cy; stroke: w1; color: ink; opacity: (o); move -14.16 * s + -0.08, -13.70 * s + 0.15; line -9.30 * s + -0.15, -17.00 * s + 0.00 }
+                path { at: cx + off, cy + off; stroke: w2; color: ink; opacity: (o) * 0.28; move -13.74 * s + 0.13, -13.83 * s + 0.08; line -9.30 * s + -0.15, -17.13 * s + -0.06 }
+            }
+        }
+    }
+
+    //  A toolbar or menu picture (`g`): back, forward, up, tiles, lines, hidden files, new folder, close, then the menu's own. `hot` swells it, turns it to the accent and redraws it, like the shell's own.
+    component PGlyph(cx: number, cy: number, s: number, g: number, hot: number, o: number) {
+        prop a = 0 ~calm
+        follow a = hot
+        let fr = if(a > 0.02, floor(time * 5), 0)
+        let jb = 0.7 * a * (0.5 + s)
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            scale: 1 + 0.08 * a
+            group {
+                show: g == 0
+                path { at: cx + jb * sin(fr * 51 + 2201), cy + jb * sin(fr * 50 + 4325); stroke: w1; color: mix(ink, mint, a); opacity: (o); move 5.70 * s + -0.15, -9.16 * s + -0.08; line -4.79 * s + 0.11, -0.22 * s + -0.11; line 5.77 * s + -0.11, 8.85 * s + -0.07 }
+                path { at: cx + off + jb * sin(fr * 72 + 4550), cy + off + jb * sin(fr * 44 + 2022); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 6.02 * s + 0.01, -9.03 * s + -0.02; line -4.95 * s + 0.03, -0.03 * s + -0.02; line 5.73 * s + -0.14, 9.30 * s + 0.15 }
+            }
+            group {
+                show: g == 1
+                path { at: cx + jb * sin(fr * 55 + 4396), cy + jb * sin(fr * 54 + 3548); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -5.79 * s + 0.11, -9.29 * s + -0.15; line 5.10 * s + 0.05, 0.03 * s + 0.01; line -5.76 * s + 0.12, 8.74 * s + -0.13 }
+                path { at: cx + off + jb * sin(fr * 65 + 4395), cy + off + jb * sin(fr * 75 + 693); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -5.79 * s + 0.10, -9.04 * s + -0.02; line 4.72 * s + -0.14, 0.27 * s + 0.13; line -6.04 * s + -0.02, 9.24 * s + 0.12 }
+            }
+            group {
+                show: g == 2
+                path { at: cx + jb * sin(fr * 55 + 2152), cy + jb * sin(fr * 60 + 4725); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -8.70 * s + 0.15, 5.11 * s + 0.06; line 0.20 * s + 0.10, -5.77 * s + 0.11; line 8.79 * s + -0.11, 5.26 * s + 0.13 }
+                path { at: cx + off + jb * sin(fr * 61 + 4160), cy + off + jb * sin(fr * 52 + 894); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -9.03 * s + -0.02, 5.05 * s + 0.02; line 0.29 * s + 0.14, -5.72 * s + 0.14; line 8.84 * s + -0.08, 4.77 * s + -0.11 }
+            }
+            group {
+                show: g == 3
+                path { at: cx + jb * sin(fr * 41 + 413), cy + jb * sin(fr * 67 + 609); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -10.29 * s + -0.14, -9.70 * s + 0.15; line -2.02 * s + -0.01, -10.30 * s + -0.15; line -2.12 * s + -0.06, -1.91 * s + 0.05; line -10.29 * s + -0.14, -1.70 * s + 0.15; line -9.73 * s + 0.14, -10.80 * s + 0.10 }
+                path { at: cx + off + jb * sin(fr * 60 + 1653), cy + off + jb * sin(fr * 43 + 2499); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -10.21 * s + -0.10, -10.30 * s + -0.15; line -1.81 * s + 0.09, -9.70 * s + 0.15; line -2.13 * s + -0.07, -1.70 * s + 0.15; line -9.82 * s + 0.09, -1.72 * s + 0.14; line -10.23 * s + -0.11, -11.26 * s + -0.13 }
+                path { at: cx + jb * sin(fr * 51 + 2297), cy + jb * sin(fr * 56 + 183); stroke: w1; color: mix(ink, mint, a); opacity: (o); move 2.30 * s + 0.15, -9.94 * s + 0.03; line 10.26 * s + 0.13, -10.30 * s + -0.15; line 10.26 * s + 0.13, -2.25 * s + -0.12; line 1.70 * s + -0.15, -2.12 * s + -0.06; line 1.90 * s + -0.05, -10.78 * s + 0.11 }
+                path { at: cx + off + jb * sin(fr * 76 + 4444), cy + off + jb * sin(fr * 58 + 1707); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 2.28 * s + 0.14, -10.26 * s + -0.13; line 10.25 * s + 0.12, -9.93 * s + 0.03; line 10.26 * s + 0.13, -1.71 * s + 0.15; line 2.29 * s + 0.14, -2.09 * s + -0.05; line 1.85 * s + -0.08, -11.14 * s + -0.07 }
+                path { at: cx + jb * sin(fr * 63 + 1034), cy + jb * sin(fr * 50 + 2922); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.71 * s + 0.15, 1.73 * s + -0.13; line -2.07 * s + -0.03, 2.07 * s + 0.04; line -1.82 * s + 0.09, 10.07 * s + 0.04; line -9.92 * s + 0.04, 9.79 * s + -0.10; line -10.04 * s + -0.02, 1.25 * s + 0.12 }
+                path { at: cx + off + jb * sin(fr * 64 + 1265), cy + off + jb * sin(fr * 59 + 4448); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -10.23 * s + -0.12, 1.83 * s + -0.08; line -1.88 * s + 0.06, 1.79 * s + -0.11; line -1.94 * s + 0.03, 10.29 * s + 0.14; line -10.16 * s + -0.08, 9.72 * s + -0.14; line -10.27 * s + -0.13, 1.18 * s + 0.09 }
+                path { at: cx + jb * sin(fr * 56 + 1722), cy + jb * sin(fr * 68 + 556); stroke: w1; color: mix(ink, mint, a); opacity: (o); move 1.74 * s + -0.13, 1.81 * s + -0.09; line 9.99 * s + -0.01, 1.93 * s + -0.04; line 9.70 * s + -0.15, 10.14 * s + 0.07; line 1.99 * s + -0.00, 9.86 * s + -0.07; line 2.29 * s + 0.15, 0.70 * s + -0.15 }
+                path { at: cx + off + jb * sin(fr * 41 + 3007), cy + off + jb * sin(fr * 54 + 1256); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 1.96 * s + -0.02, 2.15 * s + 0.07; line 10.13 * s + 0.06, 2.20 * s + 0.10; line 10.09 * s + 0.05, 10.29 * s + 0.15; line 1.76 * s + -0.12, 9.78 * s + -0.11; line 1.84 * s + -0.08, 0.83 * s + -0.08 }
+            }
+            group {
+                show: g == 4
+                path { at: cx + jb * sin(fr * 45 + 3209), cy + jb * sin(fr * 41 + 3039); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -2.78 * s + 0.11, -7.22 * s + -0.11; line 9.75 * s + -0.13, -6.87 * s + 0.06 }
+                path { at: cx + off + jb * sin(fr * 60 + 3174), cy + off + jb * sin(fr * 55 + 4509); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.00 * s + 0.00, -7.22 * s + -0.11; line 9.76 * s + -0.12, -6.99 * s + 0.00 }
+                path { at: cx + jb * sin(fr * 49 + 706), cy + jb * sin(fr * 41 + 337); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -3.03 * s + -0.01, 0.24 * s + 0.12; line 9.71 * s + -0.14, 0.29 * s + 0.15 }
+                path { at: cx + off + jb * sin(fr * 51 + 1835), cy + off + jb * sin(fr * 54 + 2914); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.00 * s + 0.00, 0.27 * s + 0.14; line 10.08 * s + 0.04, -0.00 * s + -0.00 }
+                path { at: cx + jb * sin(fr * 56 + 677), cy + jb * sin(fr * 40 + 3655); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -3.26 * s + -0.13, 6.75 * s + -0.13; line 10.03 * s + 0.02, 6.73 * s + -0.14 }
+                path { at: cx + off + jb * sin(fr * 47 + 3670), cy + off + jb * sin(fr * 45 + 3129); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -2.81 * s + 0.09, 6.76 * s + -0.12; line 10.29 * s + 0.15, 7.29 * s + 0.15 }
+                ellipse { at: cx + -8.70 * s + 0.15 + jb * sin(fr * 71 + 3571), cy + -7.10 * s + -0.05 + jb * sin(fr * 75 + 3178); radius: 1.32 * s; stroke: w1; color: mix(ink, mint, a); opacity: (o) }
+                ellipse { at: cx + -9.19 * s + -0.09 + off + jb * sin(fr * 75 + 2253), cy + -6.74 * s + 0.13 + off + jb * sin(fr * 60 + 2925); radius: 1.3 * s; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28 }
+                ellipse { at: cx + -9.23 * s + -0.12 + jb * sin(fr * 47 + 2338), cy + 0.24 * s + 0.12 + jb * sin(fr * 73 + 2094); radius: 1.30 * s; stroke: w1; color: mix(ink, mint, a); opacity: (o) }
+                ellipse { at: cx + -8.84 * s + 0.08 + off + jb * sin(fr * 44 + 372), cy + -0.25 * s + -0.12 + off + jb * sin(fr * 54 + 2287); radius: 1.3 * s; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28 }
+                ellipse { at: cx + -8.70 * s + 0.15 + jb * sin(fr * 60 + 939), cy + 7.04 * s + 0.02 + jb * sin(fr * 57 + 2613); radius: 1.24 * s; stroke: w1; color: mix(ink, mint, a); opacity: (o) }
+                ellipse { at: cx + -9.27 * s + -0.13 + off + jb * sin(fr * 55 + 1841), cy + 7.24 * s + 0.12 + off + jb * sin(fr * 68 + 3743); radius: 1.3 * s; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28 }
+            }
+            group {
+                show: g == 5
+                path { at: cx + jb * sin(fr * 73 + 238), cy + jb * sin(fr * 56 + 735); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -10.86 * s + 0.07, -0.30 * s + -0.15; line -6.23 * s + -0.12, -5.18 * s + -0.09; line -0.17 * s + -0.08, -7.02 * s + -0.01; line 5.74 * s + -0.13, -4.96 * s + 0.02; line 11.25 * s + 0.13, 0.03 * s + 0.01; line 6.13 * s + 0.06, 4.84 * s + -0.08; line -0.10 * s + -0.05, 7.05 * s + 0.02; line -5.99 * s + 0.00, 4.83 * s + -0.08; line -10.72 * s + 0.14, -0.01 * s + -0.01 }
+                path { at: cx + off + jb * sin(fr * 64 + 1099), cy + off + jb * sin(fr * 41 + 2412); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -11.18 * s + -0.09, -0.07 * s + -0.03; line -5.70 * s + 0.15, -4.89 * s + 0.06; line -0.18 * s + -0.09, -6.81 * s + 0.10; line 6.03 * s + 0.01, -4.98 * s + 0.01; line 10.93 * s + -0.03, 0.17 * s + 0.08; line 6.29 * s + 0.15, 5.29 * s + 0.14; line -0.29 * s + -0.15, 7.03 * s + 0.02; line -5.72 * s + 0.14, 5.12 * s + 0.06; line -11.20 * s + -0.10, -0.12 * s + -0.06 }
+                ellipse { at: cx + 0.29 * s + 0.14 + jb * sin(fr * 71 + 3717), cy + 0.22 * s + 0.11 + jb * sin(fr * 67 + 2728); radius: 2.88 * s; stroke: w1; color: mix(ink, mint, a); opacity: (o) }
+                ellipse { at: cx + -0.04 * s + -0.02 + off + jb * sin(fr * 72 + 2026), cy + -0.30 * s + -0.15 + off + jb * sin(fr * 74 + 967); radius: 3 * s; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28 }
+            }
+            group {
+                show: g == 6
+                path { at: cx + jb * sin(fr * 58 + 3363), cy + jb * sin(fr * 53 + 658); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -11.10 * s + -0.05, -4.71 * s + 0.15; line -11.28 * s + -0.14, -9.24 * s + -0.12; line -3.78 * s + 0.11, -9.08 * s + -0.04; line -1.02 * s + -0.01, -6.29 * s + -0.15; line 11.10 * s + 0.05, -5.91 * s + 0.04; line 10.89 * s + -0.06, 7.84 * s + -0.08; line -10.74 * s + 0.13, 7.71 * s + -0.14; line -10.79 * s + 0.10, -4.28 * s + -0.14 }
+                path { at: cx + off + jb * sin(fr * 57 + 3817), cy + off + jb * sin(fr * 71 + 2872); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -10.76 * s + 0.12, -4.80 * s + 0.10; line -10.95 * s + 0.02, -9.00 * s + -0.00; line -3.77 * s + 0.12, -9.30 * s + -0.15; line -0.83 * s + 0.09, -6.30 * s + -0.15; line 10.83 * s + -0.08, -6.23 * s + -0.11; line 11.24 * s + 0.12, 8.28 * s + 0.14; line -11.07 * s + -0.03, 7.86 * s + -0.07; line -11.08 * s + -0.04, -4.03 * s + -0.01 }
+                path { at: cx + jb * sin(fr * 45 + 262), cy + jb * sin(fr * 43 + 4712); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -2.84 * s + 0.08, 2.29 * s + 0.14; line 3.20 * s + 0.10, 2.29 * s + 0.14 }
+                path { at: cx + off + jb * sin(fr * 45 + 1162), cy + off + jb * sin(fr * 66 + 1675); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.25 * s + -0.12, 1.71 * s + -0.15; line 2.95 * s + -0.02, 2.14 * s + 0.07 }
+                path { at: cx + jb * sin(fr * 67 + 4903), cy + jb * sin(fr * 41 + 260); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -0.30 * s + -0.15, -0.80 * s + 0.10; line -0.04 * s + -0.02, 4.70 * s + -0.15 }
+                path { at: cx + off + jb * sin(fr * 47 + 2724), cy + off + jb * sin(fr * 53 + 1768); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -0.10 * s + -0.05, -0.70 * s + 0.15; line -0.30 * s + -0.15, 4.93 * s + -0.04 }
+            }
+            group {
+                show: g == 7
+                path { at: cx + jb * sin(fr * 46 + 204), cy + jb * sin(fr * 67 + 2450); stroke: w1; color: mix(ink, mint, a); opacity: (o); move -6.09 * s + -0.05, -6.29 * s + -0.14; line 6.20 * s + 0.10, 6.30 * s + 0.15 }
+                path { at: cx + off + jb * sin(fr * 51 + 1204), cy + off + jb * sin(fr * 58 + 1551); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -5.94 * s + 0.03, -6.15 * s + -0.08; line 6.30 * s + 0.15, 5.73 * s + -0.14 }
+                path { at: cx + jb * sin(fr * 66 + 957), cy + jb * sin(fr * 59 + 1613); stroke: w1; color: mix(ink, mint, a); opacity: (o); move 6.28 * s + 0.14, -5.81 * s + 0.10; line -6.13 * s + -0.07, 5.85 * s + -0.08 }
+                path { at: cx + off + jb * sin(fr * 66 + 3263), cy + off + jb * sin(fr * 46 + 736); stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 6.29 * s + 0.15, -6.14 * s + -0.07; line -5.88 * s + 0.06, 5.70 * s + -0.15 }
+            }
+        }
+    }
+
+    //  `PGlyphS` for a menu line's picture, which is chosen while it runs: only the kinds the menus use.
+    component PGlyphSM(cx: number, cy: number, s: number, g: number, o: number) {
+        let a = 0
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            group {
+                show: g == 5
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -11.03 * s + -0.01, -0.24 * s + -0.12; line -5.84 * s + 0.08, -5.19 * s + -0.10; line 0.21 * s + 0.10, -6.96 * s + 0.02; line 5.78 * s + -0.11, -5.02 * s + -0.01; line 11.07 * s + 0.04, -0.24 * s + -0.12; line 6.06 * s + 0.03, 5.07 * s + 0.03; line -0.24 * s + -0.12, 6.72 * s + -0.14; line -6.24 * s + -0.12, 5.30 * s + 0.15; line -11.30 * s + -0.15, 0.28 * s + 0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -11.29 * s + -0.14, 0.09 * s + 0.05; line -6.00 * s + -0.00, -5.26 * s + -0.13; line 0.24 * s + 0.12, -7.23 * s + -0.11; line 6.06 * s + 0.03, -5.25 * s + -0.13; line 11.30 * s + 0.15, 0.11 * s + 0.06; line 5.73 * s + -0.13, 4.92 * s + -0.04; line -0.17 * s + -0.08, 7.18 * s + 0.09; line -6.06 * s + -0.03, 5.05 * s + 0.02; line -11.02 * s + -0.01, -0.27 * s + -0.14 }
+                ellipse { at: cx + -0.22 * s + -0.11, cy + -0.27 * s + -0.14; radius: 3.12 * s; stroke: w1; color: mix(ink, mint, a); opacity: (o) }
+                ellipse { at: cx + 0.27 * s + 0.13 + off, cy + 0.24 * s + 0.12 + off; radius: 3 * s; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28 }
+            }
+            group {
+                show: g == 6
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -11.30 * s + -0.15, -5.04 * s + -0.02; line -11.30 * s + -0.15, -9.29 * s + -0.14; line -4.29 * s + -0.14, -9.23 * s + -0.12; line -1.07 * s + -0.03, -6.02 * s + -0.01; line 11.29 * s + 0.14, -6.27 * s + -0.14; line 11.03 * s + 0.02, 7.82 * s + -0.09; line -11.27 * s + -0.14, 7.96 * s + -0.02; line -10.72 * s + 0.14, -3.82 * s + 0.09 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -11.30 * s + -0.15, -5.02 * s + -0.01; line -11.20 * s + -0.10, -9.16 * s + -0.08; line -3.97 * s + 0.01, -9.29 * s + -0.14; line -0.71 * s + 0.14, -5.98 * s + 0.01; line 10.72 * s + -0.14, -6.15 * s + -0.07; line 10.71 * s + -0.14, 8.29 * s + 0.14; line -10.74 * s + 0.13, 8.27 * s + 0.14; line -10.94 * s + 0.03, -3.74 * s + 0.13 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -2.73 * s + 0.13, 1.96 * s + -0.02; line 3.29 * s + 0.14, 2.10 * s + 0.05 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -2.73 * s + 0.13, 1.88 * s + -0.06; line 2.71 * s + -0.15, 2.27 * s + 0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -0.26 * s + -0.13, -1.03 * s + -0.02; line 0.06 * s + 0.03, 5.25 * s + 0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 0.30 * s + 0.15, -0.71 * s + 0.15; line 0.30 * s + 0.15, 4.76 * s + -0.12 }
+            }
+            group {
+                show: g == 7
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -5.72 * s + 0.14, -5.78 * s + 0.11; line 6.26 * s + 0.13, 6.28 * s + 0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -6.30 * s + -0.15, -5.88 * s + 0.06; line 6.01 * s + 0.00, 6.27 * s + 0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 5.94 * s + -0.03, -6.28 * s + -0.14; line -5.91 * s + 0.04, 6.27 * s + 0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 6.23 * s + 0.12, -6.28 * s + -0.14; line -6.05 * s + -0.03, 6.16 * s + 0.08 }
+            }
+            group {
+                show: g == 8
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -4.24 * s + -0.12, -8.84 * s + 0.08; line -8.71 * s + 0.14, -9.26 * s + -0.13; line -9.16 * s + -0.08, 8.70 * s + -0.15; line 8.79 * s + -0.11, 8.97 * s + -0.02; line 9.10 * s + 0.05, 4.22 * s + 0.11 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.97 * s + 0.02, -8.79 * s + 0.10; line -8.72 * s + 0.14, -8.73 * s + 0.14; line -8.75 * s + 0.12, 8.71 * s + -0.14; line 9.30 * s + 0.15, 8.78 * s + -0.11; line 8.98 * s + -0.01, 4.07 * s + 0.03 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -0.28 * s + -0.14, -0.29 * s + -0.14; line 9.73 * s + -0.14, -9.70 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -0.03 * s + -0.02, -0.16 * s + -0.08; line 9.83 * s + -0.09, -9.71 * s + 0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 2.74 * s + -0.13, -10.18 * s + -0.09; line 9.71 * s + -0.14, -10.16 * s + -0.08; line 10.23 * s + 0.12, -2.70 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 2.70 * s + -0.15, -9.88 * s + 0.06; line 10.27 * s + 0.14, -10.28 * s + -0.14; line 9.92 * s + -0.04, -2.74 * s + 0.13 }
+            }
+            group {
+                show: g == 9
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -10.27 * s + -0.14, 9.82 * s + -0.09; line -8.21 * s + -0.10, 3.99 * s + -0.00; line 5.22 * s + 0.11, -9.01 * s + -0.01; line 9.04 * s + 0.02, -4.76 * s + 0.12; line -3.80 * s + 0.10, 7.90 * s + -0.05; line -10.29 * s + -0.15, 10.26 * s + 0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -9.98 * s + 0.01, 10.02 * s + 0.01; line -8.20 * s + -0.10, 3.72 * s + -0.14; line 4.80 * s + -0.10, -8.71 * s + 0.15; line 8.78 * s + -0.11, -5.28 * s + -0.14; line -4.23 * s + -0.12, 8.26 * s + 0.13; line -10.30 * s + -0.15, 9.73 * s + -0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 2.07 * s + 0.03, -6.26 * s + -0.13; line 5.75 * s + -0.13, -2.28 * s + -0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 1.86 * s + -0.07, -6.10 * s + -0.05; line 5.93 * s + -0.04, -2.27 * s + -0.14 }
+            }
+            group {
+                show: g == 10
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -2.97 * s + 0.02, -2.72 * s + 0.14; line -3.30 * s + -0.15, -9.20 * s + -0.10; line 9.29 * s + 0.15, -9.30 * s + -0.15; line 8.75 * s + -0.13, 3.25 * s + 0.13; line 2.70 * s + -0.15, 3.15 * s + 0.08 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.10 * s + -0.05, -2.74 * s + 0.13; line -2.76 * s + 0.12, -9.02 * s + -0.01; line 8.88 * s + -0.06, -8.83 * s + 0.08; line 9.28 * s + 0.14, 2.86 * s + -0.07; line 3.30 * s + 0.15, 2.70 * s + -0.15 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.03 * s + -0.01, -2.72 * s + 0.14; line 3.10 * s + 0.05, -3.29 * s + -0.15; line 3.26 * s + 0.13, 9.30 * s + 0.15; line -8.98 * s + 0.01, 9.28 * s + 0.14; line -8.81 * s + 0.10, -3.70 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.88 * s + 0.06, -2.87 * s + 0.07; line 3.05 * s + 0.03, -3.12 * s + -0.06; line 3.15 * s + 0.08, 8.74 * s + -0.13; line -9.24 * s + -0.12, 9.28 * s + 0.14; line -8.70 * s + 0.15, -4.23 * s + -0.11 }
+            }
+            group {
+                show: g == 11
+                ellipse { at: cx + -4.79 * s + 0.11, cy + 7.28 * s + 0.14; radius: 3.36 * s; stroke: w1; color: mix(ink, mint, a); opacity: (o) }
+                ellipse { at: cx + -5.04 * s + -0.02 + off, cy + 6.95 * s + -0.02 + off; radius: 3.2 * s; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28 }
+                ellipse { at: cx + 4.98 * s + -0.01, cy + 6.92 * s + -0.04; radius: 3.12 * s; stroke: w1; color: mix(ink, mint, a); opacity: (o) }
+                ellipse { at: cx + 5.28 * s + 0.14 + off, cy + 6.72 * s + -0.14 + off; radius: 3.2 * s; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -4.79 * s + 0.10, 3.78 * s + -0.11; line 3.91 * s + -0.04, -10.29 * s + -0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -4.91 * s + 0.05, 3.91 * s + -0.04; line 4.10 * s + 0.05, -9.92 * s + 0.04 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 5.28 * s + 0.14, 3.70 * s + -0.15; line -4.18 * s + -0.09, -10.08 * s + -0.04 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 4.97 * s + -0.02, 3.84 * s + -0.08; line -4.00 * s + 0.00, -10.28 * s + -0.14 }
+            }
+            group {
+                show: g == 12
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -7.96 * s + 0.02, -4.81 * s + 0.09; line -7.78 * s + 0.11, 10.24 * s + 0.12; line 7.91 * s + -0.04, 10.27 * s + 0.13; line 7.72 * s + -0.14, -4.84 * s + 0.08; line 3.70 * s + -0.15, -5.06 * s + -0.03 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.26 * s + -0.13, -5.03 * s + -0.01; line -8.23 * s + -0.12, 10.25 * s + 0.13; line 8.15 * s + 0.08, 9.85 * s + -0.07; line 8.04 * s + 0.02, -5.21 * s + -0.11; line 4.06 * s + 0.03, -5.28 * s + -0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -4.12 * s + -0.06, -9.17 * s + -0.08; line 3.90 * s + -0.05, -8.70 * s + 0.15; line 4.14 * s + 0.07, -2.73 * s + 0.13; line -3.71 * s + 0.14, -2.75 * s + 0.13; line -3.90 * s + 0.05, -9.26 * s + -0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.75 * s + 0.12, -9.23 * s + -0.11; line 3.71 * s + -0.15, -8.78 * s + 0.11; line 3.95 * s + -0.03, -2.92 * s + 0.04; line -3.96 * s + 0.02, -2.71 * s + 0.14; line -3.98 * s + 0.01, -9.21 * s + -0.11 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -4.28 * s + -0.14, 2.18 * s + 0.09; line 4.29 * s + 0.15, 2.30 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.72 * s + 0.14, 1.76 * s + -0.12; line 3.81 * s + -0.09, 1.90 * s + -0.05 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -3.71 * s + 0.14, 5.73 * s + -0.13; line 2.22 * s + 0.11, 6.30 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.95 * s + 0.02, 5.70 * s + -0.15; line 1.71 * s + -0.15, 6.26 * s + 0.13 }
+            }
+            group {
+                show: g == 13
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.30 * s + -0.15, -5.85 * s + 0.07; line 9.30 * s + 0.15, -6.01 * s + -0.01 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.76 * s + 0.12, -6.23 * s + -0.11; line 9.12 * s + 0.06, -5.79 * s + 0.11 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -3.01 * s + -0.00, -5.70 * s + 0.15; line -2.70 * s + 0.15, -10.22 * s + -0.11; line 2.81 * s + -0.10, -10.18 * s + -0.09; line 3.30 * s + 0.15, -5.89 * s + 0.05 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.21 * s + -0.10, -6.03 * s + -0.02; line -3.29 * s + -0.14, -10.29 * s + -0.15; line 2.83 * s + -0.08, -9.83 * s + 0.09; line 3.14 * s + 0.07, -6.13 * s + -0.07 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -6.84 * s + 0.08, -5.71 * s + 0.14; line -6.20 * s + -0.10, 9.70 * s + -0.15; line 6.06 * s + 0.03, 9.85 * s + -0.07; line 6.91 * s + -0.05, -5.70 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -7.01 * s + -0.00, -5.71 * s + 0.15; line -6.15 * s + -0.08, 10.30 * s + 0.15; line 6.29 * s + 0.15, 10.22 * s + 0.11; line 7.30 * s + 0.15, -5.90 * s + 0.05 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -2.53 * s + -0.01, -1.99 * s + 0.00; line -2.25 * s + 0.12, 5.95 * s + -0.03 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -2.51 * s + -0.00, -1.88 * s + 0.06; line -2.80 * s + -0.15, 6.22 * s + 0.11 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 2.72 * s + 0.11, -2.30 * s + -0.15; line 2.68 * s + 0.09, 6.28 * s + 0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 2.43 * s + -0.03, -1.97 * s + 0.01; line 2.47 * s + -0.02, 5.75 * s + -0.12 }
+            }
+            group {
+                show: g == 14
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.90 * s + 0.05, -4.15 * s + -0.08; line -9.89 * s + 0.06, -10.11 * s + -0.05; line -4.20 * s + -0.10, -10.04 * s + -0.02 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -9.73 * s + 0.13, -4.25 * s + -0.12; line -9.81 * s + 0.10, -10.22 * s + -0.11; line -3.73 * s + 0.14, -10.26 * s + -0.13 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 4.13 * s + 0.07, -9.70 * s + 0.15; line 9.70 * s + -0.15, -9.75 * s + 0.12; line 9.80 * s + -0.10, -3.84 * s + 0.08 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 4.27 * s + 0.14, -9.72 * s + 0.14; line 9.82 * s + -0.09, -9.70 * s + 0.15; line 10.30 * s + 0.15, -4.28 * s + -0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 10.30 * s + 0.15, 4.26 * s + 0.13; line 10.17 * s + 0.08, 9.70 * s + -0.15; line 4.13 * s + 0.07, 10.26 * s + 0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 10.30 * s + 0.15, 3.89 * s + -0.05; line 10.10 * s + 0.05, 10.14 * s + 0.07; line 4.10 * s + 0.05, 10.26 * s + 0.13 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -3.95 * s + 0.03, 10.16 * s + 0.08; line -9.70 * s + 0.15, 10.22 * s + 0.11; line -10.08 * s + -0.04, 3.76 * s + -0.12 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -4.30 * s + -0.15, 9.74 * s + -0.13; line -9.71 * s + 0.14, 10.29 * s + 0.14; line -10.03 * s + -0.01, 4.30 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -4.10 * s + -0.05, 0.18 * s + 0.09; line -1.02 * s + -0.01, 4.24 * s + 0.12; line 4.72 * s + -0.14, -3.74 * s + 0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.86 * s + 0.07, -0.17 * s + -0.08; line -0.71 * s + 0.15, 3.70 * s + -0.15; line 4.72 * s + -0.14, -3.78 * s + 0.11 }
+            }
+            group {
+                show: g == 15
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 5.02 * s + -0.04, -6.40 * s + -0.15; line 7.20 * s + -0.15, -2.95 * s + -0.13; line 7.74 * s + -0.08, 1.12 * s + -0.14; line 6.38 * s + 0.14, 5.05 * s + -0.03; line 2.84 * s + 0.07, 7.49 * s + -0.01; line -1.36 * s + 0.02, 8.19 * s + 0.14; line -4.91 * s + 0.09, 5.80 * s + -0.15; line -7.26 * s + 0.12, 3.00 * s + 0.15; line -7.70 * s + 0.10, -1.59 * s + -0.09; line -6.20 * s + -0.05, -4.99 * s + 0.06; line -2.43 * s + 0.13, -7.76 * s + -0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 4.80 * s + -0.15, -6.37 * s + -0.13; line 7.69 * s + 0.10, -2.53 * s + 0.09; line 7.60 * s + -0.15, 1.60 * s + 0.10; line 6.26 * s + 0.08, 5.39 * s + 0.14; line 2.91 * s + 0.10, 7.79 * s + 0.15; line -1.65 * s + -0.12, 8.15 * s + 0.13; line -5.28 * s + -0.09, 6.38 * s + 0.14; line -7.75 * s + -0.13, 2.92 * s + 0.11; line -8.16 * s + -0.13, -1.31 * s + 0.05; line -5.94 * s + 0.08, -5.10 * s + -0.00; line -2.71 * s + -0.01, -7.78 * s + -0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -2.81 * s + -0.05, -7.20 * s + 0.15; line -7.87 * s + -0.08, -8.20 * s + 0.15; line -4.41 * s + 0.14, -2.30 * s + 0.10 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -2.86 * s + -0.08, -7.26 * s + 0.12; line -7.49 * s + 0.11, -8.72 * s + -0.11; line -4.99 * s + -0.14, -2.58 * s + -0.04 }
+            }
+            group {
+                show: g == 16
+                ellipse { at: cx + -0.27 * s + -0.14, cy + -0.28 * s + -0.14; radius: 11.02 * s; stroke: w1; color: mix(ink, mint, a); opacity: (o) }
+                ellipse { at: cx + 0.05 * s + 0.02 + off, cy + -0.24 * s + -0.12 + off; radius: 10.5 * s; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 0.25 * s + 0.13, -4.97 * s + 0.01; line 0.05 * s + 0.03, -4.00 * s + -0.00 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 0.27 * s + 0.14, -4.98 * s + 0.01; line -0.21 * s + -0.11, -4.05 * s + -0.02 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 0.27 * s + 0.14, -0.69 * s + -0.09; line -0.17 * s + -0.08, 6.16 * s + 0.08 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 0.06 * s + 0.03, -0.20 * s + 0.15; line -0.28 * s + -0.14, 5.95 * s + -0.02 }
+            }
+            group {
+                show: g == 17
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -11.26 * s + -0.13, -7.91 * s + 0.05; line 11.27 * s + 0.13, -7.99 * s + 0.00; line 11.18 * s + 0.09, 9.26 * s + 0.13; line -10.99 * s + 0.01, 8.87 * s + -0.06; line -10.83 * s + 0.09, -9.30 * s + -0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -11.29 * s + -0.14, -7.76 * s + 0.12; line 11.12 * s + 0.06, -7.97 * s + 0.01; line 10.74 * s + -0.13, 8.80 * s + -0.10; line -10.72 * s + 0.14, 9.09 * s + 0.05; line -10.79 * s + 0.11, -8.70 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -6.70 * s + 0.15, -3.30 * s + -0.15; line -3.28 * s + -0.14, -0.16 * s + -0.08; line -6.72 * s + 0.14, 2.71 * s + -0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -6.96 * s + 0.02, -2.93 * s + 0.04; line -3.10 * s + -0.05, -0.26 * s + -0.13; line -7.24 * s + -0.12, 3.01 * s + 0.01 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 0.25 * s + 0.13, 3.74 * s + -0.13; line 6.28 * s + 0.14, 4.28 * s + 0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 0.00 * s + 0.00, 4.28 * s + 0.14; line 6.13 * s + 0.06, 4.30 * s + 0.15 }
+            }
+            group {
+                show: g == 18
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -11.08 * s + -0.04, -4.95 * s + 0.02; line -11.30 * s + -0.15, 7.71 * s + -0.15; line 11.01 * s + 0.01, 8.26 * s + 0.13; line 10.70 * s + -0.15, -4.86 * s + 0.07 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -11.08 * s + -0.04, -5.13 * s + -0.07; line -11.28 * s + -0.14, 7.71 * s + -0.14; line 10.91 * s + -0.04, 7.79 * s + -0.10; line 11.21 * s + 0.11, -4.96 * s + 0.02 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -11.25 * s + -0.12, -4.78 * s + 0.11; line -5.11 * s + -0.06, -4.71 * s + 0.14; line -3.14 * s + -0.07, -8.85 * s + 0.07; line 4.71 * s + -0.14, -8.85 * s + 0.08; line 7.28 * s + 0.14, -5.10 * s + -0.05; line 10.80 * s + -0.10, -5.20 * s + -0.10 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -10.77 * s + 0.11, -5.17 * s + -0.08; line -5.24 * s + -0.12, -4.96 * s + 0.02; line -3.07 * s + -0.03, -8.70 * s + 0.15; line 4.86 * s + -0.07, -8.70 * s + 0.15; line 6.73 * s + -0.13, -5.06 * s + -0.03; line 10.75 * s + -0.12, -4.84 * s + 0.08 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 0.29 * s + 0.14, -1.08 * s + -0.04; line 0.28 * s + 0.14, 5.03 * s + 0.02 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -0.12 * s + -0.06, -0.92 * s + 0.04; line 0.19 * s + 0.10, 5.26 * s + 0.13 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -3.29 * s + -0.14, 1.86 * s + -0.07; line 3.16 * s + 0.08, 1.74 * s + -0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -2.70 * s + 0.15, 1.98 * s + -0.01; line 2.93 * s + -0.03, 2.27 * s + 0.14 }
+            }
+            group {
+                show: g == 19
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -11.13 * s + -0.07, -7.21 * s + -0.11; line 4.86 * s + -0.07, -6.70 * s + 0.15; line 4.99 * s + -0.00, 4.74 * s + -0.13; line -10.72 * s + 0.14, 5.30 * s + 0.15; line -11.07 * s + -0.03, -8.19 * s + -0.10 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -10.74 * s + 0.13, -7.21 * s + -0.11; line 5.20 * s + 0.10, -6.89 * s + 0.06; line 4.70 * s + -0.15, 4.70 * s + -0.15; line -11.05 * s + -0.02, 5.17 * s + 0.09; line -10.71 * s + 0.14, -7.75 * s + 0.13 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -5.20 * s + -0.10, 8.71 * s + -0.14; line 10.70 * s + -0.15, 8.75 * s + -0.12; line 10.89 * s + -0.05, -2.72 * s + 0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -4.73 * s + 0.14, 9.24 * s + 0.12; line 10.93 * s + -0.03, 9.11 * s + 0.06; line 11.29 * s + 0.15, -2.72 * s + 0.14 }
+            }
+            group {
+                show: g == 21
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -2.84 * s + 0.08, 2.92 * s + -0.04; line -9.25 * s + -0.12, 2.87 * s + -0.06; line -11.17 * s + -0.08, 0.10 * s + 0.05; line -9.13 * s + -0.06, -2.88 * s + 0.06; line -2.81 * s + 0.09, -3.20 * s + -0.10 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.28 * s + -0.14, 2.82 * s + -0.09; line -8.70 * s + 0.15, 2.76 * s + -0.12; line -11.01 * s + -0.00, -0.06 * s + -0.03; line -9.21 * s + -0.10, -3.14 * s + -0.07; line -2.77 * s + 0.11, -2.74 * s + 0.13 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 3.21 * s + 0.11, -2.87 * s + 0.06; line 9.03 * s + 0.02, -3.02 * s + -0.01; line 10.72 * s + -0.14, 0.23 * s + 0.12; line 9.03 * s + 0.02, 3.28 * s + 0.14; line 3.05 * s + 0.03, 3.10 * s + 0.05 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 2.71 * s + -0.14, -2.85 * s + 0.08; line 9.04 * s + 0.02, -3.30 * s + -0.15; line 11.30 * s + 0.15, 0.30 * s + 0.15; line 9.03 * s + 0.02, 3.27 * s + 0.14; line 3.25 * s + 0.12, 2.70 * s + -0.15 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -4.74 * s + 0.13, -0.29 * s + -0.15; line 4.91 * s + -0.05, 0.28 * s + 0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -5.25 * s + -0.12, -0.29 * s + -0.14; line 4.72 * s + -0.14, -0.27 * s + -0.13 }
+            }
+            group {
+                show: g == 22
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.21 * s + -0.11, -10.01 * s + -0.00; line 8.71 * s + -0.15, -9.99 * s + 0.00; line 8.75 * s + -0.12, 9.70 * s + -0.15; line -8.70 * s + 0.15, 10.29 * s + 0.14; line -9.27 * s + -0.13, -11.12 * s + -0.06 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -9.29 * s + -0.15, -9.71 * s + 0.15; line 9.20 * s + 0.10, -10.14 * s + -0.07; line 9.28 * s + 0.14, 9.95 * s + -0.03; line -8.93 * s + 0.03, 10.23 * s + 0.12; line -9.04 * s + -0.02, -10.89 * s + 0.06 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -0.17 * s + -0.08, -10.18 * s + -0.09; line 0.14 * s + 0.07, -5.04 * s + -0.02 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -0.29 * s + -0.14, -10.24 * s + -0.12; line -0.04 * s + -0.02, -4.97 * s + 0.01 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -2.27 * s + -0.14, -3.28 * s + -0.14; line 2.26 * s + 0.13, -2.96 * s + 0.02 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -2.20 * s + -0.10, -3.08 * s + -0.04; line 2.29 * s + 0.15, -3.09 * s + -0.05 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 0.30 * s + 0.15, 0.17 * s + 0.09; line 0.12 * s + 0.06, 3.28 * s + 0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 0.28 * s + 0.14, 0.12 * s + 0.06; line 0.17 * s + 0.08, 2.72 * s + -0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -3.25 * s + -0.13, 5.19 * s + 0.09; line 2.80 * s + -0.10, 4.72 * s + -0.14; line 2.98 * s + -0.01, 9.99 * s + -0.01; line -3.25 * s + -0.12, 10.08 * s + 0.04; line -2.87 * s + 0.06, 5.02 * s + 0.01 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -3.11 * s + -0.06, 4.73 * s + -0.13; line 3.26 * s + 0.13, 5.30 * s + 0.15; line 2.72 * s + -0.14, 9.83 * s + -0.09; line -2.70 * s + 0.15, 10.23 * s + 0.12; line -3.15 * s + -0.08, 5.10 * s + 0.05 }
+            }
+            group {
+                show: g == 23
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -8.93 * s + 0.03, -3.09 * s + -0.05; line -8.86 * s + 0.07, 10.17 * s + 0.09; line 9.25 * s + 0.13, 9.97 * s + -0.02; line 9.05 * s + 0.02, -3.13 * s + -0.06 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.71 * s + 0.15, -3.21 * s + -0.11; line -9.18 * s + -0.09, 10.06 * s + 0.03; line 9.22 * s + 0.11, 9.75 * s + -0.13; line 9.10 * s + 0.05, -2.75 * s + 0.13 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -0.12 * s + -0.06, 3.73 * s + -0.13; line -0.07 * s + -0.04, -10.26 * s + -0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 0.05 * s + 0.03, 4.19 * s + 0.09; line 0.03 * s + 0.01, -9.88 * s + 0.06 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -4.70 * s + 0.15, -5.93 * s + 0.03; line 0.21 * s + 0.11, -10.79 * s + 0.11; line 5.11 * s + 0.06, -6.23 * s + -0.12 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -5.05 * s + -0.03, -5.87 * s + 0.07; line -0.07 * s + -0.03, -11.09 * s + -0.05; line 4.90 * s + -0.05, -6.20 * s + -0.10 }
+            }
+            group {
+                show: g == 24
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 0.01 * s + 0.01, -9.93 * s + 0.03; line 3.16 * s + 0.08, -3.08 * s + -0.04; line 10.18 * s + 0.09, -2.78 * s + 0.11; line 3.73 * s + -0.14, 2.23 * s + 0.12; line 6.93 * s + -0.04, 9.28 * s + 0.14; line -0.11 * s + -0.05, 5.21 * s + 0.11; line -6.83 * s + 0.09, 8.71 * s + -0.15; line -4.09 * s + -0.05, 2.15 * s + 0.07; line -9.79 * s + 0.11, -3.30 * s + -0.15; line -2.90 * s + 0.05, -3.28 * s + -0.14; line 0.11 * s + 0.05, -10.11 * s + -0.05 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -0.11 * s + -0.05, -9.70 * s + 0.15; line 2.70 * s + -0.15, -3.30 * s + -0.15; line 9.70 * s + -0.15, -3.10 * s + -0.05; line 3.86 * s + -0.07, 1.76 * s + -0.12; line 7.30 * s + 0.15, 9.03 * s + 0.01; line -0.30 * s + -0.15, 5.16 * s + 0.08; line -7.16 * s + -0.08, 8.92 * s + -0.04; line -4.26 * s + -0.13, 2.17 * s + 0.08; line -10.25 * s + -0.12, -3.07 * s + -0.03; line -2.76 * s + 0.12, -3.18 * s + -0.09; line 0.28 * s + 0.14, -10.26 * s + -0.13 }
+            }
+            group {
+                show: g == 25
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.24 * s + -0.12, -5.21 * s + -0.11; line -8.70 * s + 0.15, 8.84 * s + -0.08; line 8.78 * s + -0.11, 8.77 * s + -0.12; line 9.07 * s + 0.04, -4.90 * s + 0.05 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.86 * s + 0.07, -4.71 * s + 0.14; line -9.04 * s + -0.02, 9.18 * s + 0.09; line 9.14 * s + 0.07, 8.73 * s + -0.14; line 9.04 * s + 0.02, -4.89 * s + 0.05 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -0.29 * s + -0.14, 3.82 * s + -0.09; line -0.27 * s + -0.14, -10.07 * s + -0.03 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -0.29 * s + -0.14, 4.25 * s + 0.13; line 0.17 * s + 0.09, -9.70 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -4.74 * s + 0.13, -5.02 * s + -0.01; line 0.14 * s + 0.07, -10.29 * s + -0.14; line 5.26 * s + 0.13, -4.74 * s + 0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -5.23 * s + -0.12, -5.28 * s + -0.14; line -0.30 * s + -0.15, -9.82 * s + 0.09; line 4.70 * s + -0.15, -4.83 * s + 0.08 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.16 * s + -0.08, -5.27 * s + -0.13; line -4.71 * s + 0.15, -5.04 * s + -0.02 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.88 * s + 0.06, -4.96 * s + 0.02; line -4.75 * s + 0.13, -5.13 * s + -0.06 }
+            }
+            group {
+                show: g == 26
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -5.86 * s + 0.07, -9.22 * s + -0.11; line -8.98 * s + 0.01, -8.71 * s + 0.15; line -8.82 * s + 0.09, 9.28 * s + 0.14; line -5.70 * s + 0.15, 9.30 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -5.86 * s + 0.07, -9.28 * s + -0.14; line -9.25 * s + -0.12, -9.19 * s + -0.09; line -9.01 * s + -0.01, 9.20 * s + 0.10; line -6.08 * s + -0.04, 9.08 * s + 0.04 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 5.81 * s + -0.09, -8.71 * s + 0.14; line 9.30 * s + 0.15, -8.97 * s + 0.02; line 8.73 * s + -0.14, 9.06 * s + 0.03; line 6.29 * s + 0.14, 8.85 * s + -0.08 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 6.00 * s + -0.00, -8.95 * s + 0.03; line 9.26 * s + 0.13, -8.78 * s + 0.11; line 9.30 * s + 0.15, 9.30 * s + 0.15; line 6.29 * s + 0.14, 9.27 * s + 0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 2.97 * s + -0.02, -5.93 * s + 0.03; line -2.71 * s + 0.15, 5.79 * s + -0.10 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 2.90 * s + -0.05, -5.83 * s + 0.09; line -2.73 * s + 0.13, 5.75 * s + -0.12 }
+            }
+            group {
+                show: g == 27
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -6.00 * s + 0.00, -1.82 * s + 0.09; line -6.04 * s + -0.02, -9.25 * s + -0.12; line 6.72 * s + -0.14, -9.06 * s + -0.03; line 7.29 * s + 0.15, 3.97 * s + -0.02; line 0.29 * s + 0.14, 3.77 * s + -0.11 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -5.82 * s + 0.09, -2.28 * s + -0.14; line -6.28 * s + -0.14, -8.72 * s + 0.14; line 7.01 * s + 0.00, -9.27 * s + -0.14; line 6.93 * s + -0.04, 3.76 * s + -0.12; line 0.12 * s + 0.06, 4.29 * s + 0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -10.71 * s + 0.15, -2.25 * s + -0.13; line 0.04 * s + 0.02, -1.70 * s + 0.15; line -0.03 * s + -0.02, 9.98 * s + -0.01; line -11.23 * s + -0.12, 10.16 * s + 0.08; line -11.19 * s + -0.09, -2.70 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -10.78 * s + 0.11, -2.24 * s + -0.12; line -0.28 * s + -0.14, -2.28 * s + -0.14; line -0.24 * s + -0.12, 9.82 * s + -0.09; line -10.70 * s + 0.15, 9.78 * s + -0.11; line -10.74 * s + 0.13, -2.76 * s + 0.12 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -8.24 * s + -0.12, 2.89 * s + -0.05; line -3.02 * s + -0.01, 3.29 * s + 0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.15 * s + -0.07, 3.12 * s + 0.06; line -2.71 * s + 0.14, 3.09 * s + 0.04 }
+            }
+            group {
+                show: g == 28
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -6.80 * s + 0.10, -11.30 * s + -0.15; line 3.29 * s + 0.14, -10.90 * s + 0.05; line 8.27 * s + 0.14, -5.82 * s + 0.09; line 7.80 * s + -0.10, 11.09 * s + 0.04; line -6.80 * s + 0.10, 11.23 * s + 0.11; line -6.71 * s + 0.15, -12.23 * s + -0.11 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -6.70 * s + 0.15, -11.06 * s + -0.03; line 3.17 * s + 0.08, -11.16 * s + -0.08; line 8.14 * s + 0.07, -6.07 * s + -0.04; line 7.84 * s + -0.08, 10.75 * s + -0.12; line -6.82 * s + 0.09, 10.94 * s + -0.03; line -7.29 * s + -0.15, -11.88 * s + 0.06 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 2.83 * s + -0.08, -11.15 * s + -0.07; line 2.79 * s + -0.10, -6.03 * s + -0.02; line 8.07 * s + 0.03, -6.29 * s + -0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 2.72 * s + -0.14, -11.27 * s + -0.13; line 3.28 * s + 0.14, -6.26 * s + -0.13; line 7.70 * s + -0.15, -5.70 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -1.70 * s + 0.15, -0.26 * s + -0.13; line -2.24 * s + -0.12, 7.20 * s + 0.10 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -1.72 * s + 0.14, 0.22 * s + 0.11; line -1.77 * s + 0.11, 7.30 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -5.48 * s + 0.01, 3.23 * s + -0.13; line 1.62 * s + 0.06, 3.41 * s + -0.04 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -5.65 * s + -0.07, 3.30 * s + -0.10; line 1.79 * s + 0.14, 3.25 * s + -0.13 }
+            }
+            group {
+                show: g == 29
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -11.20 * s + -0.10, -7.28 * s + -0.14; line 11.30 * s + 0.15, -7.20 * s + -0.10; line 11.17 * s + 0.08, 7.72 * s + -0.14; line -11.12 * s + -0.06, 8.05 * s + 0.03; line -10.88 * s + 0.06, -7.70 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -10.79 * s + 0.10, -7.26 * s + -0.13; line 10.85 * s + -0.08, -6.73 * s + 0.14; line 10.70 * s + -0.15, 7.78 * s + -0.11; line -10.70 * s + 0.15, 7.80 * s + -0.10; line -10.82 * s + 0.09, -7.76 * s + 0.12 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -6.78 * s + 0.11, 5.24 * s + 0.12; line -1.98 * s + 0.01, -1.27 * s + -0.14; line 1.00 * s + -0.00, 2.71 * s + -0.14; line 3.71 * s + -0.15, -0.77 * s + 0.12; line 7.72 * s + -0.14, 5.27 * s + 0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -7.16 * s + -0.08, 4.70 * s + -0.15; line -1.72 * s + 0.14, -1.12 * s + -0.06; line 0.92 * s + -0.04, 3.18 * s + 0.09; line 3.76 * s + -0.12, -1.01 * s + -0.00; line 7.99 * s + -0.00, 5.29 * s + 0.15 }
+                ellipse { at: cx + 4.70 * s + -0.15, cy + -3.30 * s + -0.15; radius: 1.49 * s; stroke: w1; color: mix(ink, mint, a); opacity: (o) }
+                ellipse { at: cx + 5.03 * s + 0.01 + off, cy + -2.71 * s + 0.14 + off; radius: 1.5 * s; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28 }
+            }
+            group {
+                show: g == 30
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -3.92 * s + 0.04, -4.30 * s + -0.15; line -4.23 * s + -0.12, -9.75 * s + 0.12; line 9.73 * s + -0.14, -9.87 * s + 0.07; line 10.24 * s + 0.12, 3.71 * s + -0.14; line 4.07 * s + 0.04, 4.30 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -4.17 * s + -0.08, -3.87 * s + 0.07; line -4.15 * s + -0.07, -10.07 * s + -0.04; line 9.72 * s + -0.14, -10.11 * s + -0.05; line 10.06 * s + 0.03, 3.70 * s + -0.15; line 4.29 * s + 0.14, 3.98 * s + -0.01 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -10.01 * s + -0.00, -4.30 * s + -0.15; line 4.01 * s + 0.01, -3.72 * s + 0.14; line 3.80 * s + -0.10, 9.99 * s + -0.01; line -9.73 * s + 0.13, 9.81 * s + -0.10; line -10.10 * s + -0.05, -5.09 * s + -0.04 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -9.86 * s + 0.07, -3.72 * s + 0.14; line 3.98 * s + -0.01, -4.25 * s + -0.13; line 4.03 * s + 0.02, 9.87 * s + -0.06; line -9.91 * s + 0.05, 10.00 * s + 0.00; line -10.01 * s + -0.01, -4.79 * s + 0.10 }
+            }
+            group {
+                show: g == 31
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -7.89 * s + 0.05, -7.30 * s + -0.15; line -0.27 * s + -0.14, -6.71 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -7.77 * s + 0.11, -6.83 * s + 0.09; line 0.29 * s + 0.14, -7.25 * s + -0.12 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -7.97 * s + 0.02, -0.25 * s + -0.13; line 4.15 * s + 0.07, 0.09 * s + 0.05 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.30 * s + -0.15, 0.09 * s + 0.05; line 4.15 * s + 0.08, 0.23 * s + 0.12 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -8.20 * s + -0.10, 6.70 * s + -0.15; line 8.19 * s + 0.10, 6.75 * s + -0.13 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.11 * s + -0.06, 7.09 * s + 0.05; line 8.29 * s + 0.14, 7.21 * s + 0.10 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 6.72 * s + -0.14, -9.30 * s + -0.15; line 6.74 * s + -0.13, 0.85 * s + -0.07 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 7.30 * s + 0.15, -9.28 * s + -0.14; line 7.19 * s + 0.09, 1.24 * s + 0.12 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 3.91 * s + -0.05, -2.74 * s + 0.13; line 6.91 * s + -0.05, 1.17 * s + 0.08; line 10.13 * s + 0.06, -3.10 * s + -0.05 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 3.94 * s + -0.03, -2.73 * s + 0.13; line 7.21 * s + 0.11, 0.81 * s + -0.09; line 9.75 * s + -0.13, -3.30 * s + -0.15 }
+            }
+            group {
+                show: g == 32
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -8.71 * s + 0.15, -0.25 * s + -0.13; line 9.03 * s + 0.02, -0.23 * s + -0.12 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.82 * s + 0.09, 0.08 * s + 0.04; line 9.12 * s + 0.06, 0.03 * s + 0.02 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -0.25 * s + -0.13, -9.28 * s + -0.14; line -0.30 * s + -0.15, 8.79 * s + -0.10 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -0.20 * s + -0.10, -9.09 * s + -0.04; line -0.29 * s + -0.15, 9.24 * s + 0.12 }
+            }
+            group {
+                show: g == 33
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.29 * s + -0.14, -0.08 * s + -0.04; line 8.72 * s + -0.14, -0.24 * s + -0.12 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -9.04 * s + -0.02, -0.23 * s + -0.11; line 9.20 * s + 0.10, 0.09 * s + 0.05 }
+            }
+            group {
+                show: g == 34
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -8.99 * s + 0.00, 6.28 * s + 0.14; line 8.91 * s + -0.04, 5.86 * s + -0.07; line 0.30 * s + 0.15, -7.22 * s + -0.11; line -8.75 * s + 0.12, 5.76 * s + -0.12 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -9.20 * s + -0.10, 5.79 * s + -0.11; line 9.20 * s + 0.10, 6.13 * s + 0.06; line -0.30 * s + -0.15, -6.87 * s + 0.06; line -9.00 * s + -0.00, 5.73 * s + -0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -8.76 * s + 0.12, 10.27 * s + 0.14; line 9.09 * s + 0.04, 10.16 * s + 0.08 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.88 * s + 0.06, 9.88 * s + -0.06; line 8.71 * s + -0.15, 10.03 * s + 0.02 }
+            }
+            group {
+                show: g == 36
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -6.15 * s + -0.08, -9.28 * s + -0.14; line 7.70 * s + -0.15, -8.73 * s + 0.13; line 7.96 * s + -0.02, 10.29 * s + 0.15; line -0.14 * s + -0.07, 3.71 * s + -0.14; line -5.80 * s + 0.10, 9.80 * s + -0.10; line -5.71 * s + 0.15, -9.94 * s + 0.03 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -6.22 * s + -0.11, -9.30 * s + -0.15; line 8.22 * s + 0.11, -8.75 * s + 0.12; line 7.98 * s + -0.01, 10.04 * s + 0.02; line 0.09 * s + 0.04, 3.73 * s + -0.13; line -6.21 * s + -0.11, 9.82 * s + -0.09; line -5.76 * s + 0.12, -10.02 * s + -0.01 }
+            }
+        }
+    }
+
+    //  `PGlyphS` for a pick list's picture (apps, archive types): only the kinds those lists use.
+    component PGlyphSP(cx: number, cy: number, s: number, g: number, o: number) {
+        let a = 0
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            group {
+                show: g == 8
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -3.83 * s + 0.08, -8.70 * s + 0.15; line -9.24 * s + -0.12, -9.02 * s + -0.01; line -9.05 * s + -0.03, 9.30 * s + 0.15; line 8.90 * s + -0.05, 8.88 * s + -0.06; line 8.70 * s + -0.15, 4.30 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -4.27 * s + -0.14, -8.76 * s + 0.12; line -8.77 * s + 0.12, -8.70 * s + 0.15; line -9.23 * s + -0.11, 9.28 * s + 0.14; line 8.72 * s + -0.14, 9.22 * s + 0.11; line 8.86 * s + -0.07, 4.05 * s + 0.03 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -0.30 * s + -0.15, 0.07 * s + 0.03; line 9.91 * s + -0.04, -10.19 * s + -0.09 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 0.25 * s + 0.13, -0.19 * s + -0.10; line 10.28 * s + 0.14, -10.13 * s + -0.06 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 3.26 * s + 0.13, -9.90 * s + 0.05; line 10.30 * s + 0.15, -9.70 * s + 0.15; line 9.71 * s + -0.14, -3.29 * s + -0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 3.30 * s + 0.15, -9.86 * s + 0.07; line 9.93 * s + -0.03, -9.92 * s + 0.04; line 9.99 * s + -0.01, -2.77 * s + 0.11 }
+            }
+            group {
+                show: g == 22
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.03 * s + -0.01, -9.90 * s + 0.05; line 8.79 * s + -0.10, -10.26 * s + -0.13; line 8.76 * s + -0.12, 10.21 * s + 0.10; line -8.90 * s + 0.05, 9.70 * s + -0.15; line -9.28 * s + -0.14, -10.82 * s + 0.09 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -9.06 * s + -0.03, -10.18 * s + -0.09; line 9.22 * s + 0.11, -10.22 * s + -0.11; line 8.93 * s + -0.04, 10.03 * s + 0.01; line -8.72 * s + 0.14, 9.72 * s + -0.14; line -8.73 * s + 0.13, -10.70 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -0.09 * s + -0.04, -9.71 * s + 0.14; line 0.17 * s + 0.09, -5.07 * s + -0.04 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -0.29 * s + -0.15, -10.19 * s + -0.10; line -0.29 * s + -0.14, -5.17 * s + -0.09 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -1.77 * s + 0.11, -3.08 * s + -0.04; line 1.83 * s + -0.08, -3.28 * s + -0.14 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -1.95 * s + 0.03, -2.78 * s + 0.11; line 1.71 * s + -0.15, -3.24 * s + -0.12 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -0.13 * s + -0.06, 0.15 * s + 0.08; line -0.14 * s + -0.07, 3.04 * s + 0.02 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -0.22 * s + -0.11, -0.11 * s + -0.06; line -0.17 * s + -0.09, 3.30 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -2.77 * s + 0.11, 4.76 * s + -0.12; line 3.29 * s + 0.15, 4.83 * s + -0.09; line 2.70 * s + -0.15, 9.82 * s + -0.09; line -3.12 * s + -0.06, 10.08 * s + 0.04; line -2.80 * s + 0.10, 5.14 * s + 0.07 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -2.73 * s + 0.14, 4.85 * s + -0.07; line 3.25 * s + 0.12, 5.29 * s + 0.14; line 2.70 * s + -0.15, 10.18 * s + 0.09; line -3.05 * s + -0.03, 10.24 * s + 0.12; line -2.70 * s + 0.15, 4.71 * s + -0.15 }
+            }
+            group {
+                show: g == 28
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -6.74 * s + 0.13, -10.75 * s + 0.13; line 2.92 * s + -0.04, -10.85 * s + 0.07; line 8.30 * s + 0.15, -6.27 * s + -0.13; line 7.70 * s + -0.15, 10.72 * s + -0.14; line -6.86 * s + 0.07, 11.23 * s + 0.12; line -7.24 * s + -0.12, -12.02 * s + -0.01 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -6.71 * s + 0.14, -11.22 * s + -0.11; line 2.91 * s + -0.04, -10.76 * s + 0.12; line 8.10 * s + 0.05, -6.30 * s + -0.15; line 7.76 * s + -0.12, 10.70 * s + -0.15; line -7.26 * s + -0.13, 10.73 * s + -0.13; line -6.89 * s + 0.06, -11.70 * s + 0.15 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 2.80 * s + -0.10, -10.70 * s + 0.15; line 3.28 * s + 0.14, -6.29 * s + -0.15; line 7.80 * s + -0.10, -6.03 * s + -0.01 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 3.30 * s + 0.15, -11.20 * s + -0.10; line 3.08 * s + 0.04, -6.30 * s + -0.15; line 7.71 * s + -0.14, -6.10 * s + -0.05 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -1.96 * s + 0.02, -0.29 * s + -0.15; line -1.99 * s + 0.01, 7.30 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -1.78 * s + 0.11, -0.12 * s + -0.06; line -1.86 * s + 0.07, 6.92 * s + -0.04 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -5.58 * s + -0.04, 3.34 * s + -0.08; line 1.25 * s + -0.13, 3.79 * s + 0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -5.41 * s + 0.05, 3.21 * s + -0.15; line 1.40 * s + -0.05, 3.76 * s + 0.13 }
+            }
+            group {
+                show: g == 30
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -3.77 * s + 0.11, -3.87 * s + 0.07; line -3.77 * s + 0.11, -9.99 * s + 0.01; line 10.30 * s + 0.15, -9.73 * s + 0.14; line 9.89 * s + -0.05, 3.71 * s + -0.14; line 4.22 * s + 0.11, 3.85 * s + -0.08 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -4.26 * s + -0.13, -4.22 * s + -0.11; line -4.30 * s + -0.15, -10.18 * s + -0.09; line 9.70 * s + -0.15, -9.72 * s + 0.14; line 10.19 * s + 0.10, 3.79 * s + -0.10; line 3.79 * s + -0.10, 4.13 * s + 0.06 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -10.27 * s + -0.14, -3.91 * s + 0.04; line 3.88 * s + -0.06, -4.26 * s + -0.13; line 3.77 * s + -0.12, 9.83 * s + -0.08; line -10.05 * s + -0.03, 9.71 * s + -0.15; line -9.71 * s + 0.14, -5.01 * s + -0.00 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -9.72 * s + 0.14, -4.04 * s + -0.02; line 4.22 * s + 0.11, -4.25 * s + -0.12; line 3.78 * s + -0.11, 9.71 * s + -0.15; line -9.71 * s + 0.14, 9.83 * s + -0.09; line -9.79 * s + 0.11, -4.81 * s + 0.10 }
+            }
+        }
+    }
+
+    //  `PFile` for a folder alone (the sidebar's pinned-folder marker).
+    component PFile0(cx: number, cy: number, s: number, ik: number, hot: number, o: number) {
+        prop a = 0 ~calm
+        follow a = hot
+        let fr = if(a > 0.02, floor(time * 5), 0)
+        let jb = 0.7 * a * (0.5 + s)
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            scale: 1 + 0.08 * a
+            group {
+                show: ik == 0
+                path { at: cx + jb * sin(fr * 57 + 4412), cy + jb * sin(fr * 59 + 2149); stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -25.87 * s + 0.06, -11.88 * s + 0.06; line -26.14 * s + -0.07, -22.30 * s + -0.15; line -10.15 * s + -0.08, -22.14 * s + -0.07; line -4.28 * s + -0.14, -14.75 * s + 0.13; line 25.76 * s + -0.12, -14.86 * s + 0.07; line 25.71 * s + -0.14, 21.96 * s + -0.02; line -26.30 * s + -0.15, 21.82 * s + -0.09; line -26.21 * s + -0.11, -13.10 * s + -0.05; line -25.71 * s + 0.14, -7.91 * s + 0.04 }
+                path { at: cx + off + jb * sin(fr * 50 + 2345), cy + off + jb * sin(fr * 47 + 387); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -26.00 * s + -0.00, -12.18 * s + -0.09; line -26.29 * s + -0.14, -21.74 * s + 0.13; line -10.11 * s + -0.05, -21.71 * s + 0.14; line -4.01 * s + -0.01, -15.12 * s + -0.06; line 25.75 * s + -0.13, -14.95 * s + 0.03; line 25.84 * s + -0.08, 22.30 * s + 0.15; line -26.00 * s + 0.00, 21.81 * s + -0.09; line -26.27 * s + -0.13, -12.76 * s + 0.12; line -25.87 * s + 0.07, -8.09 * s + -0.04 }
+                path { at: cx + jb * sin(fr * 44 + 2154), cy + jb * sin(fr * 70 + 3304); stroke: w1; color: mix(mint, ink, 0.25); opacity: (o); move -25.91 * s + 0.05, -5.18 * s + -0.09; line 25.71 * s + -0.15, -5.30 * s + -0.15 }
+                path { at: cx + off + jb * sin(fr * 48 + 2481), cy + off + jb * sin(fr * 70 + 1881); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.28; move -25.78 * s + 0.11, -4.85 * s + 0.07; line 25.71 * s + -0.15, -5.12 * s + -0.06 }
+                path { at: cx + jb * sin(fr * 72 + 2611), cy + jb * sin(fr * 68 + 2166); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move -17.29 * s + -0.14, 18.04 * s + 0.02; line -9.15 * s + -0.08, 5.77 * s + -0.11 }
+                path { at: cx + jb * sin(fr * 72 + 2172), cy + jb * sin(fr * 51 + 3863); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move -8.04 * s + -0.02, 17.78 * s + -0.11; line -0.26 * s + -0.13, 6.30 * s + 0.15 }
+                path { at: cx + jb * sin(fr * 58 + 1320), cy + jb * sin(fr * 52 + 2796); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move 0.88 * s + -0.06, 17.98 * s + -0.01; line 8.97 * s + -0.01, 6.24 * s + 0.12 }
+                path { at: cx + jb * sin(fr * 72 + 1154), cy + jb * sin(fr * 72 + 1983); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move 10.30 * s + 0.15, 18.29 * s + 0.14; line 18.29 * s + 0.15, 6.19 * s + 0.10 }
+                path { at: cx + jb * sin(fr * 62 + 4327), cy + jb * sin(fr * 44 + 1957); stroke: w2; color: mix(mint, ink, 0.25); opacity: (o) * 0.24; move 19.05 * s + 0.02, 17.73 * s + -0.13; line 27.27 * s + 0.13, 5.71 * s + -0.15 }
+            }
+        }
+    }
+
+    //  `PGlyphS` for kind 7 alone.
+    component PGlyphS7(cx: number, cy: number, s: number, g: number, o: number) {
+        let a = 0
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            group {
+                show: g == 7
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -6.20 * s + -0.10, -5.81 * s + 0.09; line 5.75 * s + -0.13, 5.83 * s + -0.08 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -6.19 * s + -0.09, -6.01 * s + -0.01; line 5.75 * s + -0.13, 5.73 * s + -0.14 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 6.16 * s + 0.08, -6.26 * s + -0.13; line -6.07 * s + -0.03, 6.13 * s + 0.07 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 5.94 * s + -0.03, -6.30 * s + -0.15; line -5.74 * s + 0.13, 5.70 * s + -0.15 }
+            }
+        }
+    }
+
+    //  `PGlyphS` for kind 32 alone.
+    component PGlyphS32(cx: number, cy: number, s: number, g: number, o: number) {
+        let a = 0
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            group {
+                show: g == 32
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.30 * s + -0.15, -0.28 * s + -0.14; line 8.94 * s + -0.03, 0.15 * s + 0.07 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -9.05 * s + -0.03, 0.10 * s + 0.05; line 8.82 * s + -0.09, 0.20 * s + 0.10 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 0.15 * s + 0.08, -9.01 * s + -0.01; line -0.28 * s + -0.14, 9.03 * s + 0.01 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 0.13 * s + 0.07, -8.70 * s + 0.15; line -0.17 * s + -0.08, 9.20 * s + 0.10 }
+            }
+        }
+    }
+
+    //  `PGlyphS` for kind 33 alone.
+    component PGlyphS33(cx: number, cy: number, s: number, g: number, o: number) {
+        let a = 0
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            group {
+                show: g == 33
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.30 * s + -0.15, 0.02 * s + 0.01; line 8.96 * s + -0.02, -0.08 * s + -0.04 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.72 * s + 0.14, -0.25 * s + -0.13; line 9.30 * s + 0.15, -0.27 * s + -0.13 }
+            }
+        }
+    }
+
+    //  `PGlyphS` for kind 34 alone.
+    component PGlyphS34(cx: number, cy: number, s: number, g: number, o: number) {
+        let a = 0
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            group {
+                show: g == 34
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -9.23 * s + -0.11, 6.20 * s + 0.10; line 8.99 * s + -0.00, 6.07 * s + 0.04; line 0.28 * s + 0.14, -7.30 * s + -0.15; line -8.70 * s + 0.15, 6.03 * s + 0.01 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.75 * s + 0.13, 5.86 * s + -0.07; line 8.85 * s + -0.07, 5.84 * s + -0.08; line -0.17 * s + -0.08, -6.83 * s + 0.09; line -9.28 * s + -0.14, 6.16 * s + 0.08 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -8.85 * s + 0.08, 10.22 * s + 0.11; line 8.75 * s + -0.13, 10.17 * s + 0.08 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -9.23 * s + -0.12, 10.25 * s + 0.13; line 8.80 * s + -0.10, 10.30 * s + 0.15 }
+            }
+        }
+    }
+
+    //  `PGlyphS` for kind 35 alone.
+    component PGlyphS35(cx: number, cy: number, s: number, g: number, o: number) {
+        let a = 0
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            group {
+                show: g == 35
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -8.70 * s + 0.15, 0.28 * s + 0.14; line -3.09 * s + -0.04, 7.30 * s + 0.15; line 9.10 * s + 0.05, -8.30 * s + -0.15 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -8.71 * s + 0.15, -0.18 * s + -0.09; line -2.89 * s + 0.06, 7.00 * s + 0.00; line 8.80 * s + -0.10, -8.25 * s + -0.12 }
+            }
+        }
+    }
+
+    //  `PGlyphS` for kind 36 alone.
+    component PGlyphS36(cx: number, cy: number, s: number, g: number, o: number) {
+        let a = 0
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            group {
+                show: g == 36
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -6.29 * s + -0.14, -8.78 * s + 0.11; line 7.81 * s + -0.10, -8.98 * s + 0.01; line 7.80 * s + -0.10, 9.93 * s + -0.04; line -0.14 * s + -0.07, 4.28 * s + 0.14; line -5.96 * s + 0.02, 10.20 * s + 0.10; line -5.71 * s + 0.14, -9.87 * s + 0.07 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -6.26 * s + -0.13, -9.23 * s + -0.12; line 8.28 * s + 0.14, -9.18 * s + -0.09; line 7.73 * s + -0.13, 9.71 * s + -0.15; line 0.29 * s + 0.14, 3.88 * s + -0.06; line -5.77 * s + 0.11, 10.14 * s + 0.07; line -6.18 * s + -0.09, -10.26 * s + -0.13 }
+            }
+        }
+    }
+
+    //  `PGlyphS` for kind 39 alone.
+    component PGlyphS39(cx: number, cy: number, s: number, g: number, o: number) {
+        let a = 0
+        let w1 = 1.3 + 1.1 * s
+        let w2 = 0.9 + 0.6 * s
+        let off = 0.35 * (0.5 + s)
+        group {
+            pivot: cx, cy
+            group {
+                show: g == 39
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -10.70 * s + 0.15, 0.14 * s + 0.07; line -6.72 * s + 0.14, -3.77 * s + 0.11; line -2.91 * s + 0.04, 0.10 * s + 0.05; line -6.73 * s + 0.14, 3.75 * s + -0.13; line -10.99 * s + 0.00, 0.01 * s + 0.01 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -10.94 * s + 0.03, 0.20 * s + 0.10; line -7.27 * s + -0.13, -3.89 * s + 0.06; line -3.14 * s + -0.07, 0.17 * s + 0.08; line -6.92 * s + 0.04, 4.11 * s + 0.06; line -11.20 * s + -0.10, -0.08 * s + -0.04 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move -2.89 * s + 0.05, -0.28 * s + -0.14; line 10.70 * s + -0.15, 0.02 * s + 0.01 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move -2.70 * s + 0.15, -0.19 * s + -0.09; line 11.23 * s + 0.11, -0.07 * s + -0.03 }
+                path { at: cx, cy; stroke: w1; color: mix(ink, mint, a); opacity: (o); move 6.73 * s + -0.14, -4.16 * s + -0.08; line 11.30 * s + 0.15, -0.30 * s + -0.15; line 6.98 * s + -0.01, 4.09 * s + 0.04 }
+                path { at: cx + off, cy + off; stroke: w2; color: mix(ink, mint, a); opacity: (o) * 0.28; move 7.14 * s + 0.07, -3.84 * s + 0.08; line 10.96 * s + -0.02, 0.20 * s + 0.10; line 6.77 * s + -0.12, 3.95 * s + -0.03 }
+            }
+        }
+    }
+    // <<< icons
+
+    //  A picture's own picture, drawn in pencil: the picture clipped to a hand-drawn rectangle (the corners a little off, the sides a little bowed, a different one for each place it is
+    //  drawn), with its outline in two pencil strokes on top, that boil about five times a second under the pointer. The picture goes in as its child. `hot` is the hover.
+    component PThumb(x: number, y: number, w: number, h: number, hot: number) {
+        prop a = 0 ~calm
+        follow a = hot
+        let fr = if(a > 0.02, floor(time * 5), 0)
+        let jb = 1.2 * a
+        group {
+            clip path { at: x, y; move 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 0.0), 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 2.3); line w * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 4.6), -a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 6.9); line w + 3.2 * a * sin(x * 0.37 + y * 0.91 + 9.2), 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 11.5); line w + a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 13.8), h * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 16.1); line w + 3.2 * a * sin(x * 0.37 + y * 0.91 + 18.4), h + 3.2 * a * sin(x * 0.37 + y * 0.91 + 20.7); line w * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 23.0), h + a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 25.3); line 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 27.6), h + 3.2 * a * sin(x * 0.37 + y * 0.91 + 29.9); line -a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 32.2), h * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 34.5); close }
+            path { at: x, y; color: deep; opacity: 70%; move 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 0.0), 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 2.3); line w * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 4.6), -a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 6.9); line w + 3.2 * a * sin(x * 0.37 + y * 0.91 + 9.2), 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 11.5); line w + a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 13.8), h * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 16.1); line w + 3.2 * a * sin(x * 0.37 + y * 0.91 + 18.4), h + 3.2 * a * sin(x * 0.37 + y * 0.91 + 20.7); line w * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 23.0), h + a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 25.3); line 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 27.6), h + 3.2 * a * sin(x * 0.37 + y * 0.91 + 29.9); line -a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 32.2), h * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 34.5); close }
+            children
+        }
+        path { at: x, y; stroke: 1.6; color: ink; opacity: 85%; move 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 0.0) + jb * sin(fr * 47 + 1000), 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 2.3) + jb * sin(fr * 61 + 2000); line w * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 4.6) + jb * sin(fr * 50 + 1311), -a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 6.9) + jb * sin(fr * 63 + 2277); line w + 3.2 * a * sin(x * 0.37 + y * 0.91 + 9.2) + jb * sin(fr * 53 + 1622), 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 11.5) + jb * sin(fr * 65 + 2554); line w + a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 13.8) + jb * sin(fr * 56 + 1933), h * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 16.1) + jb * sin(fr * 67 + 2831); line w + 3.2 * a * sin(x * 0.37 + y * 0.91 + 18.4) + jb * sin(fr * 59 + 2244), h + 3.2 * a * sin(x * 0.37 + y * 0.91 + 20.7) + jb * sin(fr * 69 + 3108); line w * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 23.0) + jb * sin(fr * 62 + 2555), h + a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 25.3) + jb * sin(fr * 71 + 3385); line 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 27.6) + jb * sin(fr * 65 + 2866), h + 3.2 * a * sin(x * 0.37 + y * 0.91 + 29.9) + jb * sin(fr * 73 + 3662); line -a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 32.2) + jb * sin(fr * 68 + 3177), h * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 34.5) + jb * sin(fr * 75 + 3939); close }
+        path { at: x + 0.6, y + 0.6; stroke: 1.0; color: ink; opacity: 25% * a; move 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 0.0) + jb * sin(fr * 47 + 1000), 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 2.3) + jb * sin(fr * 61 + 2000); line w * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 4.6) + jb * sin(fr * 50 + 1311), -a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 6.9) + jb * sin(fr * 63 + 2277); line w + 3.2 * a * sin(x * 0.37 + y * 0.91 + 9.2) + jb * sin(fr * 53 + 1622), 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 11.5) + jb * sin(fr * 65 + 2554); line w + a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 13.8) + jb * sin(fr * 56 + 1933), h * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 16.1) + jb * sin(fr * 67 + 2831); line w + 3.2 * a * sin(x * 0.37 + y * 0.91 + 18.4) + jb * sin(fr * 59 + 2244), h + 3.2 * a * sin(x * 0.37 + y * 0.91 + 20.7) + jb * sin(fr * 69 + 3108); line w * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 23.0) + jb * sin(fr * 62 + 2555), h + a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 25.3) + jb * sin(fr * 71 + 3385); line 0 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 27.6) + jb * sin(fr * 65 + 2866), h + 3.2 * a * sin(x * 0.37 + y * 0.91 + 29.9) + jb * sin(fr * 73 + 3662); line -a + 3.2 * a * sin(x * 0.37 + y * 0.91 + 32.2) + jb * sin(fr * 68 + 3177), h * 0.5 + 3.2 * a * sin(x * 0.37 + y * 0.91 + 34.5) + jb * sin(fr * 75 + 3939); close }
+    }
+
+    // ── some pieces that come again and again ──
+    //  The glass the menus, the dialogs and the cards are made of: dark underneath, so that what is written on it reads, then the glass, or flat obsidian when the shell has its glass off.
+    component Pane(px: number, py: number, pw: number, ph: number, rad: number, gl: number) {
+        box { from: px, py; size: pw, ph; corner: rad * rr; color: mix(tint, #000000, 0.2); opacity: 98% }
+        body {
+            color: tint
+            glass: 1
+            lens: false
+            rim: 70%
+            shine: 0, 0
+            shadow: 0, 12, 30, 42%
+            opacity: gl * (1 - ob)
+            show: ob < 0.996
+            box { from: px, py; size: pw, ph; corner: rad * rr }
+        }
+        body {
+            color: mix(mix(mix(tint, #000000, 0.7), ink, 0.3), tint, pl)
+            rim: 0%
+            border: (2 + 1.2 * uk) * pl, deep
+            shadow: 0, 12, 30, 45%
+            opacity: ob
+            show: ob > 0.004
+            box { from: px, py; size: pw, ph; corner: rad * rr }
+        }
+    }
+    //  A button of a dialog: `tone` 0 plain, 1 the accent, 2 the alert colour; it says `ev(arg)` when pressed.
+    component Btn(bx: number, by: number, bw: number, bl: text, tone: number, ev: event, arg: number) {
+        prop hv = 0 ~quick
+        follow hv = bz.hover
+        box { from: bx, by; size: bw, 34; corner: 12 * rr; color: if(tone == 2, alert, if(tone == 1, mint, ink)); opacity: if(tone == 0, 8% + 8% * hv, 80% + 20% * hv) }
+        text bl { at: bx + bw / 2, by + 17; anchor: center; size: 13.5; weight: 600; color: if(tone == 0, ink, onmint); family: "Space Grotesk" }
+        zone box bz { from: bx, by; size: bw, 34; corner: 12 * rr; cursor: pointer; label: bl }
+        on press bz { emit ev(arg) }
+        on leave bz { pen = 0 }
+        on enter bz { pen = 1 }
+        on hover bz for 80ms { pen = 1 }
+    }
+    //  One of the little pills under the search field: what to look for, and where.
+    component Chip(cx: number, cy: number, cw: number, cl: text, sel: number, k: number) {
+        prop hv = 0 ~quick
+        follow hv = cz.hover
+        box { from: cx, cy; size: cw, 26; corner: 13 * rr; color: mix(ink, mint, sel); opacity: 7% + 9% * hv + 20% * sel }
+        box { from: cx, cy; size: cw, 26; corner: 13 * rr; stroke: 1.1; color: mint; opacity: 55% * sel }
+        text cl { at: cx + cw / 2, cy + 13; anchor: center; size: 12; weight: 600; color: mix(faint, ink, 0.4 + 0.6 * sel); family: "Space Grotesk" }
+        zone box cz { from: cx, cy; size: cw, 26; corner: 13 * rr; cursor: pointer; label: cl; role: toggle; checked: sel > 0.5 }
+        on press cz { emit sopt(k) }
+    }
+    //  A small switch, on or off (the permissions card).
+    component Tog(tx: number, ty: number, sel: number, tl: text, k: number) {
+        prop hv = 0 ~quick
+        follow hv = kz.hover
+        box { from: tx, ty; size: 26, 22; corner: 7 * rr; color: mix(ink, mint, sel); opacity: 8% + 8% * hv + 62% * sel }
+        text tl { at: tx + 13, ty + 11; anchor: center; size: 12; weight: 700; color: mix(faint, onmint, sel); family: "Space Grotesk" }
+        zone box kz { from: tx, ty; size: 26, 22; corner: 7 * rr; cursor: pointer; label: tl; role: toggle; checked: sel > 0.5 }
+        on press kz { emit perm(k) }
+    }
+
+    // ── the shape of the window ──
+    let W = screen.width
+    let H = screen.height
+    let slim = W < 720
+    let side = if(slim, 60, 212)         // the places: only their pictures when it is narrow
+    let tb = 60                          // the toolbar
+    let sbh = 30                         // the bar under the folder
+    let tabsh = if(tabs.count > 1, 36, 0)        // the strip of tabs, when there is more than one
+    let fsh = if(searching, 38, 0)               // the search's choices
+    let trsh = if(in.trash, 40, 0)               // the trash's two buttons
+    let mx = side + 14
+    let mw = W - side - 28
+    let my = tb + 8 + tabsh + fsh + trsh
+    let hh = if(view == lines, 30, 0)            // the heads of the columns, when it is lines
+    let cy0 = my + hh                            // where the first row is
+    let mh = H - my - sbh - 8
+    let vph = mh - hh                            // how much of the folder is seen at once
+    let tile.w = max(tilebase, floor(mw / 10))   // a window so wide that ten would not fill it gets bigger tiles
+    let tile.h = if(view == grid, tile.w + 4, 38)
+    let isz = tile.w / 128                       // how much bigger than the first size a picture is
+    let ih = round((tile.w - 12) * 0.68)         // the height of a tile's picture
+    let lpr = 10                         // in the lines, a row of the model is a block of this many lines, one under the other (so the model stays small)
+    let row.h = if(view == grid, tile.h, 38 * lpr)
+    let cols.now = if(view == grid, max(floor(mw / tile.w), 1), 1)
+    let content = if(view == grid, total * tile.h, itemsn * 38) + 8
+    let maxsc = max(content - vph, 0)
+    let wide = mw > 620                  // in the lines: with the kind and the date, or only the size
+    let namew = if(wide, mw - 530, mw - 170)
+    let lkx = mw - 470                   // the lines' columns, from the left of a line
+    let ldx = mw - 330
+    let lsx = mw - 16
+    let pill.w = W - side - 126 - 254
+    on change cols.now { emit set_cols(cols.now) }
+    on change view { emit set_cols(cols.now) }
+    on change ready { emit set_cols(cols.now); vh = vph; crumbw = pill.w - 40; tilew = tile.w; roomw = mw - 44 }
+    on change vph { vh = vph }
+    on change mw { roomw = mw - 44 }
+    on change pill.w { crumbw = pill.w - 40 }
+    on change tile.w { tilew = tile.w }
+    on focus { emit focused }
+
+    // ── the glass ──
+    body {
+        color: tint
+        glass: 1
+        lens: false
+        rim: 60%
+        shine: 0, 0
+        opacity: 90% * (1 - ob)
+        show: ob < 0.996
+        box { from: 0, 0; size: W, H; corner: 22 * rr }
+    }
+    body {
+        color: mix(mix(mix(tint, #000000, 0.7), ink, 0.3), tint, pl)
+        rim: 0%
+        border: (2 + 1.2 * uk) * pl, deep
+        opacity: ob
+        show: ob > 0.004
+        box { from: 0, 0; size: W, H; corner: 22 * rr }
+    }
+    //  The places lie on it a little darker, and the folder sits in a hollow of its own.
+    box { from: 0, 0; size: side, H; corner: 22 * rr; color: panel; opacity: 30% }
+    box { from: side - 24, 0; size: 24, H; color: tint; opacity: 0 }
+    box { from: side, 14; size: 1, H - 28; color: ink; opacity: 8% }
+    box { from: mx - 6, my - 4; size: mw + 12, mh + 6; corner: 14 * rr; color: deep; opacity: 24% }
+
+    // ── the places ──
+    //  A row of the list is a place (a folder to go to), a drive (with how full it is, and a way to let it go), or a heading over the ones that follow.
+    group {
+        PFile0(if(slim, 30, 34), 31, 0.42, 0, 0, 1)
+        text "Files" { at: 58, 31; anchor: left center; size: 17; weight: 700; color: ink; show: not slim; family: "Space Grotesk" }
+        column placelist {
+            at: 8, 72
+            view: side - 16, H - 72 - 44
+            step: 38
+            gap: 2
+            for p in places {
+                group {
+                    size: side - 16, if(p.kind == 1, 30, if(p.kind == 2, 44, 38))
+                    //  a heading
+                    text p.name { at: 14, 18; anchor: left center; size: 11; weight: 700; color: faint; opacity: 80%; show: p.kind == 1 and not slim; family: "Space Grotesk" }
+                    box { from: 10, 14; size: side - 36, 1; color: ink; opacity: 10%; show: p.kind == 1 and slim }
+                    group {
+                        show: p.kind != 1
+                        prop hv = 0 ~quick
+                        follow hv = pz.hover
+                        box { from: 0, 0; size: side - 16, if(p.kind == 2, 42, 36); corner: 11 * rr; color: mix(ink, mint, if(p.here, 1, 0)); opacity: 8% * hv + if(p.here, 20%, 0%) }
+                        box { from: 0, 0; size: side - 16, if(p.kind == 2, 42, 36); corner: 11 * rr; stroke: 1.2; color: mint; opacity: if(p.here, 55%, 0%) }
+                        PPlace(22, 18, 0.42, p.pk, 1)
+                        text p.name { at: 46, 18; anchor: left center; size: 13.5; weight: 600; width: side - 70 - if(p.eject, 28, 0); lines: 1; color: ink; show: not slim; family: "Space Grotesk" }
+                        box { from: 46, 34; size: side - 16 - 46 - 14, 3; corner: 2; color: ink; opacity: 14%; show: p.kind == 2 and p.use >= 0 and not slim }
+                        box { from: 46, 34; size: max((side - 16 - 46 - 14) * p.use, 2), 3; corner: 2; color: mix(mint, alert, p.use); opacity: 80%; show: p.kind == 2 and p.use >= 0 and not slim }
+                        zone box pz { from: 0, 0; size: side - 16, if(p.kind == 2, 42, 36); corner: 11 * rr; cursor: pointer; label: "{p.name}"; role: item }
+                        on press pz { emit place(p.at) }
+                        on press right pz { menu.x = pointer.x; menu.y = pointer.y; emit place_menu(p.at) }
+                        on drop pz { emit dropped(-100 - p.at) }
+                        on leave pz { pen = 0 }
+                        on enter pz { pen = 1 }
+                        on hover pz for 80ms { pen = 1 }
+                        // the way to let a drive go
+                        group {
+                            show: p.eject and not slim
+                            prop eh2 = 0 ~quick
+                            follow eh2 = ez.hover
+                            box { from: side - 16 - 30, 5; size: 26, 26; corner: 8 * rr; color: mint; opacity: 20% * eh2 }
+                            PGlyphS34(side - 16 - 17, 18, 0.62, 34, 1)
+                            zone box ez { from: side - 16 - 30, 5; size: 26, 26; corner: 8 * rr; cursor: pointer; label: "Eject {p.name}" }
+                            on press ez { emit place_eject(p.at) }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    //  Under the places: drop a folder there to pin it to them. It lights up while something is being carried over the window.
+    let pin.y = H - 100
+    zone box pinzone { from: 8, pin.y; size: side - 16, 52; corner: 12 * rr; label: "Drop a folder here to pin it"; role: region; active: drag.over > 0.5 }
+    on drop pinzone { emit dropped(-400) }
+    //  (Only while the pointer is over it: a hint that shows whenever anything is carried over the window is a hint where you are not going.)
+    prop pinh = 0 ~quick
+    follow pinh = if(drag.over > 0.5, pinzone.hover, 0)
+    group {
+        show: pinh > 0.01
+        opacity: pinh
+        box { from: 8, pin.y; size: side - 16, 52; corner: 12 * rr; color: tint; opacity: 96% }
+        box { from: 8, pin.y; size: side - 16, 52; corner: 12 * rr; stroke: 1.4; color: mint; opacity: 55% }
+        box { from: 8, pin.y; size: side - 16, 52; corner: 12 * rr; color: mint; opacity: 8% }
+        text "Drop a folder here to pin it" { at: side / 2, pin.y + 26; anchor: center; width: side - 40; lines: 2; align: center; size: 12.5; weight: 600; color: mint; show: not slim; family: "Space Grotesk" }
+        PGlyphS36(side / 2, pin.y + 26, 0.9, 36, 1)
+    }
+
+    // ── the toolbar: back, forward, up, where you are, how it looks ──
+    repeat i in 0..8 {
+        let bx = pick(i, side + 28, side + 66, side + 104, W - 196, W - 158, W - 112, W - 70, W - 28)
+        let on = pick(i, can.back, can.fwd, 1, 1, 1, 1, 1, 1)
+        let sel = pick(i, 0, 0, 0, if(view == grid, 1, 0), if(view == lines, 1, 0), if(hidden, 1, 0), 0, 0)
+        prop bh.$i = 0 ~quick
+        follow bh.$i = bz.$i.hover
+        box { at: bx, 34; size: 34, 34; corner: 10 * rr; color: if(i == 7, alert, mix(ink, mint, sel)); opacity: if(i == 7, 26%, 12%) * bh.$i + 22% * sel }
+        PGlyph(bx, 34, 1, i, bh.$i, if(on > 0.5, 1, 0.3))
+        zone box bz.$i { at: bx, 34; size: 34, 34; corner: 10 * rr; cursor: pointer; active: on > 0.5; label: pick(i, "Back", "Forward", "Up one folder", "Tiles", "Lines", "Hidden files", "New folder", "Close") }
+        on press bz.$i { emit act(pick(i, 12, 13, 11, 31, 32, 14, 1, 50)) }
+        on leave bz.$i { pen = 0 }
+        on enter bz.$i { pen = 1 }
+        on hover bz.$i for 80ms { pen = 1 }
+    }
+    //  Where you are: each folder on the way, to be clicked (and the rest of the room is for typing a path: Ctrl+L, or click there).
+    box { from: side + 126, 16; size: pill.w, 36; corner: 18 * rr; color: ink; opacity: 7% }
+    zone box pillz { from: side + 126, 16; size: pill.w, 36; corner: 18 * rr; cursor: text; label: "Path"; role: region }
+    on press pillz { emit act(60) }
+    //  The search: a magnifier before the buttons on the right; open, the field takes the place of the path (it filters this folder as you type; Enter looks in the folders under it too).
+    prop srh = 0 ~quick
+    follow srh = sbz.hover
+    box { at: W - 234, 34; size: 34, 34; corner: 10 * rr; color: mix(ink, mint, if(searching, 1, 0)); opacity: 12% * srh + 22% * if(searching, 1, 0) }
+    ellipse { at: W - 235, 33; radius: 6.5; stroke: 1.8; color: ink; opacity: 85% + 15% * srh }
+    path { at: W - 235, 33; stroke: 1.8; color: ink; opacity: 85% + 15% * srh; move 4.7, 4.7; line 9, 9 }
+    zone box sbz { at: W - 234, 34; size: 34, 34; corner: 10 * rr; cursor: pointer; label: "Search" }
+    on press sbz { emit act(33) }
+    group {
+        show: searching
+        box { from: side + 126, 16; size: pill.w, 36; corner: 18 * rr; stroke: 1.2; color: mint; opacity: 60% }
+        ellipse { at: side + 150, 33; radius: 5.5; stroke: 1.6; color: mint; opacity: 90% }
+        path { at: side + 150, 33; stroke: 1.6; color: mint; opacity: 90%; move 4, 4; line 7.5, 7.5 }
+        input sq { at: side + 170, 26; width: pill.w - 60 - if(slim, 0, 190); size: 14; weight: 500; color: ink; placeholder: "Search"; show: searching; family: "Space Grotesk" }
+        text "Enter: look in the folders under it" { at: side + 126 + pill.w - 18, 34; anchor: right center; size: 11.5; weight: 500; color: faint; opacity: 80%; show: not slim; family: "Space Grotesk" }
+        on submit sq { emit search_go }
+    }
+    group {
+        show: loc.edit and not searching
+        box { from: side + 126, 16; size: pill.w, 36; corner: 18 * rr; stroke: 1.2; color: mint; opacity: 60% }
+        PGlyphS39(side + 150, 34, 0.6, 39, 1)
+        input locin { at: side + 170, 26; width: pill.w - 60; size: 14; weight: 500; color: ink; placeholder: "Type a folder, ~/ or smb://…"; show: loc.edit; family: "Space Grotesk" }
+        on submit locin { emit loc_go }
+    }
+    for c in crumbs {
+        group {
+            show: not searching and not loc.edit
+            let cx = side + 144 + c.x
+            prop hv = 0 ~quick
+            follow hv = cz.hover
+            box { from: cx - 6, 21; size: c.w + 4, 26; corner: 8 * rr; color: mint; opacity: 16% * hv }
+            text c.name { at: cx, 34; anchor: left center; size: 13.5; weight: if(c.last, 700, 500); color: if(c.last, ink, mix(ink, faint, 0.4)); lines: 1; family: "Space Grotesk" }
+            text "›" { at: cx + c.w + 8, 33; anchor: center; size: 15; color: faint; opacity: 70%; show: not c.last; family: "Space Grotesk" }
+            zone box cz { at: cx + c.w / 2 - 2, 34; size: c.w + 4, 26; corner: 8 * rr; cursor: pointer; label: "{c.name}" }
+            on press cz { emit crumb(c.at) }
+            on drop cz { emit dropped(-200 - c.at) }
+        }
+    }
+
+    // ── the strip under the toolbar: the tabs, the search's choices, the trash's buttons ──
+    group {
+        show: tabs.count > 1
+        for t in tabs {
+            group {
+                let tx = mx + t.x
+                prop hv = 0 ~quick
+                follow hv = tz.hover
+                box { from: tx, tb + 11; size: t.w - 6, 28; corner: 10 * rr; color: mix(ink, mint, if(t.active, 1, 0)); opacity: 7% + 8% * hv + 18% * if(t.active, 1, 0) }
+                box { from: tx, tb + 11; size: t.w - 6, 28; corner: 10 * rr; stroke: 1.1; color: mint; opacity: if(t.active, 50%, 0%) }
+                text t.name { at: tx + 12, tb + 25; anchor: left center; size: 12.5; weight: if(t.active, 700, 500); color: ink; width: t.w - 52; lines: 1; family: "Space Grotesk" }
+                zone box tz { from: tx, tb + 11; size: t.w - 34, 28; corner: 10 * rr; cursor: pointer; label: "{t.name}"; role: tab; selected: t.active }
+                on press tz { emit tab_go(t.at) }
+                on press middle tz { emit tab_close(t.at) }
+                on drop tz { emit dropped(-300 - t.at) }
+                prop xh = 0 ~quick
+                follow xh = xz.hover
+                box { from: tx + t.w - 32, tb + 15; size: 20, 20; corner: 7 * rr; color: ink; opacity: 14% * xh }
+                PGlyphS7(tx + t.w - 22, tb + 25, 0.4, 7, 0.8)
+                zone box xz { from: tx + t.w - 32, tb + 15; size: 20, 20; corner: 7 * rr; cursor: pointer; label: "Close {t.name}" }
+                on press xz { emit tab_close(t.at) }
+            }
+        }
+        prop nh = 0 ~quick
+        follow nh = nz.hover
+        box { from: W - 14 - 30, tb + 11; size: 28, 28; corner: 9 * rr; color: mint; opacity: 16% * nh }
+        PGlyphS32(W - 14 - 16, tb + 25, 0.5, 32, 0.9)
+        zone box nz { from: W - 14 - 30, tb + 11; size: 28, 28; corner: 9 * rr; cursor: pointer; label: "New tab" }
+        on press nz { emit act(56) }
+    }
+    //  What to look for: names or what is written in the files, anything or one kind of thing, in this folder or all the home folder.
+    group {
+        show: searching
+        let sy = tb + 8 + tabsh + 5
+        text "Look in" { at: mx, sy + 13; anchor: left center; size: 11.5; weight: 600; color: faint; show: not slim; family: "Space Grotesk" }
+        Chip(mx + if(slim, 0, 52), sy, 70, "Names", if(so.what == 0, 1, 0), 10)
+        Chip(mx + if(slim, 0, 52) + 76, sy, 84, "Contents", if(so.what == 1, 1, 0), 11)
+        Chip(mx + if(slim, 0, 52) + 176, sy, 44, "All", if(so.kind == 0, 1, 0), 20)
+        Chip(mx + if(slim, 0, 52) + 226, sy, 64, "Folders", if(so.kind == 1, 1, 0), 21)
+        Chip(mx + if(slim, 0, 52) + 296, sy, 70, "Pictures", if(so.kind == 2, 1, 0), 22)
+        Chip(mx + if(slim, 0, 52) + 372, sy, 86, "Documents", if(so.kind == 3, 1, 0), 23)
+        Chip(mx + if(slim, 0, 52) + 464, sy, 62, "Sounds", if(so.kind == 4, 1, 0), 24)
+        Chip(mx + if(slim, 0, 52) + 532, sy, 62, "Videos", if(so.kind == 5, 1, 0), 25)
+        Chip(mx + mw - 160, sy, 90, "This folder", if(so.where == 0, 1, 0), 30)
+        Chip(mx + mw - 64, sy, 64, "Home", if(so.where == 1, 1, 0), 31)
+    }
+    group {
+        show: in.trash
+        let ty = tb + 8 + tabsh + fsh + 3
+        box { from: mx - 6, ty; size: mw + 12, 34; corner: 12 * rr; color: alert; opacity: 10% }
+        text "Things in the Trash stay until you empty it" { at: mx + 10, ty + 17; anchor: left center; size: 12.5; weight: 500; color: ink; opacity: 85%; show: not slim; family: "Space Grotesk" }
+        Btn(mx + mw - 270, ty + 0, 110, "Restore", 0, act, 44)
+        Btn(mx + mw - 152, ty + 0, 140, "Empty Trash", 2, act, 18)
+    }
+
+    // ── the folder: tiles, or lines ──
+    //  It scrolls here and not in the layout, which would carry the list off with the pointer whenever a press began between two tiles; this way a press there starts a box that chooses what it covers.
+    //  The wheel and the bar say where to (`sct`), and the list gets there with a spring (`sc`).
+    prop sc = 0 ~calm
+    follow sc = sct
+    on change floor(sc / row.h) { emit slid(sc) }
+    on change gen { sct = 0; sc: 0 ~0ms }
+    zone box midzone { from: mx, cy0; size: mw, vph; label: "The folder"; role: region }
+    on press midzone { rb.down = true; rb.ax = clamp(pointer.x - mx, 0, mw); rb.ay = clamp(pointer.y - cy0, 0, vph) + sc; rb.bx = rb.ax; rb.by = rb.ay; emit tile(-1) }
+    on drag midzone while rb.down { rb.on = true; rb.bx = clamp(pointer.x - mx, 0, mw); rb.by = clamp(pointer.y - cy0, 0, vph) + sc; emit band }
+    on release midzone { rb.down = false; rb.on = false; emit band_end }
+    every 40ms while rb.on {
+        sct = clamp(sct + clamp(pointer.y - (cy0 + vph - 30), 0, 60) * 0.5 - clamp((cy0 + 30) - pointer.y, 0, 60) * 0.5, 0, maxsc)
+        rb.by = clamp(pointer.y - cy0, 0, vph) + sc
+    }
+    on press right midzone { menu.x = pointer.x; menu.y = pointer.y; emit bg_menu }
+    on scroll midzone { sct = clamp(sct - wheel * 90, 0, maxsc) }
+    on drop midzone { emit dropped(-1) }
+    text empty { at: mx + mw / 2, cy0 + vph / 2 - 10; anchor: center; size: 15; weight: 600; color: faint; show: total == 0 and ready; family: "Space Grotesk" }
+    //  The heads of the columns (in the lines): to be pressed to sort by them, and the little arrow says which way.
+    group {
+        show: view == lines
+        box { from: mx, my; size: mw, hh - 3; corner: 9 * rr; color: ink; opacity: 5% }
+        text "Name" { at: mx + 50, my + 13; anchor: left center; size: 12; weight: 700; color: mix(faint, ink, if(sort == name, 1, 0.3)); family: "Space Grotesk" }
+        text "Kind" { at: mx + lkx, my + 13; anchor: left center; size: 12; weight: 700; color: mix(faint, ink, if(sort == type, 1, 0.3)); show: wide; family: "Space Grotesk" }
+        text "Modified" { at: mx + ldx, my + 13; anchor: left center; size: 12; weight: 700; color: mix(faint, ink, if(sort == date, 1, 0.3)); show: wide; family: "Space Grotesk" }
+        text "Size" { at: mx + lsx, my + 13; anchor: right center; size: 12; weight: 700; color: mix(faint, ink, if(sort == size, 1, 0.3)); family: "Space Grotesk" }
+        //  the arrow: up for the first at the top, down when it is turned round
+        let ax = mx + if(sort == name, 50 + 44, if(sort == type, lkx + 40, if(sort == date, ldx + 68, lsx - 44)))
+        path { at: ax, my + 13; stroke: 1.6; color: mint; opacity: 90%; move -4, if(sortrev, -2.5, 2.5); line 0, if(sortrev, 2.5, -2.5); line 4, if(sortrev, -2.5, 2.5) }
+        zone box hz0 { from: mx, my; size: mw - 470 + 10, hh - 3; corner: 9 * rr; cursor: pointer; label: "Sort by name"; show: wide }
+        zone box hz0b { from: mx, my; size: mw - 110, hh - 3; corner: 9 * rr; cursor: pointer; label: "Sort by name"; show: not wide }
+        zone box hz1 { from: mx + lkx - 4, my; size: 134, hh - 3; corner: 9 * rr; cursor: pointer; label: "Sort by kind"; show: wide }
+        zone box hz2 { from: mx + ldx - 4, my; size: 144, hh - 3; corner: 9 * rr; cursor: pointer; label: "Sort by date"; show: wide }
+        zone box hz3 { from: mx + lsx - 90, my; size: 94, hh - 3; corner: 9 * rr; cursor: pointer; label: "Sort by size" }
+        on press hz0 { emit sort_by(0) }
+        on press hz0b { emit sort_by(0) }
+        on press hz1 { emit sort_by(2) }
+        on press hz2 { emit sort_by(3) }
+        on press hz3 { emit sort_by(1) }
+    }
+    group {
+        clip box { from: mx - 6, cy0 - 4; size: mw + 12, vph + 4; corner: 10 * rr }
+        column grid {
+            at: mx, cy0 - sc
+            gap: 0
+            for r in rows from first {
+                group {
+                    size: mw, row.h
+                    move: 0, first * row.h
+                    for c in r.cells {
+                        group {
+                            move: 0, if(view == grid, 0, mod(c.at, lpr) * tile.h)
+                            let tx = if(view == grid, mod(c.at, cols) * tile.w, 0)
+                            let tw = if(view == grid, tile.w - 8, mw)
+                            prop on = 0 ~quick
+                            follow on = if(c.picked, 1, 0)
+                            prop hv = 0 ~quick
+                            follow hv = t.hover
+                            prop ta = 0 ~calm
+                            follow ta = if(c.has.thumb, 1, 0)
+                            box { from: tx, 0; size: tw, tile.h - 4; corner: 12 * rr; color: mix(ink, mint, on); opacity: 8% * hv + 20% * on }
+                            box { from: tx, 0; size: tw, tile.h - 4; corner: 12 * rr; stroke: 1.2; color: mint; opacity: 65% * on }
+                            box { from: tx, 0; size: tw, tile.h - 4; corner: 12 * rr; stroke: 1.1; color: ink; opacity: 38%; show: c.cur and not c.picked }
+                            box { from: tx, 0; size: tw, tile.h - 4; corner: 12 * rr; stroke: 1.6; color: mint; opacity: 80% * hv * drag.over * if(c.ik == 0, 1, 0); show: c.ik == 0 and drag.over > 0.5 }
+                            // A file's or a folder's picture, for the tiles and the lines alike: there is one copy of it here, not two, since each is long to load.
+                            group {
+                                show: not c.has.thumb
+                                opacity: if(c.hidden, 55%, 100%) * if(c.cut, 50%, 100%) * if(c.broken, 40%, 100%)
+                                PFile(if(view == grid, tx + tw / 2, tx + 24), if(view == grid, ih * 0.58 + 2, 17), if(view == grid, 0.95 * isz, 0.4), c.ik, hv, 1)
+                            }
+                            // A picture shows itself, in a frame, instead of its icon: one frame for the tiles and the lines alike (two are long to load, and only one is ever seen).
+                            group {
+                                show: c.has.thumb
+                                opacity: if(c.hidden, 55%, 100%) * if(c.cut, 50%, 100%)
+                                PThumb(if(view == grid, tx + 6, tx + 8), if(view == grid, 6, 3), if(view == grid, tw - 12, 34), if(view == grid, ih, 26), hv) {
+                                    image c.thumb { at: if(view == grid, tx + 6, tx + 8), if(view == grid, 6, 3); size: if(view == grid, tw - 12, 34), if(view == grid, ih, 26); opacity: ta }
+                                }
+                            }
+                            // Tiles: the picture, and the name under it.
+                            group {
+                                show: view == grid
+                                opacity: if(c.hidden, 55%, 100%) * if(c.cut, 50%, 100%)
+                                text c.name { at: tx + tw / 2, ih + 11; anchor: center top; width: tile.w - 20; lines: 2; align: center; size: 12; weight: 500; color: ink; line_height: 1.2; family: "Space Grotesk" }
+                            }
+                            // Lines: the picture, the name, the kind, the date and the size.
+                            group {
+                                show: view == lines
+                                opacity: if(c.hidden, 55%, 100%) * if(c.cut, 50%, 100%)
+                                text c.name { at: tx + 50, 17; anchor: left center; width: namew; lines: 1; size: 13; weight: 500; color: ink; family: "Space Grotesk" }
+                                text c.kind { at: tx + lkx, 17; anchor: left center; size: 12; color: faint; width: 130; lines: 1; show: wide; family: "Space Grotesk" }
+                                text c.date { at: tx + ldx, 17; anchor: left center; size: 12; color: faint; width: 140; lines: 1; show: wide; family: "Space Grotesk" }
+                                text c.size { at: tx + lsx, 17; anchor: right center; size: 12; color: faint; family: "Space Grotesk" }
+                            }
+                            // What else is true of it: it is a link to somewhere (a ring with an arrow), it is one you starred.
+                            group {
+                                show: c.link
+                                let lbx = if(view == grid, tx + tw / 2 - 22 * isz, tx + 14)
+                                let lby = if(view == grid, ih * 0.58 + 2 + 20 * isz, 26)
+                                ellipse { at: lbx, lby; radius: 7.5; color: tint; opacity: 92% }
+                                ellipse { at: lbx, lby; radius: 7.5; stroke: 1.1; color: mint; opacity: 80% }
+                                path { at: lbx, lby; stroke: 1.5; color: ink; move -2.6, 2.6; line 2.6, -2.6 }
+                                path { at: lbx, lby; stroke: 1.5; color: ink; move -1, -3.2; line 3.2, -3.2; line 3.2, 1 }
+                            }
+                            group {
+                                show: c.star
+                                let stx = if(view == grid, tx + tw / 2 + 24 * isz, tx + tw - 26)
+                                let sty = if(view == grid, 11, 10)
+                                path { at: stx, sty; color: mint; opacity: 95%; move 0, -6.5; line 1.9, -2; line 6.5, -1.9; line 2.9, 1; line 4, 5.8; line 0, 3.2; line -4, 5.8; line -2.9, 1; line -6.5, -1.9; line -1.9, -2; close }
+                            }
+                            zone box t { from: tx, 0; size: tw, tile.h - 4; corner: 12 * rr; carries: "{c.carry}"; carry_icon: "{dragicon}"; label: "{c.name}"; role: item; selected: c.picked }
+                            on press t { emit tile(c.at) }
+                            on release t { emit tile_up(c.at) }
+                            on press right t { menu.x = pointer.x; menu.y = pointer.y; emit tile_menu(c.at) }
+                            on press middle t { emit tile_mid(c.at) }
+                            on drop t { emit dropped(c.at) }
+                            on hover t for 900ms while drag.over > 0.5 and c.ik == 0 { emit spring(c.at) }
+                            on leave t { pen = 0 }
+                            on enter t { pen = 1 }
+                            on hover t for 80ms { pen = 1 }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    //  The box being dragged over the folder to choose what is in it.
+    group {
+        show: rb.on
+        clip box { from: mx - 6, cy0 - 4; size: mw + 12, vph + 4; corner: 10 * rr }
+        box { from: mx + min(rb.ax, rb.bx), cy0 + min(rb.ay, rb.by) - sc; size: abs(rb.bx - rb.ax), abs(rb.by - rb.ay); corner: 4; color: mint; opacity: 14% }
+        box { from: mx + min(rb.ax, rb.bx), cy0 + min(rb.ay, rb.by) - sc; size: abs(rb.bx - rb.ax), abs(rb.by - rb.ay); corner: 4; stroke: 1.2; color: mint; opacity: 75% }
+    }
+    //  The bar at the right: where in the folder, and a grip to drag.
+    let sbt = clamp(vph * vph / max(content, 1), 36, max(vph, 36))
+    let sby = cy0 + (vph - sbt) * sc / max(maxsc, 1)
+    prop sbo = 0 ~calm
+    follow sbo = if(maxsc > 0, 1, 0)
+    box { from: mx + mw + 3, sby; size: 5, sbt; corner: 3; color: ink; opacity: sbo * (16% + 30% * scz.hover); show: sbo > 0.01 }
+    zone box scz { from: mx + mw - 4, cy0; size: 18, vph; active: maxsc > 0; cursor: pointer; label: "Scroll bar" }
+    on press scz { sct = clamp((pointer.y - cy0 - sbt / 2) / max(vph - sbt, 1) * maxsc, 0, maxsc) }
+    on drag scz { sct = clamp((pointer.y - cy0 - sbt / 2) / max(vph - sbt, 1) * maxsc, 0, maxsc) }
+    //  The list lies over the middle... and what is carried over the folder lands in it: the same kind of hint as the pin zone's, for the middle, while the pointer is there.
+    prop midh = 0 ~quick
+    follow midh = if(drag.over > 0.5, midzone.hover, 0)
+    group {
+        show: midh > 0.01
+        opacity: midh
+        box { from: mx - 4, my - 2; size: mw + 8, mh + 2; corner: 14 * rr; stroke: 1.4; color: mint; opacity: 55% }
+        box { from: mx - 4, my - 2; size: mw + 8, mh + 2; corner: 14 * rr; color: mint; opacity: 6% }
+        box { from: mx + mw / 2 - 130, my + mh - 46; size: 260, 30; corner: 15 * rr; color: tint; opacity: 90% }
+        text "Drop to put it in this folder" { at: mx + mw / 2, my + mh - 31; anchor: center; size: 13; weight: 600; color: mint; family: "Space Grotesk" }
+    }
+
+    // ── what is going on, and what can be taken back: two cards that float at the bottom of the folder ──
+    let jy = H - sbh - 8 - 70
+    group {
+        show: job.on
+        let jx = mx + mw / 2 - 220
+        Pane(jx, jy, 440, 62, 16, 0.6)
+        text job.text { at: jx + 18, jy + 20; anchor: left center; size: 13; weight: 600; color: ink; width: 310; lines: 1; family: "Space Grotesk" }
+        box { from: jx + 18, jy + 40; size: 310, 6; corner: 3; color: ink; opacity: 16% }
+        box { from: jx + 18, jy + 40; size: 310 * clamp(job.p, 0, 1), 6; corner: 3; color: mint; opacity: 90%; show: job.p >= 0 }
+        box { from: jx + 18 + 250 * fract(time * 0.9), jy + 40; size: 60, 6; corner: 3; color: mint; opacity: 90%; show: job.p < 0 }
+        Btn(jx + 346, jy + 14, 80, "Cancel", 0, job_cancel, 0)
+    }
+    group {
+        show: undo.on
+        let uy = jy + if(job.on, -62, 18)
+        let ux = mx + mw / 2 - 200
+        Pane(ux, uy, 400, 44, 14, 0.6)
+        text undo.text { at: ux + 18, uy + 22; anchor: left center; size: 13; weight: 600; color: ink; width: 270; lines: 1; family: "Space Grotesk" }
+        Btn(ux + 296, uy + 5, 90, "Undo", 1, act, 47)
+    }
+
+    // ── the bar under the folder ──
+    text status { at: side + 20, H - 17; anchor: left center; size: 12; weight: 500; color: faint; lines: 1; width: W - side - 400; family: "Space Grotesk" }
+    text free { at: W - 204, H - 17; anchor: right center; size: 12; color: faint; family: "Space Grotesk" }
+    prop sh = 0 ~quick
+    follow sh = sorter.hover
+    box { from: W - 136, H - 28; size: 124, 22; corner: 8 * rr; color: mint; opacity: 16% * sh }
+    text sortname { at: W - 74, H - 17; anchor: center; size: 12; weight: 600; color: mix(faint, ink, sh); family: "Space Grotesk" }
+    zone box sorter { from: W - 136, H - 28; size: 124, 22; corner: 8 * rr; cursor: pointer; label: "Sort order" }
+    on press sorter { menu.x = pointer.x; menu.y = pointer.y; emit act(15) }
+    prop zi = 0 ~quick
+    follow zi = zinz.hover
+    prop zo = 0 ~quick
+    follow zo = zoutz.hover
+    box { from: W - 166, H - 28; size: 22, 22; corner: 8 * rr; color: mint; opacity: 16% * zi }
+    box { from: W - 192, H - 28; size: 22, 22; corner: 8 * rr; color: mint; opacity: 16% * zo }
+    PGlyphS32(W - 155, H - 17, 0.5, 32, 0.9)
+    PGlyphS33(W - 181, H - 17, 0.5, 33, 0.9)
+    zone box zinz { from: W - 166, H - 28; size: 22, 22; corner: 8 * rr; cursor: pointer; label: "Bigger" }
+    zone box zoutz { from: W - 192, H - 28; size: 22, 22; corner: 8 * rr; cursor: pointer; label: "Smaller" }
+    on press zinz { emit act(51) }
+    on press zoutz { emit act(52) }
+
+    // ── the name dialog: a new folder, a new name, a place to connect to, or a question ──
+    group {
+        show: ask.on
+        zone box askcatch { from: 0, 0; size: W, H; active: ask.on }
+        on press askcatch { emit act(10) }
+        box { from: 0, 0; size: W, H; corner: 22 * rr; color: deep; opacity: 45% }
+        Pane(W / 2 - 220, H / 2 - 80, 440, 160, 18, 0.96)
+        zone box askbox { from: W / 2 - 220, H / 2 - 80; size: 440, 160 }
+        text ask.title { at: W / 2 - 196, H / 2 - 52; anchor: left center; size: 16; weight: 700; color: ink; family: "Space Grotesk" }
+        box { from: W / 2 - 196, H / 2 - 28; size: 392, 40; corner: 12 * rr; color: deep; opacity: 45%; show: ask.input }
+        box { from: W / 2 - 196, H / 2 - 28; size: 392, 40; corner: 12 * rr; stroke: 1.2; color: mint; opacity: 55%; show: ask.input }
+        input askin { at: W / 2 - 184, H / 2 - 18; width: 368; size: 15; weight: 500; color: ink; placeholder: "Name"; show: ask.input; family: "Space Grotesk" }
+        text ask.msg { at: W / 2 - 196, H / 2 - 30; anchor: left top; size: 14; weight: 500; color: ink; opacity: 85%; width: 392; lines: 3; show: not ask.input; family: "Space Grotesk" }
+        on submit askin { emit ask_ok }
+        Btn(W / 2 + 12, H / 2 + 30, 90, "Cancel", 0, act, 10)
+        Btn(W / 2 + 106, H / 2 + 30, 90, ask.ok, if(ask.danger, 2, 1), ask_ok, 0)
+    }
+    on change ask.gen { focus askin }
+
+    // ── a name that is taken ──
+    group {
+        show: cf.on
+        zone box cfcatch { from: 0, 0; size: W, H; active: cf.on }
+        box { from: 0, 0; size: W, H; corner: 22 * rr; color: deep; opacity: 45% }
+        Pane(W / 2 - 250, H / 2 - 105, 500, 210, 18, 0.96)
+        zone box cfbox { from: W / 2 - 250, H / 2 - 105; size: 500, 210 }
+        text "Already there" { at: W / 2 - 226, H / 2 - 76; anchor: left center; size: 16; weight: 700; color: ink; family: "Space Grotesk" }
+        text cf.msg { at: W / 2 - 226, H / 2 - 52; anchor: left top; size: 13.5; weight: 500; color: ink; opacity: 85%; width: 452; lines: 3; family: "Space Grotesk" }
+        prop cah = 0 ~quick
+        follow cah = cfall.hover
+        box { from: W / 2 - 226, H / 2 + 6; size: 20, 20; corner: 6 * rr; color: mix(ink, mint, if(cf.all, 1, 0)); opacity: 12% + 10% * cah + 60% * if(cf.all, 1, 0) }
+        PGlyphS35(W / 2 - 216, H / 2 + 16, 0.5, 35, if(cf.all, 1, 0))
+        text "Do the same for the others" { at: W / 2 - 196, H / 2 + 16; anchor: left center; size: 13; weight: 500; color: ink; family: "Space Grotesk" }
+        zone box cfall { from: W / 2 - 230, H / 2 + 2; size: 260, 28; corner: 8 * rr; cursor: pointer; label: "Do the same for the others"; role: toggle; checked: cf.all }
+        on press cfall { emit cf_pick(9) }
+        Btn(W / 2 - 226, H / 2 + 54, 92, "Stop", 0, cf_pick, 0)
+        Btn(W / 2 - 126, H / 2 + 54, 92, "Skip", 0, cf_pick, 1)
+        Btn(W / 2 - 26, H / 2 + 54, 120, "Keep both", 0, cf_pick, 2)
+        Btn(W / 2 + 102, H / 2 + 54, 124, "Replace", 2, cf_pick, 3)
+    }
+
+    // ── a list to choose from ──
+    let pkh = 100 + picks.count * 42
+    group {
+        show: pick.on
+        zone box pkcatch { from: 0, 0; size: W, H; active: pick.on }
+        on press pkcatch { emit act(10) }
+        box { from: 0, 0; size: W, H; corner: 22 * rr; color: deep; opacity: 45% }
+        Pane(W / 2 - 220, H / 2 - pkh / 2, 440, pkh, 18, 0.96)
+        zone box pkbox { from: W / 2 - 220, H / 2 - pkh / 2; size: 440, pkh }
+        text pick.title { at: W / 2 - 196, H / 2 - pkh / 2 + 30; anchor: left center; size: 16; weight: 700; color: ink; family: "Space Grotesk" }
+        column pkc {
+            at: W / 2 - 206, H / 2 - pkh / 2 + 56
+            gap: 0
+            for k in picks {
+                group {
+                    size: 412, 42
+                    prop kh = 0 ~quick
+                    follow kh = kz.hover
+                    box { from: 0, 1; size: 412, 40; corner: 11 * rr; color: mint; opacity: 16% * kh }
+                    box { from: 0, 1; size: 412, 40; corner: 11 * rr; stroke: 1; color: mint; opacity: 40% * kh }
+                    PGlyphSP(24, 21, 0.78, k.ic, 1)
+                    text k.label { at: 50, if(k.hs, 14, 21); anchor: left center; size: 13.5; weight: 600; color: ink; width: 346; lines: 1; family: "Space Grotesk" }
+                    text k.sub { at: 50, 30; anchor: left center; size: 11; weight: 500; color: faint; width: 346; lines: 1; show: k.hs; family: "Space Grotesk" }
+                    zone box kz { from: 0, 1; size: 412, 40; corner: 11 * rr; cursor: pointer; label: "{k.label}" }
+                    on press kz { emit pick_ok(k.at) }
+                }
+            }
+        }
+        Btn(W / 2 + 106, H / 2 + pkh / 2 - 50, 90, "Cancel", 0, act, 10)
+    }
+
+    // ── the right-click menu ──
+    //  It springs out of the pointer the way the shell's drawers do (a little smaller and faint to start), in the same glass, with each action's pencil picture, the key that does it on the right,
+    //  a line between groups, and the one that puts something away in the alert colour. The logic fills `menuitems` and says how tall it is (`menu.h`).
+    prop mo = 0 ~calm
+    follow mo = if(menu.on, 1, 0)
+    let mpx = clamp(menu.x, 8, W - 284)
+    let mpy = clamp(menu.y, 8, H - menu.h - 8)
+    let mrh = 32                        // how tall a line is (the logic adds them up with this number)
+    group {
+        show: mo > 0.01
+        pivot: mpx, mpy
+        scale: 0.9 + 0.1 * mo
+        opacity: mo
+        zone box menucatch { from: 0, 0; size: W, H; active: menu.on }
+        on press menucatch { rb.down = false; rb.on = false; emit menu_close }
+        on press right menucatch { emit menu_close }
+        Pane(mpx, mpy, 268, menu.h, 16, 0.6)
+        column menuc {
+            at: mpx + 7, mpy + 7
+            gap: 0
+            for m in menuitems {
+                group {
+                    size: 254, mrh + if(m.sep, 9, 0)
+                    prop mh = 0 ~quick
+                    follow mh = mz.hover
+                    box { from: 14, 4; size: 226, 1; color: ink; opacity: 10%; show: m.sep }
+                    box { from: 0, if(m.sep, 10, 1); size: 254, mrh - 2; corner: 11 * rr; color: if(m.danger, alert, mint); opacity: 18% * mh }
+                    box { from: 0, if(m.sep, 10, 1); size: 254, mrh - 2; corner: 11 * rr; stroke: 1; color: if(m.danger, alert, mint); opacity: 40% * mh }
+                    PGlyphSM(25, if(m.sep, 10, 1) + mrh / 2 - 1, 0.74, m.ic, if(m.on, 1, 0.35))
+                    text m.label { at: 50, if(m.sep, 10, 1) + mrh / 2 - 1; anchor: left center; size: 13.5; weight: 600; color: if(m.danger, mix(ink, alert, 0.55 + 0.45 * mh), ink); opacity: if(m.on, 100%, 38%); family: "Space Grotesk" }
+                    text m.key { at: 242, if(m.sep, 10, 1) + mrh / 2 - 1; anchor: right center; size: 11.5; weight: 500; color: faint; opacity: if(m.on, 75%, 30%); show: not m.chk; family: "Space Grotesk" }
+                    group { show: m.chk; PGlyphS35(230, if(m.sep, 10, 1) + mrh / 2 - 1, 0.55, 35, 1) }
+                    zone box mz { from: 0, if(m.sep, 10, 1); size: 254, mrh - 2; corner: 11 * rr; cursor: pointer; active: m.on and menu.on; label: "{m.label}" }
+                    on press mz { emit act(m.k) }
+                    on leave mz { pen = 0 }
+                    on enter mz { pen = 1 }
+                    on hover mz for 80ms { pen = 1 }
+                }
+            }
+        }
+    }
+
+    // ── the properties card ──
+    //  What a file is: its picture, its name and what it is, then a line for each thing about it (the logic fills `pinfo` and `prows` and says how tall the card is, `prop.h`). A line can have a button.
+    prop po = 0 ~calm
+    follow po = if(prop.on, 1, 0)
+    let ppx = W / 2 - 236
+    let ppy = H / 2 - prop.h / 2
+    group {
+        show: po > 0.01
+        pivot: W / 2, H / 2
+        scale: 0.94 + 0.06 * po
+        opacity: po
+        zone box propcatch { from: 0, 0; size: W, H; active: prop.on }
+        on press propcatch { emit act(10) }
+        box { from: 0, 0; size: W, H; corner: 22 * rr; color: deep; opacity: 45% }
+        Pane(ppx, ppy, 472, prop.h, 20, 0.6)
+        zone box propbox { from: ppx, ppy; size: 472, prop.h }
+        for i in pinfo {
+            group {
+                group { show: not i.has.thumb; PFile(ppx + 52, ppy + 52, 1, i.ik, 0, 1) }
+                group {
+                    show: i.has.thumb
+                    body {
+                        color: deep
+                        rim: 14%
+                        box { from: ppx + 20, ppy + 22; size: 64, 48; corner: 8 * rr }
+                    }
+                    clip box { from: ppx + 20, ppy + 22; size: 64, 48; corner: 8 * rr }
+                    image i.thumb { at: ppx + 20, ppy + 22; size: 64, 48 }
+                }
+                text i.name { at: ppx + 102, ppy + 38; anchor: left center; size: 18; weight: 700; color: ink; width: 346; lines: 1; family: "Space Grotesk" }
+                text i.sub { at: ppx + 102, ppy + 62; anchor: left center; size: 12.5; weight: 500; color: faint; width: 346; lines: 1; family: "Space Grotesk" }
+            }
+        }
+        box { from: ppx + 22, ppy + 90; size: 428, 1; color: ink; opacity: 10% }
+        column prc {
+            at: ppx + 22, ppy + 100
+            gap: 0
+            for r in prows {
+                group {
+                    size: 428, 30
+                    text r.label { at: 2, 15; anchor: left center; size: 12.5; weight: 500; color: faint; family: "Space Grotesk" }
+                    text r.value { at: 112, 15; anchor: left center; size: 13; weight: 500; color: ink; width: if(r.hb, 214, 316); lines: 1; show: not r.tog; family: "Space Grotesk" }
+                    // A row with a switch: Hidden (a name that starts with a dot).
+                    group {
+                        show: r.tog
+                        prop tg = 0 ~quick
+                        follow tg = if(r.on, 1, 0)
+                        box { from: 112, 3; size: 46, 24; corner: 12 * rr; color: mix(ink, mint, tg); opacity: 20% + 60% * tg }
+                        ellipse { at: 124 + 22 * tg, 15; radius: 8.5; color: mix(ink, onmint, 0.5 * tg) }
+                        text r.value { at: 170, 15; anchor: left center; size: 13; weight: 500; color: ink; width: 258; lines: 1; family: "Space Grotesk" }
+                        zone box tz { from: 108, 1; size: 150, 28; corner: 10 * rr; cursor: pointer; active: r.tog and prop.on; label: "{r.label}" }
+                        on press tz { emit prop_act(r.k) }
+                    }
+                    // A row with a button: change the program that opens it, count its checksum.
+                    group {
+                        show: r.hb
+                        prop bh3 = 0 ~quick
+                        follow bh3 = bz3.hover
+                        box { from: 330, 2; size: 98, 26; corner: 9 * rr; color: mint; opacity: 14% + 16% * bh3 }
+                        text r.btn { at: 379, 15; anchor: center; size: 12; weight: 600; color: ink; family: "Space Grotesk" }
+                        zone box bz3 { from: 330, 2; size: 98, 26; corner: 9 * rr; cursor: pointer; active: r.hb and prop.on; label: "{r.btn}" }
+                        on press bz3 { emit prop_act(r.k) }
+                    }
+                }
+            }
+        }
+        //  Who may do what: nine little switches (the numbers in the logic go from the owner's reading, 256, to everybody's executing, 1).
+        group {
+            show: pm.on
+            let pmy = ppy + prop.h - 54 - 98
+            text "Permissions" { at: ppx + 24, pmy + 11; anchor: left center; size: 12.5; weight: 500; color: faint; family: "Space Grotesk" }
+            text "Owner" { at: ppx + 112, pmy + 11; anchor: left center; size: 12.5; weight: 500; color: ink; family: "Space Grotesk" }
+            text "Group" { at: ppx + 112, pmy + 39; anchor: left center; size: 12.5; weight: 500; color: ink; family: "Space Grotesk" }
+            text "Others" { at: ppx + 112, pmy + 67; anchor: left center; size: 12.5; weight: 500; color: ink; family: "Space Grotesk" }
+            repeat i in 0..9 {
+                Tog(ppx + 190 + mod(i, 3) * 34, pmy + floor(i / 3) * 28, mod(floor(pm.bits / pick(i, 256, 128, 64, 32, 16, 8, 4, 2, 1)), 2), pick(mod(i, 3), "r", "w", "x"), 8 - i)
+            }
+        }
+        Btn(ppx + 472 - 22 - 96, ppy + prop.h - 54, 96, "Close", 1, act, 10)
+    }
+
+    // ── a look at a file ──
+    prop pvo = 0 ~calm
+    follow pvo = if(pv.on, 1, 0)
+    let pvw = min(W - 60, 800)
+    let pvh = min(H - 40, 640)
+    let pvx = (W - pvw) / 2
+    let pvy = (H - pvh) / 2
+    let pvfit = min(pvw - 40, (pvh - 130) * 1.5625)
+    image pvimg = from pv.path, 1000, 640
+    group {
+        show: pvo > 0.01
+        pivot: W / 2, H / 2
+        scale: 0.96 + 0.04 * pvo
+        opacity: pvo
+        zone box pvcatch { from: 0, 0; size: W, H; active: pv.on }
+        on press pvcatch { emit act(10) }
+        box { from: 0, 0; size: W, H; corner: 22 * rr; color: deep; opacity: 55% }
+        Pane(pvx, pvy, pvw, pvh, 20, 0.7)
+        zone box pvbox { from: pvx, pvy; size: pvw, pvh }
+        text pv.name { at: pvx + 24, pvy + 28; anchor: left center; size: 16; weight: 700; color: ink; width: pvw - 120; lines: 1; family: "Space Grotesk" }
+        text pv.sub { at: pvx + 24, pvy + 50; anchor: left center; size: 12; weight: 500; color: faint; width: pvw - 120; lines: 1; family: "Space Grotesk" }
+        text "{pv.n} / {pv.of}" { at: pvx + pvw - 24, pvy + 28; anchor: right center; size: 12; weight: 600; color: faint; show: pv.of > 1; family: "Space Grotesk" }
+        group {
+            show: pv.kind == 1
+            image pvimg { at: pvx + (pvw - pvfit) / 2, pvy + 68; size: pvfit, pvfit / 1.5625 }
+        }
+        text pv.text { at: pvx + 26, pvy + 76; anchor: left top; size: 12.5; weight: 500; color: ink; width: pvw - 52; lines: 26; line_height: 1.25; show: pv.kind == 2; family: "monospace" }
+        text "← →  other files      Enter  open      Space or Esc  close" { at: pvx + pvw / 2, pvy + pvh - 24; anchor: center; size: 11.5; weight: 500; color: faint; show: not slim; family: "Space Grotesk" }
+    }
+}

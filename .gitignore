@@ -15,3 +15,6 @@ cmder/config/*
 !cmder/bin/*
 tst/\"cmder/bin/WakeMeOnLan.cfg\" 
 conf_backups/.glzr/zebar/tmp*
+
+# Owner-private desktop recovery snapshots (credentials/runtime pairing data).
+conf_backups/.private/

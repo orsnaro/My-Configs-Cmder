@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
-# Start the permanent Vitreus scene with a complete Wayland/Hyprland session
-# environment, even when systemd did not inherit it from the compositor.
+# Start the permanent Vitreus scene with the desktop's session and GPU environment.
 set -euo pipefail
 
 export HOME="${HOME:-/home/narol}"
@@ -33,11 +32,20 @@ if [ -z "${HYPRLAND_INSTANCE_SIGNATURE:-}" ]; then
     done
 fi
 
-# The compositor renders on the AMD RX 6600 (renderD129). Pleamar talks Vulkan and
-# otherwise enumerates the Intel iGPU (renderD128) first: pin it to RADV so every
-# shell frame stays on the same GPU as the screen it is composited onto.
+# Keep the same AMD adapter as the compositor and the original managed launcher.
 export DRI_PRIME=1
 export VK_DRIVER_FILES=/usr/share/vulkan/icd.d/radeon_icd.json
+
+shell="$HOME/.config/pleamar/shells/vitreus"
+data="$XDG_DATA_HOME/pleamar/vitreus"
+# Font names are fixed when Pleamar starts; prepare the saved selection before exec.
+"$shell/bin/vitreus-themes" "$data" 2>/dev/null || true
+fonts=$(env -u FONTCONFIG_FILE "$shell/bin/vitreus-fonts" "$data" 2>/dev/null) || fonts=""
+if [ -n "$fonts" ] && [ -r "$fonts" ]; then
+    export FONTCONFIG_FILE="$fonts"
+else
+    unset FONTCONFIG_FILE
+fi
 
 exec "$HOME/.local/bin/pleamar" \
     --scene "$HOME/.config/pleamar/shells/vitreus/vitreus.plm" \

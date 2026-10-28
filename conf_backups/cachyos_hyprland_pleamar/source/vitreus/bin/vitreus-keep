@@ -12,9 +12,25 @@
 #   - To stop a scene for good, stop its keeper first (pkill -f "vitreus-keep SCENE"), then the scene.
 set -u
 P="${1:?usage: vitreus-keep SCENE.plm [LOG]}"
-L="${2:-/dev/null}"
-export PATH="$HOME/.local/bin:$PATH"
 name=$(basename "$P" .plm)
+data="${XDG_DATA_HOME:-$HOME/.local/share}/pleamar/vitreus"
+L="${2:-$data/$name.log}"
+# A fresh install has no log folder yet: without it the redirects below fail and the scene never starts, silently.
+mkdir -p "$(dirname "$L")" 2> /dev/null
+export PATH="$HOME/.local/bin:$PATH"
+# Companion scenes launched by Hyprland do not inherit pleamar-start's GPU environment.
+# This installed desktop uses RADV; other desktops/scenes and explicit driver choices stay untouched.
+case "$P" in
+    "${XDG_CONFIG_HOME:-$HOME/.config}/pleamar/shells/vitreus/"*)
+        if [ -n "${HYPRLAND_INSTANCE_SIGNATURE:-}" ] && [ -r /usr/share/vulkan/icd.d/radeon_icd.json ]; then
+            if [ -z "${VK_ICD_FILENAMES:-}" ]; then
+                DRI_PRIME="${DRI_PRIME-1}"
+                VK_DRIVER_FILES="${VK_DRIVER_FILES-/usr/share/vulkan/icd.d/radeon_icd.json}"
+                export DRI_PRIME VK_DRIVER_FILES
+            fi
+        fi
+        ;;
+esac
 run="${XDG_RUNTIME_DIR:-/tmp}"
 say() { printf 'vitreus-keep · %s · %s\n' "$name" "$*" >> "$L"; }
 running() { pgrep -f "^pleamar --scene $P( |\$)" > /dev/null; }
@@ -28,7 +44,6 @@ alive() {
     socat -u OPEN:/dev/null "UNIX-CONNECT:$s" > /dev/null 2>&1
 }
 
-data="${XDG_DATA_HOME:-$HOME/.local/share}/pleamar/vitreus"
 # With the bar down the left (the Frame), the room round the windows is Hyprland's own gaps, not the layer's reserved zone, so it stays
 # after the shell has gone. When the keeper stops for good, it gives the gaps back (gaps-undo.lua, written by the shell) and takes them
 # out of vitreus_colors.lua, so a `hyprctl reload` does not bring them back either. Not between starts: the shell sets them again itself.
@@ -56,6 +71,8 @@ while :; do
     # The shell's typeface (Settings > Theme): Glass is Space Grotesk and Retro a VCR face, unless the Theme page's font picker chose another. pleamar's
     # font names are fixed in the scenes, so another typeface is shown by starting it with a font setup where "Space Grotesk" is that one (bin/vitreus-fonts
     # makes it). Any trouble there and the shell keeps its own font.
+    # The themes (themes/*.toml and the person's own folder) first: the font setup and the shell both read the list it leaves in the data folder.
+    "$(dirname "$(readlink -f "$0")")/vitreus-themes" "$data" 2>/dev/null || true
     fonts=$("$(dirname "$(readlink -f "$0")")/vitreus-fonts" "$data" 2>/dev/null) || fonts=""
     if [ -n "$fonts" ]; then
         FONTCONFIG_FILE="$fonts" pleamar --scene "$P" --no-hud >> "$L" 2>&1 9>&-

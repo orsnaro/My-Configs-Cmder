@@ -44,17 +44,20 @@ local function capture()
         .. 'if [ -z "$SNAP_NO_CAPTURE" ]; then grim -c -l 0 ${o:+-o "$o"} "$d/shot.png" || exit 1; fi; '
         .. 'echo "$d"; od -An -tu1 -j16 -N8 "$d/shot.png" | awk "{ print \\$1 * 16777216 + \\$2 * 65536 + \\$3 * 256 + \\$4, \\$5 * 16777216 + \\$6 * 65536 + \\$7 * 256 + \\$8 }"; '
         .. [[l="${SNAP_LOOK-}"; [ -n "$l" ] || l=$(sed -n 's/.*"look": *\([0-9]*\).*/\1/p' "${XDG_DATA_HOME:-$HOME/.local/share}/pleamar/vitreus/iris.json" 2> /dev/null | head -n 1); echo "$l"; echo "${SNAP_FULL:-0}"; ]]
-        -- The windows on that monitor's workspace (and its special one, if it is out), as "x y w h" in the monitor's own plane, bottom first:
+        -- The windows on that monitor's workspace (and its special one, if it is out), as "x y w h" in the monitor's own plane, bottom first (on niri `hyprctl` is
+-- pleamar-wm/hyprctl-niri, which works their places out from niri's columns, so it is the same jq as Hyprland's):
         -- tiled under floating, floating under fullscreen, the special workspace over the rest, and among equals the one used last on top.
         -- SNAP_WINDOWS ("x y w h;x y w h") gives them instead, to try it without Hyprland.
         .. [[if [ -n "${SNAP_WINDOWS-}" ]; then printf '%s\n' "$SNAP_WINDOWS" | tr ';' '\n'; ]]
-        .. [[elif [ -z "$HYPRLAND_INSTANCE_SIGNATURE" ] && [ -n "$o" ]; then awk -v o="$o" '$1=="monitor" && $2==o { mx=$5; my=$6; w=$3; h=$4; f=1 } $1=="window" { n++; X[n]=$2; Y[n]=$3; W[n]=$4; H[n]=$5 } ]]
+        .. [[elif [ -z "$HYPRLAND_INSTANCE_SIGNATURE" ] && [ -z "$NIRI_SOCKET" ] && [ -n "$o" ]; then awk -v o="$o" '$1=="monitor" && $2==o { mx=$5; my=$6; w=$3; h=$4; f=1 } $1=="window" { n++; X[n]=$2; Y[n]=$3; W[n]=$4; H[n]=$5 } ]]
         .. [[END { if (f) for (k=1; k<=n; k++) { x=X[k]-mx; y=Y[k]-my; if (x < w && y < h && x+W[k] > 0 && y+H[k] > 0) print x, y, W[k], H[k] } }' "${PLEAMAR_SOCKETS:-/nonexistent}/desktop" 2>/dev/null; ]]
         .. [[elif [ -n "$o" ]; then jq -rn --arg o "$o" --argjson m "$(hyprctl -j monitors)" --argjson c "$(hyprctl -j clients)" ]]
         .. [['($m[] | select(.name == $o)) as $mon | [$c[] | select(.mapped and (.hidden | not) and .monitor == $mon.id ]]
         .. [[and (.workspace.id == $mon.activeWorkspace.id or .workspace.id == $mon.specialWorkspace.id))] ]]
         .. [[| sort_by([(.workspace.id == $mon.specialWorkspace.id), (.fullscreen > 0), .floating, -.focusHistoryID]) ]]
         .. [[| .[] | "\(.at[0] - $mon.x) \(.at[1] - $mon.y) \(.size[0]) \(.size[1])"' 2> /dev/null; fi]]
+        -- (the end of the script has to say 0: under pleamar-wm without its `desktop` file the awk above ends with 2, which was taken for a failed capture)
+        .. "; true"
         -- The picture and the clickable window map are taken; now the target strip may lend its reserve (1 DP-1, 2 HDMI-A-2, 3 DP-2).
         .. [[; t=0; case "$o" in DP-1) t=1;; HDMI-A-2) t=2;; DP-2) t=3;; esac; pleamar --say vitreus "fact snap_target $t" "fact snap_open true" > /dev/null 2>&1 || true]]
     run("sh", { "-c", script }, function(out, code)

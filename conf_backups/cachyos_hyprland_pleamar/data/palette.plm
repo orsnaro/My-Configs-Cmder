@@ -2,16 +2,16 @@
 //  `let`s only: the lock screen imports this. (The shell's own scene takes its colours as facts: palette-live.plm.)
 
 library Palette {
-    let ink    = #f0eeea
-    let faint  = #ebf1f1
-    let mint   = #e9efb6
-    let mintlo = #dce68c
-    let minthi = #fbfcf2
+    let ink    = #fdf9f2
+    let faint  = #f9f8f6
+    let mint   = #f3fcfa
+    let mintlo = #caf2e9
+    let minthi = #f3fcfa
     let onmint = #10161a
-    let tint   = #294748
-    let panel  = #365d5f
-    let deep   = #172728
-    let off    = #556c6c
-    let alert  = #dabda8
-    let wink   = #f0eeea
+    let tint   = #524f32
+    let panel  = #686440
+    let deep   = #2d2b1b
+    let off    = #78745c
+    let alert  = #e5d2c1
+    let wink   = #fdf9f2
 }

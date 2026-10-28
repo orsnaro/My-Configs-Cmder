@@ -1,101 +1,70 @@
-# Restore the current Pleamar configuration overlay
+# Recover the current Pleamar setup
 
-This procedure restores **files**, not packages or a full desktop image. The
-existing CachyOS/ML4W base, local command helpers, fonts, wallpapers, Pleamar
-0.4.18, Fish, and Oh My Posh must already be installed. See `versions/` and
-`README.md`. No runtime-changing command was executed to verify this guide.
+## Normal return from QS: one launcher action
 
-## 1. Inspect first
+Choose **Switch to Pleamar** in the application launcher. It stops the complete
+QS/Walker/Elephant stack and activates the full saved Pleamar setup. Settings
+remain installed while QS is active, so normal switching does not restore old
+files over newer preferences. **Switch to QS** performs the reverse operation.
+The last successfully selected stack is used at the next Hyprland login.
 
-Run from this export directory:
+## Restore damaged/missing files from the exact local snapshot
 
-```bash
-bash RESTORE.sh --dry-run
-```
-
-The default without arguments is also a dry-run. It verifies the manifest's full
-inventory, hashes, sizes, modes, safe source aliases, and destination boundaries,
-then previews merges and helper links. It does not even create a backup directory.
-Unknown/conflicting options are rejected. A mismatch is a stop: do not bypass
-verification without investigating it.
-Public files record Git-checkout-portable 0644/0755 permissions. Validation checks
-the executable bit Git actually stores, accepting a tighter checkout umask; the
-merge preserves that checkout's file permissions. Original live modes are retained
-as audit metadata in the manifest's `source_mappings`; they are not reapplied over
-unrelated private data.
-
-This snapshot assumes the usual `$HOME/.config` and `$HOME/.local` layout; it is
-not a migration to alternate XDG roots. Existing config-directory symlinks may
-point elsewhere **inside HOME** and are preserved. Destinations resolving outside
-HOME, wrong file/directory types, or a backup directory overlapping restored data
-are rejected. Review the machine-specific monitor names, GPU wrapper, paths,
-slideshow setting, and command dependencies before continuing.
-
-## 2. Back up and merge
-
-Close editors and save your work. Prefer applying from a TTY while the graphical
-session is logged out, so background settings writers cannot race the restore.
-Do not run as another user or with sudo.
+From `/shared_across_des/repos/My-Configs-Cmder`:
 
 ```bash
-bash RESTORE.sh --apply
+tools/recover-pleamar.sh                    # verify/preview; no writes
+tools/recover-pleamar.sh --apply            # checkpoint original bytes, restore
 ```
 
-Before modifying configuration, it creates an owner-private checkpoint at:
+The Git-ignored pointer `conf_backups/.private/pleamar-current.json` selects the
+verified private/public snapshot pair. An explicit `--snapshot <bundle>` can
+select an older retained snapshot. `--home` is for deliberate alternate-home
+recovery/fixtures; this machine's absolute paths and installed dependencies
+must be reviewed before using it for another account.
 
-```
-~/.local/state/pleamar-restore/<UTC timestamp>-<PID>/
-  original/                original files/directory links, without dereferencing
-  payload/                 resolved original content, including linked config roots
-  previously-absent.txt    destination roots/helper names absent before this restore
-```
+Prefer a TTY with the graphical session logged out before `--apply`: running
+applications can write settings during restoration. Corruption/missing
+prerequisites fail before destination writes. Changed destination bytes are
+captured in an owner-private checkpoint before replacement; a later failure
+retains that checkpoint and prints its location. This is not an atomic
+whole-desktop rollback transaction.
 
-If creating/copying that backup fails, the script exits before any config write.
-Keep the printed `BACKUP=` path. After backup it merges the selected config and
-settings directories, copies the wrapper/unit, and recreates executable scene
-helper links in `~/.local/bin/`. It does **not** use `--delete`, copy private
-histories from this repo, chmod unrelated files, install packages, or patch Kitty.
+Recovery restores files, permissions and link metadata, **not running
+processes**. After recovery, log in or choose **Switch to Pleamar**. Its normal
+activation path reloads the user manager/configuration and applies the
+selected stack's service policy. Never bypass the lock-state check by killing
+lock processes manually.
 
-A later I/O failure can leave a partial restore: this is not a transaction or an
-automatic rollback engine. The full pre-write checkpoint remains available for
-manual recovery. Inspect original links and resolved payloads together before
-recovering files, and review `previously-absent.txt` rather than deleting anything
-automatically. Private checkpoints may contain private existing runtime data;
-never commit them to this public repository.
+The private snapshot includes the exact Pleamar runtime, compiled inhibitor,
+all scene settings, wallpapers, private integrations and new switch hooks.
+Build caches, source Git history and recreatable virtual environments are not
+included. The existing OS/ML4W packages/fonts/icons remain prerequisites.
 
-## 3. Activate only when ready
+**The private snapshot is local-only and contains secrets. Keep the entire
+`conf_backups/.private/` directory for exact recovery, but never publish it.**
 
-The restore script never calls `systemctl`, `hyprctl`, `pkill`, package managers,
-upstream installers, or network downloads. It does not enable the static unit,
-stop competing shells, or change the persistent SwayNC mask.
+## Curated public overlay only
 
-For the existing machine, the next Hyprland login runs the copied startup hook
-and starts `pleamar.service`; the separate lock scene is started by that same
-hook. Opening a new Fish/Kitty session loads the restored prompt/config.
-After copying a unit, the user manager may first need an explicit reload. These
-are **manual activation commands**, not part of `RESTORE.sh`:
+From this export directory:
 
 ```bash
-systemctl --user daemon-reload
-# Only after checking competing shell/notification ownership and saving work:
-systemctl --user restart pleamar.service
-hyprctl reload
+bash RESTORE.sh --dry-run                  # default; full manifest validation
+bash RESTORE.sh --apply                    # private checkpoint, merge files only
 ```
 
-Reloading Hyprland does not rerun its startup hook; a new login is the normal way
-to start all separate startup scenes. Never stop a lock scene during an active
-lock. This refresh did not exercise live activation, display-Keep, or lock/unlock.
+The overlay assumes the installed base and Pleamar 0.4.31. It does not include
+the binary or private notes/keys/history. It preserves config-root aliases
+inside HOME and unrelated destination files; unsafe destinations are rejected.
+It does not install packages, patch Kitty, alter services, or reload Hyprland.
 
-## 4. Unload / return to ML4W
+Then, from the repository root, recreate the coordinator links/app entries:
 
-For a temporary stop, `systemctl --user stop pleamar.service` stops the managed
-main shell, **not** the independent lock/widget scenes or next-login autostart.
-It does not restore the old desktop. Do not use upstream `install.sh --stop`:
-that command was built for an unmanaged trial, not this systemd cutover.
+```bash
+python3 tools/install_desktop_stack.py --apply
+```
 
-For a permanent return to the pre-Pleamar desktop, read `RESTORE.md` and inspect
-its exact local rollback pair and migration tools first. They are not shipped in
-this PR. The historical guide requires an authorization preview/journal before
-changed live files can be replaced. Neither upstream `--uninstall` nor the legacy
-ML4W `RESTORE.sh` is a safe substitute: they do not reverse this profile's managed
-service/autostart/notification ownership completely.
+The installer is also file-only, idempotent and pre-write-checkpointed. Choose
+the desired launcher after reviewing the restored machine-specific settings.
+Do not run the captured upstream installer/uninstaller or the legacy ML4W
+restore script for this workflow.

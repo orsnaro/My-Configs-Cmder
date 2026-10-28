@@ -1,0 +1,11 @@
+{
+  "//": "Your own commands in Files' right-click menu. Copy this to ~/.config/pleamar/vitreus-files-actions.json and change it.",
+  "//on": "on: files, folders, both, or background (a click on the empty part of a folder). patterns: shell patterns for files (optional). many: true to offer it with several picked (optional).",
+  "//command": "In the command, %f is the item (the folder, for background), %F every one picked, %d the folder in view, %n the item's name: each comes quoted. It runs through sh, in the folder in view.",
+  "actions": [
+    { "name": "Open in Kitty here", "on": "background", "command": "kitty --directory %d" },
+    { "name": "Shrink to 1600 px", "group": "Images", "on": "files", "patterns": ["*.jpg", "*.jpeg", "*.png", "*.webp"], "many": true,
+      "command": "for f in %F; do magick \"$f\" -resize '1600x1600>' \"${f%.*}-small.jpg\"; done" },
+    { "name": "Send with AirPipe", "group": "AirPipe", "on": "files", "command": "kitty --hold airpipe send %f" }
+  ]
+}

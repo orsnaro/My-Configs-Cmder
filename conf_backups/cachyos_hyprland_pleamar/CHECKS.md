@@ -1,4 +1,103 @@
-# Verification record — 2026-10-25–26 refresh
+# Verification record — 2026-10-28
+
+Installation was file-only. Subsequent user-authorized live testing switched
+both complete stacks; no individual widget was disabled. A real lock/unlock
+and reboot/login cycle were not performed.
+
+## Live acceptance
+
+- Both launcher entries visibly confirmed in Pleamar after a main-service-only
+  app-index refresh; six lock/widget scene PIDs were unchanged by that refresh.
+- Pleamar -> QS: main bar, two secondary bars, dock and Walker inspected in
+  private screenshots. Elephant/SwayNC/polkit present; zero Pleamar members.
+- Initial reverse switch exposed SwayNC restarting through D-Bus between stop
+  and mask. It safely rolled back. Regression tests reproduced the race;
+  mask-before-stop fixed it. Readiness also verifies notification ownership.
+- Fixed native desktop-entry roundtrips passed both ways; repeated activation
+  retained core PIDs. Nine shared daemons survived. Final state: Pleamar ready,
+  seven scenes, no QS/Walker/Elephant/Waybar, SwayNC inactive/masked, notification
+  name owned by Pleamar. All 15 saved preferences compare equal.
+- All seven active scenes passed `pleamar --check`. Five built-in theme TOMLs
+  plus template parsed; Space Grotesk and Material Symbols font assets present.
+  Current appearance inspected on three monitors; themes were not cycled.
+- Existing SwayNC CSS logs include invalid GTK properties and unterminated
+  blocks (active `themes/modern/notifications.css`, `control_center.css`). Kept out of
+  the stack-switch fix rather than silently redesigning the notification theme.
+- Raw screenshots, process logs and resource JSON stay Git-ignored/private.
+
+Short, uncontrolled ~3-second usage samples (not benchmarks):
+
+| | QS active | Full Pleamar active |
+| --- | ---: | ---: |
+| System CPU | 1.17% | 6.22% |
+| System RAM used | 2.834 GiB | 4.009 GiB |
+| System AMD GPU busy | 5% | 12% |
+| System AMD VRAM used | ~511 MiB | ~1242 MiB |
+| Stack CPU (one-core scale; 12 logical CPUs) | ~0% | 59.07% (~4.92% of total capacity) |
+| Stack RAM PSS / RSS | 655.48 / 953.68 MiB | 1615.01 / 2001.63 MiB |
+| Stack VRAM allocations | 193.83 MiB | 873.73 MiB |
+| Stack sampled GPU gfx engines | ~0% | 0.97% |
+
+Swap used was zero in both samples. RSS includes shared pages; PSS distributes
+them. Per-client VRAM is allocation accounting, not guaranteed exclusive savings.
+The user requested full Pleamar preservation, not widget/resource optimization.
+
+| Current check | Result |
+| --- | --- |
+| Exported scene Python suite | 205 passed |
+| Exported standalone scene Lua | 24 correctly parameterized invocations passed |
+| Exported Hyprland Lua fixtures | 8 passed |
+| Existing Hyprland shell/isolated QML harnesses | 8 passed; no live window input |
+| Desktop switch/installer/recovery fixtures | 39 passed |
+| Existing migration suite, including restore-cache regressions | 51 passed |
+| Public overlay restore fixtures | 13 passed |
+| Retained Kitty suite | 51 passed; 1 existing focused-GUI test skipped |
+| Exported shell syntax | 57 entrypoints/harnesses passed |
+| Retained Fish syntax / prompt formats | 14 Fish checks / 5 JSON/TOML parses passed |
+| `pleamar --check vitreus.plm` | accepted: 45980 properties, 136507 instructions, 14768 rules, 8887 zones |
+| Actual live-config copy: installer apply in temporary home | 23 updates; 18 syntax/launcher checks passed; repeat installation had zero changes |
+| Actual Hyprland entrypoint with fully stubbed modules | both mode-specific binding/style branches passed; shared geometry stays loaded |
+| Actual private snapshot: restore in temporary home | 1099 actions; zero remaining byte/mode/alias differences, including current terminal config |
+| Exact runtime / private TV pairing key | executable bit / 0600 permissions verified after isolated restore |
+| Actual public overlay: preview and apply in temporary home | manifest verified; preview wrote nothing; apply restored the shared mode helper |
+| Installed `.desktop` validation | both launcher files accepted |
+| Installed state (read-only) | selected `pleamar`, ready `true`; installer preview reports zero pending changes |
+| Unrelated backup preservation | all 523 original file/link fingerprints unchanged |
+| Private storage | parent/root 0700; all 937 payload files 0600; private directory Git-ignored |
+| Public credential-pattern audit | no private-key/OAuth-token/known credential-prefix matches; private file types excluded |
+
+Tests ran with Python `-B` and explicit suite directories. Lua VRR/tray runners
+require named cases; they were run with every case from their Python callers.
+The manual-wallpaper loader test used the explicit slideshow-off fixture below;
+the user's actual slideshow preference was not changed. The isolated QML
+workspace harness starts only its headless fixture, not the QS desktop stack.
+
+Inline review added RED→GREEN regressions ensuring ordinary applications
+launched by Walker are not treated as disposable background children, and
+Python/Bash/Lua mode readers agree on whitespace and invalid multiline input.
+The coordinator also refuses to stop its own managed-service cgroup; native
+Vitreus application launches were checked to dispatch through Hyprland.
+
+The current local snapshot is selected by
+`../.private/pleamar-current.json`; the verified final bundle contains 1065
+private/excluded manifest entries (7 cache/build exclusions). The earlier
+pre-install snapshot and original curated-export archive remain available.
+Normal mode switching never restores these snapshots over newer preferences.
+
+Independent task review was attempted but the configured free-model quota was
+reached. Review continued inline; no other model was selected. Reboot,
+lock/unlock and focused scratch Kitty input remain untested.
+ShellCheck is not installed. Do not present fixture checks as live acceptance.
+
+`git diff --cached --check` reports seven pre-existing whitespace notices in
+newly captured upstream/source files (trailing spaces/blank EOF lines). These
+bytes are deliberately retained for exact backup parity. Authored switcher,
+installer, recovery and test code passes the whitespace check; this is not a
+claim that the complete copied-source diff is whitespace-clean.
+
+## Historical verification record — 2026-10-25–26 refresh
+
+Everything below describes the older export, not new October 28 results.
 
 Run commands from this export unless otherwise specified. No real restore,
 desktop switch, lock/unlock, or focused-window input was run on the live home.

@@ -373,11 +373,24 @@ end
 for rule_name, target in pairs({
     ["focus-code"] = 2, ["focus-kate"] = 2,
     ["focus-browser"] = 3, ["focus-term"] = 7,
-    ["focus-notes"] = 4,
+    ["focus-notes"] = 4, ["focus-spotify"] = 8,
 }) do
     local rule = assert(rules[rule_name], "missing focus rule " .. rule_name)
     assert(rule.workspace == tostring(target), "wrong focus target for " .. rule_name)
 end
+local spotify = rules["focus-spotify"]
+assert(spotify.match.class == "^brave-open\\.spotify\\.com__-Default$",
+    "Spotify focus must match only its Brave app, not normal Brave or Discord windows")
+local silent_spotify_position, focus_spotify_position
+for position, name in ipairs(rule_order) do
+    if name == "glaze-app-brave-open.spotify.com__-Default" then
+        silent_spotify_position = position
+    elseif name == "focus-spotify" then
+        focus_spotify_position = position
+    end
+end
+assert(silent_spotify_position < focus_spotify_position,
+    "Spotify focus must override its silent workspace routing")
 assert(workspaces["1"] ~= nil, "main workspace must exist with nothing routed to it")
 assert(rules["glaze-app-brave-browser"].match.class == "^brave-browser$",
     "hyphenated app IDs must match without a regex escape")
@@ -394,9 +407,20 @@ assert(quake_apps.match.workspace == "special:quake",
 assert(quake_apps.match.class == "negative:^quake-kitty$",
     "the Quake terminal must stay in its special workspace")
 assert(quake_apps.workspace == "m+0 silent",
-    "Quake-time launches must use the current normal workspace without taking focus")
-assert(rule_order[#rule_order] == quake_apps.name,
-    "the Quake launch rule must override earlier app workspace destinations")
+    "unassigned Quake-time launches must use the current normal workspace without taking focus")
+assert(quake_apps.float == nil and quake_apps.size == nil and quake_apps.move == nil,
+    "escaping Quake must preserve the app's tiled/floating mode and geometry")
+local quake_fallback_position
+for position, name in ipairs(rule_order) do
+    if name == quake_apps.name then quake_fallback_position = position end
+end
+for position, name in ipairs(rule_order) do
+    local rule = rules[name]
+    if rule.workspace ~= nil and name ~= quake_apps.name then
+        assert(quake_fallback_position < position,
+            "Quake fallback must not override app workspace rule " .. name)
+    end
+end
 assert(configured.input and configured.input.special_fallthrough == true,
     "floating Quake must allow focusing normal windows beneath it")
 assert(configured.binds and configured.binds.hide_special_on_workspace_change == false,

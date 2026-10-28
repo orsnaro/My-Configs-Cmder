@@ -75,12 +75,13 @@ refresh_monitors()
 every(5000, function() refresh_monitors() end)
 
 -- ── the stickers ──
-local slots = {}      -- slot (0..15) -> { t = words, x = left, y = top, c = paper }
+pcall(math.randomseed, os.time())
+local slots = {}      -- slot (0..15) -> { t = words, x = left, y = top, c = paper, f = the folded corner (0 bottom left, 1 bottom right, 2 top left, 3 top right) }
 local function slot_list()
     local list = {}
     for k = 0, MAX - 1 do
         local s = slots[k]
-        if s then list[#list + 1] = { slot = k, t = s.t, x = s.x, y = s.y, c = s.c } end
+        if s then list[#list + 1] = { slot = k, t = s.t, x = s.x, y = s.y, c = s.c, f = s.f } end
     end
     return list
 end
@@ -92,6 +93,7 @@ local function publish(k)
     fact["gx" .. k] = s and s.x or 0
     fact["gy" .. k] = s and s.y or 0
     fact["c" .. k] = s and s.c or 0
+    fact["f" .. k] = s and s.f or 0
     text["t" .. k] = s and s.t or ""
 end
 do
@@ -100,7 +102,7 @@ do
         for _, it in ipairs(saved.items) do
             local k = math.floor(tonumber(it.slot) or -1)
             if k >= 0 and k < MAX and type(it.t) == "string" then
-                slots[k] = { t = it.t, x = tonumber(it.x) or 80, y = tonumber(it.y) or 80, c = math.floor(tonumber(it.c) or 0) % 6 }
+                slots[k] = { t = it.t, x = tonumber(it.x) or 80, y = tonumber(it.y) or 80, c = math.floor(tonumber(it.c) or 0) % 6, f = math.floor(tonumber(it.f) or math.random(0, 3)) % 4 }
             end
         end
     else
@@ -110,7 +112,7 @@ do
             local k = 0
             for _, it in ipairs(old.items) do
                 if type(it) == "table" and type(it.t) == "string" and k < MAX then
-                    slots[k] = { t = it.t, x = 60 + k * 36, y = 120 + k * 28, c = k % 6 }
+                    slots[k] = { t = it.t, x = 60 + k * 36, y = 120 + k * 28, c = k % 6, f = math.random(0, 3) }
                     k = k + 1
                 end
             end
@@ -135,8 +137,10 @@ on("note_new", function()
         x = math.max(m.x, math.min(m.x + m.w - W, x))
         y = math.max(m.y, math.min(m.y + m.h - H, y))
         made = made + 1
-        slots[free] = { t = "", x = math.floor(x + 0.5), y = math.floor(y + 0.5), c = (made - 1) % 6 }
+        slots[free] = { t = "", x = math.floor(x + 0.5), y = math.floor(y + 0.5), c = (made - 1) % 6, f = math.random(0, 3) }
         publish(free)
+        fact.ztop = (tonumber(fact.ztop) or 0) + 1       -- a new one comes to the front
+        fact["sz" .. free] = fact.ztop
         save_stickers()
         if not cfg.shown then cfg.shown = true; fact.shown = true; save_cfg() end
         fact.nx, fact.ny = -1, -1
@@ -212,3 +216,13 @@ local function ask_look()
 end
 ask_look()
 after(4000, ask_look)
+
+-- Whether the session is pleamar-wm (Vitreus knows: `wm_pwm`): there the surface has to be on top to hear the mouse; elsewhere it stays under the windows. Asked when this starts, and
+-- again a few seconds in, for when Vitreus starts after this does.
+local function ask_pwm()
+    run("pleamar", { "--say", "vitreus", "get wm_pwm" }, function(out, code)
+        if code == 0 and out then fact.pwm = out:match("true") ~= nil end
+    end)
+end
+ask_pwm()
+after(4000, ask_pwm)

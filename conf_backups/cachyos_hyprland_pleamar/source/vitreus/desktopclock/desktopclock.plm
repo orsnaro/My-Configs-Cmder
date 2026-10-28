@@ -11,7 +11,7 @@ import "clockface_styled.plm"
 //  Its settings are kept in desktopclock.json, in ~/.local/share/pleamar/desktopclock (see desktopclock.luau).
 
 scene DesktopClock {
-    surface { size: full, full; anchor: top_left; margin: 0; level: bottom; screens: each; reserve: -1 }
+    surface { size: full, full; anchor: top_left; margin: 0; level: bottom, top while edit; screens: each; reserve: -1 }
 
     permissions { services: "clock", "files", "files.write"; run: "pleamar", "hyprctl" }
 
@@ -204,7 +204,9 @@ scene DesktopClock {
     let tgh = (max(pick(tmon, m0h, m1h, m2h, m3h), 600) - gt - gb) / gny
     let tfw = clamp(ceil(2 * hw / tgw), 1, gnx)
     let tfh = clamp(ceil(2 * hh / tgh), 1, gny)
-    zone box edz { from: zx, zy; size: 2 * (hw + pad), 2 * (hh + pad); corner: 16; cursor: pointer; active: edit and (here > 0.5 or dragging); label: "Move clock" }
+    //  While it is dragged the zone is the whole surface: the card moves a cell at a time away from where the press was, and a pointer that leaves the zone's input region
+    //  ends the drag (the compositor lets go of it), after about one cell.
+    zone box edz { from: if(dragging, 0, zx), if(dragging, 0, zy); size: if(dragging, scw, 2 * (hw + pad)), if(dragging, sch, 2 * (hh + pad)); corner: 16; cursor: pointer; active: edit and (here > 0.5 or dragging); label: "Move clock" }
     on press edz { pcx = mox + gl + (ex0 + fw / 2) * gw; pcy = moy + gt + (ey0 + fh / 2) * gh; dcx = pcx; dcy = pcy; zpx = fx; zpy = fy; dragging = true }
     on drag edz { dcx = pcx + drag.dx; dcy = pcy + drag.dy }
     on change dcx { mon = tmon; gx = clamp(floor((dcx - tox - gl) / tgw - tfw / 2 + 0.5), 0, gnx - tfw); gy = clamp(floor((dcy - toy - gt) / tgh - tfh / 2 + 0.5), 0, gny - tfh) }

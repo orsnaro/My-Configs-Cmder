@@ -68,6 +68,23 @@ class LiteBarTests(unittest.TestCase):
                 self.assertEqual(float(found.group(1)), size)
         self.assertNotIn('text "{w.id}"', source, 'side workspaces no longer carry number labels')
 
+    def test_only_the_right_strip_shrinks_workspace_glyphs(self) -> None:
+        source = LITE.read_text()
+        glyph = re.search(r'text w\.icon \{[^\n]*size:\s*([\d.]+)', source)
+        assert glyph is not None
+        for side, want in ((0, 14.5), (1, 17)):
+            with self.subTest(side=side):
+                g = Lite(1440 if side == 0 else 1366)
+                g.values['side'] = side
+                self.assertAlmostEqual(float(glyph.group(1)) * g.value('ls.icon_scale'), want)
+        self.assertRegex(
+            source,
+            r'group \{\s*pivot: tile_x, 18\s*scale: ls\.icon_scale\s*text w\.icon',
+            'only the glyph is scaled, not the background or touch zone')
+        self.assertIn('ls.tile, w.slot < ls.fit, side, pick: go)', source)
+        for surface, side in (('lite_dp1', 0), ('lite_hdmi', 1)):
+            self.assertIn(f'LiteStrip({surface}.width, {side})', source)
+
     def test_background_uses_the_shared_material_component(self) -> None:
         source = LITE.read_text()
         self.assertIn('LiteMaterial(ls.w, ls.h)', source)
@@ -278,12 +295,12 @@ class LiteBarTests(unittest.TestCase):
         self.assertTrue('include "pages/lite_bars.plm"' in SCENE.read_text(),
                         'the main scene must include the new part exactly once')
 
-    def test_controller_publishes_the_lite_flags_from_the_running_file(self) -> None:
-        logic = (ROOT / 'logic/bar_monitors.luau').read_text()
-        self.assertTrue(re.search(r'fact\.bar_lite_dp1\s*=\s*on ~= "all" and on ~= "DP-1"', logic),
-                        'bar_lite_dp1 must follow the running surface, never a pending choice')
-        self.assertTrue(re.search(r'fact\.bar_lite_hdmi\s*=\s*on ~= "all" and on ~= "HDMI-A-2"', logic),
-                        'bar_lite_hdmi must follow the running surface, never a pending choice')
+    def test_controller_publishes_the_lite_flags_from_the_active_monitor_set(self) -> None:
+        import subprocess
+        result = subprocess.run(['lua5.4', 'tests/bar_monitors.lua'], cwd=ROOT,
+                                text=True, capture_output=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertIn('managed-migration and lite-flag contracts: PASS', result.stdout)
 
 
 if __name__ == '__main__':

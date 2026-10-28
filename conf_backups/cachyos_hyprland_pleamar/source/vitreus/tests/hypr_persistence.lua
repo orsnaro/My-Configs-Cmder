@@ -31,6 +31,10 @@ local function sandbox()
         fn({ data = "/data/vitreus", conf = "/config/pleamar/shells/vitreus" })
     end
     env.iris_cfg = { look = 0 }
+    env.vtheme = {
+        current = function() return { id = "glass", round = 22 } end,
+        round_of = function() return 22 end,
+    }
     env.iris_fx = { CASSETTE = 1, UWU = 2, CYBER = 3 }
     env.glass = {}
     env.run = function(command, args, cb)

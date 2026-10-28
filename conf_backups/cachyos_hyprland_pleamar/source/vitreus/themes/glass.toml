@@ -1,0 +1,7 @@
+# Glass: liquid glass in the colours Iris reads off the wallpaper. It has no [palette]
+# of its own (the wallpaper is the palette), so this file only carries its font and corners.
+name = "Glass"
+tagline = "Wallpaper"
+base = "glass"
+font = "Space Grotesk"
+corner_rounding = 22

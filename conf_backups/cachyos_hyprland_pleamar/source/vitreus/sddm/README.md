@@ -1,0 +1,44 @@
+# The Vitreus login screen (SDDM)
+
+The lock screen's look, as a theme for SDDM's greeter: your picture stays sharp, and the clock, the date, your face and a glass password bar rise one after another.
+A typed character is a random shape (the password itself is never drawn). A wrong password shakes the bar. Sleep, restart and power off are held for a second.
+The machine's name is in a corner, and the session badge under the password bar shows the session that will start (click it to go through the list: Hyprland, pleamar-wm...); if there are several users, click the face to change.
+
+An SDDM greeter is a Qt program and a theme is QML, so this one is not a pleamar scene (the lock screen is). It needs `sddm` and `qt6-declarative`, which SDDM already depends on.
+
+## Trying it first (no sudo, nothing installed)
+
+```sh
+./sddm/build-assets.sh /tmp/vitreus-greeter && QT_QPA_PLATFORM=xcb sddm-greeter-qt6 --test-mode --theme /tmp/vitreus-greeter
+```
+
+It opens the login screen in a window (`QT_QPA_PLATFORM=xcb` runs it through XWayland: without `qt6-wayland` it cannot open natively). Entering a password does not log in. If you see SDDM's blue default screen with
+"Main.qml: No such file", the `--theme` path does not hold the theme: it only is in `/usr/share/sddm/themes/vitreus` after `install.sh`.
+
+## Installing
+
+Vitreus's own `install.sh` offers this (it asks, since it needs sudo; `--no-login` skips it), or run it yourself (the main installer also offers to update an older copy):
+
+```sh
+./sddm/install.sh                       # the picture is assets/greeter.jpeg, in the repository
+./sddm/install.sh ~/Pictures/other.jpg  # or another
+```
+
+It makes the pictures (sharp and blurred, 1920 x 1080) with ImageMagick, copies the theme to `/usr/share/sddm/themes/vitreus` with Space Grotesk, your `~/.face` and the colours of
+Vitreus's palette, and makes it the theme in use. If SDDM has no theme set, that is done at once; **if it already has one it asks first** (`--set` or `--yes` says yes, `--no-set` only installs it, and with no keyboard to answer on it leaves the old one). The file that said which theme is in use is kept as `<file>.before-vitreus` in `/usr/local/share/vitreus-greeter/` (never in `/etc/sddm.conf.d/`: SDDM reads every file there, whatever its name). It asks for your password, as it uses `sudo`. The picture is `assets/greeter.jpeg` in the repository, always installed with the theme unless you give another.
+SDDM reads its settings only when it starts, so the new login screen shows after a reboot (or `sudo systemctl restart sddm` from a TTY, which ends your session); logging out is not enough. To see the installed one without logging out: `QT_QPA_PLATFORM=xcb sddm-greeter-qt6 --test-mode --theme /usr/share/sddm/themes/vitreus`.
+
+(In test mode there is no user list, no session list and no power buttons, so the name, the corners and the power pill are left out.)
+
+`./sddm/install.sh --remove` puts the theme that was in use back. If a login screen ever does not appear, Ctrl+Alt+F3 is a text login, and the same command works from there.
+
+## Changing it
+
+`vitreus/theme.conf` holds the colours and the 12 or 24 hour clock (installing writes the colours from `palette.plm`: install again after the palette changes). `vitreus/Main.qml` is the whole screen.
+`./sddm/build-assets.sh OUTDIR [IMAGE]` makes a theme folder without installing it, to try with `--test-mode`.
+
+## Your picture
+
+The greeter cannot read your home folder, so your face (`~/.face`) is kept in `/usr/local/share/vitreus-greeter`, a folder `install.sh` makes and gives to you. Changing your picture in Vitreus's Settings copies it there (no sudo);
+for any other way of changing `~/.face`, run `./sddm/refresh-avatar.sh`.
+

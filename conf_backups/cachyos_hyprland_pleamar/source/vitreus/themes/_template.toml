@@ -1,0 +1,48 @@
+# ── A Vitreus theme ──────────────────────────────────────────────────────────────────────
+# Copy this file to  ~/.config/pleamar/vitreus-themes/<anything>.toml  and change it.
+# It appears as a card on Settings > Theme (open the page again if it was already open);
+# a file here that starts with "_" is ignored, and so is this one where it stands.
+#
+# A theme is colours, a typeface and the roundness of the window corners. It wears one of
+# Vitreus's four shapes (`base`); it cannot add shapes of its own.
+#
+# Colours are "#rrggbb" (or "#rgb"). Leave a colour out and it takes Vitreus's stock one.
+# A mistake in this file is shown in a line under the cards and the card is left out; the
+# other themes are not affected.
+
+# The name on the card (up to ~12 characters fit) and the small line under it.
+name    = "My theme"
+tagline = "Mine"
+
+# The shape of the shell. "glass" is the plain one; "retro" (moulded plastic), "uwu" (cat
+# ears, stars, hearts) and "cyber" (neon HUD marks, digital rain) add their own drawing on
+# top of your colours. Anything else is read as "glass".
+base = "glass"
+
+# The typeface of the shell, by its family name (`fc-list : family` lists what is
+# installed). The font picker on the Theme page can still choose another.
+font = "Space Grotesk"
+
+# How round the window corners are in Hyprland and pleamar-wm, in pixels (0 to 30).
+corner_rounding = 22
+
+# Dark glass wants a light `ink` and a dark `tint`; a light theme (a bright `tint`) wants a
+# dark `ink`, like Retro and UwU, which also get a dark `wink` for the writing on the desktop
+# without you doing anything.
+[palette]
+ink    = "#f5f7f5"   # text, icons and light overlays
+faint  = "#c2c7cc"   # secondary text
+mint   = "#9ed6bd"   # the accent: switches, sliders, the highlight
+mintlo = "#6cbc9c"   # the accent, deeper: the start of a slider's fill
+minthi = "#dcf8ec"   # the accent, lighter: the end of it
+onmint = "#10161a"   # text and marks that sit on the accent
+tint   = "#1b2127"   # the glass: the colour of the panels and the bar
+panel  = "#161a1f"   # a solid card, such as a dropdown
+deep   = "#0b0e11"   # sunken tracks and shadows (outlines and brackets on retro/uwu/cyber)
+off    = "#3a4048"   # a switch that is off, a muted fill
+alert  = "#ef4444"   # urgent, close, muted
+
+# The five stripes of the card on the Theme page, left to right. Optional: without it they
+# are  tint, panel, ink, mint, alert  from the palette above.
+[card]
+colors = ["#1b2127", "#161a1f", "#f5f7f5", "#9ed6bd", "#ef4444"]

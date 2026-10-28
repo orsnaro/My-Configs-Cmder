@@ -26,8 +26,8 @@ for command in python3 rsync cp; do
     command -v "$command" >/dev/null || { echo "Required command missing: $command" >&2; exit 1; }
 done
 
-dir_sources=(config/hypr config/kitty config/fish config/ohmyposh config/ml4w/settings source/vitreus data)
-dir_destinations=(.config/hypr .config/kitty .config/fish .config/ohmyposh .config/ml4w/settings .config/pleamar/shells/vitreus .local/share/pleamar/vitreus)
+dir_sources=(config/hypr config/kitty config/fish config/ohmyposh config/ml4w source/vitreus data)
+dir_destinations=(.config/hypr .config/kitty .config/fish .config/ohmyposh .config/ml4w .config/pleamar/shells/vitreus .local/share/pleamar/vitreus)
 file_sources=(systemd/pleamar.service bin/pleamar-start)
 file_destinations=(.config/systemd/user/pleamar.service .local/bin/pleamar-start)
 helper_names=()
