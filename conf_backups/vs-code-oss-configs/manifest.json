@@ -1,5 +1,5 @@
 {
-  "snapshotUtc": "2026-10-26T20:46:49+00:00",
+  "snapshotUtc": "2026-10-28T19:00:26.006743+00:00",
   "application": "Code - OSS",
   "applicationVersion": "1.138.0",
   "platform": "linux",
@@ -9,13 +9,13 @@
     {
       "name": "Default",
       "installedExtensions": 75,
-      "disabledInstalledExtensions": 29,
+      "disabledInstalledExtensions": 32,
       "disabledNotInstalled": 5
     },
     {
       "name": "C# .NET",
       "installedExtensions": 13,
-      "disabledInstalledExtensions": 0,
+      "disabledInstalledExtensions": 1,
       "disabledNotInstalled": 0
     }
   ],

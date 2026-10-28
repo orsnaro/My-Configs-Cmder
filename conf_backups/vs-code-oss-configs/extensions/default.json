@@ -35,7 +35,7 @@
     },
     {
       "id": "charliermarsh.ruff",
-      "version": "2026.90.0",
+      "version": "2026.92.0",
       "disabled": false,
       "preRelease": false,
       "pinned": false,
@@ -403,7 +403,7 @@
     },
     {
       "id": "pkief.material-icon-theme",
-      "version": "5.39.0",
+      "version": "5.40.0",
       "disabled": false,
       "preRelease": false,
       "pinned": false,
@@ -516,7 +516,7 @@
     {
       "id": "vscjava.vscode-java-dependency",
       "version": "0.27.7",
-      "disabled": false,
+      "disabled": true,
       "preRelease": false,
       "pinned": false,
       "applicationScoped": false
@@ -524,7 +524,7 @@
     {
       "id": "vscjava.vscode-java-pack",
       "version": "0.31.2",
-      "disabled": false,
+      "disabled": true,
       "preRelease": false,
       "pinned": false,
       "applicationScoped": false
@@ -540,7 +540,7 @@
     {
       "id": "vscjava.vscode-maven",
       "version": "0.45.3",
-      "disabled": false,
+      "disabled": true,
       "preRelease": false,
       "pinned": false,
       "applicationScoped": false
@@ -634,7 +634,10 @@
     "vizards.deepseek-v4-for-copilot",
     "vscjava.vscode-gradle",
     "vscjava.vscode-java-debug",
+    "vscjava.vscode-java-dependency",
+    "vscjava.vscode-java-pack",
     "vscjava.vscode-java-test",
+    "vscjava.vscode-maven",
     "xaver.clang-format",
     "xdebug.php-debug",
     "zignd.html-css-class-completion"

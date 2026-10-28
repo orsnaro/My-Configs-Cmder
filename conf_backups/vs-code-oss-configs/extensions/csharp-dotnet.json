@@ -19,7 +19,7 @@
     },
     {
       "id": "jakubkozera.csharp-dev-tools",
-      "version": "1.15.5",
+      "version": "1.15.6",
       "disabled": false,
       "preRelease": false,
       "pinned": false,
@@ -44,7 +44,7 @@
     {
       "id": "jomblebee.jomblebee-csharp-solution-explorer",
       "version": "0.16.0",
-      "disabled": false,
+      "disabled": true,
       "preRelease": false,
       "pinned": false,
       "applicationScoped": false
@@ -107,7 +107,8 @@
     }
   ],
   "disabledExtensions": [
-    "github.copilot-chat"
+    "github.copilot-chat",
+    "jomblebee.jomblebee-csharp-solution-explorer"
   ],
   "disabledBuiltinExtensions": [
     "github.copilot-chat"

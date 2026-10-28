@@ -11,7 +11,7 @@
   "editor.cursorStyle": "line",
   "editor.tabSize": 3,
   "editor.detectIndentation": true,
-  "editor.renderWhitespace": "all",
+  "editor.renderWhitespace": "none",
   "chat.disableAIFeatures": true,
 
   "editor.inlineSuggest.enabled": true,
@@ -27,6 +27,9 @@
   "editor.tabCompletion": "on",
   "workbench.colorCustomizations": {
     "editorRuler.foreground": "#9a9a9a",
+    "errorLens.errorBackground": "#fff0",
+    "errorLens.errorMessageBackground": "#fff0",
+    "errorLens.errorForeground": "#fff0",
     "errorLens.warningBackground": "#fff0",
     "errorLens.warningMessageBackground": "#fff0",
     "errorLens.warningForeground": "#fff0",
@@ -58,7 +61,7 @@
   "files.autoSave": "onFocusChange",
   "files.hotExit": "onExitAndWindowClose",
   "files.exclude": {
-    "**/bin": true,
+    "**/bin": false,
     "**/obj": true,
     "**/.git": true
   },
@@ -78,6 +81,7 @@
   "csharp-dev-tools.solutionViewer.folderColorTheme": "default",
   "csharp-dev-tools.semanticColors.theme": "off",
   "git.openRepositoryInParentFolders": "always",
+  "git.blame.editorDecoration.enabled": true,
   "csharp-dev-tools.solutionViewer.folderIconVariant": "Tabler",
   "csharp-dev-tools.solutionViewer.folderThickness": "small",
   "files.trimTrailingWhitespace": true,

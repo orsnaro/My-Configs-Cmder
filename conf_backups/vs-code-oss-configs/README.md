@@ -1,7 +1,7 @@
 # VS Code OSS configuration backup
 
 Privacy-filtered snapshot of **Default** and **C# .NET** on Linux, taken on
-2026-10-26 from Code - OSS 1.138.0. This is a manual backup, not automatic sync.
+2026-10-28 from Code - OSS 1.138.0. This is a manual backup, not automatic sync.
 
 ## Contents
 
@@ -18,9 +18,9 @@ Privacy-filtered snapshot of **Default** and **C# .NET** on Linux, taken on
 | `manifest.json` | Snapshot metadata, counts, and exclusions |
 | `SHA256SUMS` | Checksums for every other file in this directory |
 
-Default has **75 installed extensions**, of which **29 are disabled**. C# .NET
-has **13 installed extensions**, none disabled. The disabled built-in Copilot
-Chat state is also preserved for both profiles. Five disabled-but-uninstalled
+Default has **75 installed extensions**, of which **32 are disabled**. C# .NET
+has **13 installed extensions**, of which **1 is disabled**. Disabled built-in
+extension states are also preserved for both profiles. Five disabled-but-uninstalled
 IDs in Default are recorded separately; importing must not install them merely
 because a stale disabled-state record exists.
 
@@ -134,10 +134,13 @@ Verified: source fidelity except documented redactions; nested profile resource
 schema; extension versions/enablement; file allowlist; privacy-pattern checks;
 checksums; and the original checkout's unchanged files. Profile imports are
 **not GUI-tested**; extension downloads/availability were not exercised.
+The refreshed keyboard resources use the native numeric `Platform.Linux` value
+(`2`), correcting the previous string metadata without changing shortcuts.
 
 - [Profiles and import workflow](https://code.visualstudio.com/docs/configure/profiles)
 - [Microsoft Settings Sync](https://code.visualstudio.com/docs/configure/settings-sync)
 - [Profile resource interfaces](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/services/userDataProfile/common/userDataProfile.ts)
+- [Keyboard resource schema](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/services/userDataProfile/browser/keybindingsResource.ts)
 - [Extension export/import behavior](https://github.com/microsoft/vscode/blob/main/src/vs/workbench/services/userDataProfile/browser/extensionsResource.ts)
 - [VSCodium](https://vscodium.com/)
 - [VSCodium extension registry and compatibility](https://github.com/VSCodium/vscodium/blob/master/docs/extensions.md)
