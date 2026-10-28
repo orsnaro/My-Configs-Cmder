@@ -1,6 +1,6 @@
 cweijan.vscode-database-client2@9.0.2
 enkia.tokyo-night@1.1.2
-jakubkozera.csharp-dev-tools@1.15.5
+jakubkozera.csharp-dev-tools@1.15.6
 jakubkozera.ms-sql-manager@0.20.5
 jdinhlife.gruvbox@1.29.1
 jomblebee.jomblebee-csharp-solution-explorer@0.16.0
