@@ -1,4 +1,4 @@
 -- Written by Vitreus (the wallpaper's colours, Iris, or greys with Iris off; and the room round the windows with the bar on the left);
 -- edits here are overwritten. hyprland.lua loads it after hypr_style.lua, so it wins over the values there.
-hl.config({ general = { col = { active_border = { colors = { "rgba(f7f1ebff)", "rgba(fbf7f4ff)" }, angle = 45 }, inactive_border = "rgba(627172aa)" } } })
+hl.config({ general = { col = { active_border = { colors = { "rgba(f3fcfaff)", "rgba(f3fcfaff)" }, angle = 45 }, inactive_border = "rgba(78745caa)" } } })
 hl.config({ general = { gaps_out = { top = 16, right = 16, bottom = 16, left = 16 } } }) hl.workspace_rule({ workspace = "m[HDMI-A-2]", gaps_out = { top = 16, right = 16, bottom = 16, left = 16 } }) hl.workspace_rule({ workspace = "m[DP-2]", gaps_out = { top = 76, right = 24, bottom = 24, left = 24 } }) hl.workspace_rule({ workspace = "m[DP-1]", gaps_out = { top = 16, right = 16, bottom = 16, left = 16 } })

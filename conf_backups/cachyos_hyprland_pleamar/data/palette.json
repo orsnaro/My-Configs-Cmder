@@ -1,14 +1,14 @@
 {
-  "alert": "#dec8b1",
-  "deep": "#1f292a",
-  "faint": "#f2f4f4",
-  "ink": "#f6f8f8",
-  "mint": "#f7f1eb",
-  "minthi": "#fbf7f4",
-  "mintlo": "#e8d8c7",
-  "off": "#627172",
+  "alert": "#e5d2c1",
+  "deep": "#2d2b1b",
+  "faint": "#f9f8f6",
+  "ink": "#fdf9f2",
+  "mint": "#f3fcfa",
+  "minthi": "#f3fcfa",
+  "mintlo": "#caf2e9",
+  "off": "#78745c",
   "onmint": "#10161a",
-  "panel": "#485f61",
-  "tint": "#384b4c",
-  "wink": "#f6f8f8"
+  "panel": "#686440",
+  "tint": "#524f32",
+  "wink": "#fdf9f2"
 }

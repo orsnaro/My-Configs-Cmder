@@ -1,8 +1,46 @@
 # Verification record — 2026-10-28
 
-No live desktop stack was switched, no individual widget was disabled, and no
-real lock/unlock or reboot/login cycle was performed. Installation was
-file-only and did not invoke desktop/service activation commands.
+Installation was file-only. Subsequent user-authorized live testing switched
+both complete stacks; no individual widget was disabled. A real lock/unlock
+and reboot/login cycle were not performed.
+
+## Live acceptance
+
+- Both launcher entries visibly confirmed in Pleamar after a main-service-only
+  app-index refresh; six lock/widget scene PIDs were unchanged by that refresh.
+- Pleamar -> QS: main bar, two secondary bars, dock and Walker inspected in
+  private screenshots. Elephant/SwayNC/polkit present; zero Pleamar members.
+- Initial reverse switch exposed SwayNC restarting through D-Bus between stop
+  and mask. It safely rolled back. Regression tests reproduced the race;
+  mask-before-stop fixed it. Readiness also verifies notification ownership.
+- Fixed native desktop-entry roundtrips passed both ways; repeated activation
+  retained core PIDs. Nine shared daemons survived. Final state: Pleamar ready,
+  seven scenes, no QS/Walker/Elephant/Waybar, SwayNC inactive/masked, notification
+  name owned by Pleamar. All 15 saved preferences compare equal.
+- All seven active scenes passed `pleamar --check`. Five built-in theme TOMLs
+  plus template parsed; Space Grotesk and Material Symbols font assets present.
+  Current appearance inspected on three monitors; themes were not cycled.
+- Existing SwayNC CSS logs include invalid GTK properties and unterminated
+  blocks (active `themes/modern/notifications.css`, `control_center.css`). Kept out of
+  the stack-switch fix rather than silently redesigning the notification theme.
+- Raw screenshots, process logs and resource JSON stay Git-ignored/private.
+
+Short, uncontrolled ~3-second usage samples (not benchmarks):
+
+| | QS active | Full Pleamar active |
+| --- | ---: | ---: |
+| System CPU | 1.17% | 6.22% |
+| System RAM used | 2.834 GiB | 4.009 GiB |
+| System AMD GPU busy | 5% | 12% |
+| System AMD VRAM used | ~511 MiB | ~1242 MiB |
+| Stack CPU (one-core scale; 12 logical CPUs) | ~0% | 59.07% (~4.92% of total capacity) |
+| Stack RAM PSS / RSS | 655.48 / 953.68 MiB | 1615.01 / 2001.63 MiB |
+| Stack VRAM allocations | 193.83 MiB | 873.73 MiB |
+| Stack sampled GPU gfx engines | ~0% | 0.97% |
+
+Swap used was zero in both samples. RSS includes shared pages; PSS distributes
+them. Per-client VRAM is allocation accounting, not guaranteed exclusive savings.
+The user requested full Pleamar preservation, not widget/resource optimization.
 
 | Current check | Result |
 | --- | --- |
@@ -10,7 +48,7 @@ file-only and did not invoke desktop/service activation commands.
 | Exported standalone scene Lua | 24 correctly parameterized invocations passed |
 | Exported Hyprland Lua fixtures | 8 passed |
 | Existing Hyprland shell/isolated QML harnesses | 8 passed; no live window input |
-| Desktop switch/installer/recovery fixtures | 36 passed |
+| Desktop switch/installer/recovery fixtures | 39 passed |
 | Existing migration suite, including restore-cache regressions | 51 passed |
 | Public overlay restore fixtures | 13 passed |
 | Retained Kitty suite | 51 passed; 1 existing focused-GUI test skipped |
@@ -47,8 +85,8 @@ pre-install snapshot and original curated-export archive remain available.
 Normal mode switching never restores these snapshots over newer preferences.
 
 Independent task review was attempted but the configured free-model quota was
-reached. Review continued inline; no other model was selected. A real stack
-switch, reboot, lock/unlock and focused scratch Kitty input remain untested.
+reached. Review continued inline; no other model was selected. Reboot,
+lock/unlock and focused scratch Kitty input remain untested.
 ShellCheck is not installed. Do not present fixture checks as live acceptance.
 
 `git diff --cached --check` reports seven pre-existing whitespace notices in

@@ -1,12 +1,12 @@
 {
-  "checkpoint_status": "Current Pleamar/Hyprland export and file-only mode-guard installation; no live restore, stack switch, process stop/restart or lock/unlock. Sandbox verification recorded in CHECKS.md.",
+  "checkpoint_status": "Current backup plus user-authorized live full-stack roundtrips verified. Pleamar left active; no individual widgets disabled. Reboot/login and real lock/unlock not tested. See CHECKS.md.",
   "created": "2026-10-19T18:30:21+0300",
   "files": [
     {
       "path": "CHECKS.md",
       "kind": "file",
-      "sha256": "4c2f39091ab285fc215c47b0cbcea0d9139bb69f95abac8bf9fc7ffe5fa63143",
-      "size": 9819,
+      "sha256": "158d2e41d6a1437d52168f430ae1e35b7f2436314e352ac89c4c0d6fb677ebdb",
+      "size": 11981,
       "mode": "0644"
     },
     {
@@ -19,8 +19,8 @@
     {
       "path": "README.md",
       "kind": "file",
-      "sha256": "77a9e988d4be9f78c154c19dfc9b553e0574824ada0d4a3cf8637c8bc72e5057",
-      "size": 6041,
+      "sha256": "e820c21a4d2c09aff0ce2506496e38825e109505fb5198525c3ad586ac2062d1",
+      "size": 7197,
       "mode": "0644"
     },
     {
@@ -159,14 +159,14 @@
     {
       "path": "config/hypr/colors.conf",
       "kind": "file",
-      "sha256": "5d594221a25ede65802848355e267c2668ed65f50d20d0283b9f85fdc09b730f",
+      "sha256": "92484c1c2a7598ef3f0b8ab417c973977501079ff562d2262bc8dcba21f3203e",
       "size": 1756,
       "mode": "0644"
     },
     {
       "path": "config/hypr/colors.lua",
       "kind": "file",
-      "sha256": "5ceb77a9d1fa098cdc185c0a37816e0bc8e99920c95b38c963000a9981dc4a56",
+      "sha256": "93bc3bfb6482dd3636b65ccc005db4822c95a9923932acc713f9762ba22d68f9",
       "size": 1806,
       "mode": "0644"
     },
@@ -1111,7 +1111,7 @@
     {
       "path": "config/hypr/vitreus_colors.lua",
       "kind": "file",
-      "sha256": "a8f0d0da57b5aeb8ec0fbf9f479e5cc7acd3ef51d7e0b1886be4836d4e9c0773",
+      "sha256": "81cd45f48cfc105b141b9402604b9612ef1401261941e12524e9eaca1d45d25c",
       "size": 811,
       "mode": "0644"
     },
@@ -1468,14 +1468,14 @@
     {
       "path": "data/palette.json",
       "kind": "file",
-      "sha256": "aa3ec6f3d90fd0fc8b01c439873ef35bad441b032961078c769e00521ab86250",
+      "sha256": "7a7653579ab691696b1e2bc0937c7e5df27527e4a329f65a5d24520203cd7f44",
       "size": 262,
       "mode": "0644"
     },
     {
       "path": "data/palette.plm",
       "kind": "file",
-      "sha256": "5b4225ccdcb883ccb349d60c61e3809831b33090570a4871217474ea0cdbb977",
+      "sha256": "9c941cf11c9246ec5f97fbae85e4d6672eaafd715c4faa9e78f3b5ea1a0f325b",
       "size": 524,
       "mode": "0644"
     },
@@ -1496,7 +1496,7 @@
     {
       "path": "data/vitreus_colors.lua",
       "kind": "file",
-      "sha256": "a8f0d0da57b5aeb8ec0fbf9f479e5cc7acd3ef51d7e0b1886be4836d4e9c0773",
+      "sha256": "81cd45f48cfc105b141b9402604b9612ef1401261941e12524e9eaca1d45d25c",
       "size": 811,
       "mode": "0644"
     },
@@ -1538,7 +1538,7 @@
     {
       "path": "data/wm-palette.plm",
       "kind": "file",
-      "sha256": "2afeb9c9da8d1ba5a8c7bb7603cb32d61c5c710c0ab53a87dbed6e24604cb5cd",
+      "sha256": "7f85ad28722a028cddce2d78687272826c29b5fc531f7d57f207272b4997f447",
       "size": 223,
       "mode": "0644"
     },
@@ -2796,7 +2796,7 @@
     {
       "path": "source/vitreus/palette.plm",
       "kind": "file",
-      "sha256": "5b4225ccdcb883ccb349d60c61e3809831b33090570a4871217474ea0cdbb977",
+      "sha256": "9c941cf11c9246ec5f97fbae85e4d6672eaafd715c4faa9e78f3b5ea1a0f325b",
       "size": 524,
       "mode": "0644"
     },
@@ -3398,7 +3398,7 @@
     {
       "path": "source/vitreus/wm-palette.plm",
       "kind": "file",
-      "sha256": "2afeb9c9da8d1ba5a8c7bb7603cb32d61c5c710c0ab53a87dbed6e24604cb5cd",
+      "sha256": "7f85ad28722a028cddce2d78687272826c29b5fc531f7d57f207272b4997f447",
       "size": 223,
       "mode": "0644"
     },
@@ -3462,11 +3462,11 @@
   "pleamar_binary_sha256": "05e05ecc0ad16a0e3e8580b6647fb3bdd89d7ce0d82e13a8a7ffcda8468d2ca3",
   "pleamar_version": "pleamar 0.4.31 · language 0.4",
   "privacy": "Curated public export: source/configuration only. No credentials, private trial checkpoint, history, logs, or private snapshot payloads are included. manifest.json hashes every payload file except itself.",
-  "refreshed": "2026-10-28T12:58:11.362296+00:00",
+  "refreshed": "2026-10-28T15:49:37.880509+00:00",
   "source_base_commit": "e6eb4b3e0311e61f92848e1d03f3d84e5c0e81cd",
   "source_remote": "https://github.com/natepayn3/Vitreus.git",
   "source_tree_hash_format": "sorted source-relative path + NUL + kind + NUL + sha256-or-link-target + newline",
-  "source_tree_sha256": "34a6bcca692c1281e6c9380d6d3985d8e4425636d35d96acbef51f588af03304",
+  "source_tree_sha256": "85618464ad7e43061d690e63a532c7a23fed47cf07b7c847d2aab95ed9146ad5",
   "historical_live_validation": {
     "as_of": "2026-10-20T16:08:22+03:00",
     "record": {
@@ -3776,13 +3776,13 @@
       "source": ".config/hypr/colors.conf",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/colors.conf",
       "mode": "0644",
-      "sha256": "5d594221a25ede65802848355e267c2668ed65f50d20d0283b9f85fdc09b730f"
+      "sha256": "92484c1c2a7598ef3f0b8ab417c973977501079ff562d2262bc8dcba21f3203e"
     },
     "config/hypr/colors.lua": {
       "source": ".config/hypr/colors.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/colors.lua",
       "mode": "0644",
-      "sha256": "5ceb77a9d1fa098cdc185c0a37816e0bc8e99920c95b38c963000a9981dc4a56"
+      "sha256": "93bc3bfb6482dd3636b65ccc005db4822c95a9923932acc713f9762ba22d68f9"
     },
     "config/hypr/conf/animation.lua": {
       "source": ".config/hypr/conf/animation.lua",
@@ -4592,7 +4592,7 @@
       "source": ".config/hypr/vitreus_colors.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/vitreus_colors.lua",
       "mode": "0644",
-      "sha256": "a8f0d0da57b5aeb8ec0fbf9f479e5cc7acd3ef51d7e0b1886be4836d4e9c0773"
+      "sha256": "81cd45f48cfc105b141b9402604b9612ef1401261941e12524e9eaca1d45d25c"
     },
     "config/hypr/vitreus_hypr.lua": {
       "source": ".config/hypr/vitreus_hypr.lua",
@@ -4898,13 +4898,13 @@
       "source": ".local/share/pleamar/vitreus/palette.json",
       "resolved_source": ".local/share/pleamar/vitreus/palette.json",
       "mode": "0644",
-      "sha256": "aa3ec6f3d90fd0fc8b01c439873ef35bad441b032961078c769e00521ab86250"
+      "sha256": "7a7653579ab691696b1e2bc0937c7e5df27527e4a329f65a5d24520203cd7f44"
     },
     "data/palette.plm": {
       "source": ".local/share/pleamar/vitreus/palette.plm",
       "resolved_source": ".local/share/pleamar/vitreus/palette.plm",
       "mode": "0644",
-      "sha256": "5b4225ccdcb883ccb349d60c61e3809831b33090570a4871217474ea0cdbb977"
+      "sha256": "9c941cf11c9246ec5f97fbae85e4d6672eaafd715c4faa9e78f3b5ea1a0f325b"
     },
     "data/sounds.json": {
       "source": ".local/share/pleamar/vitreus/sounds.json",
@@ -4922,7 +4922,7 @@
       "source": ".local/share/pleamar/vitreus/vitreus_colors.lua",
       "resolved_source": ".local/share/pleamar/vitreus/vitreus_colors.lua",
       "mode": "0644",
-      "sha256": "a8f0d0da57b5aeb8ec0fbf9f479e5cc7acd3ef51d7e0b1886be4836d4e9c0773"
+      "sha256": "81cd45f48cfc105b141b9402604b9612ef1401261941e12524e9eaca1d45d25c"
     },
     "data/vitreus_hypr.lua": {
       "source": ".local/share/pleamar/vitreus/vitreus_hypr.lua",
@@ -4958,7 +4958,7 @@
       "source": ".local/share/pleamar/vitreus/wm-palette.plm",
       "resolved_source": ".local/share/pleamar/vitreus/wm-palette.plm",
       "mode": "0644",
-      "sha256": "2afeb9c9da8d1ba5a8c7bb7603cb32d61c5c710c0ab53a87dbed6e24604cb5cd"
+      "sha256": "7f85ad28722a028cddce2d78687272826c29b5fc531f7d57f207272b4997f447"
     },
     "source/vitreus/.github/ISSUE_TEMPLATE/bug_report.md": {
       "source": ".config/pleamar/shells/vitreus/.github/ISSUE_TEMPLATE/bug_report.md",
@@ -6038,7 +6038,7 @@
       "source": ".config/pleamar/shells/vitreus/palette.plm",
       "resolved_source": ".config/pleamar/shells/vitreus/palette.plm",
       "mode": "0644",
-      "sha256": "5b4225ccdcb883ccb349d60c61e3809831b33090570a4871217474ea0cdbb977"
+      "sha256": "9c941cf11c9246ec5f97fbae85e4d6672eaafd715c4faa9e78f3b5ea1a0f325b"
     },
     "source/vitreus/pixelate.wgsl": {
       "source": ".config/pleamar/shells/vitreus/pixelate.wgsl",
@@ -6554,7 +6554,7 @@
       "source": ".config/pleamar/shells/vitreus/wm-palette.plm",
       "resolved_source": ".config/pleamar/shells/vitreus/wm-palette.plm",
       "mode": "0644",
-      "sha256": "2afeb9c9da8d1ba5a8c7bb7603cb32d61c5c710c0ab53a87dbed6e24604cb5cd"
+      "sha256": "7f85ad28722a028cddce2d78687272826c29b5fc531f7d57f207272b4997f447"
     },
     "source/vitreus/wptrans/hexreveal.wgsl": {
       "source": ".config/pleamar/shells/vitreus/wptrans/hexreveal.wgsl",
@@ -6676,7 +6676,7 @@
     "scene_lua_invocations_passed": 24,
     "hyprland_lua_passed": 8,
     "hyprland_shell_headless_qml_passed": 8,
-    "desktop_stack_fixtures_passed": 36,
+    "desktop_stack_fixtures_passed": 39,
     "migration_fixtures_passed": 51,
     "curated_restore_fixtures_passed": 13,
     "kitty_passed": 51,
@@ -6689,14 +6689,23 @@
     "unrelated_fingerprints_preserved": 523,
     "review": "Inline after configured free-model independent reviewer hit usage quota; no model escalation.",
     "not_tested": [
-      "live stack switch",
       "reboot/login",
       "real lock/unlock",
-      "focused Kitty GUI input"
+      "focused Kitty GUI input",
+      "visual activation of every theme"
     ],
     "private_snapshot_entries": 1065,
     "private_payload_files": 937,
     "current_terminal_state": "included in exact private snapshot; public terminal payload retained from October 25–26",
-    "copied_source_whitespace_notices_preserved": 7
+    "copied_source_whitespace_notices_preserved": 7,
+    "live_switch_directions_verified": [
+      "pleamar -> quickshell",
+      "quickshell -> pleamar"
+    ],
+    "saved_preferences_unchanged": 15,
+    "shared_daemons_unchanged": 9,
+    "pleamar_scenes_after_return": 7,
+    "screenshots": "Inspected privately for three monitors and both launchers; not published.",
+    "known_theme_limitation": "Existing active SwayNC modern theme CSS parser errors; not changed by stack switch fix."
   }
 }

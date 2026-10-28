@@ -10,6 +10,7 @@ wallpapers and relevant QS/ML4W configuration are also preserved in a verified
 
 No individual Pleamar widgets were disabled. Installation changed files only;
 it did not activate a switch, stop/restart a process, or perform a lock/unlock.
+Subsequent user-approved live testing verified both full-stack switch directions.
 
 ## Two application-launcher entries
 
@@ -51,6 +52,11 @@ python3 tools/install_desktop_stack.py --apply
 
 This installer backs up affected files privately, preserves config-root
 symlinks, and does not run either desktop stack or reload services.
+
+If newly installed entries are missing from an already-running Pleamar launcher,
+its app index may predate installation. An unlocked-session restart of **only**
+`pleamar.service` refreshed that index in live testing without restarting the
+six lock/widget scenes. No manual restart is needed for ordinary stack switches.
 
 ## Exact local recovery
 
@@ -119,7 +125,18 @@ a temporary home.
 
 Tests cover both switch directions, repeated/concurrent requests, locked-session
 refusal, failure rollback, hidden restart guards and shared-process preservation.
-**A real live switch, reboot/login cycle and lock/unlock were not performed.**
+Live desktop-entry roundtrips passed after fixing a SwayNC D-Bus reactivation
+race: mask the service before stopping it, then require correct notification
+ownership before reporting readiness. Repeated activation preserved core PIDs;
+nine shared daemons and all 15 saved preference files were unchanged. Screenshots
+confirmed the QS bars/dock/Walker and returned Pleamar bars across three monitors;
+all seven Pleamar scenes were running afterward. Screenshots remain private.
+
+All five built-in theme definitions plus the template parsed; bundled fonts
+were present. Current appearance was inspected, not every theme activated.
+SwayNC's existing theme CSS emits parser warnings/errors; it still served
+notifications, but this is **not** a clean bill of health for every theme.
+**Reboot/login and real lock/unlock remain untested.**
 One pre-existing focused-GUI Kitty test remains skipped. Independent review was
 unavailable after the configured free-model quota was reached; review continued
 inline without model escalation.
