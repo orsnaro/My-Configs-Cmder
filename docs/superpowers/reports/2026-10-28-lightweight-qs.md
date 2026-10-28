@@ -70,6 +70,20 @@ sample; other processes and wallpaper differ from the earlier sample.
 
 ## Backup and use
 
+Final fresh verification: **378 Python tests passed**, one pre-existing Kitty
+GUI skip. All 27 recorded unrelated dirty/untracked file fingerprints are
+unchanged. Eight scoped saved/live artifacts are byte-identical. All 15 saved
+preferences match the original baseline after accounting for the intentionally
+added `title` entry. The refreshed owner-private snapshot has 1066 entries,
+seven cache/build exclusions and 938 protected payload files; isolated recovery
+applied **1100 actions with zero remaining byte/mode/alias differences**,
+including the new bar component and Walker stylesheet.
+
+Inline review found no unresolved important issue in this feature diff. Known
+unmodified QS/SwayNC warnings above are deferred, not silently presented as a
+clean-log result. The earlier comparison of full QS versus full Pleamar remains
+in `conf_backups/cachyos_hyprland_pleamar/CHECKS.md`.
+
 Saved counterparts of changed QML/layout files are under
 `conf_backups/cachyos_hyprland_ml4w/dotfiles/.config/`:
 

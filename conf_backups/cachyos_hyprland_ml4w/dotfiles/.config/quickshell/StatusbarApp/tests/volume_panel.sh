@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 # Volume dropdown contract: hover shows sinks + slider on all 3 bars.
-# Click (pavucontrol) / right-click (mute) / wheel (step) stay as-is.
+# Left-click (mute) / right-click (pavucontrol) / wheel (step) stay as-is.
 app="$HOME/.config/quickshell/StatusbarApp"
 shell="$HOME/.config/quickshell/shell.qml"
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
@@ -54,8 +54,8 @@ for p in sys.argv[1:]:
     assert m, f'{p}: missing right module list'
     order = re.findall(r'"(\w+)"', m.group(1))
     assert order == ["cpu", "mem", "updates", "battery", "powerprofile",
-                     "systemtray", "volume", "keyboard", "power"], \
-        f'{p}: right must be cpu,mem,updates,battery,powerprofile,systemtray,volume,keyboard,power, got {order}'
+                     "systemtray", "mic", "volume", "keyboard", "power"], \
+        f'{p}: right must be cpu,mem,updates,battery,powerprofile,systemtray,mic,volume,keyboard,power, got {order}'
     m2 = re.search(r'"left":\s*\[([^\]]+)\]', t)
     assert m2, f'{p}: missing left module list'
     left = re.findall(r'"(\w+)"', m2.group(1))
