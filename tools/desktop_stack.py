@@ -175,10 +175,15 @@ class StackManager:
         if mode == 'pleamar':
             roots = [p for p in processes if p.name == 'pleamar' or any(self.script(p, name) for name in
                      ('vitreus-keep', 'vitreus-polkit-agent', 'vitreus-trial-status', 'vitreus-inhibit'))]
+            return self.descendants(roots, processes)
         else:
             roots = [p for p in processes if p.name in {'qs', 'quickshell', 'walker', 'elephant', 'swaync', 'waybar', Path(POLKIT).name}
                      or self.script(p, 'ml4w-wallpaper-automation') or self.script(p, 'ml4w-autostart')]
-        return self.descendants(roots, processes)
+            # A launcher may be the parent of an ordinary user application.
+            # Only the wallpaper loop owns a wholly disposable job subtree.
+            loops = [p for p in roots if self.script(p, 'ml4w-wallpaper-automation')]
+            owned = {p.pid for p in self.descendants(loops, processes)} | {p.pid for p in roots}
+            return [p for p in processes if p.pid in owned]
 
     @staticmethod
     def descendants(roots: list[Process], processes: list[Process]) -> list[Process]:

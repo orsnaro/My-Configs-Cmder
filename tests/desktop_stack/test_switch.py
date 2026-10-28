@@ -115,6 +115,16 @@ class StackTests(unittest.TestCase):
         self.manager.switch('pleamar')
         self.assertEqual(self.backend.events, [])
 
+    def test_external_apps_launched_by_walker_are_not_stack_background_jobs(self) -> None:
+        self.manager.write_mode('quickshell')
+        self.backend.healthy = {'quickshell'}
+        self.process(10, 'walker')
+        self.process(11, 'obsidian', ppid=10)
+        self.process(12, 'kitty', ppid=10)
+        self.process(13, 'fish', ppid=12)
+        self.manager.switch('pleamar')
+        self.assertEqual({p.pid for p in self.backend.items}, {11, 12, 13})
+
     def test_native_lock_and_unknown_lock_query_refuse_before_stop(self) -> None:
         for value in ('true', '', 'invalid'):
             with self.subTest(value=value):

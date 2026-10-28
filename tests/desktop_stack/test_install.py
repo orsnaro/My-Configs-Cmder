@@ -156,6 +156,24 @@ fi
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertNotIn('pleamar', self.log.read_text())
 
+    def test_mode_reader_matches_coordinator_for_whitespace_and_invalid_multiline(self) -> None:
+        self.apply()
+        for value, expected in (('  quickshell \n', True), ('quickshell\npleamar\n', False)):
+            with self.subTest(value=value):
+                self.log.unlink(missing_ok=True)
+                (self.home / '.config/ml4w/settings/desktop-stack').write_text(value)
+                result = subprocess.run(['bash', str(self.home / '.config/ml4w/scripts/ml4w-wallpaper')], env=self.env, capture_output=True, text=True, timeout=10)
+                self.assertEqual(result.returncode, 0, result.stderr)
+                self.assertEqual(self.log.exists(), expected)
+
+    def test_hyprland_does_not_accept_first_line_of_invalid_multiline_mode(self) -> None:
+        self.apply()
+        self.write('.config/hypr/hypr_vitreus.lua', '-- fixture\n')
+        self.write('.config/ml4w/settings/desktop-stack', 'pleamar\nquickshell\n')
+        script = 'local seen = {}; function require(name) seen[name] = true end; dofile(arg[1]); assert(not seen.hypr_vitreus, "invalid selection loaded Pleamar bindings")'
+        result = subprocess.run(['lua5.4', '-', str(self.home / '.config/hypr/hyprland.lua')], input=script, env=self.env, capture_output=True, text=True, timeout=10)
+        self.assertEqual(result.returncode, 0, result.stderr)
+
     def test_unexpected_shape_fails_before_any_file_write(self) -> None:
         path = self.write('.config/hypr/conf/autostart.lua', '-- unrelated config\n')
         with self.assertRaises(install.InstallError):

@@ -21,11 +21,13 @@ MARK = 'desktop-stack managed'
 MODE_PATH = '.config/ml4w/settings/desktop-stack'
 QS_HELPERS = ('ml4w-reload-dock', 'ml4w-toggle-dock', 'ml4w-toggle-dock-autohide',
               'ml4w-reload-statusbar', 'ml4w-toggle-statusbar', 'ml4w-toggle-statusbar-autohide')
-SHELL_HELPER = '''# desktop-stack managed: shared mode reader; no daemon or subprocess.
+SHELL_HELPER = '''# desktop-stack managed: shared mode reader; no resident process.
 desktop_stack_is_qs() {
     local selected=pleamar
     if [[ -f "$HOME/.config/ml4w/settings/desktop-stack" ]]; then
-        IFS= read -r selected < "$HOME/.config/ml4w/settings/desktop-stack"
+        selected=$(<"$HOME/.config/ml4w/settings/desktop-stack")
+        selected="${selected#"${selected%%[![:space:]]*}"}"
+        selected="${selected%"${selected##*[![:space:]]}"}"
     fi
     [[ "$selected" == quickshell ]]
 }
@@ -35,7 +37,7 @@ LUA_MODE = '''-- desktop-stack managed: shared display geometry stays independen
 local desktop_stack_mode = "pleamar"
 local desktop_stack_file = io.open(os.getenv("HOME") .. "/.config/ml4w/settings/desktop-stack", "r")
 if desktop_stack_file then
-    desktop_stack_mode = (desktop_stack_file:read("*l") or ""):match("^%s*(.-)%s*$")
+    desktop_stack_mode = (desktop_stack_file:read("*a") or ""):match("^%s*(.-)%s*$")
     desktop_stack_file:close()
 end
 '''
@@ -75,6 +77,8 @@ def shell_prefix(text: str, body: str = '') -> str:
 
 def transform(name: str, text: str, home: Path) -> str:
     if MARK in text:
+        if name == '.config/hypr/hyprland.lua':
+            return text.replace('desktop_stack_file:read("*l")', 'desktop_stack_file:read("*a")')
         return text
     base = Path(name).name
     if name == '.config/hypr/conf/autostart.lua':
