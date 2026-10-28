@@ -15,12 +15,14 @@ FIXTURES = Path(__file__).resolve().parent
 
 
 class BarTests(unittest.TestCase):
-    def run_fixture(self, name: str, files: tuple[str, ...]) -> None:
+    def run_fixture(self, name: str, files: tuple[str, ...], extra_env: dict[str, str] | None = None) -> None:
         with tempfile.TemporaryDirectory(prefix='qs-lightweight-', dir='/tmp/opencode') as directory:
             root = Path(directory)
             (root / 'StatusbarApp').mkdir()
             for filename in files:
-                shutil.copy2(SOURCE / 'StatusbarApp' / filename, root / 'StatusbarApp' / filename)
+                destination = root / 'StatusbarApp' / filename
+                destination.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copy2(SOURCE / 'StatusbarApp' / filename, destination)
             theme = root / 'CustomTheme'
             theme.mkdir()
             (theme / 'qmldir').write_text('module qs.CustomTheme\nsingleton Theme 1.0 Theme.qml\n')
@@ -33,7 +35,7 @@ class BarTests(unittest.TestCase):
             binary.parent.mkdir(parents=True)
             binary.write_text('#!/bin/sh\nexit 0\n')
             binary.chmod(0o755)
-            result = subprocess.run(['qs', '-p', str(root)], env={**os.environ, 'HOME': str(home), 'QT_QPA_PLATFORM': 'offscreen'}, capture_output=True, text=True, timeout=15)
+            result = subprocess.run(['qs', '-p', str(root)], env={**os.environ, 'HOME': str(home), 'QT_QPA_PLATFORM': 'offscreen', **(extra_env or {})}, capture_output=True, text=True, timeout=15)
             output = result.stdout + result.stderr
             self.assertEqual(result.returncode, 0, output)
             self.assertIn('PASS:', output)
@@ -64,6 +66,13 @@ class BarTests(unittest.TestCase):
         for name in ('StatusbarWindow.qml', 'config.json'):
             self.assertRegex((app / name).read_text(), r'"workspaces"\s*,\s*"title"')
         self.assertNotIn('FocusedTitleModule', (app / 'SlimBarWindow.qml').read_text())
+
+    def test_existing_memory_and_panel_state_qml_fixtures(self) -> None:
+        for fixture in ('memory_format.qml', 'system_panel_state.qml'):
+            with self.subTest(fixture=fixture):
+                self.run_fixture('legacy_harness.qml',
+                                 (f'tests/{fixture}', 'SystemMetricFormat.js', 'SystemPanelState.qml'),
+                                 {'QS_LEGACY_FIXTURE': fixture})
 
 
 if __name__ == '__main__':

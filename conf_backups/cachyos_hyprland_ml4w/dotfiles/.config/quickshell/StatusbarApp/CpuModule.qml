@@ -5,7 +5,7 @@ import QtQuick.Layouts
 import qs.CustomTheme
 import "SystemMetricFormat.js" as Metrics
 
-// CPU pill: usage percent + clock. Left click opens the shared system
+// CPU/GPU/VRAM pill using one sample. Left click opens the shared system
 // panel; data comes from hypr-sysinfo via ~/.cache/sysinfo.json.
 Rectangle {
     id: cpu

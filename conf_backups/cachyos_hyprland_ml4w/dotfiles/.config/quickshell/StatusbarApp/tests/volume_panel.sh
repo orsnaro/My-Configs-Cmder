@@ -59,8 +59,8 @@ for p in sys.argv[1:]:
     m2 = re.search(r'"left":\s*\[([^\]]+)\]', t)
     assert m2, f'{p}: missing left module list'
     left = re.findall(r'"(\w+)"', m2.group(1))
-    assert left == ["launcher", "logo", "workspaces", "media"], \
-        f'{p}: left must be launcher,logo,workspaces,media, got {left}'
+    assert left == ["launcher", "logo", "workspaces", "title", "media"], \
+        f'{p}: left must be launcher,logo,workspaces,title,media, got {left}'
 PY
 # Slider must match the theme (custom groove + handle, not default Controls look).
 need "$app/VolumePanel.qml" "handle:" "Volume slider must define a themed handle"
