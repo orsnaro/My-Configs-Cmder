@@ -1,0 +1,8 @@
+@import "base.rasi"
+mainbox { width: 1000px; children: [ inputbar, clipboard-body ]; }
+clipboard-body { orientation: horizontal; children: [ listview, preview-box ]; spacing: 16px; }
+listview { lines: 8; columns: 1; }
+element-icon { size: 44px; }
+preview-box { orientation: vertical; children: [ icon-current-entry ]; width: 360px; padding: 10px; }
+icon-current-entry { size: 320px; squared: false; horizontal-align: 0.5; vertical-align: 0.5; }
+mode-switcher { enabled: false; }

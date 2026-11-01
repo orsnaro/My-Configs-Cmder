@@ -177,18 +177,21 @@ hl.bind("ALT + Tab", hl.dsp.exec_cmd("~/.local/bin/qs-lazy-toggle ~/.local/share
 hl.unbind("SUPER + SPACE")
 hl.bind("SUPER + CTRL + SPACE", hl.dsp.exec_cmd("qs ipc call statusbar focus"),
     { description = "Focus the statusbar" })
-hl.bind("SUPER + R", hl.dsp.exec_cmd("$HOME/.config/walker/launch.sh -m runner -N -H"),
+hl.bind("SUPER + R", hl.dsp.exec_cmd("$HOME/.local/bin/rofi-trial run"),
     { description = "Run a command" })
 hl.bind("SUPER + SUPER_L", hl.dsp.exec_cmd("~/.config/hypr/scripts/launcher.sh"),
     { release = true, description = "Open app list with bare Super" })
-hl.bind("SUPER + period", hl.dsp.exec_cmd("$HOME/.config/walker/launch.sh -m symbols -N -H --width 750"),
+hl.bind("SUPER + period", hl.dsp.exec_cmd("$HOME/.local/bin/rofi-trial emoji"),
     { description = "Emoji picker (Win-style)" })
+hl.unbind("SUPER + V")
+hl.bind("SUPER + V", hl.dsp.exec_cmd("$HOME/.local/bin/rofi-trial clipboard"),
+    { description = "Clipboard history with image preview (Rofi)" })
 
 -- Keyboard layout switch: SUPER+Space toggles us/ara (SHIFT+SPACE freed:
 -- it fired while typing and is problematic).
 -- Uses hyprctl switchxkblayout so ALT+SHIFT+keys (move/resize) keep working.
 -- XKB group toggles would eat those combos or hijack Caps Lock, so input.lua leaves kb_options empty.
--- SUPER+RETURN restored to terminal (default); layout moved to SUPER+SPACE, run moved to SUPER+R (walker).
+-- SUPER+RETURN restored to terminal (default); layout moved to SUPER+SPACE, run moved to SUPER+R (Rofi).
 hl.unbind("SHIFT + SPACE") -- keep old layout switch freed
 hl.unbind("SUPER + RETURN") -- clear default.lua duplicate, single terminal below
 hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("~/.local/bin/hypr-switch-xkblayout"),

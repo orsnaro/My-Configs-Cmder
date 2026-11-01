@@ -460,6 +460,9 @@ dotfiles/.config/rofi/config-screenshot.rasi
 dotfiles/.config/rofi/config-short.rasi
 dotfiles/.config/rofi/config-themes.rasi
 dotfiles/.config/rofi/config.rasi
+dotfiles/.config/rofi/trial/base.rasi
+dotfiles/.config/rofi/trial/clipboard.rasi
+dotfiles/.config/rofi/trial/emoji.rasi
 dotfiles/.config/swaync/colors.css
 dotfiles/.config/swaync/config.json
 dotfiles/.config/swaync/style.css
@@ -556,6 +559,16 @@ local/.local/bin/hypr-switch-xkblayout
 local/.local/bin/hypr-sysinfo
 local/.local/bin/hypr-weather
 local/.local/bin/qs-lazy-toggle
+local/.local/bin/rofi-trial
+local/.local/lib/rofi-trial/build-dismiss.sh
+local/.local/lib/rofi-trial/build-smart.sh
+local/.local/lib/rofi-trial/clipboard.py
+local/.local/lib/rofi-trial/dismiss-guard.c
+local/.local/lib/rofi-trial/files.py
+local/.local/lib/rofi-trial/protocols/README.md
+local/.local/lib/rofi-trial/protocols/wlr-layer-shell-unstable-v1.xml
+local/.local/lib/rofi-trial/smart.cpp
+local/.local/lib/rofi-trial/toggle.py
 local/.local/share/applications/quake-kitty.desktop
 local/.local/share/ml4w-dock/DockApp/DockItem.qml
 local/.local/share/ml4w-dock/DockApp/DockLauncherButton.qml

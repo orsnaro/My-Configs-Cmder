@@ -5,6 +5,24 @@ REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 DOT="$REPO_DIR/dotfiles/.config"
 LOC="$REPO_DIR/local/.local"
 mkdir -p "$DOT" "$LOC/bin" "$LOC/share/applications"
+mkdir -p "$DOT/ml4w/scripts" "$DOT/ml4w/settings" "$DOT/ml4w/listeners"
+
+# Hyprland's on-demand launcher is source-backed; rebuild its ABI-specific plugin on restore.
+if [[ -f "$HOME/.local/bin/rofi-trial" ]]; then
+    cp -L -- "$HOME/.local/bin/rofi-trial" "$LOC/bin/rofi-trial"
+    mkdir -p "$LOC/lib/rofi-trial"
+    rsync -aL --exclude='*.so' --exclude='dismiss-guard' --exclude='.*' --exclude='__pycache__/' --exclude='*.pyc' \
+        "$HOME/.local/lib/rofi-trial/" "$LOC/lib/rofi-trial/"
+fi
+if [[ -f "$HOME/.config/ml4w/listeners/gtk-theme-switcher.sh" ]]; then
+    cp -L -- "$HOME/.config/ml4w/listeners/gtk-theme-switcher.sh" "$DOT/ml4w/listeners/"
+fi
+for theme in glass modern transparent glass-walker modern-walker; do
+    if [[ -f "$HOME/.config/ml4w/themes/$theme/theme.sh" ]]; then
+        mkdir -p "$DOT/ml4w/themes/$theme"
+        cp -L -- "$HOME/.config/ml4w/themes/$theme/theme.sh" "$DOT/ml4w/themes/$theme/"
+    fi
+done
 
 # Excluded files already in a snapshot are protected, not silently deleted.
 # Review and remove any old private artifacts separately before publication.

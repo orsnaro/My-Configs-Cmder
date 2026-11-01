@@ -19,8 +19,8 @@
     {
       "path": "README.md",
       "kind": "file",
-      "sha256": "e820c21a4d2c09aff0ce2506496e38825e109505fb5198525c3ad586ac2062d1",
-      "size": 7197,
+      "sha256": "e4a1cdac0873c2309cd3daa095f569c387263fb440cd1388e1d98344caff347f",
+      "size": 7735,
       "mode": "0644"
     },
     {
@@ -649,8 +649,8 @@
     {
       "path": "config/hypr/custom.lua",
       "kind": "file",
-      "sha256": "bc9e975d65fa4788a04f4b2dde2b8a9d3ea1eff8e5cbb01e79988d1ef32f91da",
-      "size": 18193,
+      "sha256": "c06fa3f28a332090a2ff849407a86f283e4933a4a1846ccbf78adb2604cf66fd",
+      "size": 18323,
       "mode": "0644"
     },
     {
@@ -915,8 +915,8 @@
     {
       "path": "config/hypr/scripts/launcher.sh",
       "kind": "file",
-      "sha256": "529079fbc8439c2289775f5a9ffe1a3d772202e9b221e10c10c10e96efa04df6",
-      "size": 215,
+      "sha256": "21a1aebab85ca91ba4f311cab62850708ae360313fe0666fa455e953a5e64eb2",
+      "size": 272,
       "mode": "0755"
     },
     {
@@ -3167,8 +3167,8 @@
     {
       "path": "source/vitreus/tests/test_nightmode_controls.py",
       "kind": "file",
-      "sha256": "1dbb5581e12bf7dd0eeee07faec7bef96fc471934d069b6d3bf448994c609ea8",
-      "size": 4795,
+      "sha256": "dc420b384844c4347c760cab448c030276251c321fea5e1c3ceb96c8a664013d",
+      "size": 5221,
       "mode": "0644"
     },
     {

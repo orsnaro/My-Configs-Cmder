@@ -62,6 +62,53 @@ Kitty receives the original event, not a synthetic forwarded shortcut. Its no-UI
 
 ## Caveats
 
+### Rofi launcher — permanent Hyprland selection, 2026-10-31
+
+- Bare **Super**: app search and inline arithmetic (`2+2` → `4`; Enter copies).
+  **Super+R** runs commands, **Super+.** opens the 6×6 emoji grid, and
+  **Super+V** opens clipboard history with image previews. Repeat a shortcut to
+  close that menu; Escape or clicking outside on **any connected monitor** also
+  cancels. Moving the pointer alone does not close it.
+- Emoji uses contiguous keyword matching (`heart` no longer matches scattered
+  letters in unrelated descriptions). Other menus retain fuzzy abbreviations.
+  Search results use fzf relevance ranking; empty clipboard searches keep recency.
+- The executable retains its compatible name `~/.local/bin/rofi-trial`; this is
+  no longer session-only. The QS coordinator in `tools/desktop_stack.py` starts
+  neither Walker/Elephant nor a resident Rofi process. KDE configuration is untouched.
+- The ML4W clipboard button forwards to the same preview/toggle helper. Visual
+  theme presets preserve the selected launcher rather than resetting it to Walker.
+- Runtime packages on CachyOS/Arch: `rofi`, `rofi-calc`, `rofimoji`, `libqalculate`,
+  `wl-clipboard`, `cliphist`, `fd`, and an installed `xdg-open` provider. Plugin build:
+  `gcc`, `pkgconf`, `glib2`, `cairo`, `pango`, `libqalculate`, `wayland`,
+  `wayland-protocols`, and Rofi development headers.
+  This payload was tested with Rofi 2.0.0 and Qalculate 5.13.2.
+- `BACKUP.sh` includes launcher helpers/source and the guarded GTK listener.
+  `RESTORE.sh --dry-run` never builds or launches anything; actual restore builds
+  `smart.so` and the cross-monitor Wayland guard against the installed ABI, and
+  fails visibly on build errors. The guard uses one shared transparent pixel,
+  never requests keyboard focus, and exists only while a picker is open. Tested
+  guard PSS was 228–238 KiB. No compiled binaries, generated protocol code, or
+  clipboard database/history are published in this backup.
+- Restore ML4W files first. For the existing QS/Pleamar setup, then run repository-root
+  `python3 tools/install_desktop_stack.py --dry-run`, followed by `--apply`, to install
+  coordinator/switch links and mode guards. Keep the repository at that path afterward.
+  `tools/switch-to-qs.sh` checks Rofi assets before stopping the current stack.
+
+Original full-stack **PSS** baseline (MiB), retained without remeasurement:
+
+| View | Walker/Elephant | Original Rofi trial |
+| --- | ---: | ---: |
+| Closed | 214.74 | 0.22 |
+| Apps | 257.22 | 29.93 |
+| Emoji | 262.96 | 46.07 |
+| Clipboard | 255.37 | 30.93 |
+
+These are original measurements, **not a benchmark of the later smart-search
+plugin/full-monitor theme**. Raw samples and recovery data remain at
+`~/.local/state/launcher-trial/20261031T133150+0200/` on the original machine;
+`followup/` records subsequent fixes and safe recovery checkpoints.
+
+
 - Restore targets `$HOME` only (no alternate target dir); base required: CachyOS + ML4W dotfiles stable 2.16.
 - `hypr/monitors.conf` + `custom.lua` workspaces hardcode a 3-monitor layout (DP-2/HDMI-A-2/DP-1) — adjust for single-display machines.
 - Matugen overwrites `hypr/colors.*`, `kitty/colors-matugen.conf`, `ml4w-dock/colors.json` on theme change; these copies are a snapshot.

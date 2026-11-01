@@ -16,6 +16,7 @@ for name in hypr kitty quickshell waybar rofi swaync ml4w ml4w-dock ml4w-statusb
   restore_one "$DOT/$name" "$HOME/.config/$name"
 done
 restore_one "$LOC/bin" "$HOME/.local/bin"
+restore_one "$LOC/lib/rofi-trial" "$HOME/.local/lib/rofi-trial"
 for name in ml4w-dock quickshell-overview ml4w-dotfiles-settings applications; do
   restore_one "$LOC/share/$name" "$HOME/.local/share/$name"
 done
@@ -30,6 +31,13 @@ if [[ -f "$LOC/share/ml4w-dock/bin/ml4w-dock" && ! -e "$HOME/.local/bin/ml4w-doc
 fi
 
 if [[ ${#DRY_ARGS[@]} -eq 0 ]]; then
+  if [[ -f "$HOME/.local/lib/rofi-trial/build-smart.sh" ]]; then
+    echo "Building the on-demand Rofi plugin and cross-monitor guard..."
+    bash "$HOME/.local/lib/rofi-trial/build-smart.sh" || {
+      echo "Rofi native build failed; install the documented build dependencies before activating QS." >&2
+      exit 1
+    }
+  fi
   echo "--- kitty system patch (needs sudo, kitty 0.49.2) ---"
   cat "$DOT/kitty/KITTY_PATCH_STATE.txt" 2>/dev/null || true
   read -r -p "Re-apply kitty patch with sudo now? [y/N] " ans || ans="N"

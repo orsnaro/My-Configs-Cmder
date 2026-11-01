@@ -76,7 +76,7 @@ apply_theme() {
 
         # Walker reads its CSS at service start, so restart it to pick up
         # the regenerated colors.
-        if command -v walker >/dev/null 2>&1; then
+        if [[ "$(cat "$HOME/.config/ml4w/settings/launcher" 2>/dev/null)" == "walker" ]] && command -v walker >/dev/null 2>&1; then
             pkill -x walker 2>/dev/null
             walker --gapplication-service >/dev/null 2>&1 &
         fi
@@ -103,7 +103,7 @@ apply_theme() {
 
         # Walker reads its CSS at service start, so restart it to pick up
         # the regenerated colors.
-        if command -v walker >/dev/null 2>&1; then
+        if [[ "$(cat "$HOME/.config/ml4w/settings/launcher" 2>/dev/null)" == "walker" ]] && command -v walker >/dev/null 2>&1; then
             pkill -x walker 2>/dev/null
             walker --gapplication-service >/dev/null 2>&1 &
         fi
