@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
 # -----------------------------------------------------
-# Walker-only launcher (rofi removed)
+# Hyprland on-demand Rofi launcher; original wiring remains in ~/.local/state/launcher-trial.
 # -----------------------------------------------------
-$HOME/.config/walker/launch.sh --height 350
+exec "$HOME/.local/bin/rofi-trial" apps "$@"

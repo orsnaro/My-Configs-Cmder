@@ -68,6 +68,7 @@ fi
         for name in install.QS_HELPERS:
             self.write('.config/ml4w/scripts/' + name, '#!/bin/bash\nqs ipc call dock toggle\n')
         self.write('.config/ml4w/settings/wallpaper-slideshow', 'true\n')
+        self.write('.config/ml4w/settings/launcher', 'walker\n')
         self.write('.config/ml4w/settings/waybar-disabled', '')
         self.bin = self.root / 'bin'
         self.bin.mkdir()
@@ -155,6 +156,32 @@ fi
         result = subprocess.run(['bash', str(self.home / '.config/ml4w/scripts/ml4w-toggle-hyprsunset'), 'off'], env=self.env, capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertNotIn('pleamar', self.log.read_text())
+
+    def test_rofi_selection_blocks_legacy_restart_in_fresh_and_managed_hooks(self) -> None:
+        for already_managed in (False, True):
+            with self.subTest(already_managed=already_managed):
+                if already_managed:
+                    self.write('.config/ml4w/scripts/ml4w-wallpaper',
+                               '#!/bin/bash\n# desktop-stack managed\n'
+                               'source "$HOME/.config/ml4w/scripts/desktop-stack-mode"\n'
+                               'reload_walker() {\n    desktop_stack_is_qs || return 0\n    walker\n}\n'
+                               'reload_walker\n')
+                    self.write('.config/ml4w/listeners/gtk-theme-switcher.sh',
+                               '#!/bin/bash\n# desktop-stack managed\n'
+                               'source "$HOME/.config/ml4w/scripts/desktop-stack-mode"\n'
+                               'if desktop_stack_is_qs && command -v walker >/dev/null; then walker; fi\n')
+                self.write('.config/ml4w/settings/desktop-stack', 'quickshell\n')
+                self.write('.config/ml4w/settings/launcher', 'rofi\n')
+                self.apply()
+                self.log.unlink(missing_ok=True)
+                for name in ('.config/ml4w/scripts/ml4w-wallpaper',
+                             '.config/ml4w/listeners/gtk-theme-switcher.sh'):
+                    subprocess.run(['bash', '-c', 'source "$1"; wait', 'fixture', str(self.home/name)], env=self.env,
+                                   capture_output=True, text=True, timeout=10, check=True)
+                calls = self.log.read_text() if self.log.exists() else ''
+                self.assertNotIn('walker', calls)
+                self.assertNotIn('elephant', calls)
+                self.assertEqual((self.home/'.config/ml4w/settings/launcher').read_text(), 'rofi\n')
 
     def test_mode_reader_matches_coordinator_for_whitespace_and_invalid_multiline(self) -> None:
         self.apply()

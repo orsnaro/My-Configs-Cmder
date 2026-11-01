@@ -41,7 +41,7 @@ class FakeBackend:
             raise stack.SwitchError('Cannot mask an existing user unit file')
         output = ''
         if argv[:3] == ['systemctl', '--user', 'show']:
-            output = 'loaded' if argv[3] in {'pleamar.service', 'swaync.service', 'waybar.service'} else 'not-found'
+            output = 'loaded' if argv[3] in {'pleamar.service', 'swaync.service', 'waybar.service', 'walker.service', 'elephant.service'} else 'not-found'
         if argv[:3] == ['systemctl', '--user', 'stop']:
             self.healthy.discard('pleamar' if argv[3] == 'pleamar.service' else 'quickshell')
             if self.dbus_activation_race and argv[3] == 'swaync.service' and argv[3] not in self.masked:
@@ -91,6 +91,13 @@ class StackTests(unittest.TestCase):
             path = self.home / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text('fixture')
+        for name in ('.local/bin/rofi-trial', '.local/lib/rofi-trial/smart.so', '.local/lib/rofi-trial/dismiss-guard',
+                     '.local/lib/rofi-trial/toggle.py', '.local/lib/rofi-trial/clipboard.py',
+                     '.local/lib/rofi-trial/files.py', '.config/rofi/trial/base.rasi',
+                     '.config/rofi/trial/emoji.rasi', '.config/rofi/trial/clipboard.rasi'):
+            path = self.home / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text('fixture')
 
     def process(self, pid: int, *args: str, ppid: int = 1) -> stack.Process:
         process = stack.Process(pid, tuple(args), 'start', ppid)
@@ -109,7 +116,8 @@ class StackTests(unittest.TestCase):
                         self.backend.events.index(('systemctl', '--user', 'stop', 'pleamar.service')))
         self.assertIn(('signal', '12', '15'), self.backend.events)
         self.assertNotIn(('signal', '99', '15'), self.backend.events)
-        self.assertTrue(any(event[0] == 'spawn' and 'elephant' in event for event in self.backend.events))
+        self.assertFalse(any(event[0] == 'spawn' and any(name in event for name in ('elephant', 'walker', 'rofi'))
+                             for event in self.backend.events))
 
     def test_switch_to_pleamar_removes_entire_qs_stack_and_keeps_preference(self) -> None:
         self.manager.write_mode('quickshell')
@@ -158,11 +166,45 @@ class StackTests(unittest.TestCase):
             self.manager.switch('quickshell')
 
     def test_missing_dependency_does_not_stop_current_stack(self) -> None:
-        self.backend.missing.add('walker')
+        self.backend.missing.add('rofi')
         with self.assertRaises(stack.SwitchError):
             self.manager.switch('quickshell')
         self.assertEqual(self.backend.events, [])
         self.assertEqual(self.manager.selected(), 'pleamar')
+
+    def test_qs_preflight_needs_no_legacy_launcher_binaries(self) -> None:
+        self.backend.missing.update({'walker', 'elephant'})
+        self.manager.preflight('quickshell')
+
+    def test_missing_smart_plugin_refuses_before_stopping_current_stack(self) -> None:
+        (self.home / '.local/lib/rofi-trial/smart.so').unlink()
+        with self.assertRaisesRegex(stack.SwitchError, 'smart.so'):
+            self.manager.switch('quickshell')
+        self.assertEqual(self.backend.events, [])
+
+    def test_qs_readiness_is_on_demand_and_rejects_legacy_daemons(self) -> None:
+        backend = stack.Backend(self.home)
+        self.backend.items = [stack.Process(1, ('swaync',), 'a'), stack.Process(2, (stack.POLKIT,), 'b')]
+        def run(argv: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
+            return subprocess.CompletedProcess(argv, 0, '[{"pid": 20}]', '')
+        with mock.patch.object(backend, 'run', side_effect=run), \
+             mock.patch.object(backend, 'processes', side_effect=self.backend.processes), \
+             mock.patch.object(backend, 'notifications_owned_by', return_value=True):
+            self.assertTrue(backend.ready('quickshell', self.home))
+            self.backend.items.append(stack.Process(3, ('walker',), 'c'))
+            self.assertFalse(backend.ready('quickshell', self.home))
+
+    def test_qs_start_stops_old_launchers_without_unmasking_or_killing_app_children(self) -> None:
+        self.process(50, 'walker')
+        self.process(51, 'elephant')
+        self.process(52, 'obsidian', ppid=50)
+        self.manager.start('quickshell')
+        self.assertEqual({p.pid for p in self.backend.items}, {52})
+        for unit in ('walker.service', 'elephant.service'):
+            self.assertIn(('systemctl', '--user', 'stop', unit), self.backend.events)
+            self.assertNotIn(('systemctl', '--user', 'unmask', unit), self.backend.events)
+        self.assertFalse(any(event[0] == 'spawn' and event[1] in ('walker', 'elephant', 'rofi')
+                             for event in self.backend.events))
 
     def test_switch_refuses_to_stop_its_own_managed_service_context(self) -> None:
         self.backend.unsafe_context = True

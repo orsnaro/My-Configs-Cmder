@@ -15,11 +15,19 @@ Subsequent user-approved live testing verified both full-stack switch directions
 ## Two application-launcher entries
 
 - **Switch to QS** — closes Pleamar's managed shell, every scene and keeper;
-  starts the existing QS main/secondary status bars, dock, Walker/Elephant,
+  starts the existing QS main/secondary status bars and dock, with on-demand Rofi,
   SwayNC and its authentication agent.
 - **Switch to Pleamar** — closes QS/docks/Walker/Elephant and the QS-specific
   background loop; starts the full saved Pleamar setup, including its lock
   scene and configured widgets.
+
+Since 2026-10-31, QS no longer requires or starts resident Walker/Elephant.
+Restore the Rofi payload from `../cachyos_hyprland_ml4w/` before activating QS
+on a recovered machine; its restore script builds the native smart-search plugin.
+The coordinator preflights those files before stopping the active shell. Old
+Walker/Elephant shutdown checks remain for cleanup/recovery compatibility.
+KDE remains unchanged; the earlier live-switch screenshots below document the
+older launcher stack, not a new roundtrip/reboot test of Rofi.
 
 Both remember the selected stack for the next Hyprland login. Repeated clicks
 do not duplicate a healthy stack. Normal switching preserves installed

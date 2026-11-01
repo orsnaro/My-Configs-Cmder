@@ -18,3 +18,9 @@ conf_backups/.glzr/zebar/tmp*
 
 # Owner-private desktop recovery snapshots (credentials/runtime pairing data).
 conf_backups/.private/
+
+# Rebuilt locally against the installed Rofi/Wayland ABI.
+conf_backups/cachyos_hyprland_ml4w/local/.local/lib/rofi-trial/*.so
+conf_backups/cachyos_hyprland_ml4w/local/.local/lib/rofi-trial/dismiss-guard
+conf_backups/cachyos_hyprland_ml4w/local/.local/lib/rofi-trial/.smart-build-*
+conf_backups/cachyos_hyprland_ml4w/local/.local/lib/rofi-trial/.dismiss-build-*/

@@ -179,13 +179,11 @@ reload_swaync() {
 }
 
 reload_walker() {
-    # Walker reads its CSS at service start, so restart it to pick up
-    # the regenerated ~/.config/walker/colors.css (matugen).
-    # NOTE: ml4w updates may overwrite this script; re-add if lost.
+    # Rofi is on demand; only an explicitly selected legacy launcher may restart.
+    [[ "$(cat "$HOME/.config/ml4w/settings/launcher" 2>/dev/null)" == "walker" ]] || return 0
     if command -v walker >/dev/null 2>&1; then
-        pkill -x walker 2>/dev/null
+        pkill -x walker 2>/dev/null || true
         walker --gapplication-service >/dev/null 2>&1 &
-        info "Walker restarted"
     fi
 }
 

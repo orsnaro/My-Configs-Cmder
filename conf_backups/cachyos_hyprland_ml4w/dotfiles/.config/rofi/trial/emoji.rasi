@@ -1,0 +1,8 @@
+@import "base.rasi"
+configuration { matching: "normal"; }
+mainbox { width: 900px; children: [ inputbar, listview ]; }
+listview { columns: 6; lines: 6; fixed-columns: true; flow: horizontal; spacing: 6px; }
+element { orientation: vertical; children: [ element-icon, element-text ]; padding: 8px; spacing: 8px; }
+element-icon { size: 42px; horizontal-align: 0.5; }
+element-text { font: "Fira Sans 10"; horizontal-align: 0.5; vertical-align: 0.5; }
+mode-switcher { enabled: false; }

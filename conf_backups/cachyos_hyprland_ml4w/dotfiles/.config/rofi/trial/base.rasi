@@ -1,0 +1,71 @@
+configuration {
+    modes: "drun,run,calc,filebrowser";
+    font: "Fira Sans 11";
+    show-icons: true;
+    display-drun: "Apps";
+    display-run: "Run";
+    display-calc: "Calculator";
+    display-filebrowser: "Browse files";
+    drun-display-format: "{name}";
+    matching: "fuzzy";
+    sort: true;
+    sorting-method: "fzf";
+    case-sensitive: false;
+    cycle: true;
+    click-to-exit: true;
+}
+@theme "default"
+* {
+    background-color: transparent;
+    text-color: #dee3e6;
+    border-color: #8ad0ee;
+    spacing: 8px;
+}
+window {
+    fullscreen: true;
+    children: [ dismiss-column ];
+    padding: 0;
+    border: 0;
+    background-color: transparent;
+}
+dismiss-column { children: [ button-close-top, dismiss-row, button-close-bottom ]; orientation: vertical; spacing: 0; }
+dismiss-row { children: [ button-close-left, mainbox, button-close-right ]; orientation: horizontal; expand: false; spacing: 0; }
+button-close-top, button-close-bottom, button-close-left, button-close-right {
+    content: "";
+    action: "kb-cancel";
+    expand: true;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background-color: transparent;
+}
+mainbox {
+    width: 750px;
+    expand: false;
+    padding: 18px;
+    border: 1px;
+    border-radius: 20px;
+    background-color: #0f1417;
+}
+mainbox { children: [ inputbar, message, listview, mode-switcher ]; spacing: 10px; }
+inputbar { children: [ prompt, entry ]; padding: 10px; border: 2px; border-radius: 10px; }
+prompt { enabled: false; }
+entry { placeholder: "Search"; placeholder-color: #8a9296; text-color: #dee3e6; }
+textbox { text-color: #dee3e6; background-color: transparent; }
+message { padding: 4px; }
+listview { lines: 8; columns: 1; fixed-height: true; dynamic: false; scrollbar: false; }
+element { padding: 9px; spacing: 12px; border-radius: 10px; }
+element normal.normal, element alternate.normal, element normal.active,
+element alternate.active, element normal.urgent, element alternate.urgent {
+    background-color: transparent;
+    text-color: #dee3e6;
+}
+element selected.normal, element selected.active, element selected.urgent {
+    background-color: #8ad0ee;
+    text-color: #003545;
+}
+element-icon { size: 28px; }
+element-text { vertical-align: 0.5; text-color: inherit; }
+mode-switcher { enabled: true; spacing: 6px; }
+button { padding: 8px; border-radius: 8px; }
+button selected { background-color: #354a53; }

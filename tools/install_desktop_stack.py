@@ -75,7 +75,7 @@ def shell_prefix(text: str, body: str = '') -> str:
     return first + '\n' + SHELL_SOURCE + body + rest
 
 
-def transform(name: str, text: str, home: Path) -> str:
+def _transform_stack(name: str, text: str, home: Path) -> str:
     if MARK in text:
         if name == '.config/hypr/hyprland.lua':
             return text.replace('desktop_stack_file:read("*l")', 'desktop_stack_file:read("*a")')
@@ -133,6 +133,21 @@ def transform(name: str, text: str, home: Path) -> str:
     if base == 'qs-lazy-toggle' or base in QS_HELPERS:
         return shell_prefix(text, 'desktop_stack_is_qs || exit 0\n')
     raise InstallError(f'Unknown integration target: {name}')
+
+
+def transform(name: str, text: str, home: Path) -> str:
+    text = _transform_stack(name, text, home)
+    if Path(name).name in ('ml4w-wallpaper', 'gtk-theme-switcher.sh'):
+        guard = '[[ "$(cat "$HOME/.config/ml4w/settings/launcher" 2>/dev/null)" == "walker" ]]'
+        if Path(name).name == 'ml4w-wallpaper':
+            function = 'reload_walker() {\n'
+            guarded = function + '    ' + guard + ' || return 0\n'
+            if guarded not in text:
+                text = text.replace(function, guarded)
+        # Also upgrade hooks already carrying the desktop-stack marker.
+        for prefix in ('if desktop_stack_is_qs && ', 'if '):
+            text = text.replace(prefix + 'command -v walker', prefix + guard + ' && command -v walker')
+    return text
 
 
 def desktop_argument(value: str) -> str:
