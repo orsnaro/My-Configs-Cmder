@@ -2,6 +2,7 @@ local root = os.getenv("HOME") .. "/.config/hypr/"
 local bindings, workspaces, rules, unbound = {}, {}, {}, {}
 local configured, rule_order = {}, {}
 local layer_rules = {}
+local animations = {}
 local dispatched = {}
 local adjacent_monitors, monitor_queries = {}, {}
 local active_window, all_windows, all_monitors = nil, {}, { { active_workspace = { id = 8 } } }
@@ -36,6 +37,7 @@ hl = {
         rule_order[#rule_order + 1] = rule.name
     end,
     layer_rule = function(rule) layer_rules[rule.name] = rule end,
+    animation = function(animation) animations[animation.leaf] = animation end,
     config = function(options)
         for section, values in pairs(options) do
             configured[section] = configured[section] or {}
@@ -55,6 +57,12 @@ hl = {
 
 package.path = root .. "?.lua;" .. package.path
 dofile(root .. "custom.lua")
+
+local closing = assert(animations.fadeLayersOut, "the approved faster closing fade must be configured")
+assert(closing.enabled == true and closing.speed == 1.5 and closing.bezier == "default",
+    "shared layer closing fades must last 150 ms with their existing curve")
+assert(animations.fadeLayersIn == nil and animations.windowsOut == nil and animations.workspacesOut == nil,
+    "faster closing must not change opening, window or workspace animations")
 
 local rofi_layer = assert(layer_rules["rofi-fade"], "Rofi must retain its selected fade animation")
 assert(rofi_layer.no_anim == false and rofi_layer.animation == "fade",

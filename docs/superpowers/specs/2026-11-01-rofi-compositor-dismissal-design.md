@@ -7,7 +7,8 @@ This extends the already approved startup-reliability work: both shortcuts shoul
 open one responsive picker, deliberate repeated shortcuts should close it, and
 an outside click must dismiss a **fully rendered** picker on another monitor.
 Keyboard focus remains with Rofi; pointer movement alone must not dismiss it.
-There must be no additional permanent daemon or global desktop animation change.
+There must be no additional permanent daemon. Only the subsequently approved
+shared layer fade-out timing may change; window/workspace/opening animations stay unchanged.
 Keep arithmetic, relevance/recency, the emoji grid, clipboard previews and safe
 cancellation intact. Test only with synthetic clipboard data and intercepted copy.
 
@@ -89,12 +90,15 @@ Retain the tested nonblocking startup-lock handoff. Requests overlapping startup
 return promptly rather than competing for Rofi's PID file; after readiness a
 deliberate repeated shortcut still closes it. Preserve the caller's umask.
 
-The user subsequently chose a Rofi-only fade rather than disabling animations
+The user initially chose a Rofi-only fade rather than disabling animations
 or changing shared layer timings. Use `animation="fade"` and `no_anim=false`
 only for namespace `^rofi$`; keep the transparent guard namespace unanimated
-until that obsolete surface code is retired. Current shared timings remain
-200 ms in and 1 second out; do not claim a 100 ms fade or silently alter panels
-and notifications. Animation completion must not gate keyboard input.
+until that obsolete surface code is retired. The user later explicitly approved
+shortening **shared `fadeLayersOut` only** from 1 second to **150 ms**, accepting
+that fading panels/notifications also close faster. Override it with speed `1.5`,
+enabled `true`, existing bezier `default` in custom.lua in both overlays and live.
+Keep the 200 ms opening fade, all other animation settings and the Rofi-only fade
+style unchanged. Animation completion must not gate keyboard input.
 
 The earlier no-animation A/B median of 113.4 ms versus 237.2 ms is historical,
 not the result of the newly selected fade. Cold-start samples of 3794.6 ms and
