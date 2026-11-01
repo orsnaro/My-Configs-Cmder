@@ -94,7 +94,8 @@ class StackTests(unittest.TestCase):
         for name in ('.local/bin/rofi-trial', '.local/lib/rofi-trial/smart.so', '.local/lib/rofi-trial/dismiss-guard',
                      '.local/lib/rofi-trial/toggle.py', '.local/lib/rofi-trial/clipboard.py',
                      '.local/lib/rofi-trial/files.py', '.config/rofi/trial/base.rasi',
-                     '.config/rofi/trial/emoji.rasi', '.config/rofi/trial/clipboard.rasi'):
+                      '.config/rofi/trial/emoji.rasi', '.config/rofi/trial/clipboard.rasi',
+                      '.config/hypr/rofi_session.lua'):
             path = self.home / name
             path.parent.mkdir(parents=True, exist_ok=True)
             path.write_text('fixture')
@@ -139,6 +140,12 @@ class StackTests(unittest.TestCase):
         self.manager.switch('pleamar')
         self.assertEqual(self.backend.events, [])
 
+    def test_missing_session_module_refuses_before_stopping_current_stack(self) -> None:
+        (self.home/'.config/hypr/rofi_session.lua').unlink()
+        with self.assertRaises(stack.SwitchError):
+            self.manager.switch('quickshell')
+        self.assertEqual(self.backend.events, [])
+
     def test_external_apps_launched_by_walker_are_not_stack_background_jobs(self) -> None:
         self.manager.write_mode('quickshell')
         self.backend.healthy = {'quickshell'}
@@ -166,11 +173,13 @@ class StackTests(unittest.TestCase):
             self.manager.switch('quickshell')
 
     def test_missing_dependency_does_not_stop_current_stack(self) -> None:
-        self.backend.missing.add('rofi')
-        with self.assertRaises(stack.SwitchError):
-            self.manager.switch('quickshell')
-        self.assertEqual(self.backend.events, [])
-        self.assertEqual(self.manager.selected(), 'pleamar')
+        for command in ('rofi', 'flock'):
+            with self.subTest(command=command):
+                self.backend.missing = {command}
+                with self.assertRaises(stack.SwitchError):
+                    self.manager.switch('quickshell')
+                self.assertEqual(self.backend.events, [])
+                self.assertEqual(self.manager.selected(), 'pleamar')
 
     def test_qs_preflight_needs_no_legacy_launcher_binaries(self) -> None:
         self.backend.missing.update({'walker', 'elephant'})

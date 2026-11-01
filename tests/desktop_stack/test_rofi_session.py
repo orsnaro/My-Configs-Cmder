@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import os
+import fcntl
 from pathlib import Path
 import shutil
 import subprocess
@@ -42,9 +43,14 @@ class SessionTests(unittest.TestCase):
         binary = self.root/'bin'
         binary.mkdir()
         hyprctl = binary/'hyprctl'
-        hyprctl.write_text('#!/usr/bin/python\nimport os\nprint(os.environ.get("MONITORS",\'[{"name":"DP-new","focused":true}]\'))\n')
+        hyprctl.write_text('#!/usr/bin/python\nimport os, sys, time\n'
+                           'if sys.argv[1:2]==["eval"]:\n'
+                           '    with open(os.environ["IPC_LOG"], "a") as f: f.write(sys.argv[2]+"\\n")\n'
+                           '    time.sleep(float(os.environ.get("IPC_DELAY", "0")))\n'
+                           '    print(os.environ.get("IPC_RESPONSE", "ok"))\n'
+                           'else: print(os.environ.get("MONITORS",\'[{"name":"DP-new","focused":true}]\'))\n')
         hyprctl.chmod(0o755)
-        self.env = {**os.environ, 'PATH': f'{binary}:/usr/bin:/bin'}
+        self.env = {**os.environ, 'PATH': f'{binary}:/usr/bin:/bin', 'IPC_LOG': str(self.root/'ipc.log')}
 
     def picker(self, args: list[str] | None = None, *, executable: str | None = None) -> subprocess.Popen[bytes]:
         process = subprocess.Popen([executable or str(self.build/'rofi'), *(args or ['-pid', str(self.pidfile)])])
@@ -156,6 +162,81 @@ class SessionTests(unittest.TestCase):
                 self.env['MONITORS'] = response
                 self.assertEqual(self.toggle().returncode, 2)
                 self.assertEqual((self.runtime/'monitor').read_text(), 'DP-fixture\n')
+
+    def native(self, action: str, pid: int) -> subprocess.CompletedProcess[str]:
+        return subprocess.run([str(self.guard), action, str(pid)], env=self.env,
+                              capture_output=True, text=True, timeout=5)
+
+    def test_dismiss_signals_verified_picker_but_not_foreign_process(self) -> None:
+        picker = self.picker()
+        self.assertEqual(self.native('--dismiss', picker.pid).returncode, 0)
+        self.assertEqual(picker.wait(timeout=2), -15)
+        foreign = self.picker(executable='/usr/bin/sleep', args=['30'])
+        self.assertEqual(self.native('--dismiss', foreign.pid).returncode, 0)
+        self.assertIsNone(foreign.poll())
+
+    def test_adoption_registers_only_a_verified_live_picker(self) -> None:
+        picker = self.picker()
+        self.assertEqual(self.native('--adopt', picker.pid).returncode, 0)
+        self.assertIn(f'.register({picker.pid})', (self.root/'ipc.log').read_text())
+        self.assertIsNone(picker.poll())
+        foreign = self.picker(executable='/usr/bin/sleep', args=['30'])
+        previous = (self.root/'ipc.log').read_text()
+        self.assertEqual(self.native('--adopt', foreign.pid).returncode, 0)
+        self.assertEqual((self.root/'ipc.log').read_text(), previous)
+
+    def watcher(self, fd: int | None = None) -> subprocess.Popen[str]:
+        argv = [str(self.guard), str(self.pidfile), 'DP-fixture', str(os.getpid())]
+        if fd is not None:
+            argv.append(str(fd))
+        process = subprocess.Popen(argv, env=self.env, pass_fds=() if fd is None else (fd,),
+                                   stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+        self.addCleanup(self.reap, process)
+        return process
+
+    def test_watcher_registers_releases_lock_and_unregisters_on_exit(self) -> None:
+        picker = self.picker()
+        lockpath = self.runtime/'startup.lock'
+        with lockpath.open('w') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            watcher = self.watcher(lock.fileno())
+        deadline = time.monotonic()+3
+        while time.monotonic() < deadline:
+            with lockpath.open('r') as lock:
+                try:
+                    fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                    break
+                except BlockingIOError:
+                    time.sleep(.005)
+        else:
+            self.fail('Registration did not release the startup lock')
+        self.assertIsNone(watcher.poll())
+        self.assertIsNone(picker.poll())
+        self.reap(picker)
+        _, stderr = watcher.communicate(timeout=4)
+        self.assertEqual(watcher.returncode, 0, stderr)
+        log = (self.root/'ipc.log').read_text()
+        self.assertIn(f'.register({picker.pid})', log)
+        self.assertIn(f'.unregister({picker.pid})', log)
+
+    def test_missing_integration_cancels_only_the_verified_picker(self) -> None:
+        picker = self.picker()
+        self.env['IPC_RESPONSE'] = 'Lua error: missing rofi_trial_session'
+        watcher = self.watcher()
+        _, stderr = watcher.communicate(timeout=4)
+        self.assertEqual(watcher.returncode, 2)
+        self.assertIn('registration', stderr)
+        self.assertEqual(picker.wait(timeout=2), -15)
+
+    def test_ipc_timeout_cancels_verified_picker_without_leaving_child(self) -> None:
+        picker = self.picker()
+        self.env['IPC_DELAY'] = '30'
+        watcher = self.watcher()
+        start = time.monotonic()
+        _, stderr = watcher.communicate(timeout=5)
+        self.assertEqual(watcher.returncode, 2, stderr)
+        self.assertLess(time.monotonic()-start, 4.5)
+        self.assertEqual(picker.wait(timeout=2), -15)
 
 
 if __name__ == '__main__':

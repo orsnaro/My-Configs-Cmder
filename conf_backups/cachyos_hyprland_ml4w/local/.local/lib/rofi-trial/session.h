@@ -16,5 +16,6 @@ int session_from_pidfile(const char *pidfile, struct launcher_session *session);
 void session_close(struct launcher_session *session);
 int session_toggle(const char *mode, const char *runtime);
 int session_command(char *const argv[], char *output, size_t capacity);
+int session_ipc(const char *action, pid_t pid);
 
 #endif

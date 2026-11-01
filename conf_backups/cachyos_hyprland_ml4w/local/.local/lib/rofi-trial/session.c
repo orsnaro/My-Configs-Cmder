@@ -198,7 +198,8 @@ int session_command(char *const argv[], char *output, size_t capacity) {
             break;
         }
         struct pollfd files[] = {{pipefd[0], POLLIN, 0}, {childfd, POLLIN, 0}};
-        if (poll(files, 2, (int)(deadline-milliseconds())) < 0 && errno != EINTR) break;
+        long remaining = deadline-milliseconds();
+        if (poll(files, 2, remaining > 0 ? (int)remaining : 0) < 0 && errno != EINTR) break;
     }
 done:
     if (child > 0) {
@@ -209,6 +210,17 @@ done:
     close(pipefd[0]);
     output[used] = '\0';
     return result;
+}
+
+int session_ipc(const char *action, pid_t pid) {
+    if (pid <= 1 || (strcmp(action, "register") != 0 && strcmp(action, "unregister") != 0)) return 2;
+    char code[256], output[4096];
+    snprintf(code, sizeof(code), "assert(rofi_trial_session and rofi_trial_session.%s(%d) ~= false, 'Rofi session integration missing; reload config')", action, pid);
+    char *command[] = {"hyprctl", "eval", code, NULL};
+    if (session_command(command, output, sizeof(output)) != 0) return 2;
+    size_t length = strlen(output);
+    while (length && isspace((unsigned char)output[length-1])) output[--length] = '\0';
+    return strcmp(output, "ok") == 0 ? 0 : 2;
 }
 
 static int write_metadata(int directory, const char *name, const char *value) {

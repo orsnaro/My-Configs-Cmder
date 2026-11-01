@@ -187,6 +187,11 @@ hl.unbind("SUPER + V")
 hl.bind("SUPER + V", hl.dsp.exec_cmd("$HOME/.local/bin/rofi-trial clipboard"),
     { description = "Clipboard history with image preview (Rofi)" })
 
+-- Keep Rofi's fade without changing shared layer animation timings.
+require("rofi_session").setup()
+hl.layer_rule({ name = "rofi-fade", match = { namespace = "^rofi$" }, no_anim = false, animation = "fade" })
+hl.layer_rule({ name = "rofi-dismiss-instant", match = { namespace = "^rofi-dismiss-guard$" }, no_anim = true })
+
 -- Keyboard layout switch: SUPER+Space toggles us/ara (SHIFT+SPACE freed:
 -- it fired while typing and is problematic).
 -- Uses hyprctl switchxkblayout so ALT+SHIFT+keys (move/resize) keep working.
