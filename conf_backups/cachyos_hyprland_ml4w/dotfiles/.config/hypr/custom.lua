@@ -187,8 +187,9 @@ hl.unbind("SUPER + V")
 hl.bind("SUPER + V", hl.dsp.exec_cmd("$HOME/.local/bin/rofi-trial clipboard"),
     { description = "Clipboard history with image preview (Rofi)" })
 
--- Keep Rofi's fade without changing shared layer animation timings.
+-- Rofi keeps its fade; approved shared layer fade-out is 150 ms (in unchanged).
 require("rofi_session").setup()
+hl.animation({ leaf = "fadeLayersOut", enabled = true, speed = 1.5, bezier = "default" })
 hl.layer_rule({ name = "rofi-fade", match = { namespace = "^rofi$" }, no_anim = false, animation = "fade" })
 hl.layer_rule({ name = "rofi-dismiss-instant", match = { namespace = "^rofi-dismiss-guard$" }, no_anim = true })
 

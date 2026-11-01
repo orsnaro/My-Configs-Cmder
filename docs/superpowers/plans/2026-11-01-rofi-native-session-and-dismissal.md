@@ -15,7 +15,7 @@
 - Continue on `fix/rofi-startup-reliability`; preserve `0623ee1`, the original dirty checkout and current approved startup work. No automatic push, PR changes or merge.
 - Keep Rofi on demand: no resident frontend, generic keyboard capture/replay, idle polling process, private Rofi/Hyprland binary, or compositor plugin.
 - Retain the startup FD-9 handoff, caller umask, PID safety, arithmetic, matching/ranking/recency, emoji grid and clipboard previews.
-- Use a Rofi-only fade with unchanged shared timings (currently 200 ms in, 1 s out), not a new 100 ms global animation setting. Keyboard input must not wait for fade completion.
+- Use a Rofi-only fade style. Subsequent user-approved amendment: shared `fadeLayersOut` becomes 150 ms (speed 1.5, existing default bezier); opening remains 200 ms and every other animation setting is unchanged. The user accepted the faster closing of fading panels/notifications. Keyboard input must not wait for fade completion.
 - Mouse callbacks handle unmodified left/right/middle presses. Alt/Super drag/resize and other modified shortcuts stay untouched.
 - Compositor callbacks perform only in-memory queries; no file reads, synchronous IPC, subprocess on ordinary clicks or action on pointer motion.
 - Snapshot live changes, verify the bundle before deployment, and preserve historical recovery data. Backups contain source, not binaries or runtime data.
