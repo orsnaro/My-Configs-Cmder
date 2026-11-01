@@ -89,11 +89,46 @@ Retain the tested nonblocking startup-lock handoff. Requests overlapping startup
 return promptly rather than competing for Rofi's PID file; after readiness a
 deliberate repeated shortcut still closes it. Preserve the caller's umask.
 
-Retain the measured Rofi-only no-animation rule. Its crossed five-pair A/B test
-reduced median stable center-border appearance from 237.2 ms to 113.4 ms. This is
-not an assertion that every cold launch is fast: an initial 3794.6 ms baseline
-sample and a 729.7 ms sample in the later 30-cycle test remain recorded. Do not
-silently add stale application caches, remove fonts, or change power settings.
+The user subsequently chose a Rofi-only fade rather than disabling animations
+or changing shared layer timings. Use `animation="fade"` and `no_anim=false`
+only for namespace `^rofi$`; keep the transparent guard namespace unanimated
+until that obsolete surface code is retired. Current shared timings remain
+200 ms in and 1 second out; do not claim a 100 ms fade or silently alter panels
+and notifications. Animation completion must not gate keyboard input.
+
+The earlier no-animation A/B median of 113.4 ms versus 237.2 ms is historical,
+not the result of the newly selected fade. Cold-start samples of 3794.6 ms and
+729.7 ms remain recorded; no claim that all occasional latency is eliminated.
+Do not silently add stale application caches, remove fonts, or change power settings.
+
+### 4. On-demand input-readiness goal
+
+The user chose to continue with on-demand Rofi after discussing the trade-off:
+no resident frontend or general keyboard buffering is authorized. Streamline the
+normal launch path where measured overhead is avoidable (the earlier Python
+toggle path measured about 27 ms), and test delivery of the first typed characters
+independently from fading/visual readiness. Native startup/cancellation work may
+reuse the existing native helper, preserving PID-descriptor safety and startup
+serialization. Keep JSON parsing robust rather than scraping compositor output.
+
+The selected implementation should move ordinary app/run/calculator toggle and
+monitor lookup into subcommands of that existing native helper, removing the
+Python interpreter from the common open/close path. Use the installed `json-c`
+library (currently 0.19) for compositor JSON; document it as a build dependency.
+Python remains appropriate for existing clipboard/file helpers and Rofimoji;
+this is not a promise to remove Python from every picker.
+
+Never promise zero-delay or guaranteed pre-focus keystrokes: until Rofi acquires
+keyboard focus, input can go to the previous application. Record launch-to-focus
+timing and early-character results, not just window registration time. Do not
+capture, replay or log arbitrary user typing outside an explicitly synthetic test.
+
+The first direct input-readiness probe with the selected fade delivered all
+digits of three synthetic arithmetic queries intact when typing began immediately
+after the observed keyboard-focus event. Focus was observed at 667.6 ms on the
+initial sample and 75.6/73.2 ms on subsequent samples. This proves input need not
+wait for fade completion; it does not prove pre-focus keys are preserved or that
+the remaining cold-start delay has been fixed.
 
 ## Integration and recovery
 
