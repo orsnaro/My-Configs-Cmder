@@ -166,6 +166,7 @@ dotfiles/.config/hypr/hyprsunset.conf
 dotfiles/.config/hypr/input.lua
 dotfiles/.config/hypr/monitors.conf
 dotfiles/.config/hypr/monitors.lua
+dotfiles/.config/hypr/rofi_session.lua
 dotfiles/.config/hypr/scripts/cleanup.sh
 dotfiles/.config/hypr/scripts/gamemode.sh
 dotfiles/.config/hypr/scripts/gtk.sh
@@ -565,8 +566,8 @@ local/.local/lib/rofi-trial/build-smart.sh
 local/.local/lib/rofi-trial/clipboard.py
 local/.local/lib/rofi-trial/dismiss-guard.c
 local/.local/lib/rofi-trial/files.py
-local/.local/lib/rofi-trial/protocols/README.md
-local/.local/lib/rofi-trial/protocols/wlr-layer-shell-unstable-v1.xml
+local/.local/lib/rofi-trial/session.c
+local/.local/lib/rofi-trial/session.h
 local/.local/lib/rofi-trial/smart.cpp
 local/.local/lib/rofi-trial/toggle.py
 local/.local/share/applications/quake-kitty.desktop

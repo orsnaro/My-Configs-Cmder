@@ -29,6 +29,11 @@ function M.setup()
         if active == pid then active = nil; enable(false) end
         return true
     end
+    function session.adopt(pid)
+        -- Reload helpers can arrive after close/reopen; never revive a dead layer.
+        if not valid_pid(pid) or not mapped(pid) then return false end
+        return session.register(pid)
+    end
     local function click()
         local layer = active and mapped(active)
         local cursor = layer and hl.get_monitor_at_cursor()

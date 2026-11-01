@@ -213,7 +213,7 @@ done:
 }
 
 int session_ipc(const char *action, pid_t pid) {
-    if (pid <= 1 || (strcmp(action, "register") != 0 && strcmp(action, "unregister") != 0)) return 2;
+    if (pid <= 1 || (strcmp(action, "register") != 0 && strcmp(action, "unregister") != 0 && strcmp(action, "adopt") != 0)) return 2;
     char code[256], output[4096];
     snprintf(code, sizeof(code), "assert(rofi_trial_session and rofi_trial_session.%s(%d) ~= false, 'Rofi session integration missing; reload config')", action, pid);
     char *command[] = {"hyprctl", "eval", code, NULL};
