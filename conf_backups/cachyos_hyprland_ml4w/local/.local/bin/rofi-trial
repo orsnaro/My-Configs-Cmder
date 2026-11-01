@@ -21,9 +21,25 @@ copy_result() {
 
 case "$mode" in apps|run|calc|emoji|files|clipboard) ;; *) printf 'Unknown mode: %s\n' "$mode" >&2; exit 2 ;; esac
 require rofi
-require python
 require hyprctl
-pidfile=$(python "$helpers/toggle.py" "$mode")
+require flock
+[[ -x "$helpers/dismiss-guard" ]] || { printf 'Cross-monitor helper missing; run %s/build-smart.sh\n' "$helpers" >&2; exit 2; }
+caller_umask=$(umask)
+umask 077
+runtime=${ROFI_HYPRLAND_RUNTIME:-${XDG_RUNTIME_DIR:-$HOME/.cache}/rofi-hyprland}
+mkdir -p -- "$runtime" || exit 2
+permissions=$(stat -c '%a' -- "$runtime") || exit 2
+if [[ ! -O "$runtime" || -L "$runtime" ]] || (( (8#$permissions & 077) != 0 )); then
+    printf 'Launcher runtime directory is not private: %s\n' "$runtime" >&2
+    exit 2
+fi
+export ROFI_HYPRLAND_RUNTIME="$runtime"
+[[ ! -L "$runtime/startup.lock" ]] || { printf 'Unsafe launcher lockfile\n' >&2; exit 2; }
+exec 9>"$runtime/startup.lock" || exit 2
+umask "$caller_umask"
+# Ignore overlapping requests until the existing guard verifies Rofi's PID.
+flock -n 9 || exit 0
+pidfile=$("$helpers/dismiss-guard" --toggle "$mode" "$runtime")
 toggle_status=$?
 [[ $toggle_status -ne 0 ]] || exit 0
 [[ $toggle_status -eq 10 ]] || exit "$toggle_status"
@@ -31,7 +47,8 @@ export ROFI_HYPRLAND_PID="$pidfile"
 monitor=$(<"${pidfile%/*}/monitor")
 export ROFI_HYPRLAND_MONITOR="$monitor"
 [[ -x "$helpers/dismiss-guard" ]] || { printf 'Cross-monitor helper missing; run %s/build-smart.sh\n' "$helpers" >&2; exit 2; }
-"$helpers/dismiss-guard" "$pidfile" "$monitor" "$$" </dev/null >/dev/null 2>>"${pidfile%/*}/dismiss.log" &
+"$helpers/dismiss-guard" "$pidfile" "$monitor" "$$" 9 </dev/null >/dev/null 2>>"${pidfile%/*}/dismiss.log" &
+exec 9>&-
 extra=(-monitor "$monitor")
 
 case "$mode" in
