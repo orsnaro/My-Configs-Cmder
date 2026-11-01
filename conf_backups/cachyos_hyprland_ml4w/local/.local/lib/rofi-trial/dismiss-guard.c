@@ -1,6 +1,7 @@
 /* On-demand pointer-only guards for outputs not occupied by the Rofi picker. */
 #define _GNU_SOURCE
 #include <errno.h>
+#include <fcntl.h>
 #include <limits.h>
 #include <poll.h>
 #include <stdbool.h>
@@ -17,6 +18,7 @@
 #include <wayland-client.h>
 #include "wlr-layer-shell-client.h"
 #include "viewporter-client.h"
+#include "session.h"
 
 struct App;
 struct Output {
@@ -295,9 +297,21 @@ static void cleanup(struct App *app) {
     close(app->pidfd);
 }
 int main(int argc, char **argv) {
-    if (argc != 4 || !*argv[2] || parse_pid(argv[3]) < 0) {
-        fprintf(stderr, "Usage: dismiss-guard PIDFILE EXCLUDED_OUTPUT OWNER_PID\n");
+    if (argc == 4 && strcmp(argv[1], "--toggle") == 0) return session_toggle(argv[2], argv[3]);
+    if ((argc != 4 && argc != 5) || !*argv[2] || parse_pid(argv[3]) < 0) {
+        fprintf(stderr, "Usage: dismiss-guard PIDFILE EXCLUDED_OUTPUT OWNER_PID [STARTUP_FD]\n");
         return 2;
+    }
+    int startup_fd = -1;
+    if (argc == 5) {
+        char *end;
+        errno = 0;
+        long value = strtol(argv[4], &end, 10);
+        if (errno || end == argv[4] || *end || value < 3 || value > INT_MAX || fcntl((int)value, F_GETFD) < 0) {
+            fprintf(stderr, "Dismiss guard: invalid startup descriptor\n");
+            return 2;
+        }
+        startup_fd = (int)value;
     }
     int owner = pidfd_open_for(parse_pid(argv[3]));
     if (owner < 0) return errno == ESRCH ? 0 : 2;
@@ -311,6 +325,9 @@ int main(int argc, char **argv) {
     }
     close(owner);
     if (app.pidfd < 0) return 2;
+    /* The wrapper closed its copy before launching Rofi. No picker/app inherits
+       the lock, and later requests can toggle only after PID identity is known. */
+    if (startup_fd >= 0) close(startup_fd);
     app.display = wl_display_connect(NULL);
     if (!app.display) { close(app.pidfd); return 2; }
     app.registry = wl_display_get_registry(app.display);

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import json
+import fcntl
 import os
 from pathlib import Path
 import shlex
@@ -21,6 +22,10 @@ class DispatchTests(unittest.TestCase):
         self.root = Path(temporary.name)
         self.home = self.root/'home with spaces'
         shutil.copytree(PAYLOAD/'local/.local/lib/rofi-trial', self.home/'.local/lib/rofi-trial')
+        subprocess.run(['bash', str(self.home/'.local/lib/rofi-trial/build-dismiss.sh')],
+                       check=True, capture_output=True, text=True, timeout=30)
+        shutil.move(self.home/'.local/lib/rofi-trial/dismiss-guard',
+                    self.home/'.local/lib/rofi-trial/native-test-guard')
         (self.home/'.local/lib/rofi-trial/smart.so').touch()
         self.binary = self.root/'bin'
         self.binary.mkdir()
@@ -37,6 +42,8 @@ class DispatchTests(unittest.TestCase):
     def stub(self, path: Path) -> None:
         path.write_text('#!/usr/bin/python\nimport json, os, sys\nfrom pathlib import Path\n'
                         'name=Path(sys.argv[0]).name\n'
+                        'if name=="dismiss-guard" and sys.argv[1:2]==["--toggle"]:\n'
+                        '    os.execv(str(Path(sys.argv[0]).with_name("native-test-guard")), sys.argv)\n'
                         'with open(os.environ["AUDIT"], "a") as f:\n'
                         '    f.write(json.dumps({"name":name,"args":sys.argv[1:]})+"\\n")\n'
                         'if name=="hyprctl": print(json.dumps([{ "name":"DP-1", "focused":False }, { "name":"DP-2", "focused":True }]))\n'
@@ -87,6 +94,136 @@ class DispatchTests(unittest.TestCase):
                                       'sys.stdin.read()\nos.kill(os.getpid(), signal.SIGTERM)\n')
         rows = self.invoke('emoji')
         self.assertNotIn('wl-copy', [row['name'] for row in rows])
+
+    def test_apps_open_without_python_command(self) -> None:
+        for name in ('bash', 'mkdir', 'stat', 'flock'):
+            (self.binary/name).symlink_to(shutil.which(name))
+        self.env['PATH'] = str(self.binary)
+        self.assertIsNone(shutil.which('python', path=self.env['PATH']))
+        result = subprocess.run(['/usr/bin/bash', str(PAYLOAD/'local/.local/bin/rofi-trial'), 'apps'],
+                                env=self.env, capture_output=True, text=True, timeout=5)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        rows = [json.loads(line) for line in self.log.read_text().splitlines()]
+        self.assertTrue(any(row['name']=='rofi' for row in rows))
+
+    def test_busy_startup_does_not_spawn_or_rewrite_metadata(self) -> None:
+        runtime = self.root/'runtime'
+        runtime.mkdir(mode=0o700)
+        (runtime/'mode').write_text('files\n')
+        with (runtime/'startup.lock').open('w') as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            result = subprocess.run(['bash', str(PAYLOAD/'local/.local/bin/rofi-trial'), 'apps'],
+                                    env=self.env, capture_output=True, text=True, timeout=3)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertFalse(self.log.exists(), 'A busy request must not start any commands')
+        self.assertEqual((runtime/'mode').read_text(), 'files\n')
+
+    def paused_picker(self) -> subprocess.Popen[str]:
+        self.env['GATE_ROOT'] = str(self.root)
+        (self.binary/'rofi').write_text(
+            '#!/usr/bin/python\nimport json, os, time\nfrom pathlib import Path\n'
+            'root=Path(os.environ["GATE_ROOT"])\n'
+            'with open(os.environ["AUDIT"], "a") as f: f.write(json.dumps({"name":"rofi"})+"\\n")\n'
+            '(root/"picker-entered").touch()\n'
+            'while not (root/"release-picker").exists(): time.sleep(.005)\n')
+        (self.home/'.local/lib/rofi-trial/dismiss-guard').write_text(
+            '#!/usr/bin/python\nimport os, sys, time\nfrom pathlib import Path\n'
+            'if sys.argv[1:2]==["--toggle"]:\n'
+            '    os.execv(str(Path(sys.argv[0]).with_name("native-test-guard")), sys.argv)\n'
+            'root=Path(os.environ["GATE_ROOT"])\n'
+            '(root/"guard-entered").touch()\n'
+            'while not (root/"release-guard").exists(): time.sleep(.005)\n'
+            'if len(sys.argv)==5: os.close(int(sys.argv[4]))\n')
+        return self.start_picker()
+
+    def start_picker(self) -> subprocess.Popen[str]:
+        return subprocess.Popen(['bash', str(PAYLOAD/'local/.local/bin/rofi-trial'), 'apps'],
+                                env=self.env, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+                                stderr=subprocess.PIPE, text=True)
+
+    def wait_for(self, path: Path) -> None:
+        deadline = time.monotonic()+3
+        while not path.exists() and time.monotonic()<deadline:
+            time.sleep(.005)
+        self.assertTrue(path.exists(), f'Missing fixture milestone: {path.name}')
+
+    def test_overlap_before_pid_registration_launches_only_one_picker(self) -> None:
+        first = self.paused_picker()
+        second: subprocess.Popen[str] | None = None
+        try:
+            self.wait_for(self.root/'picker-entered')
+            second = self.start_picker()
+            try:
+                second.communicate(timeout=1)
+            except subprocess.TimeoutExpired:
+                self.fail('Overlapping startup spawned another waiting picker instead of returning')
+            self.assertEqual(second.returncode, 0)
+            rows = [json.loads(line) for line in self.log.read_text().splitlines()]
+            self.assertEqual(sum(row['name']=='rofi' for row in rows), 1)
+        finally:
+            (self.root/'release-guard').touch()
+            (self.root/'release-picker').touch()
+            first.communicate(timeout=3)
+            if second is not None: second.communicate(timeout=3)
+
+    def test_guard_handoff_releases_lock_before_picker_exits(self) -> None:
+        first = self.paused_picker()
+        second: subprocess.Popen[str] | None = None
+        try:
+            self.wait_for(self.root/'picker-entered')
+            (self.root/'release-guard').touch()
+            runtime = self.root/'runtime'
+            deadline = time.monotonic()+2
+            while time.monotonic()<deadline:
+                with (runtime/'startup.lock').open('a') as lock:
+                    try:
+                        fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                        break
+                    except BlockingIOError: pass
+                time.sleep(.005)
+            else: self.fail('Startup lock survived the guard handoff')
+            self.assertIsNone(first.poll(), 'The picker should still be open')
+            second = self.start_picker()
+            deadline = time.monotonic()+2
+            while time.monotonic()<deadline:
+                rows = [json.loads(line) for line in self.log.read_text().splitlines()]
+                if sum(row['name']=='rofi' for row in rows)==2: break
+                time.sleep(.005)
+            self.assertEqual(sum(row['name']=='rofi' for row in rows), 2)
+        finally:
+            (self.root/'release-guard').touch()
+            (self.root/'release-picker').touch()
+            first.communicate(timeout=3)
+            if second is not None: second.communicate(timeout=3)
+
+    def test_missing_guard_does_not_leave_startup_locked(self) -> None:
+        guard = self.home/'.local/lib/rofi-trial/dismiss-guard'
+        guard.unlink()
+        result = subprocess.run(['bash', str(PAYLOAD/'local/.local/bin/rofi-trial'), 'apps'],
+                                env=self.env, capture_output=True, text=True, timeout=3)
+        self.assertEqual(result.returncode, 2)
+        self.stub(guard)
+        self.assertTrue(self.invoke('apps'))
+
+    def test_unsafe_runtime_is_rejected_without_creating_lockfile(self) -> None:
+        runtime = self.root/'runtime'
+        runtime.mkdir(mode=0o755)
+        runtime.chmod(0o755)
+        result = subprocess.run(['bash', str(PAYLOAD/'local/.local/bin/rofi-trial'), 'apps'],
+                                env=self.env, capture_output=True, text=True, timeout=3)
+        self.assertEqual(result.returncode, 2)
+        self.assertFalse((runtime/'startup.lock').exists())
+
+    def test_picker_keeps_the_callers_umask(self) -> None:
+        output = self.root/'picker-created-file'
+        self.env['PICKER_CREATED_FILE'] = str(output)
+        (self.binary/'rofi').write_text('#!/usr/bin/python\nimport os, sys\nfrom pathlib import Path\n'
+                                      'Path(os.environ["PICKER_CREATED_FILE"]).write_text("fixture")\n'
+                                      'sys.exit(1)\n')
+        result = subprocess.run(['bash', str(PAYLOAD/'local/.local/bin/rofi-trial'), 'apps'],
+                                env=self.env, capture_output=True, text=True, timeout=3, umask=0o022)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(output.stat().st_mode & 0o777, 0o644)
 
 
 if __name__ == '__main__':
