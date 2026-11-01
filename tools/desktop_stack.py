@@ -22,7 +22,7 @@ LEGACY_LAUNCHERS = ('walker', 'elephant')
 ROFI_FILES = ('.local/bin/rofi-trial', '.local/lib/rofi-trial/smart.so', '.local/lib/rofi-trial/dismiss-guard',
               '.local/lib/rofi-trial/toggle.py', '.local/lib/rofi-trial/clipboard.py',
               '.local/lib/rofi-trial/files.py', '.config/rofi/trial/base.rasi',
-              '.config/rofi/trial/emoji.rasi', '.config/rofi/trial/clipboard.rasi')
+              '.config/rofi/trial/emoji.rasi', '.config/rofi/trial/clipboard.rasi', '.config/hypr/rofi_session.lua')
 
 
 class SwitchError(RuntimeError):
@@ -216,7 +216,7 @@ class StackManager:
 
     def preflight(self, mode: str) -> None:
         commands = ['systemctl', 'hyprctl', 'busctl', 'pleamar'] if mode == 'pleamar' else [
-            'systemctl', 'hyprctl', 'busctl', 'qs', 'rofi', 'python', 'wl-copy',
+            'systemctl', 'hyprctl', 'busctl', 'qs', 'rofi', 'python', 'flock', 'wl-copy',
             'rofimoji', 'cliphist', 'fd', 'xdg-open', 'qalc', POLKIT]
         files = ['.config/systemd/user/pleamar.service', '.local/bin/pleamar',
                  '.config/pleamar/shells/vitreus/vitreus.plm', '.config/pleamar/shells/vitreus/bin/vitreus-keep',
