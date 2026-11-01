@@ -186,10 +186,15 @@ class StackTests(unittest.TestCase):
         self.manager.preflight('quickshell')
 
     def test_missing_smart_plugin_refuses_before_stopping_current_stack(self) -> None:
-        (self.home / '.local/lib/rofi-trial/smart.so').unlink()
-        with self.assertRaisesRegex(stack.SwitchError, 'smart.so'):
-            self.manager.switch('quickshell')
-        self.assertEqual(self.backend.events, [])
+        for name in ('smart.so', 'dismiss-guard'):
+            with self.subTest(asset=name):
+                path = self.home/'.local/lib/rofi-trial'/name
+                original = path.read_bytes()
+                path.unlink()
+                with self.assertRaisesRegex(stack.SwitchError, name):
+                    self.manager.switch('quickshell')
+                self.assertEqual(self.backend.events, [])
+                path.write_bytes(original)
 
     def test_qs_readiness_is_on_demand_and_rejects_legacy_daemons(self) -> None:
         backend = stack.Backend(self.home)

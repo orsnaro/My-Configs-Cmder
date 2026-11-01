@@ -178,7 +178,7 @@ class SessionTests(unittest.TestCase):
     def test_adoption_registers_only_a_verified_live_picker(self) -> None:
         picker = self.picker()
         self.assertEqual(self.native('--adopt', picker.pid).returncode, 0)
-        self.assertIn(f'.register({picker.pid})', (self.root/'ipc.log').read_text())
+        self.assertIn(f'.adopt({picker.pid})', (self.root/'ipc.log').read_text())
         self.assertIsNone(picker.poll())
         foreign = self.picker(executable='/usr/bin/sleep', args=['30'])
         previous = (self.root/'ipc.log').read_text()

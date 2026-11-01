@@ -37,7 +37,7 @@ int main(int argc, char **argv) {
         if (pid < 0) return 2;
         struct launcher_session session;
         int result = session_from_pid(pid, &session);
-        if (result == 0) result = strcmp(argv[1], "--dismiss") == 0 ? signal_session(&session) : session_ipc("register", pid);
+        if (result == 0) result = strcmp(argv[1], "--dismiss") == 0 ? signal_session(&session) : session_ipc("adopt", pid);
         else result = 0; /* Invalid, stale and foreign targets are a safe no-op. */
         session_close(&session);
         return result;

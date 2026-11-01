@@ -61,6 +61,9 @@ for _, path in ipairs(paths) do
     session.unregister(99)
     enabled(true)
     assert(session.register(202))
+    layers = { { namespace = "rofi", pid = 202, mapped = true, monitor = { id = 2 } } }
+    assert(type(session.adopt) == "function", "reload adoption must recheck the mapped layer at IPC delivery")
+    assert(session.adopt(101) == false, "a late adoption must not replace a newer live session")
     session.unregister(101)
     events["layer.closed"]({ namespace = "rofi", pid = 101 })
     enabled(true)

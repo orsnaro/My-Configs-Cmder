@@ -1,5 +1,16 @@
 # Permanent Hyprland Rofi — 2026-10-31
 
+> **2026-11-01 correction:** stronger tests that wait for a fully rendered picker
+> show that cross-monitor dismissal does not work reliably with the transparent
+> guards. Hyprland routes the click to Rofi's exclusive layer instead. Earlier
+> six-case checks clicked before exclusive routing became active and were false
+> positives; the cross-monitor pass claims below are superseded, not confirmation
+> of settled-menu behavior. The compositor-callback replacement is not yet
+> implemented at the time of that correction. Its now-tested native/compositor
+> replacement and the subsequent user-approved 150 ms shared closing fade are
+> documented in [the 2026-11-01 follow-up](2026-11-01-rofi-native-session.md).
+> Older no-animation measurements remain historical.
+
 ## Outcome
 
 - Main Search handles arithmetic (`2+2` → `4`) and normal desktop applications.

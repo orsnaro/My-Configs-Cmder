@@ -649,8 +649,8 @@
     {
       "path": "config/hypr/custom.lua",
       "kind": "file",
-      "sha256": "c06fa3f28a332090a2ff849407a86f283e4933a4a1846ccbf78adb2604cf66fd",
-      "size": 18323,
+      "sha256": "daa785565da47271182d0b0fbf71b890b6ea892ea845776016bc45044beb135d",
+      "size": 18749,
       "mode": "0644"
     },
     {
@@ -868,6 +868,13 @@
       "kind": "file",
       "sha256": "bb31120234c6b84f612866fe87d776105d5520f80819eac272a2185d75cb5f16",
       "size": 464,
+      "mode": "0644"
+    },
+    {
+      "path": "config/hypr/rofi_session.lua",
+      "kind": "file",
+      "sha256": "c6ef0db32da218e28457d67d1628e1621cd06a7d21bb339ee96ae74f7752faf1",
+      "size": 2661,
       "mode": "0644"
     },
     {
@@ -4196,7 +4203,7 @@
       "source": ".config/hypr/custom.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/custom.lua",
       "mode": "0644",
-      "sha256": "bc9e975d65fa4788a04f4b2dde2b8a9d3ea1eff8e5cbb01e79988d1ef32f91da"
+      "sha256": "daa785565da47271182d0b0fbf71b890b6ea892ea845776016bc45044beb135d"
     },
     "config/hypr/effects/wallpaper/blackwhite": {
       "source": ".config/hypr/effects/wallpaper/blackwhite",
@@ -4383,6 +4390,12 @@
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/monitors.lua",
       "mode": "0644",
       "sha256": "bb31120234c6b84f612866fe87d776105d5520f80819eac272a2185d75cb5f16"
+    },
+    "config/hypr/rofi_session.lua": {
+      "source": ".config/hypr/rofi_session.lua",
+      "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/rofi_session.lua",
+      "mode": "0644",
+      "sha256": "c6ef0db32da218e28457d67d1628e1621cd06a7d21bb339ee96ae74f7752faf1"
     },
     "config/hypr/scripts/cleanup.sh": {
       "source": ".config/hypr/scripts/cleanup.sh",

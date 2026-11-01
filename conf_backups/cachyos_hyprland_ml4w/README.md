@@ -69,6 +69,25 @@ Kitty receives the original event, not a synthetic forwarded shortcut. Its no-UI
   **Super+V** opens clipboard history with image previews. Repeat a shortcut to
   close that menu; Escape or clicking outside on **any connected monitor** also
   cancels. Moving the pointer alone does not close it.
+  Overlapping requests during startup are ignored until the guard verifies the
+  picker PID; a later press still closes it. The wrapper needs `flock` from
+  `util-linux`. App/run/calculator launch and toggle use the native helper,
+  without starting Python. A namespace-scoped fade rule preserves Rofi's open/close animation
+  without a slide. The approved shared layer fade-out is now **150 ms**, down
+  from 1 second: fading panels/notifications also close faster. Opening remains
+  200 ms; window/workspace animations are unchanged. The native watcher creates
+  no overlay surfaces and registers only ordinary left/right/middle click callbacks
+  during the verified picker session; modified mouse shortcuts stay unchanged.
+  **Correction and replacement:** settled-menu testing found that Hyprland's
+  exclusive input routing bypasses the transparent guards. The earlier
+  cross-monitor checks clicked before that routing became active; do not treat
+  them as proof that the original guard worked. Its compositor-callback replacement
+  now passes all 18 settled-menu cases (three pickers × two other outputs × three
+  buttons), including reloads while open, with no underlying click or clipboard write.
+  See `docs/superpowers/reports/2026-11-01-rofi-native-session.md` at repository root.
+  Warm keyboard-focus probes were roughly 46–58 ms, with a 669 ms initial sample.
+  Pre-focus characters can still go to the previous application; no zero-delay or
+  physical-shortcut guarantee, resident frontend, or input buffering is added.
 - Emoji uses contiguous keyword matching (`heart` no longer matches scattered
   letters in unrelated descriptions). Other menus retain fuzzy abbreviations.
   Search results use fzf relevance ranking; empty clipboard searches keep recency.
@@ -80,14 +99,15 @@ Kitty receives the original event, not a synthetic forwarded shortcut. Its no-UI
 - Runtime packages on CachyOS/Arch: `rofi`, `rofi-calc`, `rofimoji`, `libqalculate`,
   `wl-clipboard`, `cliphist`, `fd`, and an installed `xdg-open` provider. Plugin build:
   `gcc`, `pkgconf`, `glib2`, `cairo`, `pango`, `libqalculate`, `wayland`,
-  `wayland-protocols`, and Rofi development headers.
+  `json-c`, and Rofi development headers.
   This payload was tested with Rofi 2.0.0 and Qalculate 5.13.2.
 - `BACKUP.sh` includes launcher helpers/source and the guarded GTK listener.
   `RESTORE.sh --dry-run` never builds or launches anything; actual restore builds
-  `smart.so` and the cross-monitor Wayland guard against the installed ABI, and
-  fails visibly on build errors. The guard uses one shared transparent pixel,
-  never requests keyboard focus, and exists only while a picker is open. Tested
-  guard PSS was 228–238 KiB. No compiled binaries, generated protocol code, or
+  `smart.so` and the native session watcher against the installed ABI, and
+  fails visibly on build errors. The watcher verifies Rofi identity, registers
+  session-scoped Hyprland callbacks and blocks on its process descriptor; it
+  creates no surfaces and exits after the picker. The old guard PSS of
+  228–238 KiB is historical, not a measurement of this watcher. No compiled binaries, generated protocol code, or
   clipboard database/history are published in this backup.
 - Restore ML4W files first. For the existing QS/Pleamar setup, then run repository-root
   `python3 tools/install_desktop_stack.py --dry-run`, followed by `--apply`, to install
