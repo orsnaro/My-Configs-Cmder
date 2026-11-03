@@ -64,3 +64,47 @@ The only pre-existing live files changed are `~/.config/hypr/scripts/launcher.sh
 To undo immediately, compare those three files against their recorded backups, restore the originals only if no later edits would be discarded, stop `sherlock.service`, and reload Hyprland. Preserve symlinks by updating their resolved files. No Sherlock service enablement or package uninstallation is required: startup is owned by the one added Hyprland command. Rofi's files were not changed.
 
 The native reset/readiness helper is on demand, not a daemon. Its startup check times out after 15 seconds and validates the peer PID/UID. Runtime mode state contains only the daemon PID and mode, not clipboard contents. The Meta-incident integration file backups and diffs are under `meta-fix/`; reverting to those old helpers would also restore the reproduced bug.
+
+## Emoji usage ordering — 2026-11-03
+
+Super+period keeps the native grid, with **most-used emoji first and most-recent selection breaking ties**. Typing uses the existing search/filter/scorer; clearing the query restores usage order. Unused emoji retain their original order. Only explicit selections count, with skin-tone choices grouped under their base emoji. Browsing, searching and cancellation do not count. Learning starts with new selections; clipboard history is never inspected or imported.
+
+`emoji-usage.patch` changes four Rust source files in Sherlock **v0.1.14-3**, adding no dependencies, service, process, watcher, timer, thread or resident history table. History is read only on grid creation/selection and atomically saved only on selection. Ordering precedes the existing 77-result filter so a previously used emoji anywhere in the dataset can reach the first row. Nonempty-query matching/scoring, wrappers, shortcuts and the service unit are unchanged.
+
+The private history is `$XDG_DATA_HOME/sherlock/emoji-usage.json` (normally `~/.local/share/sherlock/emoji-usage.json`; upstream's existing `~/.sherlock` directory takes precedence if present). Missing/corrupt history falls back to the original order; write failure does not block selection. To reset, close the picker and move that file aside. No history, binary, machine-local build record or rollback snapshot is published here.
+
+### Rebuild and install manually
+
+`RESTORE.sh` copies the patch; it does **not** download, compile or install Sherlock. The official binary documented in `CURRENT-RESTORE.md` remains an unpatched fallback. `provenance.json` continues to describe that official binary, not this locally modified build. This patch targets upstream GPL-3.0 source; retain the upstream `LICENSE` in the build checkout.
+
+After restoring these integration files, install Rust/Cargo, a C linker, `glib-compile-resources` and the GTK4/layer-shell development dependencies required by the pinned upstream source. Build in a fresh directory; the commit check prevents applying against a moved tag. The nine added tests use disposable fixtures below `/tmp/opencode`:
+
+```bash
+mkdir -p /tmp/opencode
+build_dir=$(mktemp -d /tmp/opencode/sherlock-emoji-build.XXXXXXXX)
+git clone --depth 1 --branch v0.1.14-3 https://github.com/Skxxtz/sherlock.git "$build_dir"
+cd "$build_dir"
+test "$(git rev-parse HEAD)" = 93afa10ce1be2b83ac33d7eee6f4943b38b33422 || exit 1
+git switch -c feat/emoji-usage-order
+git apply --check "$HOME/.local/share/sherlock-integration/emoji-usage.patch"
+git apply "$HOME/.local/share/sherlock-integration/emoji-usage.patch"
+CARGO_BUILD_JOBS=2 RUSTFLAGS='-C linker=/usr/bin/cc' nice -n 10 cargo test --locked
+CARGO_BUILD_JOBS=2 RUSTFLAGS='-C linker=/usr/bin/cc' nice -n 10 cargo build --release --locked
+```
+
+Only after both commands succeed, install over an existing working Sherlock setup. Back up the current executable and atomically replace it; do not overwrite a running executable in place:
+
+```bash
+mkdir -p "$HOME/.local/state" "$HOME/.local/bin"
+backup_dir=$(mktemp -d "$HOME/.local/state/sherlock-emoji-usage.XXXXXXXX")
+cp -p -- "$HOME/.local/bin/sherlock" "$backup_dir/sherlock.original"
+printf 'Original executable backup: %s\n' "$backup_dir/sherlock.original"
+staged=$(mktemp "$HOME/.local/bin/.sherlock-emoji.XXXXXXXX")
+install -m755 target/release/sherlock "$staged"
+mv -T -- "$staged" "$HOME/.local/bin/sherlock"
+systemctl --user restart sherlock.service
+```
+
+Keep the printed/saved `backup_dir` path. To undo, stop the existing service, restore that `sherlock.original` to `~/.local/bin/sherlock`, and start the same service. Compare digests before restoring so later changes are not overwritten. The history file can remain inert; no shortcut/configuration rollback is needed.
+
+Verification of this exact patch: **10 native tests** (nine new), the existing **36 Python integration tests**, and Lua toggle/hit-test/lifecycle checks passed. The installed binary passed isolated GUI checks for frequency/recency ordering, search/clear, restart persistence, default/tone selection and cancellation; synthetic XDG data and the existing runtime field override prevented personal clipboard access. Four emoji/app transitions, synthetic history cancellation and forty stable-PID app reopen cycles passed before/after. Short hidden-idle CPU samples were 0% in both builds; this is not a zero-memory/activation-cost guarantee. Review was inline because the configured free reviewer quota was exhausted. No physical shortcut or reboot test is claimed.

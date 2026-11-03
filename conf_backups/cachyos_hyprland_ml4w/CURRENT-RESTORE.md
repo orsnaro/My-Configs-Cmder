@@ -49,6 +49,13 @@ The upstream executable reports v0.1.14. Install GTK4/layer-shell and its runtim
 dependencies as required by that release, plus Python, cliphist, wl-clipboard and
 util-linux/flock. No Sherlock binary or clipboard database is committed.
 
+The current live emoji picker additionally uses the native **most-used first,
+most-recent breaks ties** patch. To reproduce that behavior, follow
+[the integration README's manual rebuild/install steps](local/.local/share/sherlock-integration/README.md#rebuild-and-install-manually)
+using the restored `emoji-usage.patch`. The official binary/digest above is the
+unpatched fallback; the patched build has a different digest. Restore does not
+compile/install it automatically, and personal emoji usage is never backed up.
+
 Build the saved clipboard helper with Rust/Cargo and a C linker:
 
 ```sh
