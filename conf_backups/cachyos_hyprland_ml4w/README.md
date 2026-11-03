@@ -1,4 +1,28 @@
-# CachyOS Hyprland ML4W configs — refreshed 2026-10-13
+# CachyOS Hyprland ML4W configs — refreshed 2026-11-03
+
+## Current desktop (supersedes historical launcher notes below)
+
+The November 1–3 desktop decisions are now included:
+
+- **Sherlock is primary:** bare Super toggles apps/calculator; Super+V opens
+  clipboard history; Super+. opens emoji. Outside clicks dismiss it. One resident
+  service, Cairo rendering, 53px Tela Circle Dracula app icons, enlarged emoji,
+  rounded/translucent styling. Palette is read at startup, not watched.
+- **Rofi remains available:** Super+R runs commands; `rofi-trial apps|emoji|clipboard`
+  opens its other modes. Native startup/dismissal fixes and source are retained.
+- Workspace **7 = terminals**, **8 = others**, with matching QS labels. CasaOS and
+  Jellyfin use Ethernet (`192.168.1.12`), open tiled on others, and hide only their
+  own title bars. Normal Brave and other apps keep their rules.
+- Kitty's persistent ANSI green override fixes invisible green Git additions.
+- Managed aerc/Konsole source, declarative preferences and regression tests are
+  included: Nano, 10pt mail-only font, no terminal scrollback, current navigation,
+  safe right-side HTML previews, and the Gmail SMTP/header-cache generator.
+
+See [CURRENT-RESTORE.md](CURRENT-RESTORE.md) **before restoring**. Sherlock binaries,
+Tela assets, Hyprlock 0.9.7, the external Pomo fix and mail authorization require
+the documented separate setup. Mail accounts, OAuth credentials, mail/browser
+data and clipboard history are deliberately absent. This refresh changes the
+repository only; it does not restart or alter the live desktop.
 
 Base: CachyOS + ML4W dotfiles stable 2.16 + kitty 0.49.2
 Repo: https://github.com/orsnaro/My-Configs-Cmder.git, folder `conf_backups/cachyos_hyprland_ml4w/`
@@ -62,11 +86,11 @@ Kitty receives the original event, not a synthetic forwarded shortcut. Its no-UI
 
 ## Caveats
 
-### Rofi launcher — permanent Hyprland selection, 2026-10-31
+### Rofi fallback — implementation and historical verification
 
-- Bare **Super**: app search and inline arithmetic (`2+2` → `4`; Enter copies).
-  **Super+R** runs commands, **Super+.** opens the 6×6 emoji grid, and
-  **Super+V** opens clipboard history with image previews. Repeat a shortcut to
+- `rofi-trial apps`: app search and inline arithmetic (`2+2` → `4`; Enter copies).
+  **Super+R** runs commands; `rofi-trial emoji` opens the 6×6 emoji grid, and
+  `rofi-trial clipboard` opens clipboard history with image previews. Repeat a command to
   close that menu; Escape or clicking outside on **any connected monitor** also
   cancels. Moving the pointer alone does not close it.
   Overlapping requests during startup are ignored until the guard verifies the

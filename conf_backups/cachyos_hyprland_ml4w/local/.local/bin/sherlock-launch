@@ -1,0 +1,56 @@
+#!/usr/bin/env bash
+set -uo pipefail
+export PATH="$HOME/.local/bin:$PATH"
+
+mode=${1:-apps}
+[[ $# -eq 0 ]] || shift
+case "$mode" in
+    start)
+        systemctl --user import-environment WAYLAND_DISPLAY HYPRLAND_INSTANCE_SIGNATURE XDG_CURRENT_DESKTOP DISPLAY || exit $?
+        exec systemctl --user start sherlock.service
+        ;;
+    apps|emoji|clipboard) ;;
+    *) printf 'Use sherlock-launch apps|emoji|clipboard|start\n' >&2; exit 2 ;;
+esac
+
+if [[ "$mode" == clipboard ]]; then
+    umask 077
+    runtime="${XDG_RUNTIME_DIR:?XDG_RUNTIME_DIR is required}/sherlock-launch"
+    mkdir -p -- "$runtime" || exit 1
+    [[ -O "$runtime" && ! -L "$runtime" && ! -L "$runtime/clipboard.lock" ]] || exit 1
+    chmod 700 -- "$runtime" || exit 1
+    exec 9>"$runtime/clipboard.lock" || exit 1
+    # The released native client has one fixed response socket; serialize callers.
+    flock -n 9 || exit 0
+fi
+
+systemctl --user start sherlock.service || exit $?
+case "$mode" in
+    apps|emoji)
+        exec /usr/bin/python "$HOME/.local/share/sherlock-integration/sherlock_ipc.py" show "$mode"
+        ;;
+    clipboard)
+        data=$(sherlock-clp) || exit $?
+        /usr/bin/python "$HOME/.local/share/sherlock-integration/sherlock_ipc.py" invalidate || exit $?
+        selected=$(printf '%s' "$data" | sherlock)
+        status=$?
+        unset data
+        # A successful request forwarded to an existing daemon exits with 1.
+        [[ $status -eq 0 || $status -eq 1 ]] || exit "$status"
+        # The native response has completed; mode coordination may now restart its UI.
+        flock -u 9 || exit 1
+        # Release piped image thumbnails while the launcher is hidden.
+        /usr/bin/python "$HOME/.local/share/sherlock-integration/sherlock_ipc.py" reset || true
+        [[ -n "$selected" ]] || exit 0
+        [[ "$selected" =~ ^[0-9]+$ ]] || { printf 'Invalid clipboard selection\n' >&2; exit 2; }
+        decoded=$(mktemp -- "$runtime/selection.XXXXXXXX") || exit 1
+        trap 'rm -f -- "$decoded"' EXIT
+        trap 'exit 130' INT
+        trap 'exit 143' HUP TERM
+        # Decode completely before touching the clipboard; preserve binary bytes.
+        printf '%s' "$selected" | cliphist decode >"$decoded" || exit 1
+        [[ -s "$decoded" ]] || exit 1
+        wl-copy <"$decoded"
+        exit $?
+        ;;
+esac

@@ -1,0 +1,16 @@
+{
+  "source": "https://github.com/vinceliuice/Tela-circle-icon-theme",
+  "commit": "ee3cf47bcb05c3d99a0860b54254d2ff3d1d2c69",
+  "archive_url": "https://codeload.github.com/vinceliuice/Tela-circle-icon-theme/tar.gz/ee3cf47bcb05c3d99a0860b54254d2ff3d1d2c69",
+  "archive_sha256": "2c7e54f707962091a1a762ecc2bd798635a4a83ccacea6db03359f41a7e7ff60",
+  "archive_bytes": 3729081,
+  "installed_themes": [
+    "/home/narol/.local/share/icons/Tela-circle-dracula",
+    "/home/narol/.local/share/icons/Tela-circle-dracula-light",
+    "/home/narol/.local/share/icons/Tela-circle-dracula-dark"
+  ],
+  "sherlock_app_icon_path": "/home/narol/.local/share/icons/Tela-circle-dracula/scalable/apps",
+  "app_icons": 6415,
+  "installation_scope": "user-local only; no global theme selection",
+  "staging_path": "/tmp/opencode/sherlock-tela-3ki25hp0"
+}

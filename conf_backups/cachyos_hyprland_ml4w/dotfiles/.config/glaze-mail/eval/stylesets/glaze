@@ -1,0 +1,24 @@
+# Mail-only snapshot of the current desktop palette.
+*.fg=#e3e3d7
+*.bg=default
+*.selected.fg=#e3e3d7
+*.selected.bg=#34362e
+*.selected.bold=false
+border.fg=#45483c
+border.bold=false
+title.fg=#b8cf84
+title.bg=default
+title.bold=false
+header.fg=#b8cf84
+msglist_unread.bold=true
+msglist_marked.bg=#424a31
+msglist_pill.bg=#3a4d10
+msglist_pill.fg=#d3ec9e
+dirlist_unread.fg=#b8cf84
+selector_focused.bg=#34362e
+selector_focused.fg=#e3e3d7
+completion_*.bg=#292b23
+completion_pill.bg=#3a4d10
+completion_pill.fg=#d3ec9e
+statusline_default.fg=#c6c8b9
+statusline_error.fg=#ffb4ab

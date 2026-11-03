@@ -15,7 +15,7 @@ RowLayout {
     // Display names for the numbered workspaces (must match custom.lua layout).
     readonly property var workspaceNames: ({
         1: "main", 2: "work", 3: "search", 4: "notes", 5: "chat",
-        6: "mail", 7: "others", 8: "terminals", 9: "gaming"
+        6: "mail", 7: "terminals", 8: "others", 9: "gaming"
     })
     function workspaceName(id: int): string {
         return wsRoot.workspaceNames[id] || ("" + id)

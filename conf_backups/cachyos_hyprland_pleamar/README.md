@@ -1,4 +1,12 @@
-# Current Pleamar / Vitreus backup — 2026-10-28
+# Pleamar / Vitreus backup — shared desktop refreshed 2026-11-03
+
+The public Hyprland overlay now matches the November 1–3 desktop changes:
+Sherlock primary/Rofi fallback, current workspace routing, CasaOS/Jellyfin-only
+title-bar rules and Kitty's ANSI-green fix. **Restore the companion ML4W payload
+and follow its [current recovery guide](../cachyos_hyprland_ml4w/CURRENT-RESTORE.md)
+first**: it owns the Sherlock/mail source, service and prerequisites.
+The Pleamar engine/scenes and private snapshot below remain the October 28 backup;
+this refresh does not claim a new live switch, reboot or lock/unlock verification.
 
 Repository: `/shared_across_des/repos/My-Configs-Cmder`.
 
@@ -112,7 +120,8 @@ the two app entries before activating the desktop.
 | `bin/pleamar-start` | `~/.local/bin/pleamar-start` |
 | retained `config/kitty`, `fish`, `ohmyposh` | corresponding `~/.config/` trees |
 
-The public Kitty/Fish/Oh My Posh payload is retained from the October 25–26 export;
+The public Fish/Oh My Posh payload is retained from the October 25–26 export;
+Kitty additionally includes the approved persistent ANSI-green override.
 current terminal/theming state is additionally preserved in the private snapshot,
 without publishing unrelated terminal edits. Full private
 scene state is not limited to the public `data/` subset: desktop notes, other

@@ -63,6 +63,9 @@ hl.on("hyprland.start", function ()
     -- permanent Pleamar: Walker UI is not started
     -- hl.exec_cmd("walker --gapplication-service")
 
+    -- One resident Sherlock UI; reuse the existing clipboard recorder below.
+    hl.exec_cmd(HOME .. "/.local/bin/sherlock-launch start")
+
     -- Start hypridle
     hl.exec_cmd("hypridle")
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
 # -----------------------------------------------------
-# Hyprland on-demand Rofi launcher; original wiring remains in ~/.local/state/launcher-trial.
+# Resident Sherlock launcher; Rofi remains available through rofi-trial.
 # -----------------------------------------------------
-exec "$HOME/.local/bin/rofi-trial" apps "$@"
+exec "$HOME/.local/bin/sherlock-launch" apps "$@"

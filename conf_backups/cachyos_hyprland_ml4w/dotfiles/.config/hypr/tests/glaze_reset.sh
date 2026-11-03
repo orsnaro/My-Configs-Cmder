@@ -21,13 +21,22 @@ cat > "$CLIENT_FIXTURE" <<'JSON'
   {"address":"0xc","class":"quake-kitty","title":"quake","workspace":{"id":-99},"floating":true,"fullscreen":0,"mapped":true,"pinned":false},
   {"address":"0xd","class":"steam","title":"Steam","workspace":{"id":1},"floating":false,"fullscreen":2,"mapped":true,"pinned":false},
   {"address":"0xe","class":"dotfiles-floating","title":"ML4W","workspace":{"id":1},"floating":true,"fullscreen":0,"mapped":true,"pinned":false},
-  {"address":"0xf","class":"brave-browser","title":"Floating dialog","workspace":{"id":1},"floating":true,"fullscreen":0,"mapped":true,"pinned":false}
+  {"address":"0xf","class":"brave-browser","title":"Floating dialog","workspace":{"id":1},"floating":true,"fullscreen":0,"mapped":true,"pinned":false},
+  {"address":"0x10","class":"brave-192.168.1.12__-Default","title":"CasaOS","workspace":{"id":1},"floating":false,"fullscreen":0,"mapped":true,"pinned":false},
+  {"address":"0x11","class":"brave-192.168.1.12__web_-Default","title":"Jellyfin","workspace":{"id":1},"floating":false,"fullscreen":0,"mapped":true,"pinned":false},
+  {"address":"0x12","class":"brave-192.168.1.12__-Default","title":"CasaOS dialog","workspace":{"id":1},"floating":true,"fullscreen":0,"mapped":true,"pinned":false}
 ]
 JSON
 
 "$HOME/.local/bin/glaze-reset"
 grep -Fx 'ok' "$COMMAND_LOG"
 grep -Fx 'hl.dsp.window.float({ action = "unset", window = "address:0xa" })' "$COMMAND_LOG"
-grep -Fx 'hl.dsp.window.move({ workspace = "8", follow = false, window = "address:0xa" })' "$COMMAND_LOG"
-test "$(wc -l < "$COMMAND_LOG")" -eq 3
-echo 'PASS: reset reloads, restores a normal terminal, skips game/Quake/helpers'
+grep -Fx 'hl.dsp.window.move({ workspace = "7", follow = false, window = "address:0xa" })' "$COMMAND_LOG"
+grep -Fx 'hl.dsp.window.move({ workspace = "8", follow = false, window = "address:0x10" })' "$COMMAND_LOG"
+grep -Fx 'hl.dsp.window.move({ workspace = "8", follow = false, window = "address:0x11" })' "$COMMAND_LOG"
+if grep -Fq 'address:0x12' "$COMMAND_LOG"; then
+    echo 'FAIL: reset must leave the floating CasaOS dialog untouched' >&2
+    exit 1
+fi
+test "$(wc -l < "$COMMAND_LOG")" -eq 5
+echo 'PASS: reset reloads, restores a normal terminal, routes CasaOS/Jellyfin to others, skips game/Quake/helpers/dialogs'

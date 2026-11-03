@@ -1,0 +1,8 @@
+[Desktop Entry]
+Version=1.0
+Terminal=false
+Type=Application
+Name=Jellyfin
+Exec=/opt/brave-bin/brave --profile-directory=Default --app=http://192.168.1.12:8096/web/
+Icon=/home/narol/.local/share/icons/hicolor/512x512/apps/brave-kdcbgnonmmimiohkdebbbipakbegkkol-Default.png
+StartupWMClass=brave-192.168.1.12__web_-Default

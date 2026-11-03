@@ -466,7 +466,7 @@ class HyprRequestTest(unittest.TestCase):
 
 
 class SmartFocusMapsTest(unittest.TestCase):
-    def test_exact_letter_and_arrow_kitten_maps_keep_layout_fallback(self) -> None:
+    def test_only_letter_kitten_maps_keep_layout_fallback(self) -> None:
         focus_maps = [line for line in CONFIG.read_text().splitlines()
                       if line.startswith("map ") and " alt+" in line]
         self.assertEqual(focus_maps, [
@@ -474,10 +474,6 @@ class SmartFocusMapsTest(unittest.TestCase):
             "map --allow-fallback=shifted,ascii alt+l kitten smart-focus.py right",
             "map --allow-fallback=shifted,ascii alt+i kitten smart-focus.py up",
             "map --allow-fallback=shifted,ascii alt+k kitten smart-focus.py down",
-            "map --allow-fallback=shifted,ascii alt+left kitten smart-focus.py left",
-            "map --allow-fallback=shifted,ascii alt+right kitten smart-focus.py right",
-            "map --allow-fallback=shifted,ascii alt+up kitten smart-focus.py up",
-            "map --allow-fallback=shifted,ascii alt+down kitten smart-focus.py down",
         ])
 
     def test_letter_and_arrow_resize_fallback_maps_precede_native_generator(self) -> None:

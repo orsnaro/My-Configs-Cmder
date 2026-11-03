@@ -1,3 +1,4 @@
+-- desktop-stack managed
 hl.on("hyprland.start", function ()
     local HOME = os.getenv("HOME")
 
@@ -11,6 +12,13 @@ hl.on("hyprland.start", function ()
 
     -- Export variables to systemd
     hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP")
+    -- The permanent shell is managed by systemd, not by a trial watcher.
+    hl.exec_cmd('"' .. HOME .. '/.local/bin/desktop-stack" resume')
+
+    -- Vitreus's own lock screen: a separate scene so that restarting the shell cannot unlock the session.
+    -- PLEAMAR_SWAPCHAIN=1 is required on pleamar 0.4 or Hyprland kills the lock surface on the first lock.
+    -- DRI_PRIME/VK_DRIVER_FILES keep it on the same AMD GPU as the main scene instead of the Intel iGPU.
+    -- Native lock startup is owned by desktop-stack.
 
     -- Restart portals so they catch the environment
     hl.exec_cmd("systemctl --user stop xdg-desktop-portal xdg-desktop-portal-hyprland")
@@ -26,10 +34,12 @@ hl.on("hyprland.start", function ()
     hl.exec_cmd("~/.config/ml4w/listeners.sh --startall")
 
     -- Start waybar
-    hl.exec_cmd(HOME .. "/.config/waybar/launch.sh")
+    -- permanent Pleamar: waybar is closed, not uninstalled
+    -- hl.exec_cmd(HOME .. "/.config/waybar/launch.sh")
 
     -- Start polkit daemon
-    hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
+    -- permanent Pleamar: Vitreus's own polkit agent owns authentication
+    -- hl.exec_cmd("/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1")
 
     -- Restore wallpaper (skip for quickshell — handled inside ml4w-autostart)
     if wallpaper_app ~= "quickshell" then
@@ -37,23 +47,30 @@ hl.on("hyprland.start", function ()
     end
 
     -- Autostart scripts
-    hl.exec_cmd("~/.config/ml4w/scripts/ml4w-autostart > ~/.mydotfiles/ml4w-autostart.log 2>&1")
+    -- permanent Pleamar: ML4W/Quickshell/dock startup is retired
+    -- hl.exec_cmd("~/.config/ml4w/scripts/ml4w-autostart > ~/.mydotfiles/ml4w-autostart.log 2>&1")
 
     -- Load GTK settings
     hl.exec_cmd("~/.config/hypr/scripts/gtk.sh")
 
     -- Start swaync
-    hl.exec_cmd("swaync")
+    -- permanent Pleamar owns notifications
+    -- hl.exec_cmd("swaync")
 
     -- Walker launcher backend + UI service (needs elephant for providers)
-    hl.exec_cmd("elephant")
-    hl.exec_cmd("walker --gapplication-service")
+    -- permanent Pleamar: Walker backend is not started
+    -- hl.exec_cmd("elephant")
+    -- permanent Pleamar: Walker UI is not started
+    -- hl.exec_cmd("walker --gapplication-service")
+
+    -- One resident Sherlock UI; reuse the existing clipboard recorder below.
+    hl.exec_cmd(HOME .. "/.local/bin/sherlock-launch start")
 
     -- Start hypridle
     hl.exec_cmd("hypridle")
 
-    -- Start hyprsunset (00:00-07:00 blue-light schedule from hyprsunset.conf)
-    hl.exec_cmd("hyprsunset")
+    -- Vitreus starts and controls hyprsunset from its shared saved night-mode settings.
+    -- Do not start a competing daemon/schedule here.
 
     -- Load cliphist history
     hl.exec_cmd("wl-paste --watch cliphist store")

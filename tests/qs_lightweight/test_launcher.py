@@ -32,6 +32,9 @@ class LauncherTests(unittest.TestCase):
         launcher.parent.mkdir(parents=True)
         launcher.write_text('#!/bin/sh\nprintf "rofi-launcher %s\\n" "$*" >> "$AUDIT"\n')
         launcher.chmod(0o755)
+        sherlock = self.home / '.local/bin/sherlock-launch'
+        sherlock.write_text('#!/bin/sh\nprintf "sherlock-launcher %s\\n" "$*" >> "$AUDIT"\n')
+        sherlock.chmod(0o755)
         waybar = self.home / '.config/waybar/launch.sh'
         waybar.write_text('#!/bin/sh\nprintf "fake-waybar\\n" >> "$AUDIT"\n')
         waybar.chmod(0o755)
@@ -41,12 +44,12 @@ class LauncherTests(unittest.TestCase):
         self.assertTrue(path.is_file(), f'Missing saved configuration: {relative}')
         return path
 
-    def test_shared_launcher_routes_apps_to_on_demand_rofi(self) -> None:
+    def test_shared_launcher_routes_apps_to_resident_sherlock(self) -> None:
         shutil.copy2(self.source('.config/ml4w/settings/launcher'), self.home / '.config/ml4w/settings/launcher')
         result = subprocess.run(['bash', str(self.source('.config/hypr/scripts/launcher.sh'))],
                                 env=self.env, capture_output=True, text=True, timeout=10)
         self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(self.audit.read_text(), 'rofi-launcher apps\n')
+        self.assertEqual(self.audit.read_text(), 'sherlock-launcher apps\n')
 
     def test_real_clipboard_helper_routes_to_walker_without_reading_history(self) -> None:
         (self.home / '.config/ml4w/settings/launcher').write_text('walker\n')

@@ -38,4 +38,12 @@ if [ -f "$GTK4_SETTINGS_FILE" ]; then
     sed -i "s/^$KEY=.*/$KEY=$gtk4_value/" "$GTK4_SETTINGS_FILE"
 fi
 
+# Libadwaita and portals must update even when wallpaper theming is disabled.
+if [[ "$gtk3_value" == 1 ]]; then
+    scheme=prefer-dark
+else
+    scheme=prefer-light
+fi
+gsettings set org.gnome.desktop.interface color-scheme "$scheme"
+
 echo "$message"
