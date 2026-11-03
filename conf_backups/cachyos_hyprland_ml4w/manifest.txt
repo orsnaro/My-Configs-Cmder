@@ -664,6 +664,7 @@ local/.local/share/quickshell-overview/services/qmldir
 local/.local/share/quickshell-overview/shell.qml
 local/.local/share/sherlock-integration/README.md
 local/.local/share/sherlock-integration/burst_check.py
+local/.local/share/sherlock-integration/emoji-usage.patch
 local/.local/share/sherlock-integration/live_check.py
 local/.local/share/sherlock-integration/provenance.json
 local/.local/share/sherlock-integration/sherlock-launch
