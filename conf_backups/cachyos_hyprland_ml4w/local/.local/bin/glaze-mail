@@ -1,0 +1,3 @@
+#!/bin/sh
+# Hyprland starts this once; the transient service owns all mail children.
+exec "$HOME/.config/gcal/.venv/bin/python" "$HOME/.local/src/glaze-mail/session.py" "$@"

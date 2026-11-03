@@ -1,5 +1,5 @@
 {
-  "checkpoint_status": "Current backup plus user-authorized live full-stack roundtrips verified. Pleamar left active; no individual widgets disabled. Reboot/login and real lock/unlock not tested. See CHECKS.md.",
+  "checkpoint_status": "Public shared Hyprland/Kitty configuration refreshed from approved November 1–3 changes. Companion Sherlock/mail dependencies are in cachyos_hyprland_ml4w. Private snapshot and Pleamar scenes remain October 28; no new live activation claimed.",
   "created": "2026-10-19T18:30:21+0300",
   "files": [
     {
@@ -19,8 +19,8 @@
     {
       "path": "README.md",
       "kind": "file",
-      "sha256": "e820c21a4d2c09aff0ce2506496e38825e109505fb5198525c3ad586ac2062d1",
-      "size": 7197,
+      "sha256": "d46c8da4e5bf89d204b55e372167734c245bba6257f4c022bc0a8945a1760207",
+      "size": 8378,
       "mode": "0644"
     },
     {
@@ -250,8 +250,8 @@
     {
       "path": "config/hypr/conf/autostart.lua",
       "kind": "file",
-      "sha256": "e976f49452baf807be7d18683c4ffb3ebfe22e4555a49f41465364f451acc768",
-      "size": 2958,
+      "sha256": "d033584585502c95707f2a314a62b856b1ab01927ef5fc0dc9ce8c991c80ee7b",
+      "size": 3098,
       "mode": "0644"
     },
     {
@@ -516,8 +516,8 @@
     {
       "path": "config/hypr/conf/window.lua",
       "kind": "file",
-      "sha256": "46b2de9bcee7928d845b4f8919093ea508b9ae21d7b6df45eb585357e54fb83c",
-      "size": 57,
+      "sha256": "b5cc0705abd3e3cc6ae0345ee4a41ad5c43a81e09cfc610907d7bd0aef88b65b",
+      "size": 65,
       "mode": "0644"
     },
     {
@@ -649,8 +649,8 @@
     {
       "path": "config/hypr/custom.lua",
       "kind": "file",
-      "sha256": "bc9e975d65fa4788a04f4b2dde2b8a9d3ea1eff8e5cbb01e79988d1ef32f91da",
-      "size": 18193,
+      "sha256": "2d56258a6760ea3a07b40225880442d3c75eb4114315121335d7d4975c0c80b6",
+      "size": 19513,
       "mode": "0644"
     },
     {
@@ -796,8 +796,8 @@
     {
       "path": "config/hypr/glaze-apps.tsv",
       "kind": "file",
-      "sha256": "9f273af05630d9811660d272f2584b97a531d2c49b4242c993ef07bbdad4a712",
-      "size": 985,
+      "sha256": "f0d22ed11d23273e061b50cc4e669dcd204ffad79204cac49e3dfb325fa4d4e1",
+      "size": 1072,
       "mode": "0644"
     },
     {
@@ -871,6 +871,13 @@
       "mode": "0644"
     },
     {
+      "path": "config/hypr/rofi_session.lua",
+      "kind": "file",
+      "sha256": "c6ef0db32da218e28457d67d1628e1621cd06a7d21bb339ee96ae74f7752faf1",
+      "size": 2661,
+      "mode": "0644"
+    },
+    {
       "path": "config/hypr/scripts/cleanup.sh",
       "kind": "file",
       "sha256": "037c706f681cd1247f5458452e34795fca9a659da6f5ff0067671c7600a72a36",
@@ -915,8 +922,8 @@
     {
       "path": "config/hypr/scripts/launcher.sh",
       "kind": "file",
-      "sha256": "529079fbc8439c2289775f5a9ffe1a3d772202e9b221e10c10c10e96efa04df6",
-      "size": 215,
+      "sha256": "f5f6e6879318f9281cf79cd6841705c40a18b269df32b1c340e648430cd5dbad",
+      "size": 256,
       "mode": "0755"
     },
     {
@@ -997,17 +1004,31 @@
       "mode": "0755"
     },
     {
+      "path": "config/hypr/sherlock_session.lua",
+      "kind": "file",
+      "sha256": "0763d5dd0e48d5783cce40d1a62b852eb64621ebb5ec04a513ce55c48a6d712b",
+      "size": 2567,
+      "mode": "0644"
+    },
+    {
       "path": "config/hypr/tests/brave_google_signin.lua",
       "kind": "file",
-      "sha256": "70cd7cb545dd19a4bb04e6e80e421cb696b7acfcfe555fbc2eec59fc427908fd",
-      "size": 7415,
+      "sha256": "6624aff4ae0d817597bb1c4520630f9d473f722e2fc01f46d40274061a0eb077",
+      "size": 7530,
+      "mode": "0644"
+    },
+    {
+      "path": "config/hypr/tests/brave_local_apps_titlebar.lua",
+      "kind": "file",
+      "sha256": "a68bf554da7fcf31614e675d75ead363294c54ed5343ce0ec606f1bfdb34a911",
+      "size": 4012,
       "mode": "0644"
     },
     {
       "path": "config/hypr/tests/brave_task_manager.lua",
       "kind": "file",
-      "sha256": "e859bd828d524af6d2f77639dad3fe700130e15b5633fd4374d8d5dd2a753a37",
-      "size": 1425,
+      "sha256": "5661add8065ed67a4533064e1c414007c5e95ba648b7480dbb836e1a7f568087",
+      "size": 1540,
       "mode": "0644"
     },
     {
@@ -1020,15 +1041,15 @@
     {
       "path": "config/hypr/tests/glaze_bindings.lua",
       "kind": "file",
-      "sha256": "5616fbb9cdd33f9d6d4527b45773fa4d8be5a7e400477e858591aa544e630568",
-      "size": 22031,
+      "sha256": "21656d0bda8fc52d5134548e42e57bd2ba673f7e7b96a8b63412289a5fba411f",
+      "size": 22550,
       "mode": "0644"
     },
     {
       "path": "config/hypr/tests/glaze_brave_launchers.sh",
       "kind": "file",
-      "sha256": "11fe914b87e1290b1a6569844073c0af5084c365709e05e411855a02646af649",
-      "size": 762,
+      "sha256": "9bc93fc2720bcb0c163d443d2d65512ac14c4251dc9dc0843e6dacbeb99bf432",
+      "size": 771,
       "mode": "0644"
     },
     {
@@ -1043,6 +1064,20 @@
       "kind": "file",
       "sha256": "83e9562dba343e38f8efe43e4019e0259b30993013c08ed0d04930b6a6a6c744",
       "size": 1065,
+      "mode": "0644"
+    },
+    {
+      "path": "config/hypr/tests/glaze_mail.lua",
+      "kind": "file",
+      "sha256": "a07de4f080df3fc2a6b79e17dd267b4b0969b08c747e0779df250959106a74b6",
+      "size": 2144,
+      "mode": "0644"
+    },
+    {
+      "path": "config/hypr/tests/glaze_mail_launcher.sh",
+      "kind": "file",
+      "sha256": "8e6d3b5e5b279ac10826f6691491872886b7a69dfcd8131ff3e5d08796dc0cdd",
+      "size": 1156,
       "mode": "0644"
     },
     {
@@ -1062,8 +1097,8 @@
     {
       "path": "config/hypr/tests/glaze_reset.sh",
       "kind": "file",
-      "sha256": "21b9ce2b1bb8858a104af6d202e4028b85f3b501e6020812653cdca8cffbac9c",
-      "size": 1810,
+      "sha256": "ba02ed412ea91b089212b555238c843b4fff969df25342dd1edf793f2f4b863d",
+      "size": 2695,
       "mode": "0644"
     },
     {
@@ -1083,15 +1118,15 @@
     {
       "path": "config/hypr/tests/obsidian_settings.lua",
       "kind": "file",
-      "sha256": "90e91c149e87f8cd3242d66d9b2b2c323f7ca825b2bcfd9c19012b8dae150160",
-      "size": 1912,
+      "sha256": "57d5a9e28532579556364465734d8e8fd1e4151bb4c007ca37504721881effff",
+      "size": 2027,
       "mode": "0644"
     },
     {
       "path": "config/hypr/tests/qbittorrent_dialogs.lua",
       "kind": "file",
-      "sha256": "465d83ea39053e035636ed33a13369e5cd8d67ae889353133573e51bc8107dcc",
-      "size": 2647,
+      "sha256": "006aa509f4cba575baede85a5677c971ebceccc9f0d5df1adb5d666b51aaa8ad",
+      "size": 2762,
       "mode": "0644"
     },
     {
@@ -1104,14 +1139,14 @@
     {
       "path": "config/hypr/tests/workspaces_visibility.sh",
       "kind": "file",
-      "sha256": "29cbdc815fdd1dad889f38eed60092696d26c3cf12a4690c2e6ae9e4863565d5",
-      "size": 3436,
+      "sha256": "b5df68fd3b9637920192b4d52d4d016e33d30e998350d02b0f61188474476720",
+      "size": 5568,
       "mode": "0644"
     },
     {
       "path": "config/hypr/vitreus_colors.lua",
       "kind": "file",
-      "sha256": "81cd45f48cfc105b141b9402604b9612ef1401261941e12524e9eaca1d45d25c",
+      "sha256": "9e04931bd6cdc2969f34d41abd5e2243bd6df58821b292efd5adf7fe07d80075",
       "size": 811,
       "mode": "0644"
     },
@@ -1167,8 +1202,8 @@
     {
       "path": "config/kitty/custom.conf",
       "kind": "file",
-      "sha256": "0a43270d1b88dfd8b148b996503106253b99b4feaccffd7ba6651094377c106d",
-      "size": 3789,
+      "sha256": "219cb507872ba793008fe469ff4d531117eeb6fc481564824ffc1327d2c9b606",
+      "size": 3887,
       "mode": "0644"
     },
     {
@@ -1972,8 +2007,8 @@
     {
       "path": "source/vitreus/bin/vitreus-tvremote",
       "kind": "file",
-      "sha256": "c15502c89d29a43637d5cd83cbd73236cca85b191f892e0b1a706b3b4b23d139",
-      "size": 20243,
+      "sha256": "5657c2a376f2f62d363d01fdc42044e6c4ff10b8c9ec3203f539108c25d9c2b2",
+      "size": 20463,
       "mode": "0755"
     },
     {
@@ -3167,8 +3202,8 @@
     {
       "path": "source/vitreus/tests/test_nightmode_controls.py",
       "kind": "file",
-      "sha256": "1dbb5581e12bf7dd0eeee07faec7bef96fc471934d069b6d3bf448994c609ea8",
-      "size": 4795,
+      "sha256": "dc420b384844c4347c760cab448c030276251c321fea5e1c3ceb96c8a664013d",
+      "size": 5221,
       "mode": "0644"
     },
     {
@@ -3462,7 +3497,7 @@
   "pleamar_binary_sha256": "05e05ecc0ad16a0e3e8580b6647fb3bdd89d7ce0d82e13a8a7ffcda8468d2ca3",
   "pleamar_version": "pleamar 0.4.31 · language 0.4",
   "privacy": "Curated public export: source/configuration only. No credentials, private trial checkpoint, history, logs, or private snapshot payloads are included. manifest.json hashes every payload file except itself.",
-  "refreshed": "2026-10-28T15:49:37.880509+00:00",
+  "refreshed": "2026-11-03",
   "source_base_commit": "e6eb4b3e0311e61f92848e1d03f3d84e5c0e81cd",
   "source_remote": "https://github.com/natepayn3/Vitreus.git",
   "source_tree_hash_format": "sorted source-relative path + NUL + kind + NUL + sha256-or-link-target + newline",
@@ -3854,7 +3889,7 @@
       "source": ".config/hypr/conf/autostart.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/conf/autostart.lua",
       "mode": "0644",
-      "sha256": "e976f49452baf807be7d18683c4ffb3ebfe22e4555a49f41465364f451acc768"
+      "sha256": "d033584585502c95707f2a314a62b856b1ab01927ef5fc0dc9ce8c991c80ee7b"
     },
     "config/hypr/conf/decoration.lua": {
       "source": ".config/hypr/conf/decoration.lua",
@@ -4082,7 +4117,7 @@
       "source": ".config/hypr/conf/window.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/conf/window.lua",
       "mode": "0644",
-      "sha256": "46b2de9bcee7928d845b4f8919093ea508b9ae21d7b6df45eb585357e54fb83c"
+      "sha256": "b5cc0705abd3e3cc6ae0345ee4a41ad5c43a81e09cfc610907d7bd0aef88b65b"
     },
     "config/hypr/conf/windowrule.lua": {
       "source": ".config/hypr/conf/windowrule.lua",
@@ -4196,7 +4231,7 @@
       "source": ".config/hypr/custom.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/custom.lua",
       "mode": "0644",
-      "sha256": "bc9e975d65fa4788a04f4b2dde2b8a9d3ea1eff8e5cbb01e79988d1ef32f91da"
+      "sha256": "2d56258a6760ea3a07b40225880442d3c75eb4114315121335d7d4975c0c80b6"
     },
     "config/hypr/effects/wallpaper/blackwhite": {
       "source": ".config/hypr/effects/wallpaper/blackwhite",
@@ -4322,7 +4357,7 @@
       "source": ".config/hypr/glaze-apps.tsv",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/glaze-apps.tsv",
       "mode": "0644",
-      "sha256": "9f273af05630d9811660d272f2584b97a531d2c49b4242c993ef07bbdad4a712"
+      "sha256": "f0d22ed11d23273e061b50cc4e669dcd204ffad79204cac49e3dfb325fa4d4e1"
     },
     "config/hypr/hypr_vitreus.lua": {
       "source": ".config/hypr/hypr_vitreus.lua",
@@ -4384,6 +4419,12 @@
       "mode": "0644",
       "sha256": "bb31120234c6b84f612866fe87d776105d5520f80819eac272a2185d75cb5f16"
     },
+    "config/hypr/rofi_session.lua": {
+      "source": ".config/hypr/rofi_session.lua",
+      "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/rofi_session.lua",
+      "mode": "0644",
+      "sha256": "c6ef0db32da218e28457d67d1628e1621cd06a7d21bb339ee96ae74f7752faf1"
+    },
     "config/hypr/scripts/cleanup.sh": {
       "source": ".config/hypr/scripts/cleanup.sh",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/scripts/cleanup.sh",
@@ -4424,7 +4465,7 @@
       "source": ".config/hypr/scripts/launcher.sh",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/scripts/launcher.sh",
       "mode": "0755",
-      "sha256": "529079fbc8439c2289775f5a9ffe1a3d772202e9b221e10c10c10e96efa04df6"
+      "sha256": "f5f6e6879318f9281cf79cd6841705c40a18b269df32b1c340e648430cd5dbad"
     },
     "config/hypr/scripts/load-gamemode.sh": {
       "source": ".config/hypr/scripts/load-gamemode.sh",
@@ -4496,13 +4537,13 @@
       "source": ".config/hypr/tests/brave_google_signin.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/tests/brave_google_signin.lua",
       "mode": "0644",
-      "sha256": "70cd7cb545dd19a4bb04e6e80e421cb696b7acfcfe555fbc2eec59fc427908fd"
+      "sha256": "6624aff4ae0d817597bb1c4520630f9d473f722e2fc01f46d40274061a0eb077"
     },
     "config/hypr/tests/brave_task_manager.lua": {
       "source": ".config/hypr/tests/brave_task_manager.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/tests/brave_task_manager.lua",
       "mode": "0644",
-      "sha256": "e859bd828d524af6d2f77639dad3fe700130e15b5633fd4374d8d5dd2a753a37"
+      "sha256": "5661add8065ed67a4533064e1c414007c5e95ba648b7480dbb836e1a7f568087"
     },
     "config/hypr/tests/default_mouse_bindings.lua": {
       "source": ".config/hypr/tests/default_mouse_bindings.lua",
@@ -4514,13 +4555,13 @@
       "source": ".config/hypr/tests/glaze_bindings.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/tests/glaze_bindings.lua",
       "mode": "0644",
-      "sha256": "5616fbb9cdd33f9d6d4527b45773fa4d8be5a7e400477e858591aa544e630568"
+      "sha256": "21656d0bda8fc52d5134548e42e57bd2ba673f7e7b96a8b63412289a5fba411f"
     },
     "config/hypr/tests/glaze_brave_launchers.sh": {
       "source": ".config/hypr/tests/glaze_brave_launchers.sh",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/tests/glaze_brave_launchers.sh",
       "mode": "0644",
-      "sha256": "11fe914b87e1290b1a6569844073c0af5084c365709e05e411855a02646af649"
+      "sha256": "9bc93fc2720bcb0c163d443d2d65512ac14c4251dc9dc0843e6dacbeb99bf432"
     },
     "config/hypr/tests/glaze_input.lua": {
       "source": ".config/hypr/tests/glaze_input.lua",
@@ -4550,7 +4591,7 @@
       "source": ".config/hypr/tests/glaze_reset.sh",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/tests/glaze_reset.sh",
       "mode": "0644",
-      "sha256": "21b9ce2b1bb8858a104af6d202e4028b85f3b501e6020812653cdca8cffbac9c"
+      "sha256": "ba02ed412ea91b089212b555238c843b4fff969df25342dd1edf793f2f4b863d"
     },
     "config/hypr/tests/glaze_window_actions.sh": {
       "source": ".config/hypr/tests/glaze_window_actions.sh",
@@ -4568,13 +4609,13 @@
       "source": ".config/hypr/tests/obsidian_settings.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/tests/obsidian_settings.lua",
       "mode": "0644",
-      "sha256": "90e91c149e87f8cd3242d66d9b2b2c323f7ca825b2bcfd9c19012b8dae150160"
+      "sha256": "57d5a9e28532579556364465734d8e8fd1e4151bb4c007ca37504721881effff"
     },
     "config/hypr/tests/qbittorrent_dialogs.lua": {
       "source": ".config/hypr/tests/qbittorrent_dialogs.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/tests/qbittorrent_dialogs.lua",
       "mode": "0644",
-      "sha256": "465d83ea39053e035636ed33a13369e5cd8d67ae889353133573e51bc8107dcc"
+      "sha256": "006aa509f4cba575baede85a5677c971ebceccc9f0d5df1adb5d666b51aaa8ad"
     },
     "config/hypr/tests/vitreus_bindings.lua": {
       "source": ".config/hypr/tests/vitreus_bindings.lua",
@@ -4586,13 +4627,13 @@
       "source": ".config/hypr/tests/workspaces_visibility.sh",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/tests/workspaces_visibility.sh",
       "mode": "0644",
-      "sha256": "29cbdc815fdd1dad889f38eed60092696d26c3cf12a4690c2e6ae9e4863565d5"
+      "sha256": "b5df68fd3b9637920192b4d52d4d016e33d30e998350d02b0f61188474476720"
     },
     "config/hypr/vitreus_colors.lua": {
       "source": ".config/hypr/vitreus_colors.lua",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/vitreus_colors.lua",
       "mode": "0644",
-      "sha256": "81cd45f48cfc105b141b9402604b9612ef1401261941e12524e9eaca1d45d25c"
+      "sha256": "9e04931bd6cdc2969f34d41abd5e2243bd6df58821b292efd5adf7fe07d80075"
     },
     "config/hypr/vitreus_hypr.lua": {
       "source": ".config/hypr/vitreus_hypr.lua",
@@ -4639,7 +4680,7 @@
     "config/kitty/custom.conf": {
       "mode": "0644",
       "resolved_source": ".mydotfiles/com.ml4w.dotfiles.stable/.config/kitty/custom.conf",
-      "sha256": "0a43270d1b88dfd8b148b996503106253b99b4feaccffd7ba6651094377c106d",
+      "sha256": "219cb507872ba793008fe469ff4d531117eeb6fc481564824ffc1327d2c9b606",
       "source": ".config/kitty/custom.conf"
     },
     "config/kitty/kitty.conf": {
@@ -5330,7 +5371,7 @@
       "source": ".config/pleamar/shells/vitreus/bin/vitreus-tvremote",
       "resolved_source": ".config/pleamar/shells/vitreus/bin/vitreus-tvremote",
       "mode": "0755",
-      "sha256": "c15502c89d29a43637d5cd83cbd73236cca85b191f892e0b1a706b3b4b23d139"
+      "sha256": "5657c2a376f2f62d363d01fdc42044e6c4ff10b8c9ec3203f539108c25d9c2b2"
     },
     "source/vitreus/blur.wgsl": {
       "source": ".config/pleamar/shells/vitreus/blur.wgsl",
@@ -6356,7 +6397,7 @@
       "source": ".config/pleamar/shells/vitreus/tests/test_nightmode_controls.py",
       "resolved_source": ".config/pleamar/shells/vitreus/tests/test_nightmode_controls.py",
       "mode": "0644",
-      "sha256": "1dbb5581e12bf7dd0eeee07faec7bef96fc471934d069b6d3bf448994c609ea8"
+      "sha256": "dc420b384844c4347c760cab448c030276251c321fea5e1c3ceb96c8a664013d"
     },
     "source/vitreus/tests/test_notification_icon.py": {
       "source": ".config/pleamar/shells/vitreus/tests/test_notification_icon.py",

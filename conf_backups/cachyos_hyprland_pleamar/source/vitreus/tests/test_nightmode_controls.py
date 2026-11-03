@@ -5,6 +5,7 @@ import json
 import os
 from pathlib import Path
 import re
+import shutil
 import subprocess
 import tempfile
 import unittest
@@ -16,7 +17,7 @@ CONTROL = CONFIG / "ml4w/scripts/ml4w-toggle-hyprsunset"
 
 class NightModeControls(unittest.TestCase):
     def setUp(self) -> None:
-        self.temp = tempfile.TemporaryDirectory()
+        self.temp = tempfile.TemporaryDirectory(prefix='night-controls-', dir='/tmp/opencode')
         self.addCleanup(self.temp.cleanup)
         self.root = Path(self.temp.name)
         self.log = self.root / "args.json"
@@ -29,7 +30,14 @@ class NightModeControls(unittest.TestCase):
             "sys.exit(int(os.environ.get('STUB_EXIT', '0')))\n"
         )
         self.stub.chmod(0o755)
-        self.env = dict(os.environ, PATH=str(self.root), ARGS_LOG=str(self.log))
+        home = self.root / 'home'
+        settings = home / '.config/ml4w/settings'
+        settings.mkdir(parents=True)
+        (settings / 'desktop-stack').write_text('pleamar\n')
+        scripts = home / '.config/ml4w/scripts'
+        scripts.mkdir()
+        shutil.copy2(CONFIG / 'ml4w/scripts/desktop-stack-mode', scripts / 'desktop-stack-mode')
+        self.env = dict(os.environ, HOME=str(home), PATH=str(self.root), ARGS_LOG=str(self.log))
 
     def invoke(self, *args: str) -> subprocess.CompletedProcess[str]:
         return subprocess.run(

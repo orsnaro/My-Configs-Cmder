@@ -99,7 +99,10 @@ else
         esac
         # Swapping without reinsertion preserves the divider's split ratio.
         # One callback keeps the operations together and ignores stale focus.
-        hyprctl dispatch "function() local w = hl.get_active_window(); if w ~= nil and w.address == \"$address\" and w.workspace.id == $workspace then $actions end end" >/dev/null
+        # Unsupported Lua dispatches return {ok=false}, not a failed process.
+        # Select the live layout inside the same focus guard; never retry an
+        # IPC failure with an unguarded swap on a potentially different window.
+        hyprctl dispatch "function() local w = hl.get_active_window(); if w ~= nil and w.address == \"$address\" and w.workspace.id == $workspace then if w.workspace.tiled_layout == \"dwindle\" then $actions else hl.dispatch(hl.dsp.window.swap({ direction = \"$code\" })) end end end" >/dev/null 2>&1
         exit 0
     fi
     hyprctl dispatch "hl.dsp.window.move({ direction = \"$code\" })" >/dev/null

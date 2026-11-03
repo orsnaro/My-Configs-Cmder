@@ -1,0 +1,87 @@
+#!/usr/bin/env bash
+set -u
+
+mode=${1:-apps}
+[[ $# -eq 0 ]] || shift
+theme="$HOME/.config/rofi/trial"
+helpers="$HOME/.local/lib/rofi-trial"
+require() {
+    command -v "$1" >/dev/null 2>&1 || { printf 'Required command missing: %s\n' "$1" >&2; exit 127; }
+}
+copy_result() {
+    local result status
+    if result=$("$@"); then
+        [[ -z "$result" ]] || printf '%s' "$result" | wl-copy
+    else
+        status=$?
+        [[ $status -eq 1 || $status -eq 130 || $status -eq 143 ]] && return 0
+        return "$status"
+    fi
+}
+
+case "$mode" in apps|run|calc|emoji|files|clipboard) ;; *) printf 'Unknown mode: %s\n' "$mode" >&2; exit 2 ;; esac
+require rofi
+require hyprctl
+require flock
+[[ -x "$helpers/dismiss-guard" ]] || { printf 'Cross-monitor helper missing; run %s/build-smart.sh\n' "$helpers" >&2; exit 2; }
+caller_umask=$(umask)
+umask 077
+runtime=${ROFI_HYPRLAND_RUNTIME:-${XDG_RUNTIME_DIR:-$HOME/.cache}/rofi-hyprland}
+mkdir -p -- "$runtime" || exit 2
+permissions=$(stat -c '%a' -- "$runtime") || exit 2
+if [[ ! -O "$runtime" || -L "$runtime" ]] || (( (8#$permissions & 077) != 0 )); then
+    printf 'Launcher runtime directory is not private: %s\n' "$runtime" >&2
+    exit 2
+fi
+export ROFI_HYPRLAND_RUNTIME="$runtime"
+[[ ! -L "$runtime/startup.lock" ]] || { printf 'Unsafe launcher lockfile\n' >&2; exit 2; }
+exec 9>"$runtime/startup.lock" || exit 2
+umask "$caller_umask"
+# Ignore overlapping requests until the existing guard verifies Rofi's PID.
+flock -n 9 || exit 0
+pidfile=$("$helpers/dismiss-guard" --toggle "$mode" "$runtime")
+toggle_status=$?
+[[ $toggle_status -ne 0 ]] || exit 0
+[[ $toggle_status -eq 10 ]] || exit "$toggle_status"
+export ROFI_HYPRLAND_PID="$pidfile"
+monitor=$(<"${pidfile%/*}/monitor")
+export ROFI_HYPRLAND_MONITOR="$monitor"
+[[ -x "$helpers/dismiss-guard" ]] || { printf 'Cross-monitor helper missing; run %s/build-smart.sh\n' "$helpers" >&2; exit 2; }
+"$helpers/dismiss-guard" "$pidfile" "$monitor" "$$" 9 </dev/null >/dev/null 2>>"${pidfile%/*}/dismiss.log" &
+exec 9>&-
+extra=(-monitor "$monitor")
+
+case "$mode" in
+    apps)
+        view=smart
+        [[ -f "$helpers/smart.so" ]] || { printf 'Smart search plugin missing; run %s/build-smart.sh\n' "$helpers" >&2; exit 2; }
+        export ROFI_PLUGIN_PATH="$helpers${ROFI_PLUGIN_PATH:+:$ROFI_PLUGIN_PATH}"
+        extra+=(-modes "smart,drun,run,calc,filebrowser" -display-smart "Search")
+        ;;
+    run) view=run ;;
+    calc) view=calc ;;
+    emoji)
+        require rofi; require rofimoji; require wl-copy
+        # Rofimoji treats a terminated selector as an empty selection, not CANCEL.
+        # Capture print output and copy only nonempty data, preserving cancellation.
+        copy_result rofimoji --selector rofi --clipboarder wl-copy --action print \
+            --skin-tone neutral --use-icons --only-official --max-recent 0 \
+            --selector-args="-config \"$theme/emoji.rasi\" -pid \"$pidfile\" -monitor \"$monitor\"" "$@"
+        exit $?
+        ;;
+    files)
+        require rofi; require fd; require python; require xdg-open
+        exec python "$helpers/files.py" "$@"
+        ;;
+    clipboard)
+        require rofi; require cliphist; require wl-copy; require python
+        [[ -f "$helpers/clipboard.py" ]] || { printf 'Clipboard mode is not configured yet.\n' >&2; exit 2; }
+        exec python "$helpers/clipboard.py" "$@"
+        ;;
+    *) printf 'Unknown mode: %s. Use apps, run, emoji, clipboard, calc or files.\n' "$mode" >&2; exit 2 ;;
+esac
+
+require rofi
+require wl-copy
+# Only selected calculations emit output. It is data, never shell code.
+copy_result rofi -config "$theme/base.rasi" -pid "$pidfile" "${extra[@]}" -show "$view" -terse "$@"

@@ -1,0 +1,29 @@
+/* Existing GTK palette at startup; wallpaper refresh deliberately deferred. */
+@import url("file:///home/narol/.config/gtk-4.0/colors.css");
+:root {
+    --background: @window_bg_color;
+    --foreground: alpha(@accent_color, 0.12);
+    --text: @window_fg_color;
+    --border: alpha(@window_fg_color, 0.20);
+    --tag-background: @accent_color;
+    --tag-color: @accent_fg_color;
+}
+* { font-family: "Fira Sans"; }
+window:not(#backdrop) {
+    background: alpha(@window_bg_color, 0.97);
+    border: 1px solid alpha(@accent_color, 0.45);
+    border-radius: 10px;
+}
+scrolledwindow > viewport, scrolledwindow > viewport > *, listview, gridview,
+#search-bar, .status-bar { background: transparent; }
+.tile, gridview child box, #context-menu { border-radius: 6px; }
+row:selected .tile { background: alpha(@accent_color, 0.16); }
+gridview child box { background: alpha(@window_fg_color, 0.05); }
+gridview child:selected box.emoji-item {
+    border-color: @accent_color;
+    box-shadow: inset 0 0 0 2px @accent_color;
+    background: alpha(@accent_color, 0.24);
+}
+gridview .emoji-item > label:first-child { font-size: 2.25em; }
+gridview child:selected .emoji-item #emoji-name { color: @window_fg_color; }
+#calc-tile-result { color: @accent_color; }

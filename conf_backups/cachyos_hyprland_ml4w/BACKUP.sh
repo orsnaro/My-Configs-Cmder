@@ -5,6 +5,24 @@ REPO_DIR="$(cd "$(dirname "$0")" && pwd)"
 DOT="$REPO_DIR/dotfiles/.config"
 LOC="$REPO_DIR/local/.local"
 mkdir -p "$DOT" "$LOC/bin" "$LOC/share/applications"
+mkdir -p "$DOT/ml4w/scripts" "$DOT/ml4w/settings" "$DOT/ml4w/listeners"
+
+# Hyprland's on-demand launcher is source-backed; rebuild its ABI-specific plugin on restore.
+if [[ -f "$HOME/.local/bin/rofi-trial" ]]; then
+    cp -L -- "$HOME/.local/bin/rofi-trial" "$LOC/bin/rofi-trial"
+    mkdir -p "$LOC/lib/rofi-trial"
+    rsync -aL --exclude='*.so' --exclude='dismiss-guard' --exclude='.*' --exclude='__pycache__/' --exclude='*.pyc' \
+        "$HOME/.local/lib/rofi-trial/" "$LOC/lib/rofi-trial/"
+fi
+if [[ -f "$HOME/.config/ml4w/listeners/gtk-theme-switcher.sh" ]]; then
+    cp -L -- "$HOME/.config/ml4w/listeners/gtk-theme-switcher.sh" "$DOT/ml4w/listeners/"
+fi
+for theme in glass modern transparent glass-walker modern-walker; do
+    if [[ -f "$HOME/.config/ml4w/themes/$theme/theme.sh" ]]; then
+        mkdir -p "$DOT/ml4w/themes/$theme"
+        cp -L -- "$HOME/.config/ml4w/themes/$theme/theme.sh" "$DOT/ml4w/themes/$theme/"
+    fi
+done
 
 # Excluded files already in a snapshot are protected, not silently deleted.
 # Review and remove any old private artifacts separately before publication.
@@ -37,6 +55,26 @@ done
 for name in ml4w-dock ml4w-statusbar fastfetch fish matugen walker elephant ohmyposh hyprland-kde-overrides; do
   optional_tree "$HOME/.config/$name" "$DOT/$name"
 done
+optional_tree "$HOME/.config/sherlock" "$DOT/sherlock"
+mkdir -p "$DOT/systemd/user" "$DOT/glaze-mail/eval/stylesets" \
+  "$DOT/glaze-mail/terminal/config/aerc" "$DOT/glaze-mail/terminal/data/konsole"
+backup_file "$HOME/.config/systemd/user/sherlock.service" "$DOT/systemd/user"
+backup_file "$HOME/.local/bin/sherlock-launch" "$LOC/bin"
+optional_tree "$HOME/.local/share/sherlock-integration" "$LOC/share/sherlock-integration" \
+  --exclude='target/' --exclude='*.tar.gz' --exclude='Cargo.lock.upstream'
+# Mail's surrounding directories contain browser profiles, drafts and credentials.
+# Only declarative preferences and reviewed source are public backup inputs.
+optional_tree "$HOME/.local/src/glaze-mail" "$LOC/src/glaze-mail" \
+  --include='/*.py' --include='/*.lua' --include='/Makefile' --include='/README.md' \
+  --include='/requirements-preview.txt' --include='/assets/***' \
+  --include='/tests/***' --include='/tests_preview/***' --exclude='*'
+for name in aerc.conf lesskey; do
+  backup_file "$HOME/.config/glaze-mail/eval/$name" "$DOT/glaze-mail/eval"
+done
+backup_file "$HOME/.config/glaze-mail/eval/stylesets/glaze" "$DOT/glaze-mail/eval/stylesets"
+backup_file "$HOME/.config/glaze-mail/terminal/config/aerc/binds.conf" "$DOT/glaze-mail/terminal/config/aerc"
+backup_file "$HOME/.config/glaze-mail/terminal/config/konsolerc" "$DOT/glaze-mail/terminal/config"
+backup_file "$HOME/.config/glaze-mail/terminal/data/konsole/GlazeMail.colorscheme" "$DOT/glaze-mail/terminal/data/konsole"
 for name in gtk-3.0 gtk-4.0; do
   optional_tree "$HOME/.config/$name" "$DOT/$name" \
     --include='/settings.ini' --include='/gtk.css' --include='/colors.css' --exclude='*'
@@ -56,6 +94,12 @@ for name in ml4w-dock quickshell-overview ml4w-dotfiles-settings; do
   optional_tree "$HOME/.local/share/$name" "$LOC/share/$name"
 done
 backup_file "$HOME/.local/share/applications/quake-kitty.desktop" "$LOC/share/applications"
+backup_file "$HOME/.local/share/applications/aerc-mail.desktop" "$LOC/share/applications"
+for app in brave-kdcbgnonmmimiohkdebbbipakbegkkol-Default brave-cdbapkcndmkmbeiedikfcaeelndldoha-Default; do
+  backup_file "$HOME/.local/share/applications/$app.desktop" "$LOC/share/applications"
+  mkdir -p "$LOC/share/icons/hicolor/512x512/apps"
+  backup_file "$HOME/.local/share/icons/hicolor/512x512/apps/$app.png" "$LOC/share/icons/hicolor/512x512/apps"
+done
 
 kitty --version > "$DOT/kitty/KITTY_PATCH_STATE.txt" 2>/dev/null || echo "kitty unknown" > "$DOT/kitty/KITTY_PATCH_STATE.txt"
 echo "tabs.py resize_divider count: $(grep -c resize_divider /usr/lib/kitty/kitty/tabs.py 2>/dev/null || echo 0)" >> "$DOT/kitty/KITTY_PATCH_STATE.txt"

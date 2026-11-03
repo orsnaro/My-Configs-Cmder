@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
 # -----------------------------------------------------
-# Walker-only launcher (rofi removed)
+# Resident Sherlock launcher; Rofi remains available through rofi-trial.
 # -----------------------------------------------------
-$HOME/.config/walker/launch.sh --height 350
+exec "$HOME/.local/bin/sherlock-launch" apps "$@"

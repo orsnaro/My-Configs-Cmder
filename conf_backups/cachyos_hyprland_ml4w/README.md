@@ -1,4 +1,28 @@
-# CachyOS Hyprland ML4W configs — refreshed 2026-10-13
+# CachyOS Hyprland ML4W configs — refreshed 2026-11-03
+
+## Current desktop (supersedes historical launcher notes below)
+
+The November 1–3 desktop decisions are now included:
+
+- **Sherlock is primary:** bare Super toggles apps/calculator; Super+V opens
+  clipboard history; Super+. opens emoji. Outside clicks dismiss it. One resident
+  service, Cairo rendering, 53px Tela Circle Dracula app icons, enlarged emoji,
+  rounded/translucent styling. Palette is read at startup, not watched.
+- **Rofi remains available:** Super+R runs commands; `rofi-trial apps|emoji|clipboard`
+  opens its other modes. Native startup/dismissal fixes and source are retained.
+- Workspace **7 = terminals**, **8 = others**, with matching QS labels. CasaOS and
+  Jellyfin use Ethernet (`192.168.1.12`), open tiled on others, and hide only their
+  own title bars. Normal Brave and other apps keep their rules.
+- Kitty's persistent ANSI green override fixes invisible green Git additions.
+- Managed aerc/Konsole source, declarative preferences and regression tests are
+  included: Nano, 10pt mail-only font, no terminal scrollback, current navigation,
+  safe right-side HTML previews, and the Gmail SMTP/header-cache generator.
+
+See [CURRENT-RESTORE.md](CURRENT-RESTORE.md) **before restoring**. Sherlock binaries,
+Tela assets, Hyprlock 0.9.7, the external Pomo fix and mail authorization require
+the documented separate setup. Mail accounts, OAuth credentials, mail/browser
+data and clipboard history are deliberately absent. This refresh changes the
+repository only; it does not restart or alter the live desktop.
 
 Base: CachyOS + ML4W dotfiles stable 2.16 + kitty 0.49.2
 Repo: https://github.com/orsnaro/My-Configs-Cmder.git, folder `conf_backups/cachyos_hyprland_ml4w/`
@@ -61,6 +85,73 @@ Physical keys: J=left, L=right, I=up, K=down (US and Arabic layouts).
 Kitty receives the original event, not a synthetic forwarded shortcut. Its no-UI `smart-focus.py` focuses pane groups in-process and uses bounded local Hyprland IPC only at an edge. `checked_focus` also handles empty desktops; PID/address guards reject stale Kitty requests. No watcher, polling, parity filter or navigation subprocess is needed.
 
 ## Caveats
+
+### Rofi fallback — implementation and historical verification
+
+- `rofi-trial apps`: app search and inline arithmetic (`2+2` → `4`; Enter copies).
+  **Super+R** runs commands; `rofi-trial emoji` opens the 6×6 emoji grid, and
+  `rofi-trial clipboard` opens clipboard history with image previews. Repeat a command to
+  close that menu; Escape or clicking outside on **any connected monitor** also
+  cancels. Moving the pointer alone does not close it.
+  Overlapping requests during startup are ignored until the guard verifies the
+  picker PID; a later press still closes it. The wrapper needs `flock` from
+  `util-linux`. App/run/calculator launch and toggle use the native helper,
+  without starting Python. A namespace-scoped fade rule preserves Rofi's open/close animation
+  without a slide. The approved shared layer fade-out is now **150 ms**, down
+  from 1 second: fading panels/notifications also close faster. Opening remains
+  200 ms; window/workspace animations are unchanged. The native watcher creates
+  no overlay surfaces and registers only ordinary left/right/middle click callbacks
+  during the verified picker session; modified mouse shortcuts stay unchanged.
+  **Correction and replacement:** settled-menu testing found that Hyprland's
+  exclusive input routing bypasses the transparent guards. The earlier
+  cross-monitor checks clicked before that routing became active; do not treat
+  them as proof that the original guard worked. Its compositor-callback replacement
+  now passes all 18 settled-menu cases (three pickers × two other outputs × three
+  buttons), including reloads while open, with no underlying click or clipboard write.
+  See `docs/superpowers/reports/2026-11-01-rofi-native-session.md` at repository root.
+  Warm keyboard-focus probes were roughly 46–58 ms, with a 669 ms initial sample.
+  Pre-focus characters can still go to the previous application; no zero-delay or
+  physical-shortcut guarantee, resident frontend, or input buffering is added.
+- Emoji uses contiguous keyword matching (`heart` no longer matches scattered
+  letters in unrelated descriptions). Other menus retain fuzzy abbreviations.
+  Search results use fzf relevance ranking; empty clipboard searches keep recency.
+- The executable retains its compatible name `~/.local/bin/rofi-trial`; this is
+  no longer session-only. The QS coordinator in `tools/desktop_stack.py` starts
+  neither Walker/Elephant nor a resident Rofi process. KDE configuration is untouched.
+- The ML4W clipboard button forwards to the same preview/toggle helper. Visual
+  theme presets preserve the selected launcher rather than resetting it to Walker.
+- Runtime packages on CachyOS/Arch: `rofi`, `rofi-calc`, `rofimoji`, `libqalculate`,
+  `wl-clipboard`, `cliphist`, `fd`, and an installed `xdg-open` provider. Plugin build:
+  `gcc`, `pkgconf`, `glib2`, `cairo`, `pango`, `libqalculate`, `wayland`,
+  `json-c`, and Rofi development headers.
+  This payload was tested with Rofi 2.0.0 and Qalculate 5.13.2.
+- `BACKUP.sh` includes launcher helpers/source and the guarded GTK listener.
+  `RESTORE.sh --dry-run` never builds or launches anything; actual restore builds
+  `smart.so` and the native session watcher against the installed ABI, and
+  fails visibly on build errors. The watcher verifies Rofi identity, registers
+  session-scoped Hyprland callbacks and blocks on its process descriptor; it
+  creates no surfaces and exits after the picker. The old guard PSS of
+  228–238 KiB is historical, not a measurement of this watcher. No compiled binaries, generated protocol code, or
+  clipboard database/history are published in this backup.
+- Restore ML4W files first. For the existing QS/Pleamar setup, then run repository-root
+  `python3 tools/install_desktop_stack.py --dry-run`, followed by `--apply`, to install
+  coordinator/switch links and mode guards. Keep the repository at that path afterward.
+  `tools/switch-to-qs.sh` checks Rofi assets before stopping the current stack.
+
+Original full-stack **PSS** baseline (MiB), retained without remeasurement:
+
+| View | Walker/Elephant | Original Rofi trial |
+| --- | ---: | ---: |
+| Closed | 214.74 | 0.22 |
+| Apps | 257.22 | 29.93 |
+| Emoji | 262.96 | 46.07 |
+| Clipboard | 255.37 | 30.93 |
+
+These are original measurements, **not a benchmark of the later smart-search
+plugin/full-monitor theme**. Raw samples and recovery data remain at
+`~/.local/state/launcher-trial/20261031T133150+0200/` on the original machine;
+`followup/` records subsequent fixes and safe recovery checkpoints.
+
 
 - Restore targets `$HOME` only (no alternate target dir); base required: CachyOS + ML4W dotfiles stable 2.16.
 - `hypr/monitors.conf` + `custom.lua` workspaces hardcode a 3-monitor layout (DP-2/HDMI-A-2/DP-1) — adjust for single-display machines.

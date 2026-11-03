@@ -13,7 +13,9 @@ local function emit(event, window)
 end
 
 hl = {
-    bind = function() end,
+    bind = function() return { set_enabled = function() end } end,
+    get_layers = function() return {} end,
+    animation = function() end,
     unbind = function() end,
     on = function(event, callback)
         callbacks[event] = callbacks[event] or {}

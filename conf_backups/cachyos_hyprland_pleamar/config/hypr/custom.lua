@@ -177,12 +177,22 @@ hl.bind("ALT + Tab", hl.dsp.exec_cmd("~/.local/bin/qs-lazy-toggle ~/.local/share
 hl.unbind("SUPER + SPACE")
 hl.bind("SUPER + CTRL + SPACE", hl.dsp.exec_cmd("qs ipc call statusbar focus"),
     { description = "Focus the statusbar" })
-hl.bind("SUPER + R", hl.dsp.exec_cmd("$HOME/.config/walker/launch.sh -m runner -N -H"),
+hl.bind("SUPER + R", hl.dsp.exec_cmd("$HOME/.local/bin/rofi-trial run"),
     { description = "Run a command" })
-hl.bind("SUPER + SUPER_L", hl.dsp.exec_cmd("~/.config/hypr/scripts/launcher.sh"),
-    { release = true, description = "Open app list with bare Super" })
-hl.bind("SUPER + period", hl.dsp.exec_cmd("$HOME/.config/walker/launch.sh -m symbols -N -H --width 750"),
+local sherlock_session = require("sherlock_session").setup()
+hl.bind("SUPER + SUPER_L", sherlock_session.toggle,
+    { release = true, description = "Toggle app list with bare Super" })
+hl.bind("SUPER + period", hl.dsp.exec_cmd("$HOME/.local/bin/sherlock-launch emoji"),
     { description = "Emoji picker (Win-style)" })
+hl.unbind("SUPER + V")
+hl.bind("SUPER + V", hl.dsp.exec_cmd("$HOME/.local/bin/sherlock-launch clipboard"),
+    { description = "Clipboard history with image preview (Sherlock)" })
+
+-- Rofi keeps its fade; approved shared layer fade-out is 150 ms (in unchanged).
+require("rofi_session").setup()
+hl.animation({ leaf = "fadeLayersOut", enabled = true, speed = 1.5, bezier = "default" })
+hl.layer_rule({ name = "rofi-fade", match = { namespace = "^rofi$" }, no_anim = false, animation = "fade" })
+hl.layer_rule({ name = "rofi-dismiss-instant", match = { namespace = "^rofi-dismiss-guard$" }, no_anim = true })
 
 -- Browser: default.lua binds SUPER+B to ml4w browser.sh (Firefox).
 -- Overridden here to Brave; browser.sh stays untouched for other ML4W consumers.
@@ -229,6 +239,19 @@ for line in apps:lines() do
     end
 end
 apps:close()
+
+-- Hide only these apps' client chrome; Hyprland keeps their normal tiled size.
+for _, app in ipairs({
+    { name = "jellyfin", class = "^brave-(kdcbgnonmmimiohkdebbbipakbegkkol|192\\.168\\.1\\.12__web_)-Default$" },
+    { name = "casaos", class = "^brave-(cdbapkcndmkmbeiedikfcaeelndldoha|192\\.168\\.1\\.12__)-Default$" },
+}) do
+    hl.window_rule({
+        name = "tiled-" .. app.name .. "-chromeless",
+        match = { class = app.class, float = false, modal = false },
+        fullscreen_state = "0 2",
+        sync_fullscreen = false,
+    })
+end
 
 hl.window_rule({
     name = "glaze-quake",
@@ -298,6 +321,7 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("kitty")
     hl.exec_cmd("~/.local/bin/glaze-obsidian-notes")
     hl.exec_cmd("~/.local/bin/glaze-discord")
+    hl.exec_cmd("~/.local/bin/glaze-mail")
     hl.exec_cmd("~/.local/bin/albion-data-watch")
     -- The tray indicator activates the daemon over D-Bus; no second startup needed.
     hl.exec_cmd("kdeconnect-indicator")
@@ -310,6 +334,7 @@ hl.window_rule({ name = "focus-code", match = { class = "^(code|code-oss)$" }, w
 hl.window_rule({ name = "focus-kate", match = { class = "^(kate|org.kde.kate)$" }, workspace = "2" })
 hl.window_rule({ name = "focus-browser", match = { class = "^(brave-browser|firefox)$" }, workspace = "3" })
 hl.window_rule({ name = "focus-term", match = { class = "^(kitty|konsole|org.kde.konsole|Alacritty)$" }, workspace = "7" })
+hl.window_rule({ name = "glaze-mail-tiled", match = { class = "^aerc-mail$" }, workspace = "6 silent", float = false })
 hl.window_rule({ name = "focus-notes", match = { class = "^(obsidian|md.obsidian.Obsidian)$", modal = false, float = false }, workspace = "4" })
 hl.window_rule({ name = "focus-spotify", match = { class = "^brave-open\\.spotify\\.com__-Default$" }, workspace = "8" })
 hl.window_rule({ name = "focus-vortex", match = { class = "^vortex\\.exe$"}, workspace = "9", float = true, size = "1600 900", center = true })

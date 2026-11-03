@@ -1,0 +1,34 @@
+[
+    {
+        "name": "Calculator",
+        "alias": "all",
+        "type": "calculation",
+        "args": {"capabilities": ["calc.math", "calc.units"]},
+        "priority": 1,
+        "on_return": "copy"
+    },
+    {
+        "name": "App Launcher",
+        "alias": "all",
+        "type": "app_launcher",
+        "args": {},
+        "priority": 3,
+        "home": "Home"
+    },
+    {
+        "name": "Emoji",
+        "alias": "all",
+        "type": "emoji_picker",
+        "args": {"default_skin_tone": "Simpsons", "icon": "face-smile-symbolic"},
+        "priority": 1,
+        "home": "Home"
+    },
+    {
+        "name": "Emoji",
+        "alias": "emoji",
+        "type": "emoji_picker",
+        "args": {"default_skin_tone": "Simpsons", "icon": "face-smile-symbolic"},
+        "priority": 1,
+        "home": "Home"
+    }
+]

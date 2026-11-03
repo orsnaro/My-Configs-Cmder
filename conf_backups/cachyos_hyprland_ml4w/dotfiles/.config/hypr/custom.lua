@@ -14,8 +14,8 @@ end
 hl.env("XDG_CONFIG_DIRS", table.concat(kde_config_paths, ":"))
 -- Workspace layout (numeric IDs: this fork's Lua dispatcher only takes numbers).
 -- Display names live in quickshell StatusbarApp/WorkspacesModule.qml.
--- Center (DP-2): 1 main + 9 gaming. Left Samsung (HDMI-A-2): 2 work .. 7 others.
--- Right (DP-1): 8 terminals. Nothing is routed to 1:main by default.
+-- Center (DP-2): 1 main + 9 gaming. Left Samsung (HDMI-A-2): 2-6 work, 8 others.
+-- Right (DP-1): 7 terminals. Nothing is routed to 1:main by default.
 local workspaces = {
     { id = 1, monitor = "DP-2",     key = "grave" }, -- grave is just the back-tick '`'
     { id = 2, monitor = "HDMI-A-2", key = "1" },
@@ -23,8 +23,8 @@ local workspaces = {
     { id = 4, monitor = "HDMI-A-2", key = "3" },
     { id = 5, monitor = "HDMI-A-2", key = "4" },
     { id = 6, monitor = "HDMI-A-2", key = "5" },
-    { id = 7, monitor = "HDMI-A-2", key = "F1" },
-    { id = 8, monitor = "DP-1",     key = "F2" },
+    { id = 7, monitor = "DP-1",     key = "F2" },
+    { id = 8, monitor = "HDMI-A-2", key = "F1" },
     { id = 9, monitor = "DP-2",     key = "F3" },
 }
 
@@ -128,7 +128,7 @@ for _, pair in ipairs({
     { "J", "left" }, { "L", "right" }, { "I", "up" }, { "K", "down" },
 }) do
     local letter, direction = pair[1], pair[2]
-    -- ALT+letters/arrows: Kitty panes own them while a Kitty window is focused
+    -- ALT+letters: Kitty panes own them while a Kitty window is focused
     -- (original event passes through, no reinjection, so pane move + edge fallthrough apply);
     -- anywhere else they focus Hyprland windows, stopping at the edge.
     local opts = { description = "Focus window " .. direction .. " (Kitty panes first)" }
@@ -140,7 +140,7 @@ for _, pair in ipairs({
         checked_focus(direction)
     end
     hl.bind("ALT + " .. letter, focus_or_passthrough, opts)
-    hl.bind("ALT + " .. direction, focus_or_passthrough, opts)
+    -- Plain ALT+arrows stay free for application shortcuts.
     -- SHIFT+ALT letters move; SHIFT+ALT arrows still focus.
     hl.bind("ALT + SHIFT + " .. letter,
         hl.dsp.exec_cmd("~/.local/bin/glaze-move-window " .. direction),
@@ -177,12 +177,28 @@ hl.bind("ALT + Tab", hl.dsp.exec_cmd("~/.local/bin/qs-lazy-toggle ~/.local/share
 hl.unbind("SUPER + SPACE")
 hl.bind("SUPER + CTRL + SPACE", hl.dsp.exec_cmd("qs ipc call statusbar focus"),
     { description = "Focus the statusbar" })
-hl.bind("SUPER + R", hl.dsp.exec_cmd("$HOME/.config/walker/launch.sh -m runner -N -H"),
+hl.bind("SUPER + R", hl.dsp.exec_cmd("$HOME/.local/bin/rofi-trial run"),
     { description = "Run a command" })
-hl.bind("SUPER + SUPER_L", hl.dsp.exec_cmd("~/.config/hypr/scripts/launcher.sh"),
-    { release = true, description = "Open app list with bare Super" })
-hl.bind("SUPER + period", hl.dsp.exec_cmd("$HOME/.config/walker/launch.sh -m symbols -N -H --width 750"),
+local sherlock_session = require("sherlock_session").setup()
+hl.bind("SUPER + SUPER_L", sherlock_session.toggle,
+    { release = true, description = "Toggle app list with bare Super" })
+hl.bind("SUPER + period", hl.dsp.exec_cmd("$HOME/.local/bin/sherlock-launch emoji"),
     { description = "Emoji picker (Win-style)" })
+hl.unbind("SUPER + V")
+hl.bind("SUPER + V", hl.dsp.exec_cmd("$HOME/.local/bin/sherlock-launch clipboard"),
+    { description = "Clipboard history with image preview (Sherlock)" })
+
+-- Rofi keeps its fade; approved shared layer fade-out is 150 ms (in unchanged).
+require("rofi_session").setup()
+hl.animation({ leaf = "fadeLayersOut", enabled = true, speed = 1.5, bezier = "default" })
+hl.layer_rule({ name = "rofi-fade", match = { namespace = "^rofi$" }, no_anim = false, animation = "fade" })
+hl.layer_rule({ name = "rofi-dismiss-instant", match = { namespace = "^rofi-dismiss-guard$" }, no_anim = true })
+
+-- Browser: default.lua binds SUPER+B to ml4w browser.sh (Firefox).
+-- Overridden here to Brave; browser.sh stays untouched for other ML4W consumers.
+hl.unbind("SUPER + B")
+hl.bind("SUPER + B", hl.dsp.exec_cmd("brave"),
+    { description = "Open Brave" })
 
 -- Keyboard layout switch: SUPER+Space toggles us/ara (SHIFT+SPACE freed:
 -- it fired while typing and is problematic).
@@ -197,6 +213,14 @@ hl.bind("SUPER + RETURN", hl.dsp.exec_cmd("~/.config/ml4w/settings/terminal.sh")
     { description = "Open the terminal" })
 hl.bind("ALT + RETURN", hl.dsp.exec_cmd("~/.config/ml4w/settings/terminal.sh"),
     { description = "Open the terminal" })
+
+-- Quake escape is a fallback: later app rules choose the destination and
+-- tiled/floating mode. Unassigned apps stay on the normal workspace below.
+hl.window_rule({
+    name = "quake-apps-to-normal-workspace",
+    match = { workspace = "special:quake", class = "negative:^quake-kitty$" },
+    workspace = "m+0 silent",
+})
 
 -- One destination map is shared with the manual reset. Exact class matching
 -- deliberately excludes Quake, ML4W helper terminals and application dialogs.
@@ -215,6 +239,19 @@ for line in apps:lines() do
     end
 end
 apps:close()
+
+-- Hide only these apps' client chrome; Hyprland keeps their normal tiled size.
+for _, app in ipairs({
+    { name = "jellyfin", class = "^brave-(kdcbgnonmmimiohkdebbbipakbegkkol|192\\.168\\.1\\.12__web_)-Default$" },
+    { name = "casaos", class = "^brave-(cdbapkcndmkmbeiedikfcaeelndldoha|192\\.168\\.1\\.12__)-Default$" },
+}) do
+    hl.window_rule({
+        name = "tiled-" .. app.name .. "-chromeless",
+        match = { class = app.class, float = false, modal = false },
+        fullscreen_state = "0 2",
+        sync_fullscreen = false,
+    })
+end
 
 hl.window_rule({
     name = "glaze-quake",
@@ -243,16 +280,39 @@ hl.window_rule({ name = "float-ark", match = { class = "^(ark|org.kde.ark)$" }, 
 hl.window_rule({ name = "float-fileroller", match = { class = "^(file-roller|org.gnome.FileRoller)$" }, float = true, center = true, size = "800 600" })
 -- Brave Task Manager reports no window class; match its title instead.
 hl.window_rule({ name = "float-brave-task-manager", match = { title = "^Task Manager - Brave$" }, float = true, center = true })
--- Brave Google OAuth popup shares brave-browser class with main windows.
--- Static float evaluates once at open when title==initialTitle==Untitled,
--- so matching final "Sign in" title can never fire. Untitled initialTitle
--- distinguishes popups from main windows (New Tab - Brave).
-hl.window_rule({ name = "float-brave-google-signin", match = { class = "^brave-browser$", initial_title = "^Untitled - Brave$" }, float = true, center = true, size = "600 700" })
+-- Ordinary hyperlink windows also start as Untitled. Wait for the actual sign-in
+-- title; static floating rules cannot respond to titles that arrive after open.
+local handled_google_signin = {}
+local function float_google_signin(w)
+    if w == nil or not w.mapped or w.class ~= "brave-browser"
+        or w.title ~= "Sign in - Google Accounts - Brave" then return end
+    if handled_google_signin[w.address] then return end
+    -- Mark before dispatch, and do not override later manual tiling or resizing.
+    handled_google_signin[w.address] = true
+    hl.dispatch(hl.dsp.window.float({ action = "on", window = w }))
+    hl.dispatch(hl.dsp.window.resize({ x = 600, y = 700, window = w }))
+    hl.dispatch(hl.dsp.window.center({ window = w }))
+end
+hl.on("window.open", float_google_signin)
+hl.on("window.title", float_google_signin)
+hl.on("window.close", function(w)
+    if w ~= nil then handled_google_signin[w.address] = nil end
+end)
 -- Steam Settings dialog shares the main client's "steam" class; match its title instead.
 hl.window_rule({ name = "float-steam-settings", match = { class = "^steam$", title = "Settings$" }, float = true, center = true })
 -- Obsidian Settings shares the main client's class; float it on the current
 -- workspace/monitor instead of dragging it to workspace 4 with the main window.
 hl.window_rule({ name = "float-obsidian-settings", match = { class = "^(obsidian|md.obsidian.Obsidian)$", title = "Settings" }, float = true, center = true, size = "1000 700" })
+-- qBittorrent: main window and dialogs share the app_id
+-- "org.qbittorrent.qBittorrent". The main title is "qBittorrent v<version>"
+-- (optionally prefixed by [PAUSED] or [D: ...]); everything else in this
+-- class is a subwindow. Dialogs opened from the GUI carry a parent and
+-- Hyprland floats those on its own, but the add-torrent dialog for a magnet
+-- link or .torrent launched from outside has no parent and is titled with the
+-- torrent name, so it tiles unless this negative title match floats it.
+-- (modal = true cannot be used: in Hyprland 0.56 modal is XWayland-only.)
+hl.window_rule({ name = "qbit-main-tiled", match = { class = "^org\\.qbittorrent\\.qBittorrent$", title = ".*qBittorrent v[0-9]+(\\.[0-9]+)+.*" }, float = false })
+hl.window_rule({ name = "float-qbit-dialogs", match = { class = "^org\\.qbittorrent\\.qBittorrent$", title = "negative:.*qBittorrent v[0-9]+(\\.[0-9]+)+.*" }, float = true, center = true })
 
 -- Hyprland-only boot apps (NOT ~/.config/autostart, so KDE is unaffected).
 -- Obsidian launches here only, never from KDE/plasma autostart.
@@ -261,17 +321,22 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("kitty")
     hl.exec_cmd("~/.local/bin/glaze-obsidian-notes")
     hl.exec_cmd("~/.local/bin/glaze-discord")
+    hl.exec_cmd("~/.local/bin/glaze-mail")
     hl.exec_cmd("~/.local/bin/albion-data-watch")
+    -- The tray indicator activates the daemon over D-Bus; no second startup needed.
+    hl.exec_cmd("kdeconnect-indicator")
 end)
 
 -- Focus overrides: later rules win over the silent TSV ones above.
 -- Code and Kate jump to work (2) + focus; everything else opens silently
--- except the retargeted browser/terminal/notes overrides below.
+-- except the retargeted browser/terminal/notes/Spotify overrides below.
 hl.window_rule({ name = "focus-code", match = { class = "^(code|code-oss)$" }, workspace = "2" })
 hl.window_rule({ name = "focus-kate", match = { class = "^(kate|org.kde.kate)$" }, workspace = "2" })
 hl.window_rule({ name = "focus-browser", match = { class = "^(brave-browser|firefox)$" }, workspace = "3" })
-hl.window_rule({ name = "focus-term", match = { class = "^(kitty|konsole|org.kde.konsole|Alacritty)$" }, workspace = "8" })
+hl.window_rule({ name = "focus-term", match = { class = "^(kitty|konsole|org.kde.konsole|Alacritty)$" }, workspace = "7" })
+hl.window_rule({ name = "glaze-mail-tiled", match = { class = "^aerc-mail$" }, workspace = "6 silent", float = false })
 hl.window_rule({ name = "focus-notes", match = { class = "^(obsidian|md.obsidian.Obsidian)$", modal = false, float = false }, workspace = "4" })
+hl.window_rule({ name = "focus-spotify", match = { class = "^brave-open\\.spotify\\.com__-Default$" }, workspace = "8" })
 hl.window_rule({ name = "focus-vortex", match = { class = "^vortex\\.exe$"}, workspace = "9", float = true, size = "1600 900", center = true })
 
 -- Lutris / Wine / Proton games (workspace 9 = gaming).
@@ -284,16 +349,9 @@ hl.window_rule({ name = "gaming-wine-exe", match = { class = "\\.exe$" }, worksp
 hl.window_rule({ name = "gaming-steam-app", match = { class = "^steam_app_" }, workspace = "9", float = true })
 hl.window_rule({ name = "gaming-cemu", match = { class = "^[Cc]emu$" }, workspace = "9", float = true })
 
--- Last workspace rule: Quake-time launches stay on the normal workspace below.
-hl.window_rule({
-    name = "quake-apps-to-normal-workspace",
-    match = { workspace = "special:quake", class = "negative:^quake-kitty$" },
-    workspace = "m+0 silent",
-})
-
 -- Focus follows mouse, mouse doesn't follow focus
 hl.config({
     input = { special_fallthrough = true },
     binds = { hide_special_on_workspace_change = false },
-    cursor = { no_warps = true },
+    cursor = { no_warps = true, no_hardware_cursors = 1 },
 })

@@ -1,6 +1,9 @@
 # My-Configs-Cmder
 This repo contains my mini-tools and batch scripts that I use along with cmder aliases and configs
 
+Linux desktop backups: [current Hyprland/ML4W recovery](conf_backups/cachyos_hyprland_ml4w/CURRENT-RESTORE.md)
+and [Pleamar/Vitreus](conf_backups/cachyos_hyprland_pleamar/README.md).
+
 ## Linux configuration backup
 
 The [CachyOS + Hyprland/ML4W snapshot](./conf_backups/cachyos_hyprland_ml4w/README.md)

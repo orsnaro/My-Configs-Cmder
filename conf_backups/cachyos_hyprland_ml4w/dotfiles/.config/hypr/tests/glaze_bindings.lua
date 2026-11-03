@@ -2,6 +2,7 @@ local root = os.getenv("HOME") .. "/.config/hypr/"
 local bindings, workspaces, rules, unbound = {}, {}, {}, {}
 local configured, rule_order = {}, {}
 local dispatched = {}
+local commands = {}
 local adjacent_monitors, monitor_queries = {}, {}
 local active_window, all_windows, all_monitors = nil, {}, { { active_workspace = { id = 8 } } }
 
@@ -13,8 +14,9 @@ end
 
 hl = {
     bind = function(key, action, options)
-        assert(not bindings[key], "duplicate binding: " .. key)
+        assert(not bindings[key] or key:match("^mouse:"), "duplicate binding: " .. key)
         bindings[key] = { action = action, options = options or {} }
+        return { set_enabled = function() end }
     end,
     unbind = function(key) unbound[key] = true end,
     on = function(...) end,
@@ -22,12 +24,14 @@ hl = {
     dispatch = function(action) dispatched[#dispatched + 1] = action end,
     get_active_window = function() return active_window end,
     get_windows = function() return all_windows end,
+    get_layers = function() return {} end,
+    animation = function() end,
     get_monitors = function() return all_monitors end,
     get_monitor = function(selector)
         monitor_queries[#monitor_queries + 1] = selector
         return adjacent_monitors[selector]
     end,
-    exec_cmd = operation("exec"),
+    exec_cmd = function(command) commands[#commands + 1] = command end,
     workspace_rule = function(rule) workspaces[rule.workspace] = rule end,
     window_rule = function(rule)
         rules[rule.name] = rule
@@ -62,8 +66,8 @@ end
 for id, monitor in pairs({
     [1] = "DP-2", [9] = "DP-2",
     [2] = "HDMI-A-2", [3] = "HDMI-A-2", [4] = "HDMI-A-2",
-    [5] = "HDMI-A-2", [6] = "HDMI-A-2", [7] = "HDMI-A-2",
-    [8] = "DP-1",
+    [5] = "HDMI-A-2", [6] = "HDMI-A-2", [7] = "DP-1",
+    [8] = "HDMI-A-2",
 }) do
     assert(workspaces[tostring(id)] ~= nil, "missing workspace rule " .. id)
     assert(workspaces[tostring(id)].monitor == monitor, "wrong monitor for workspace " .. id)
@@ -73,7 +77,7 @@ local id_keys = {
     { key = "grave", id = 1 }, { key = "1", id = 2 },
     { key = "2", id = 3 }, { key = "3", id = 4 },
     { key = "4", id = 5 }, { key = "5", id = 6 },
-    { key = "F1", id = 7 }, { key = "F2", id = 8 },
+    { key = "F1", id = 8 }, { key = "F2", id = 7 },
     { key = "F3", id = 9 },
 }
 for _, ws in ipairs(id_keys) do
@@ -96,17 +100,16 @@ is_action("ALT + M", "exec")
 assert(bindings["ALT + M"].action.arg:find("glaze-minimize hide", 1, true))
 is_action("ALT + SHIFT + M", "exec")
 assert(bindings["ALT + SHIFT + M"].action.arg:find("glaze-minimize restore-all", 1, true))
--- ALT+letters/arrows focus Hyprland windows, passing through to Kitty panes
+-- ALT+letters focus Hyprland windows, passing through to Kitty panes
 -- while a Kitty window is focused (function binds: runtime class check).
 for _, spec in ipairs({ {"J", "left"}, {"L", "right"}, {"I", "up"}, {"K", "down"} }) do
-    for _, key in ipairs({ spec[1], spec[2] }) do
-        local binding = assert(bindings["ALT + " .. key],
-            "missing ALT+" .. key .. " focus-with-passthrough binding")
-        assert(type(binding.action) == "function",
-            "ALT+" .. key .. " must check the active window class at runtime")
-    end
-    assert(bindings["ALT + " .. spec[1]].action == bindings["ALT + " .. spec[2]].action,
-        "ALT+" .. spec[1] .. " and ALT+" .. spec[2] .. " must share the same routing function")
+    local key = spec[1]
+    local binding = assert(bindings["ALT + " .. key],
+        "missing ALT+" .. key .. " focus-with-passthrough binding")
+    assert(type(binding.action) == "function",
+        "ALT+" .. key .. " must check the active window class at runtime")
+    assert(bindings["ALT + " .. spec[2]] == nil,
+        "ALT+" .. spec[2] .. " must reach applications, not change window focus")
 end
 -- SHIFT+ALT arrows focus; CTRL+ALT+SHIFT letters focus.
 for _, spec in ipairs({ {"J", "left"}, {"L", "right"}, {"I", "up"}, {"K", "down"} }) do
@@ -122,7 +125,7 @@ end
 assert(_reset_nav == nil, "no test-only nav reset in production")
 all_monitors = { { active_workspace = { id = 8 } } }
 for _, spec in ipairs({ {"J", "left"}, {"L", "right"}, {"I", "up"}, {"K", "down"} }) do
-    for _, key in ipairs({ spec[1], spec[2] }) do
+    local key = spec[1]
     for _, class in ipairs({ "kitty", "quake-kitty" }) do
         dispatched = {}
         active_window = fake_window(class, 200, 0, 100, 100, 8, 111)
@@ -132,13 +135,12 @@ for _, spec in ipairs({ {"J", "left"}, {"L", "right"}, {"I", "up"}, {"K", "down"
             "ALT+" .. key .. " in " .. class .. " must return original event")
         assert(#dispatched == 0, "ALT+" .. key .. " in " .. class .. " must not dispatch")
     end
-    end
 end
 local dir_candidate = {
     left = { 0, 200 }, right = { 400, 200 }, up = { 200, 0 }, down = { 200, 400 },
 }
 for _, spec in ipairs({ {"J", "left"}, {"L", "right"}, {"I", "up"}, {"K", "down"} }) do
-    for _, key in ipairs({ spec[1], spec[2] }) do
+    local key = spec[1]
     dispatched = {}
     active_window = fake_window("brave-browser", 200, 200, 100, 100, 8)
     local c = dir_candidate[spec[2]]
@@ -147,7 +149,6 @@ for _, spec in ipairs({ {"J", "left"}, {"L", "right"}, {"I", "up"}, {"K", "down"
     assert(#dispatched == 1 and dispatched[1].name == "focus"
         and dispatched[1].arg.direction == spec[2],
         "ALT+" .. key .. " must focus " .. spec[2])
-    end
 end
 dispatched = {}
 active_window = fake_window("brave-browser", 200, 200, 100, 100, 8)
@@ -172,11 +173,8 @@ assert(#dispatched == 1, "Kitty after non-Kitty must not dispatch")
 dispatched = {}
 active_window = fake_window("brave-browser", 200, 0, 100, 100, 8)
 all_windows = { active_window }
-for _, key in ipairs({ "L", "right" }) do
-    dispatched = {}
-    bindings["ALT + " .. key].action()
-    assert(#dispatched == 0, "ALT+" .. key .. " with nothing right must stop, not cycle")
-end
+bindings["ALT + L"].action()
+assert(#dispatched == 0, "ALT+L with nothing right must stop, not cycle")
 -- Cross-monitor: candidate on another VISIBLE workspace counts.
 dispatched = {}
 all_monitors = { { active_workspace = { id = 8 } }, { active_workspace = { id = 1 } } }
@@ -215,11 +213,8 @@ assert(#dispatched == 1 and dispatched[1].name == "focus"
 dispatched = {}
 active_window = nil
 all_windows = {}
-for _, key in ipairs({ "J", "left" }) do
-    dispatched = {}
-    bindings["ALT + " .. key].action()
-    assert(#dispatched == 0, "nil active window must stay silent (" .. key .. ")")
-end
+bindings["ALT + J"].action()
+assert(#dispatched == 0, "nil active window must stay silent (J)")
 checked_focus("left")
 assert(#dispatched == 0, "checked_focus with nil window must stay silent")
 -- Empty desktops must remain navigable, even through another empty monitor.
@@ -228,13 +223,12 @@ for _, spec in ipairs({ {"J", "left", "l"}, {"L", "right", "r"},
     local target = { id = 0 }
     adjacent_monitors = { [spec[3]] = target }
     active_window, all_windows = nil, {}
-    for _, key in ipairs({ spec[1], spec[2] }) do
+    local key = spec[1]
     dispatched, monitor_queries = {}, {}
     bindings["ALT + " .. key].action()
     assert(#dispatched == 1 and dispatched[1].name == "focus"
         and dispatched[1].arg.monitor == target.id,
         "empty desktop must focus adjacent monitor " .. spec[2] .. " via ALT+" .. key)
-    end
     assert(#monitor_queries == 1 and monitor_queries[1] == spec[3],
         "monitor lookup must use native direction " .. spec[3])
     dispatched, monitor_queries = {}, {}
@@ -244,12 +238,10 @@ for _, spec in ipairs({ {"J", "left", "l"}, {"L", "right", "r"},
         "stale guarded Kitty requests must never escape an empty desktop")
     active_window = fake_window("brave-browser", 200, 200, 100, 100, 8)
     all_windows = { active_window }
-    for _, key in ipairs({ spec[1], spec[2] }) do
     dispatched, monitor_queries = {}, {}
     bindings["ALT + " .. key].action()
     assert(#dispatched == 1 and dispatched[1].arg.monitor == target.id,
         "window edge must permit moving to adjacent empty monitor " .. spec[2] .. " via ALT+" .. key)
-    end
     local candidate = dir_candidate[spec[2]]
     all_windows = { active_window,
         fake_window("brave-browser", candidate[1], candidate[2], 100, 100, 8) }
@@ -334,10 +326,15 @@ is_action("SUPER + SPACE", "exec")
 assert(bindings["SUPER + SPACE"].action.arg:find("hypr-switch-xkblayout", 1, true))
 is_action("SUPER + R", "exec")
 local runner = bindings["SUPER + R"].action.arg
-assert(runner == "rofi -show run -i -replace" or runner == "$HOME/.config/walker/launch.sh -m runner -N -H", "SUPER+R must be exactly rofi run or walker runner, got: " .. tostring(runner))
+assert(runner == "rofi -show run -i -replace" or runner == "$HOME/.config/walker/launch.sh -m runner -N -H"
+    or runner == "$HOME/.local/bin/rofi-trial run",
+    "SUPER+R must be an explicitly supported run launcher, got: " .. tostring(runner))
 assert(unbound["SUPER + SPACE"], "statusbar bind must be replaced, not duplicated")
 is_action("SUPER + CTRL + SPACE", "exec")
-is_action("SUPER + SUPER_L", "exec")
+assert(type(bindings["SUPER + SUPER_L"].action) == "function", "bare Super must toggle the mapped Sherlock layer")
+bindings["SUPER + SUPER_L"].action()
+assert(commands[#commands]:find("/.config/hypr/scripts/launcher.sh", 1, true),
+    "hidden Sherlock must open through the primary launcher")
 assert(bindings["SUPER + SUPER_L"].options.release, "bare Super should trigger on release")
 is_action("ALT + SHIFT + R", "exec")
 assert(bindings["ALT + SHIFT + R"].action.arg:find("glaze-reset", 1, true))
@@ -364,11 +361,15 @@ for class, workspace in pairs({
     obsidian = 4, ["md.obsidian.Obsidian"] = 4,
     ["org.gnome.TextEditor"] = 4,
     Discord = 5, discord = 5,
-    Spotify = 7, spotify = 7,
+    Spotify = 8, spotify = 8, hayase = 8,
+    ["brave-kdcbgnonmmimiohkdebbbipakbegkkol-Default"] = 8,
+    ["brave-cdbapkcndmkmbeiedikfcaeelndldoha-Default"] = 8,
+    qbittorrent = 8, ["org.qbittorrent.qBittorrent"] = 8,
+    obs = 8, ["com.obsproject.Studio"] = 8,
     ["org.kde.kmail2"] = 6, thunderbird = 6,
     geary = 6, evolution = 6,
-    kitty = 8, konsole = 8,
-    Alacritty = 8,
+    kitty = 7, konsole = 7,
+    Alacritty = 7,
     steam = 9, heroic = 9, lutris = 9,
 }) do
     local rule = assert(rules["glaze-app-" .. class], "missing app rule " .. class)
@@ -380,12 +381,25 @@ for class, workspace in pairs({
 end
 for rule_name, target in pairs({
     ["focus-code"] = 2, ["focus-kate"] = 2,
-    ["focus-browser"] = 3, ["focus-term"] = 8,
-    ["focus-notes"] = 4,
+    ["focus-browser"] = 3, ["focus-term"] = 7,
+    ["focus-notes"] = 4, ["focus-spotify"] = 8,
 }) do
     local rule = assert(rules[rule_name], "missing focus rule " .. rule_name)
     assert(rule.workspace == tostring(target), "wrong focus target for " .. rule_name)
 end
+local spotify = rules["focus-spotify"]
+assert(spotify.match.class == "^brave-open\\.spotify\\.com__-Default$",
+    "Spotify focus must match only its Brave app, not normal Brave or Discord windows")
+local silent_spotify_position, focus_spotify_position
+for position, name in ipairs(rule_order) do
+    if name == "glaze-app-brave-open.spotify.com__-Default" then
+        silent_spotify_position = position
+    elseif name == "focus-spotify" then
+        focus_spotify_position = position
+    end
+end
+assert(silent_spotify_position < focus_spotify_position,
+    "Spotify focus must override its silent workspace routing")
 assert(workspaces["1"] ~= nil, "main workspace must exist with nothing routed to it")
 assert(rules["glaze-app-brave-browser"].match.class == "^brave-browser$",
     "hyphenated app IDs must match without a regex escape")
@@ -402,9 +416,20 @@ assert(quake_apps.match.workspace == "special:quake",
 assert(quake_apps.match.class == "negative:^quake-kitty$",
     "the Quake terminal must stay in its special workspace")
 assert(quake_apps.workspace == "m+0 silent",
-    "Quake-time launches must use the current normal workspace without taking focus")
-assert(rule_order[#rule_order] == quake_apps.name,
-    "the Quake launch rule must override earlier app workspace destinations")
+    "unassigned Quake-time launches must use the current normal workspace without taking focus")
+assert(quake_apps.float == nil and quake_apps.size == nil and quake_apps.move == nil,
+    "escaping Quake must preserve the app's tiled/floating mode and geometry")
+local quake_fallback_position
+for position, name in ipairs(rule_order) do
+    if name == quake_apps.name then quake_fallback_position = position end
+end
+for position, name in ipairs(rule_order) do
+    local rule = rules[name]
+    if rule.workspace ~= nil and name ~= quake_apps.name then
+        assert(quake_fallback_position < position,
+            "Quake fallback must not override app workspace rule " .. name)
+    end
+end
 assert(configured.input and configured.input.special_fallthrough == true,
     "floating Quake must allow focusing normal windows beneath it")
 assert(configured.binds and configured.binds.hide_special_on_workspace_change == false,

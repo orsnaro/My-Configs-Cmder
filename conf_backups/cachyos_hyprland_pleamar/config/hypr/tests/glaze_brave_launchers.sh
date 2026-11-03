@@ -10,7 +10,7 @@ FAKE
 chmod +x "$test_dir/brave"
 
 for spec in \
-    'gmail|https://mail.google.com/' \
+    'gmail|https://mail.google.com/mail/u/1/' \
     'discord|https://discord.com/channels/@me' \
     'spotify|https://open.spotify.com/'; do
     name=${spec%%|*}

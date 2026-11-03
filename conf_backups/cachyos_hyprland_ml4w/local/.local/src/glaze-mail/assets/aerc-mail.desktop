@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=aerc Mail
+GenericName=Email Client
+Comment=Open the managed aerc mail session
+Exec=/home/narol/.local/bin/glaze-mail
+TryExec=/home/narol/.local/bin/glaze-mail
+Icon=internet-mail
+Terminal=false
+StartupNotify=false
+StartupWMClass=aerc-mail
+Categories=Network;Email;
+Keywords=aerc;mail;email;Gmail;Glaze;Inbox;

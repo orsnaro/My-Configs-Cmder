@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# aerc mail-received hook: toast live mail and remember its id so the periodic
+# sync does not announce the same message twice.
+set -u
+
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/glaze-mail"
+mkdir -p "$STATE_DIR"
+
+id="${AERC_MESSAGE_ID:-}"
+id="${id#<}"
+id="${id%>}"
+[ -n "$id" ] && printf '%s\n' "$id" >>"$STATE_DIR/toasted-ids"
+
+notify-send -a Mail -i mail-message-new \
+    "${AERC_FROM_NAME:-New mail}${AERC_ACCOUNT:+ ($AERC_ACCOUNT)}" \
+    "${AERC_SUBJECT:-No subject}"

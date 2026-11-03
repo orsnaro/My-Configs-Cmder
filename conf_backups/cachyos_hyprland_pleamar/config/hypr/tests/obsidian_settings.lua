@@ -7,7 +7,9 @@ local function operation(name)
 end
 
 hl = {
-    bind = function() end,
+    bind = function() return { set_enabled = function() end } end,
+    get_layers = function() return {} end,
+    animation = function() end,
     unbind = function() end,
     on = function() end,
     config = function() end,

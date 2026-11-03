@@ -18,6 +18,11 @@ import time
 MODES = ('quickshell', 'pleamar')
 POLKIT = '/usr/lib/polkit-gnome/polkit-gnome-authentication-agent-1'
 QS_UNITS = ('quickshell.service', 'ml4w-dock.service', 'walker.service', 'elephant.service', 'swaync.service', 'waybar.service')
+LEGACY_LAUNCHERS = ('walker', 'elephant')
+ROFI_FILES = ('.local/bin/rofi-trial', '.local/lib/rofi-trial/smart.so', '.local/lib/rofi-trial/dismiss-guard',
+              '.local/lib/rofi-trial/toggle.py', '.local/lib/rofi-trial/clipboard.py',
+              '.local/lib/rofi-trial/files.py', '.config/rofi/trial/base.rasi',
+              '.config/rofi/trial/emoji.rasi', '.config/rofi/trial/clipboard.rasi', '.config/hypr/rofi_session.lua')
 
 
 class SwitchError(RuntimeError):
@@ -128,7 +133,9 @@ class Backend:
                 if result.returncode or not json.loads(result.stdout):
                     return False
             names = {p.name for p in self.processes()}
-            return ({'walker', 'elephant', 'swaync', Path(POLKIT).name} <= names
+            return ({'swaync', Path(POLKIT).name} <= names
+                    and not names.intersection(LEGACY_LAUNCHERS)
+                    and all((home / name).is_file() for name in ROFI_FILES)
                     and self.notifications_owned_by('swaync'))
         except (SwitchError, ValueError):
             return False
@@ -208,11 +215,14 @@ class StackManager:
             found = expanded
 
     def preflight(self, mode: str) -> None:
-        commands = ['systemctl', 'hyprctl', 'busctl', 'pleamar'] if mode == 'pleamar' else ['systemctl', 'hyprctl', 'busctl', 'qs', 'walker', 'elephant', POLKIT]
+        commands = ['systemctl', 'hyprctl', 'busctl', 'pleamar'] if mode == 'pleamar' else [
+            'systemctl', 'hyprctl', 'busctl', 'qs', 'rofi', 'python', 'flock', 'wl-copy',
+            'rofimoji', 'cliphist', 'fd', 'xdg-open', 'qalc', POLKIT]
         files = ['.config/systemd/user/pleamar.service', '.local/bin/pleamar',
                  '.config/pleamar/shells/vitreus/vitreus.plm', '.config/pleamar/shells/vitreus/bin/vitreus-keep',
                  '.config/pleamar/shells/vitreus/lockscreen/lockscreen.plm'] if mode == 'pleamar' else [
-                 '.config/quickshell/shell.qml', '.local/share/ml4w-dock/shell.qml', '.config/ml4w/scripts/ml4w-autostart']
+                 '.config/quickshell/shell.qml', '.local/share/ml4w-dock/shell.qml',
+                 '.config/ml4w/scripts/ml4w-autostart', *ROFI_FILES]
         for command in commands:
             if not self.backend.has_command(command):
                 raise SwitchError(f'Required command is missing: {command}')
@@ -278,12 +288,20 @@ class StackManager:
                                 str(self.home / '.local/share/pleamar/vitreus/lockscreen.log')],
                                {'DRI_PRIME': '1', 'VK_DRIVER_FILES': '/usr/share/vulkan/icd.d/radeon_icd.json', 'PLEAMAR_SWAPCHAIN': '1'})
         else:
-            for unit in QS_UNITS:
+            # Legacy launcher services may still be installed for another DE.
+            # Stop them for this Hyprland activation; never disable them globally.
+            legacy = [p for p in self.backend.processes() if p.name in LEGACY_LAUNCHERS]
+            for name in LEGACY_LAUNCHERS:
+                unit = name + '.service'
                 if self.unit_exists(unit):
+                    self.backend.run(['systemctl', '--user', 'stop', unit])
+            self.backend.signal(legacy)
+            self.backend.wait_stopped(legacy)
+            for unit in QS_UNITS:
+                if unit not in tuple(name + '.service' for name in LEGACY_LAUNCHERS) and self.unit_exists(unit):
                     self.backend.run(['systemctl', '--user', 'unmask', unit])
             self.backend.spawn([str(self.home / '.config/ml4w/scripts/ml4w-autostart')])
-            self.backend.spawn(['elephant'])
-            self.backend.spawn(['walker', '--gapplication-service'])
+            # Rofi (including arithmetic, emoji and clipboard) starts only on demand.
             self.backend.run(['systemctl', '--user', 'start', 'swaync.service'])
             self.backend.spawn([POLKIT])
 

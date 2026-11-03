@@ -9,6 +9,8 @@ case "$1" in
     monitors) printf '%s\n' "$MONITORS_JSON" ;;
     dispatch)
         if [[ $2 == function* ]]; then
+            # Transport/callback failures are not layout capability detection.
+            if [[ ${DISPATCH_FAIL:-0} == 1 ]]; then exit 1; fi
             export DISPATCH_EXPR="$2"
             export TEST_FOCUS_ADDRESS="${DISPATCH_FOCUS_ADDRESS:-$(jq -r '.address' <<< "$ACTIVE_JSON")}" \
                 TEST_FOCUS_WORKSPACE="${DISPATCH_FOCUS_WORKSPACE:-$(jq -r '.workspace.id' <<< "$ACTIVE_JSON")}"
@@ -17,13 +19,31 @@ hl = {
     get_active_window = function()
         local address = os.getenv("TEST_FOCUS_ADDRESS")
         if address == "nil" then return nil end
-        return { address = address, workspace = { id = tonumber(os.getenv("TEST_FOCUS_WORKSPACE")) } }
+        return { address = address, workspace = {
+            id = tonumber(os.getenv("TEST_FOCUS_WORKSPACE")),
+            tiled_layout = os.getenv("TEST_TILED_LAYOUT") or "dwindle",
+        } }
     end,
     dispatch = function(action) return action() end,
     dsp = {
         layout = function(name)
-            return function() print('hl.dsp.layout("' .. name .. '")') end
+            return function()
+                local log = assert(io.open(os.getenv("LAYOUT_LOG"), "a"))
+                log:write(name .. "\n")
+                log:close()
+                if os.getenv("LAYOUT_REJECT") == "1" then return { ok = false } end
+                print('hl.dsp.layout("' .. name .. '")')
+                return { ok = true }
+            end
         end,
+        window = {
+            swap = function(options)
+                return function()
+                    print('hl.dsp.window.swap({ direction = "' .. options.direction .. '" })')
+                    return { ok = true }
+                end
+            end,
+        },
     },
 }
 local callback = assert(load("return " .. os.getenv("DISPATCH_EXPR"), "pair-dispatch"))()
@@ -38,7 +58,7 @@ LUA
 esac
 FAKE
 chmod +x "$test_dir/hyprctl"
-export PATH="$test_dir:$PATH" COMMAND_LOG="$test_dir/dispatches"
+export PATH="$test_dir:$PATH" COMMAND_LOG="$test_dir/dispatches" LAYOUT_LOG="$test_dir/layouts"
 export MONITORS_JSON='[{"id":0,"name":"DP-2","x":2404,"y":381,"width":2560,"height":1440},{"id":1,"name":"HDMI-A-2","x":1038,"y":768,"width":1366,"height":768},{"id":2,"name":"DP-1","x":4964,"y":768,"width":1440,"height":900}]'
 export ACTIVE_JSON='{"address":"0xabc","class":"kitty","monitor":0,"floating":false,"workspace":{"id":1,"name":"1"}}'
 export CLIENTS_JSON='[]'
@@ -119,6 +139,32 @@ export CLIENTS_JSON="$STACK" ACTIVE_JSON="$(active_for 0xaaa)"; "$move" down; ex
 export CLIENTS_JSON="$STACK" ACTIVE_JSON="$(active_for 0xbbb)"; "$move" up; expect_one "$SWAP"
 export CLIENTS_JSON="$SIDE" ACTIVE_JSON="$(active_for 0xaaa)"; "$move" right; expect_one "$SWAP"
 export CLIENTS_JSON="$SIDE" ACTIVE_JSON="$(active_for 0xbbb)"; "$move" left; expect_one "$SWAP"
+
+# Unsupported layout messages return {ok=false}, not a failed hyprctl process.
+# Master must swap directly, without trying any dwindle-only messages.
+export TEST_TILED_LAYOUT=master LAYOUT_REJECT=1
+: > "$LAYOUT_LOG"
+export CLIENTS_JSON="$SIDE" ACTIVE_JSON="$(active_for 0xbbb)"
+"$move" left; expect_one 'hl.dsp.window.swap({ direction = "l" })'
+export CLIENTS_JSON="$SIDE" ACTIVE_JSON="$(active_for 0xaaa)"
+"$move" right; expect_one 'hl.dsp.window.swap({ direction = "r" })'
+"$move" down; expect_one 'hl.dsp.window.swap({ direction = "d" })'
+[[ ! -s "$LAYOUT_LOG" ]] || { echo 'FAIL: master received dwindle-only messages' >&2; exit 1; }
+export DISPATCH_FOCUS_ADDRESS=0xccc; "$move" down; expect_one ''
+unset DISPATCH_FOCUS_ADDRESS
+export DISPATCH_FOCUS_WORKSPACE=2; "$move" down; expect_one ''
+unset DISPATCH_FOCUS_WORKSPACE
+for layout in scrolling unknown; do
+    export TEST_TILED_LAYOUT="$layout"
+    "$move" right; expect_one 'hl.dsp.window.swap({ direction = "r" })'
+done
+unset TEST_TILED_LAYOUT LAYOUT_REJECT
+
+# An IPC failure must not cause a second, unguarded swap on a different focus.
+export DISPATCH_FAIL=1
+if "$move" right; then echo 'FAIL: IPC failure must be reported' >&2; exit 1; fi
+expect_one ''
+unset DISPATCH_FAIL
 
 UNEQUAL_STACK=$(printf '[%s,%s]' "$(mkclient 0xaaa '0,0' '800,900' 1 false true false 0 '[]')" "$(mkclient 0xbbb '0,900' '800,300' 1 false true false 0 '[]')")
 UNEQUAL_SIDE=$(printf '[%s,%s]' "$(mkclient 0xaaa '0,0' '1200,600' 1 false true false 0 '[]')" "$(mkclient 0xbbb '1200,0' '400,600' 1 false true false 0 '[]')")

@@ -1,0 +1,61 @@
+#!/usr/bin/env bash
+# One-shot mail sync. Owned by the mail session and killed with it.
+# Fetches only the recent window, prunes old local copies, refreshes notmuch,
+# and raises one toast for genuinely new mail.
+set -u
+
+MAIL_ROOT="${MAIL_ROOT:-$HOME/Mail}"
+STATE_DIR="${XDG_STATE_HOME:-$HOME/.local/state}/glaze-mail"
+LOG="$STATE_DIR/sync.log"
+TOASTED="$STATE_DIR/toasted-ids"
+INITIALIZED="$STATE_DIR/initialized"
+LOCK="$STATE_DIR/sync.lock"
+
+mkdir -p "$STATE_DIR" "$MAIL_ROOT"
+
+# Overlapping runs would fight over the same Maildir and Notmuch DB.
+exec 9>"$LOCK" || exit 0
+flock -n 9 || exit 0
+
+timeout --signal=TERM 240 offlineimap -o -u quiet >>"$LOG" 2>&1
+sync_rc=$?
+
+# Age-based prune. offlineimap runs with maxage=60 and cannot see messages
+# older than that, so deleting files past 90 days can never be mistaken for a
+# local deletion and propagated to the server. Requires utime_from_header=yes
+# so the Maildir mtime is the message date, not the sync time.
+find "$MAIL_ROOT" -type f \( -path '*/cur/*' -o -path '*/new/*' \) \
+    -mtime +90 -delete 2>/dev/null
+
+# Writing the Xapian DB below is what makes aerc's notmuch view refresh.
+new_count=$(notmuch new 2>>"$LOG" \
+    | sed -n 's/^Added \([0-9]\+\) new messages.*/\1/p' | head -1)
+new_count=${new_count:-0}
+
+[ "$sync_rc" -ne 0 ] && logger -t glaze-mail "offlineimap exited $sync_rc" 2>/dev/null
+
+# Never toast the first index build.
+if [ ! -e "$INITIALIZED" ]; then
+    : >"$INITIALIZED"
+    exit 0
+fi
+[ "$new_count" -gt 0 ] || exit 0
+
+notified=0
+while IFS= read -r id; do
+    [ -n "$id" ] || continue
+    grep -qxF "$id" "$TOASTED" 2>/dev/null && continue
+    printf '%s\n' "$id" >>"$TOASTED"
+    notified=$((notified + 1))
+done < <(notmuch search --output=messages --sort=newest \
+    --limit="$new_count" tag:inbox 2>/dev/null)
+
+if [ "$notified" -gt 0 ]; then
+    newest=$(notmuch search --output=summary --format=text --limit=1 \
+        tag:inbox 2>/dev/null | head -1 | cut -c1-160)
+    notify-send -a Mail -i mail-message-new \
+        "$notified new message$([ "$notified" -eq 1 ] || echo s)" "$newest"
+fi
+
+tail -n 300 "$TOASTED" >"$TOASTED.tmp" 2>/dev/null && mv "$TOASTED.tmp" "$TOASTED"
+exit 0

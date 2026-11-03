@@ -9,8 +9,8 @@ $HOME/.config/waybar/launch.sh &
 echo '@import "themes/glass/style.css";' > $HOME/.config/swaync/style.css
 swaync-client -rs
 
-# Set launcher
-echo 'rofi' > $HOME/.config/ml4w/settings/launcher
+# Preserve the selected launcher; a visual preset must not restart a legacy daemon.
+[[ -f "$HOME/.config/ml4w/settings/launcher" ]] || echo 'rofi' > "$HOME/.config/ml4w/settings/launcher"
 
 # Set walker theme
 echo 'glass' > $HOME/.config/ml4w/settings/walker-theme

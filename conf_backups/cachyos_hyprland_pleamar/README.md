@@ -1,4 +1,12 @@
-# Current Pleamar / Vitreus backup — 2026-10-28
+# Pleamar / Vitreus backup — shared desktop refreshed 2026-11-03
+
+The public Hyprland overlay now matches the November 1–3 desktop changes:
+Sherlock primary/Rofi fallback, current workspace routing, CasaOS/Jellyfin-only
+title-bar rules and Kitty's ANSI-green fix. **Restore the companion ML4W payload
+and follow its [current recovery guide](../cachyos_hyprland_ml4w/CURRENT-RESTORE.md)
+first**: it owns the Sherlock/mail source, service and prerequisites.
+The Pleamar engine/scenes and private snapshot below remain the October 28 backup;
+this refresh does not claim a new live switch, reboot or lock/unlock verification.
 
 Repository: `/shared_across_des/repos/My-Configs-Cmder`.
 
@@ -15,11 +23,19 @@ Subsequent user-approved live testing verified both full-stack switch directions
 ## Two application-launcher entries
 
 - **Switch to QS** — closes Pleamar's managed shell, every scene and keeper;
-  starts the existing QS main/secondary status bars, dock, Walker/Elephant,
+  starts the existing QS main/secondary status bars and dock, with on-demand Rofi,
   SwayNC and its authentication agent.
 - **Switch to Pleamar** — closes QS/docks/Walker/Elephant and the QS-specific
   background loop; starts the full saved Pleamar setup, including its lock
   scene and configured widgets.
+
+Since 2026-10-31, QS no longer requires or starts resident Walker/Elephant.
+Restore the Rofi payload from `../cachyos_hyprland_ml4w/` before activating QS
+on a recovered machine; its restore script builds the native smart-search plugin.
+The coordinator preflights those files before stopping the active shell. Old
+Walker/Elephant shutdown checks remain for cleanup/recovery compatibility.
+KDE remains unchanged; the earlier live-switch screenshots below document the
+older launcher stack, not a new roundtrip/reboot test of Rofi.
 
 Both remember the selected stack for the next Hyprland login. Repeated clicks
 do not duplicate a healthy stack. Normal switching preserves installed
@@ -104,7 +120,8 @@ the two app entries before activating the desktop.
 | `bin/pleamar-start` | `~/.local/bin/pleamar-start` |
 | retained `config/kitty`, `fish`, `ohmyposh` | corresponding `~/.config/` trees |
 
-The public Kitty/Fish/Oh My Posh payload is retained from the October 25–26 export;
+The public Fish/Oh My Posh payload is retained from the October 25–26 export;
+Kitty additionally includes the approved persistent ANSI-green override.
 current terminal/theming state is additionally preserved in the private snapshot,
 without publishing unrelated terminal edits. Full private
 scene state is not limited to the public `data/` subset: desktop notes, other

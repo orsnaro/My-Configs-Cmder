@@ -17,7 +17,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-FASTFETCH_DIR = Path("/home/narol/.config/fastfetch")
+FASTFETCH_DIR = Path(__file__).resolve().parents[1]
 PRODUCTION_SQL = FASTFETCH_DIR / "network-usage.sql"
 SQLITE = "/usr/bin/sqlite3"
 CLOCK_EXPRESSION = "datetime('now', 'localtime')"
@@ -588,7 +588,7 @@ EXPECTED_COMMAND = (
     " || printf '%s\\n' 'network usage unavailable'"
 )
 CONFIG_NAMES = ("config.jsonc", "config.ml.jsonc", "config.gif.jsonc")
-BACKUP_DIR = Path("/tmp/opencode/fastfetch-network-backups")
+BACKUP_DIR = Path(__file__).resolve().parent / 'fixtures/before-network'
 NETWORK_KEY = "\uf6ff"
 
 
@@ -646,13 +646,30 @@ class NetworkCommandIntegrationTest(unittest.TestCase):
         self.assertIn("Ran 1 test", result.stderr)
         self.assertIn("OK", result.stderr)
 
-    def test_only_network_command_changed(self) -> None:
+    def test_network_snapshot_preserves_settings_except_documented_desktop_customizations(self) -> None:
         import json
 
         for name in CONFIG_NAMES:
             with self.subTest(config=name):
                 before = json.loads((BACKUP_DIR / name).read_text())
                 after = json.loads((FASTFETCH_DIR / name).read_text())
+                if name == 'config.jsonc':
+                    self.assertEqual(after['logo'], {
+                        'source': '~/.config/fastfetch/images/ascii-logo-inverted-small-color.txt',
+                        'type': 'file', 'color': {'1': '@4'},
+                        'padding': {'left': 2, 'right': 2, 'top': 0},
+                    })
+                    # The later default-logo change is independent of network usage.
+                    before['logo'] = after['logo']
+                    commands = {
+                        '\U000f0ee0': "echo $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | sed -e 's/(R)//g' -e 's/(TM)//g' -e 's/[0-9]*th Gen //' -e 's/Core //' -e 's/ @ .*//' -e 's/^ *//') / $(cat /sys/devices/virtual/dmi/id/board_name)",
+                        '\U000f02ca 1': 'df -B1 --output=source,used,size / /boot /run/media/narol/shared_across_os | awk \'NR>1 {u+=$2; t+=$3} END {printf "free %.2f GiB (%d%%)", (t-u)/1024/1024/1024, u/t*100}\'',
+                    }
+                    for key, expected in commands.items():
+                        current = next(module for module in after['modules'] if module.get('key') == key)
+                        original = next(module for module in before['modules'] if module.get('key') == key)
+                        self.assertEqual(current['text'], expected)
+                        original['text'] = expected
                 network_module(before)["text"] = ""
                 network_module(after)["text"] = ""
                 self.assertEqual(after, before)

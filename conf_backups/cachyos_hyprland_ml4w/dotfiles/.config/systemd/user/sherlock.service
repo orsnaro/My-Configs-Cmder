@@ -1,0 +1,16 @@
+[Unit]
+Description=Sherlock resident launcher
+PartOf=graphical-session.target
+After=graphical-session.target
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/sherlock --daemonize
+ExecStartPost=/usr/bin/python %h/.local/share/sherlock-integration/sherlock_ipc.py /tmp/sherlock_daemon.sock $MAINPID
+Restart=on-failure
+RestartSec=2
+TimeoutStartSec=20
+# Applications launched by Sherlock must survive a launcher-only restart.
+KillMode=process
+UMask=0077
+StandardOutput=null
