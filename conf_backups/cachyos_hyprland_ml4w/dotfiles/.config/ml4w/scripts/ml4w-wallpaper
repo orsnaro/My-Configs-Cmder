@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# desktop-stack managed
+source "$HOME/.config/ml4w/scripts/desktop-stack-mode"
 
 # ============================================================
 # Variables
@@ -135,6 +137,7 @@ run_matugen() {
 }
 
 reload_waybar() {
+    desktop_stack_is_qs || return 0
     if [[ -f "$HOME/.config/ml4w/settings/waybar-disabled" ]]; then
         info "Waybar disabled, skipping launch"
         return
@@ -152,6 +155,7 @@ reload_waybar() {
 }
 
 reload_quickshell() {
+    desktop_stack_is_qs || return 0
     if ! pgrep -x qs >/dev/null; then
         warn "Quickshell not running, skipping theme reload"
         return 0
@@ -173,17 +177,21 @@ reload_pywalfox() {
 }
 
 reload_swaync() {
+    desktop_stack_is_qs || return 0
     sleep 0.1
     swaync-client -rs
     info "SwayNC refreshed"
 }
 
 reload_walker() {
-    # Rofi is on demand; only an explicitly selected legacy launcher may restart.
-    [[ "$(cat "$HOME/.config/ml4w/settings/launcher" 2>/dev/null)" == "walker" ]] || return 0
-    if command -v walker >/dev/null 2>&1; then
-        pkill -x walker 2>/dev/null || true
+    desktop_stack_is_qs || return 0
+    # Walker reads its CSS at service start, so restart it to pick up
+    # the regenerated ~/.config/walker/colors.css (matugen).
+    # NOTE: ml4w updates may overwrite this script; re-add if lost.
+    if [[ "$(cat "$HOME/.config/ml4w/settings/launcher" 2>/dev/null)" == "walker" ]] && command -v walker >/dev/null 2>&1; then
+        pkill -x walker 2>/dev/null
         walker --gapplication-service >/dev/null 2>&1 &
+        info "Walker restarted"
     fi
 }
 

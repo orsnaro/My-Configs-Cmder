@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# desktop-stack managed
+source "$HOME/.config/ml4w/scripts/desktop-stack-mode"
 
 # This script monitors changes to the GTK settings.ini file
 # and automatically switches the 'matugen' theme between light and dark
@@ -59,24 +61,29 @@ apply_theme() {
         $MATUGEN_BIN image "$wallpaper_image" --source-color-index 0 -m "dark"
 
         # Update Quickshell theme
-        qs ipc call theme-manager reload
+        if desktop_stack_is_qs; then qs ipc call theme-manager reload; fi
         echo "Quickshell Theme updated"
 
         # Update ML4W Dotfiles Settings theme
-        qs -p $HOME/.local/share/ml4w-dotfiles-settings/quickshell ipc call theme-manager reload
+        if desktop_stack_is_qs; then qs -p $HOME/.local/share/ml4w-dotfiles-settings/quickshell ipc call theme-manager reload; fi
         echo "ML4W Dotfiles Settings Theme updated"
 
         # Reload Waybar
-        nohup bash -c "$HOME/.config/waybar/launch.sh" > /dev/null 2>&1 &
-        disown
+        if desktop_stack_is_qs && [[ ! -f "$HOME/.config/ml4w/settings/waybar-disabled" ]]; then
+            nohup bash -c "$HOME/.config/waybar/launch.sh" > /dev/null 2>&1 &
+            disown
+        fi
 
         $HOME/.config/hypr/scripts/gtk.sh &
 
-        swaync-client -rs
+        # Only reload if swaync is running; otherwise the client waits forever.
+        if desktop_stack_is_qs && pgrep -x swaync >/dev/null 2>&1; then
+            swaync-client -rs
+        fi
 
         # Walker reads its CSS at service start, so restart it to pick up
         # the regenerated colors.
-        if [[ "$(cat "$HOME/.config/ml4w/settings/launcher" 2>/dev/null)" == "walker" ]] && command -v walker >/dev/null 2>&1; then
+        if desktop_stack_is_qs && [[ "$(cat "$HOME/.config/ml4w/settings/launcher" 2>/dev/null)" == "walker" ]] && command -v walker >/dev/null 2>&1; then
             pkill -x walker 2>/dev/null
             walker --gapplication-service >/dev/null 2>&1 &
         fi
@@ -86,24 +93,29 @@ apply_theme() {
         $MATUGEN_BIN image "$wallpaper_image" --source-color-index 0 -m "light"
 
         # Update Quickshell theme
-        qs ipc call theme-manager reload
+        if desktop_stack_is_qs; then qs ipc call theme-manager reload; fi
         echo "Quickshell Theme updated"
 
         # Update ML4W Dotfiles Settings theme
-        qs -p $HOME/.local/share/ml4w-dotfiles-settings/quickshell ipc call theme-manager reload
+        if desktop_stack_is_qs; then qs -p $HOME/.local/share/ml4w-dotfiles-settings/quickshell ipc call theme-manager reload; fi
         echo "ML4W Dotfiles Settings Theme updated"
 
         # Reload Waybar
-        nohup bash -c "$HOME/.config/waybar/launch.sh" > /dev/null 2>&1 &
-        disown
+        if desktop_stack_is_qs && [[ ! -f "$HOME/.config/ml4w/settings/waybar-disabled" ]]; then
+            nohup bash -c "$HOME/.config/waybar/launch.sh" > /dev/null 2>&1 &
+            disown
+        fi
 
         $HOME/.config/hypr/scripts/gtk.sh &
 
-        swaync-client -rs
+        # Only reload if swaync is running; otherwise the client waits forever.
+        if desktop_stack_is_qs && pgrep -x swaync >/dev/null 2>&1; then
+            swaync-client -rs
+        fi
 
         # Walker reads its CSS at service start, so restart it to pick up
         # the regenerated colors.
-        if [[ "$(cat "$HOME/.config/ml4w/settings/launcher" 2>/dev/null)" == "walker" ]] && command -v walker >/dev/null 2>&1; then
+        if desktop_stack_is_qs && [[ "$(cat "$HOME/.config/ml4w/settings/launcher" 2>/dev/null)" == "walker" ]] && command -v walker >/dev/null 2>&1; then
             pkill -x walker 2>/dev/null
             walker --gapplication-service >/dev/null 2>&1 &
         fi

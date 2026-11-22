@@ -149,12 +149,13 @@ Rectangle {
 
     Timer {
         id: dwellTimer
-        interval: 250
+        interval: 120
         onTriggered: volume.volumeOpenRequested()
     }
     Timer {
         id: closeTimer
-        interval: 1000
+        // Short grace to allow moving from icon to panel without a visible linger.
+        interval: 80
         onTriggered: volume.volumeCloseRequested()
     }
 

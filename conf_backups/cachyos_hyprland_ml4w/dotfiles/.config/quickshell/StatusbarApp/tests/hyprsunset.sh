@@ -1,19 +1,18 @@
 #!/usr/bin/env bash
 set -euo pipefail
-# Hyprsunset contract: sidebar-only switch. ON = schedule armed, OFF = filter cleared + schedule off.
+# Night controls route through the selected desktop stack.
 app="$HOME/.config/quickshell/StatusbarApp"
 conf="$HOME/.config/hypr/hyprsunset.conf"
 fail() { printf 'FAIL: %s\n' "$1" >&2; exit 1; }
 need() { grep -q "$2" "$1" || fail "$3"; }
 
 [[ -f "$conf" ]] || fail "hyprsunset.conf missing"
-need "$conf" "time *= *00:00" "schedule must start warm at 00:00"
-need "$conf" "temperature *= *5000" "night profile must use 5000K"
-need "$conf" "time *= *07:00" "schedule must switch at 07:00"
-need "$conf" "identity *= *1" "07:00 profile must use identity off state"
+grep -Eq '^[[:space:]]*profile[[:space:]]*\{' "$conf" && fail "backend must not run a competing profile schedule" || true
+need "$conf" "night.json" "backend config must document the shared saved state"
 
 auto="$HOME/.mydotfiles/com.ml4w.dotfiles.stable/.config/hypr/conf/autostart.lua"
-grep -q "hyprsunset" "$auto" || fail "autostart.lua must launch hyprsunset"
+grep -Eq '^[[:space:]]*hl\.exec_cmd\("hyprsunset' "$auto" && fail "Vitreus alone must start its backend" || true
+need "$auto" "desktop-stack.*resume" "autostart must resume the selected settings owner"
 
 # No bar icons anywhere: neither center nor slim bars reference it.
 grep '"right"' "$app/StatusbarWindow.qml" | grep -q '"hyprsunset"' && fail "center bar must not list hyprsunset" || true
@@ -21,14 +20,17 @@ grep '"right"' "$app/config.json" | grep -q '"hyprsunset"' && fail "config doc m
 grep -q "Hyprsunset" "$app/SlimBarWindow.qml" && fail "slim bars must not host hyprsunset" || true
 [[ ! -f "$app/HyprsunsetModule.qml" ]] || fail "HyprsunsetModule.qml must be removed"
 
-# Sidebar switch documents the auto schedule and clears the filter on OFF.
+# Sidebar reads and changes the same state as the keyboard and Waybar.
 side="$HOME/.config/quickshell/SidebarApp/SidebarWindow.qml"
 need "$side" "Blue Light Filter" "sidebar must keep the Blue Light Filter switch"
-need "$side" "00:00" "sidebar must note the 00:00 start"
-need "$side" "07:00" "sidebar must note the 07:00 end"
-need "$side" "hyprsunset identity" "sidebar OFF must reset filter via hyprctl hyprsunset identity"
+need "$side" "Shared with Vitreus" "sidebar must identify the shared settings"
+need "$side" "ml4w-toggle-hyprsunset status" "sidebar must query the shared state"
+need "$side" 'checked ? "on" : "off"' "sidebar must use absolute shared controls"
 
-# Keybinding toggle shares the same OFF-clears-filter behavior.
-need "$HOME/.config/ml4w/scripts/ml4w-toggle-hyprsunset" "hyprsunset identity" "toggle-off must reset filter via hyprctl hyprsunset identity"
+# Pleamar keeps saved-state controls; QS uses its separately gated backend.
+toggle="$HOME/.config/ml4w/scripts/ml4w-toggle-hyprsunset"
+need "$toggle" "emit night_toggle" "toggle must use the shared event"
+need "$toggle" "emit night_set 0" "Off must use the shared absolute setter"
+need "$toggle" "desktop_stack_is_qs" "QS backend operations must be mode-gated"
 
-printf 'PASS: hyprsunset sidebar-only wired\n'
+printf 'PASS: night-mode controls share Vitreus state\n'

@@ -2,7 +2,6 @@ local root = os.getenv("HOME") .. "/.config/hypr/"
 local bindings, workspaces, rules, unbound = {}, {}, {}, {}
 local configured, rule_order = {}, {}
 local dispatched = {}
-local commands = {}
 local adjacent_monitors, monitor_queries = {}, {}
 local active_window, all_windows, all_monitors = nil, {}, { { active_workspace = { id = 8 } } }
 
@@ -14,9 +13,8 @@ end
 
 hl = {
     bind = function(key, action, options)
-        assert(not bindings[key] or key:match("^mouse:"), "duplicate binding: " .. key)
+        assert(not bindings[key], "duplicate binding: " .. key)
         bindings[key] = { action = action, options = options or {} }
-        return { set_enabled = function() end }
     end,
     unbind = function(key) unbound[key] = true end,
     on = function(...) end,
@@ -24,14 +22,12 @@ hl = {
     dispatch = function(action) dispatched[#dispatched + 1] = action end,
     get_active_window = function() return active_window end,
     get_windows = function() return all_windows end,
-    get_layers = function() return {} end,
-    animation = function() end,
     get_monitors = function() return all_monitors end,
     get_monitor = function(selector)
         monitor_queries[#monitor_queries + 1] = selector
         return adjacent_monitors[selector]
     end,
-    exec_cmd = function(command) commands[#commands + 1] = command end,
+    exec_cmd = operation("exec"),
     workspace_rule = function(rule) workspaces[rule.workspace] = rule end,
     window_rule = function(rule)
         rules[rule.name] = rule
@@ -331,10 +327,7 @@ assert(runner == "rofi -show run -i -replace" or runner == "$HOME/.config/walker
     "SUPER+R must be an explicitly supported run launcher, got: " .. tostring(runner))
 assert(unbound["SUPER + SPACE"], "statusbar bind must be replaced, not duplicated")
 is_action("SUPER + CTRL + SPACE", "exec")
-assert(type(bindings["SUPER + SUPER_L"].action) == "function", "bare Super must toggle the mapped Sherlock layer")
-bindings["SUPER + SUPER_L"].action()
-assert(commands[#commands]:find("/.config/hypr/scripts/launcher.sh", 1, true),
-    "hidden Sherlock must open through the primary launcher")
+is_action("SUPER + SUPER_L", "exec")
 assert(bindings["SUPER + SUPER_L"].options.release, "bare Super should trigger on release")
 is_action("ALT + SHIFT + R", "exec")
 assert(bindings["ALT + SHIFT + R"].action.arg:find("glaze-reset", 1, true))

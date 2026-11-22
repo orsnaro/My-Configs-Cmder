@@ -12,7 +12,11 @@ PanelWindow {
     id: root
 
     // --- WAYLAND CONFIGURATION ---
-    WlrLayershell.layer: WlrLayer.Top
+    // Bottom by default: the exclusive zone still makes tiled/maximized windows
+    // leave the dock's strip clear, while floating/PiP/fullscreen windows render
+    // above it. Autohide (no reserved space) and open menus/previews need Top.
+    WlrLayershell.layer: (!root.reservesSpace || root.menuOpen || previewPopup.visible)
+        ? WlrLayer.Top : WlrLayer.Bottom
     // The dock claims its strip of the screen so windows tile above it instead
     // of running underneath. Only the pill itself is reserved (the window is
     // taller to leave room for the shadow), see exclusiveZone below.

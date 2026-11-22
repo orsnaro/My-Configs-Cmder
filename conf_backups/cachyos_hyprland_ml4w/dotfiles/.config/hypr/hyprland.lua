@@ -65,3 +65,7 @@ require("hyprland-gui")
 pcall(require, "vitreus_monitors")
 if desktop_stack_mode == "pleamar" then pcall(require, "vitreus_hypr") end
 if desktop_stack_mode == "pleamar" then pcall(require, "vitreus_colors") end
+
+-- QuickShell owns the top padding; override Vitreus's regenerated frame-bar
+-- room. Loaded last so a theme change cannot restore the 76px top gap.
+pcall(require, "bar_padding")

@@ -81,7 +81,6 @@ hl.bind(mainMod .. " + ALT + down", hl.dsp.window.swap({ direction = "d" }), { d
 
 -- Actions
 hl.bind(mainMod .. " + CTRL + R", hl.dsp.exec_cmd("hyprctl reload"), { description = "Reload Hyprland configuration" })
-hl.bind(mainMod .. " + SHIFT + A", hl.dsp.exec_cmd("~/.config/hypr/scripts/toggle-animations.sh"), { description = "Toggle animations" })
 hl.bind(mainMod .. " + PRINT", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh"), { description = "Take a screenshot" })
 hl.bind(mainMod .. " + ALT + F", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh --instant"), { description = "Take an instant full-screen screenshot" })
 hl.bind(mainMod .. " + ALT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh --instant-area"), { description = "Take an instant area screenshot" })
@@ -113,10 +112,7 @@ hl.bind("CTRL + ALT + T", hl.dsp.exec_cmd("~/.config/ml4w/themes/themes.sh"), { 
 
 -- Special workspace (scratchpad)
 hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("scratchpad"), { description = "Toggle special workspace scratchpad" })
-hl.bind(mainMod .. " + SHIFT + S", function()
-    hl.dispatch(hl.dsp.window.float({ action = "toggle" }))
-    hl.dispatch(hl.dsp.window.move({ workspace = "special:scratchpad" }))
-end)
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.exec_cmd("~/.config/hypr/scripts/gamemode-dock.sh"), { description = "Toggle game mode and stop/start the dock" })
 
 -- Scroll through existing workspaces with mainMod + scroll
 hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }), { description = "Switch to next workspace" })
