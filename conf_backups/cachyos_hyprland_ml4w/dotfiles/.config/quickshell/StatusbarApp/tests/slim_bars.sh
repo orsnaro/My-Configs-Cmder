@@ -25,6 +25,23 @@ grep -q 'monitorName' "$app/SlimBarWindow.qml" || fail "slim bar must pass its s
 grep -q 'Gradient' "$app/SlimBarWindow.qml" || fail "slim pill must share the center gradient border"
 grep -q 'RectangularShadow' "$app/SlimBarWindow.qml" || fail "slim pill must share the center shadow"
 grep -q 'topMargin: 10' "$app/SlimBarWindow.qml" || fail "slim pill sits 10px from the top edge"
+# Gamemode sets gaps_out=0, so windows tile exactly at the reserved edge.
+# The pill is drawn 10px below the panel top; the reserved strip must cover
+# that margin plus 4px of clear padding below the pill, or its lower edge
+# overlaps (or touches) every side-monitor window.
+bar_height=$(grep -oE 'property int barHeight: [0-9]+' "$app/SlimBarWindow.qml" | head -1 | awk '{print $NF}' || true)
+top_margin=$(grep -oE 'anchors\.topMargin: [0-9]+' "$app/SlimBarWindow.qml" | head -1 | awk '{print $2}' || true)
+reserve=$(grep -oE 'exclusiveZone: barHeight \+ [0-9]+ \+ [0-9]+' "$app/SlimBarWindow.qml" | head -1 || true)
+[[ -n "$bar_height" && -n "$top_margin" && -n "$reserve" ]] \
+  || fail "slim bar reserve must cover pill top margin plus 4px padding"
+margin_part=$(printf '%s\n' "$reserve" | awk '{print $4}')
+padding_part=$(printf '%s\n' "$reserve" | awk '{print $6}')
+[[ "$margin_part" == "$top_margin" ]] \
+  || fail "slim bar reserve margin ($margin_part) must match pill top margin ($top_margin)"
+[[ "$padding_part" == "4" ]] \
+  || fail "slim bar must leave 4px padding below the pill (got $padding_part)"
+[[ $((bar_height + top_margin + padding_part)) -eq 50 ]] \
+  || fail "slim bar reserved strip must total 50px"
 # Task 4: slim screens come from the slimBars setting, both sides by default.
 grep -q 'slimBars' "$shell" || fail "shell must drive slim bars from the slimBars setting"
 grep -q 'target: "slimbars"' "$shell" || fail "shell must expose slimbars reload IPC for live apply"

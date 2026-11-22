@@ -69,18 +69,18 @@
         {
             "key": "󰻠",
             "keyColor": "#d2a8ff",
-            "text": "echo $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | sed -e 's/(R)//g' -e 's/(TM)//g' -e 's/[0-9]*th Gen //' -e 's/Core //' -e 's/ @ .*//' -e 's/^ *//') / $(cat /sys/devices/virtual/dmi/id/board_name)",
+            "text": "printf '%s · %s\\n' \"$(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | sed -e 's/(R)//g' -e 's/(TM)//g' -e 's/[0-9]*th Gen //' -e 's/Intel //' -e 's/Core //' -e 's/ @ .*//' -e 's/^ *//')\" \"$(sed -e 's/^PRIME //' -e 's/-K$//' /sys/devices/virtual/dmi/id/board_name)\"",
             "type": "command"
         },
         {
-            "format": "{2}",
+            "format": "{name~11}",
             "hideType": "integrated",
             "key": "󰍛",
             "keyColor": "#d2a8ff",
             "type": "gpu"
         },
         {
-            "format": "{used} / {total} ({percentage})",
+            "format": "{used} / {total}",
             "key": "",
             "keyColor": "#71b7ff",
             "type": "memory"

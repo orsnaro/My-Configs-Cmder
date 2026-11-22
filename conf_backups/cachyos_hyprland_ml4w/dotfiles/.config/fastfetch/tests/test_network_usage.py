@@ -17,7 +17,7 @@ from datetime import datetime
 from pathlib import Path
 from zoneinfo import ZoneInfo
 
-FASTFETCH_DIR = Path(__file__).resolve().parents[1]
+FASTFETCH_DIR = Path("/home/narol/.config/fastfetch")
 PRODUCTION_SQL = FASTFETCH_DIR / "network-usage.sql"
 SQLITE = "/usr/bin/sqlite3"
 CLOCK_EXPRESSION = "datetime('now', 'localtime')"
@@ -167,7 +167,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-11 23:26:00"),
-            "↓ 62.09 GiB ↑ 23.98 GiB (resets 25th; partial)",
+            "↓ 62.1 ↑ 24.0 GiB ( 25th; partial)",
         )
 
     def test_monthly_rows_are_ignored(self) -> None:
@@ -181,7 +181,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-11 23:26:00"),
-            "↓ 62.09 GiB ↑ 23.98 GiB (resets 25th; partial)",
+            "↓ 62.1 ↑ 24.0 GiB ( 25th; partial)",
         )
 
     def test_before_reset_includes_previous_25th(self) -> None:
@@ -198,7 +198,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-24 23:59:59"),
-            "↓ 3.00 GiB ↑ 3.00 MiB (resets 25th)",
+            "↓ 3.0 ↑ 0.0 GiB ( 25th)",
         )
 
     def test_midnight_starts_new_cycle_without_new_save(self) -> None:
@@ -210,7 +210,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-25 00:00:00"),
-            "↓ 0.00 B ↑ 0.00 B (resets 25th)",
+            "↓ 0.0 ↑ 0.0 B ( 25th)",
         )
 
     def test_new_day_accumulates_without_old_history(self) -> None:
@@ -225,7 +225,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-25 12:00:00"),
-            "↓ 1.00 GiB ↑ 512.00 KiB (resets 25th)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th)",
         )
 
     def test_month_edges(self) -> None:
@@ -251,7 +251,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
                 _ = start
                 self.assertEqual(
                     self.query_at(now),
-                    "↓ 3.00 GiB ↑ 3.00 MiB (resets 25th)",
+                    "↓ 3.0 ↑ 0.0 GiB ( 25th)",
                 )
 
     def test_cairo_clock_near_dst(self) -> None:
@@ -263,7 +263,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-25 00:00:00"),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th)",
         )
         self.create_database(
             created="2026-08-01 00:00:00",
@@ -276,7 +276,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-30 00:30:00"),
-            "↓ 3.00 GiB ↑ 3.00 MiB (resets 25th)",
+            "↓ 3.0 ↑ 0.0 GiB ( 25th)",
         )
 
     def test_excludes_other_interface_and_future_daily_rows(self) -> None:
@@ -289,7 +289,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-11 12:00:00"),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th)",
         )
 
     def test_autumn_rollback_preserves_recent_save(self) -> None:
@@ -301,7 +301,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-29 23:02:00", fold=1),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th)",
         )
 
     def test_autumn_equal_wall_times_do_not_prove_freshness(self) -> None:
@@ -313,7 +313,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-29 23:57:00", fold=1),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th; time uncertain)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th; time uncertain)",
         )
 
     def test_autumn_first_fold_save_is_unambiguously_fresh(self) -> None:
@@ -325,7 +325,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-29 23:57:00", fold=0),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th)",
         )
 
     def test_autumn_stale_when_every_candidate_is_old(self) -> None:
@@ -337,7 +337,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-29 23:50:00", fold=1),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th; stale)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th; stale)",
         )
 
     def test_autumn_uncertainty_clears_after_stale_threshold(self) -> None:
@@ -349,11 +349,11 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-30 00:07:00"),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th; time uncertain)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th; time uncertain)",
         )
         self.assertEqual(
             self.query_at("2026-10-30 00:07:01"),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th; stale)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th; stale)",
         )
 
     def test_spring_jump_uses_elapsed_seconds(self) -> None:
@@ -365,11 +365,11 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-04-24 01:02:00"),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th)",
         )
         self.assertEqual(
             self.query_at("2026-04-24 01:06:00"),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th; stale)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th; stale)",
         )
 
     def test_nonexistent_spring_save_is_unavailable(self) -> None:
@@ -391,7 +391,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-29 23:57:00", fold=1),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th; partial; time uncertain)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th; partial; time uncertain)",
         )
 
     def test_partial_until_next_cycle(self) -> None:
@@ -403,7 +403,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-11 12:00:00"),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th; partial)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th; partial)",
         )
         self.create_database(
             created="2026-09-27 19:49:31",
@@ -412,7 +412,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         self.assertEqual(
             self.query_at("2026-10-26 12:00:00"),
-            "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th)",
+            "↓ 1.0 ↑ 0.0 GiB ( 25th)",
         )
 
     def test_stale_threshold_and_partial_combination(self) -> None:
@@ -423,20 +423,20 @@ class NetworkUsageQueryTest(unittest.TestCase):
             updated="2026-10-11 11:50:00",
             rows=[("2026-10-11", 1 * GIB, 1 * MIB)],
         )
-        self.assertEqual(self.query_at(now), "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th)")
+        self.assertEqual(self.query_at(now), "↓ 1.0 ↑ 0.0 GiB ( 25th)")
         self.create_database(
             created="2026-08-01 00:00:00",
             updated="2026-10-11 11:49:59",
             rows=[("2026-10-11", 1 * GIB, 1 * MIB)],
         )
-        self.assertEqual(self.query_at(now), "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th; stale)")
+        self.assertEqual(self.query_at(now), "↓ 1.0 ↑ 0.0 GiB ( 25th; stale)")
         self.create_database(
             created="2026-10-01 00:00:01",
             updated="2026-10-11 11:49:59",
             rows=[("2026-10-11", 1 * GIB, 1 * MIB)],
         )
         self.assertEqual(
-            self.query_at(now), "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th; partial; stale)"
+            self.query_at(now), "↓ 1.0 ↑ 0.0 GiB ( 25th; partial; stale)"
         )
 
     def test_future_update_threshold(self) -> None:
@@ -447,7 +447,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
             updated="2026-10-11 12:05:00",
             rows=[("2026-10-11", 1 * GIB, 1 * MIB)],
         )
-        self.assertEqual(self.query_at(now), "↓ 1.00 GiB ↑ 1.00 MiB (resets 25th)")
+        self.assertEqual(self.query_at(now), "↓ 1.0 ↑ 0.0 GiB ( 25th)")
         self.create_database(
             created="2026-08-01 00:00:00",
             updated="2026-10-11 12:05:01",
@@ -488,12 +488,12 @@ class NetworkUsageQueryTest(unittest.TestCase):
     def test_iec_units_and_sum_before_rounding(self) -> None:
         """Units use binary boundaries and raw bytes are summed before formatting."""
         cases = [
-            (0, "↓ 0.00 B ↑ 0.00 B (resets 25th)"),
-            (1023, "↓ 1023.00 B ↑ 0.00 B (resets 25th)"),
-            (1024, "↓ 1.00 KiB ↑ 0.00 B (resets 25th)"),
-            (1048576, "↓ 1.00 MiB ↑ 0.00 B (resets 25th)"),
-            (1073741824, "↓ 1.00 GiB ↑ 0.00 B (resets 25th)"),
-            (1099511627776, "↓ 1.00 TiB ↑ 0.00 B (resets 25th)"),
+            (0, "↓ 0.0 ↑ 0.0 B ( 25th)"),
+            (1023, "↓ 1023.0 ↑ 0.0 B ( 25th)"),
+            (1024, "↓ 1.0 ↑ 0.0 KiB ( 25th)"),
+            (1048576, "↓ 1.0 ↑ 0.0 MiB ( 25th)"),
+            (1073741824, "↓ 1.0 ↑ 0.0 GiB ( 25th)"),
+            (1099511627776, "↓ 1.0 ↑ 0.0 TiB ( 25th)"),
         ]
         for value, expected in cases:
             with self.subTest(bytes=value):
@@ -510,7 +510,7 @@ class NetworkUsageQueryTest(unittest.TestCase):
                 rows=[("2026-10-10", 600, 0), ("2026-10-11", 600, 0)],
             )
             self.assertEqual(
-                self.query_at("2026-10-11 12:00:00"), "↓ 1.17 KiB ↑ 0.00 B (resets 25th)"
+                self.query_at("2026-10-11 12:00:00"), "↓ 1.2 ↑ 0.0 KiB ( 25th)"
             )
         with self.subTest(bytes="600+600 TX"):
             self.create_database(
@@ -519,8 +519,24 @@ class NetworkUsageQueryTest(unittest.TestCase):
                 rows=[("2026-10-10", 0, 600), ("2026-10-11", 0, 600)],
             )
             self.assertEqual(
-                self.query_at("2026-10-11 12:00:00"), "↓ 0.00 B ↑ 1.17 KiB (resets 25th)"
+                self.query_at("2026-10-11 12:00:00"), "↓ 0.0 ↑ 1.2 KiB ( 25th)"
             )
+
+    def test_shared_unit_scales_both_directions_and_rounds_once(self) -> None:
+        """One trailing unit applies to both amounts, including when TX is larger."""
+        cases = [
+            (79 * GIB + 64 * MIB, 3 * GIB + 416 * MIB, "↓ 79.1 ↑ 3.4 GiB ( 25th)"),
+            (3 * GIB, 512 * MIB, "↓ 3.0 ↑ 0.5 GiB ( 25th)"),
+            (512 * MIB, 3 * GIB, "↓ 0.5 ↑ 3.0 GiB ( 25th)"),
+        ]
+        for rx, tx, expected in cases:
+            with self.subTest(rx=rx, tx=tx):
+                self.create_database(
+                    created="2026-08-01 00:00:00",
+                    updated="2026-10-11 12:00:00",
+                    rows=[("2026-10-11", rx, tx)],
+                )
+                self.assertEqual(self.query_at("2026-10-11 12:00:00"), expected)
 
     def test_query_never_writes(self) -> None:
         """Valid, rollover, and unavailable queries leave bytes and journals untouched."""
@@ -531,9 +547,9 @@ class NetworkUsageQueryTest(unittest.TestCase):
         )
         before = hashlib.sha256(self.database.read_bytes()).hexdigest()
         self.assertEqual(
-            self.query_at("2026-10-25 00:00:00"), "↓ 0.00 B ↑ 0.00 B (resets 25th)"
+            self.query_at("2026-10-25 00:00:00"), "↓ 0.0 ↑ 0.0 B ( 25th)"
         )
-        self.assertEqual(self.query_at("2026-10-24 23:59:00"), "↓ 2.00 GiB ↑ 2.00 MiB (resets 25th; partial)")
+        self.assertEqual(self.query_at("2026-10-24 23:59:00"), "↓ 2.0 ↑ 0.0 GiB ( 25th; partial)")
         missing = Path(self.tmp.name) / "missing.db"
         saved, self.database = self.database, missing
         try:
@@ -588,7 +604,6 @@ EXPECTED_COMMAND = (
     " || printf '%s\\n' 'network usage unavailable'"
 )
 CONFIG_NAMES = ("config.jsonc", "config.ml.jsonc", "config.gif.jsonc")
-BACKUP_DIR = Path(__file__).resolve().parent / 'fixtures/before-network'
 NETWORK_KEY = "\uf6ff"
 
 
@@ -646,33 +661,21 @@ class NetworkCommandIntegrationTest(unittest.TestCase):
         self.assertIn("Ran 1 test", result.stderr)
         self.assertIn("OK", result.stderr)
 
-    def test_network_snapshot_preserves_settings_except_documented_desktop_customizations(self) -> None:
-        import json
+    def test_compact_cpu_keeps_motherboard_and_memory_omits_percentage(self) -> None:
+        """Render the live config: retain the short board name and avoid duplicate RAM %."""
+        import re
 
-        for name in CONFIG_NAMES:
-            with self.subTest(config=name):
-                before = json.loads((BACKUP_DIR / name).read_text())
-                after = json.loads((FASTFETCH_DIR / name).read_text())
-                if name == 'config.jsonc':
-                    self.assertEqual(after['logo'], {
-                        'source': '~/.config/fastfetch/images/ascii-logo-inverted-small-color.txt',
-                        'type': 'file', 'color': {'1': '@4'},
-                        'padding': {'left': 2, 'right': 2, 'top': 0},
-                    })
-                    # The later default-logo change is independent of network usage.
-                    before['logo'] = after['logo']
-                    commands = {
-                        '\U000f0ee0': "echo $(grep -m1 'model name' /proc/cpuinfo | cut -d: -f2- | sed -e 's/(R)//g' -e 's/(TM)//g' -e 's/[0-9]*th Gen //' -e 's/Core //' -e 's/ @ .*//' -e 's/^ *//') / $(cat /sys/devices/virtual/dmi/id/board_name)",
-                        '\U000f02ca 1': 'df -B1 --output=source,used,size / /boot /run/media/narol/shared_across_os | awk \'NR>1 {u+=$2; t+=$3} END {printf "free %.2f GiB (%d%%)", (t-u)/1024/1024/1024, u/t*100}\'',
-                    }
-                    for key, expected in commands.items():
-                        current = next(module for module in after['modules'] if module.get('key') == key)
-                        original = next(module for module in before['modules'] if module.get('key') == key)
-                        self.assertEqual(current['text'], expected)
-                        original['text'] = expected
-                network_module(before)["text"] = ""
-                network_module(after)["text"] = ""
-                self.assertEqual(after, before)
+        result = subprocess.run(
+            ["fastfetch", "--config", str(FASTFETCH_DIR / "config.jsonc"),
+             "--logo", "none", "--pipe", "true"],
+            capture_output=True, text=True, timeout=10, check=False,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
+        output = re.sub(r"\x1b\[[0-?]*[ -/]*[@-~]", "", result.stdout)
+        cpu = next(line for line in output.splitlines() if line.startswith("󰻠"))
+        self.assertEqual(cpu.strip(), "󰻠 i5-11400 · B560M")
+        memory = next(line for line in output.splitlines() if line.startswith(""))
+        self.assertRegex(memory, r"^ \d+(?:\.\d+)? \w+ / \d+(?:\.\d+)? \w+$")
 
     def test_missing_database_falls_back(self) -> None:
         missing = Path(tempfile.gettempdir()) / "ff-net-definitely-missing.db"

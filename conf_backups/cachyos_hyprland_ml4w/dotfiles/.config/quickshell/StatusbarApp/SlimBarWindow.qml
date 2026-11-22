@@ -39,7 +39,10 @@ PanelWindow {
     // the center bar via fallback.
     visible: root.screen !== null
 
-    WlrLayershell.layer: WlrLayer.Top
+    // Same layering as the center bar: below windows normally, top only while
+    // a dropdown is open (the panels hang below the reserved band).
+    WlrLayershell.layer: (root.calendarOpen || root.volumeOpen)
+        ? WlrLayer.Top : WlrLayer.Bottom
     color: "transparent"
 
     anchors {
@@ -52,9 +55,11 @@ PanelWindow {
     }
 
     readonly property int barHeight: 36
-    // The bar reserves a slim strip so windows tile below it (a touch less
-    // than the 40px center bar; the clock text itself stays full-size).
-    exclusiveZone: barHeight
+    // Reserve the pill's whole footprint, not just its height: it sits 10px
+    // below the panel top (see pill.topMargin), plus 4px of clear padding
+    // below it. Gamemode sets gaps_out=0, so both must live in this reserved
+    // strip; the normal 16px workspace gap adds to it automatically.
+    exclusiveZone: barHeight + 10 + 4
     // Room below the bar for the calendar, reserved permanently (resizing a
     // layer surface while the panel opens fights the animation, cf. center).
     readonly property int calendarReserve: calendarPanel.implicitHeight + 40
@@ -205,6 +210,11 @@ PanelWindow {
                     pillHeight: 26
                     fontSize: 12
                 }
+                MicModule {
+                    Layout.alignment: Qt.AlignVCenter
+                    pillHeight: 26
+                    iconSize: 16
+                }
                 VolumeModule {
                     id: volumeModule
                     Layout.alignment: Qt.AlignVCenter
@@ -257,7 +267,7 @@ PanelWindow {
                 Math.min(root.width - width - 8, center - width / 2)))
         }
 
-        readonly property int volumeGap: 26
+        readonly property int volumeGap: 20
         openY: Math.round(pill.y + pill.height + volumeGap - cardInset)
     }
 }

@@ -35,50 +35,32 @@ WITH clock(local_now, now_epoch) AS (
         COALESCE(SUM(day.tx), 0) AS tx
     FROM day
     WHERE day.interface = (SELECT id FROM iface)
-      AND day.date >= (SELECT cycle_start FROM bounds)
-      AND day.date <= (SELECT today FROM bounds)
+       AND day.date >= (SELECT cycle_start FROM bounds)
+       AND day.date <= (SELECT today FROM bounds)
+), units(scale, label) AS (
+    VALUES (1152921504606846976.0, 'EiB'),
+           (1125899906842624.0, 'PiB'),
+           (1099511627776.0, 'TiB'),
+           (1073741824.0, 'GiB'),
+           (1048576.0, 'MiB'),
+           (1024.0, 'KiB'),
+           (1.0, 'B')
+), display_unit AS (
+    -- Both directions share the unit selected by the larger byte total.
+    SELECT scale, label
+    FROM units, totals
+    WHERE scale <= MAX(totals.rx, totals.tx) OR scale = 1.0
+    ORDER BY scale DESC
+    LIMIT 1
 )
 SELECT CASE
     WHEN iface.id IS NULL THEN 'network usage unavailable'
     ELSE printf(
-        '↓ %.2f %s ↑ %.2f %s%s',
-        CASE
-            WHEN totals.rx >= 1152921504606846976 THEN CAST(totals.rx AS REAL) / 1152921504606846976.0
-            WHEN totals.rx >= 1125899906842624 THEN CAST(totals.rx AS REAL) / 1125899906842624.0
-            WHEN totals.rx >= 1099511627776 THEN CAST(totals.rx AS REAL) / 1099511627776.0
-            WHEN totals.rx >= 1073741824 THEN CAST(totals.rx AS REAL) / 1073741824.0
-            WHEN totals.rx >= 1048576 THEN CAST(totals.rx AS REAL) / 1048576.0
-            WHEN totals.rx >= 1024 THEN CAST(totals.rx AS REAL) / 1024.0
-            ELSE CAST(totals.rx AS REAL)
-        END,
-        CASE
-            WHEN totals.rx >= 1152921504606846976 THEN 'EiB'
-            WHEN totals.rx >= 1125899906842624 THEN 'PiB'
-            WHEN totals.rx >= 1099511627776 THEN 'TiB'
-            WHEN totals.rx >= 1073741824 THEN 'GiB'
-            WHEN totals.rx >= 1048576 THEN 'MiB'
-            WHEN totals.rx >= 1024 THEN 'KiB'
-            ELSE 'B'
-        END,
-        CASE
-            WHEN totals.tx >= 1152921504606846976 THEN CAST(totals.tx AS REAL) / 1152921504606846976.0
-            WHEN totals.tx >= 1125899906842624 THEN CAST(totals.tx AS REAL) / 1125899906842624.0
-            WHEN totals.tx >= 1099511627776 THEN CAST(totals.tx AS REAL) / 1099511627776.0
-            WHEN totals.tx >= 1073741824 THEN CAST(totals.tx AS REAL) / 1073741824.0
-            WHEN totals.tx >= 1048576 THEN CAST(totals.tx AS REAL) / 1048576.0
-            WHEN totals.tx >= 1024 THEN CAST(totals.tx AS REAL) / 1024.0
-            ELSE CAST(totals.tx AS REAL)
-        END,
-        CASE
-            WHEN totals.tx >= 1152921504606846976 THEN 'EiB'
-            WHEN totals.tx >= 1125899906842624 THEN 'PiB'
-            WHEN totals.tx >= 1099511627776 THEN 'TiB'
-            WHEN totals.tx >= 1073741824 THEN 'GiB'
-            WHEN totals.tx >= 1048576 THEN 'MiB'
-            WHEN totals.tx >= 1024 THEN 'KiB'
-            ELSE 'B'
-        END,
-        ' (resets 25th'
+        '↓ %.1f ↑ %.1f %s%s',
+        totals.rx / display_unit.scale,
+        totals.tx / display_unit.scale,
+        display_unit.label,
+        ' ( 25th'
             || CASE WHEN (iface.created > ((SELECT cycle_start FROM bounds) || ' 00:00:00')) THEN '; partial' ELSE '' END
             -- A lost DST fold cannot prove freshness; keep totals and report doubt.
             || CASE WHEN iface.min_age > 600 THEN '; stale'
@@ -86,4 +68,4 @@ SELECT CASE
             || ')'
     )
 END
-FROM bounds LEFT JOIN iface ON 1 = 1, totals;
+FROM bounds LEFT JOIN iface ON 1 = 1, totals, display_unit;

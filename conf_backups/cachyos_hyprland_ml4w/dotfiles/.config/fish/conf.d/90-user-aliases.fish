@@ -3,6 +3,7 @@
 # ============================================================
 
 # Git
+alias g='git'
 alias log='git log --all --decorate --oneline --source'
 alias loga='git log --graph --pretty="%Cred%h%Creset -%C(auto)%d%Creset %s %Cgreen(%ar) %C(bold blue)<%an>%Creset" --stat'
 alias logme='git log --all --graph --decorate --stat --author="Omar Rashad" --source'

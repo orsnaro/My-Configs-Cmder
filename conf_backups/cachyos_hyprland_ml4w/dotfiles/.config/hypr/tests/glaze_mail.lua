@@ -5,10 +5,7 @@ local function operation(name)
     return function(arg) return { name = name, arg = arg } end
 end
 hl = {
-    bind = function() return { set_enabled = function() end } end,
-    get_layers = function() return {} end,
-    animation = function() end,
-    unbind = function() end, env = function() end,
+    bind = function() end, unbind = function() end, env = function() end,
     on = function(event, callback)
         handlers[event] = handlers[event] or {}
         table.insert(handlers[event], callback)

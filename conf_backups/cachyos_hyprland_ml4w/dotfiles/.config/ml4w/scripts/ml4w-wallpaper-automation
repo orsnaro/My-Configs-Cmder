@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# desktop-stack managed
+source "$HOME/.config/ml4w/scripts/desktop-stack-mode"
+case "${1:---toggle}" in --start|--toggle) desktop_stack_is_qs || exit 0 ;; esac
 #     _         _         __        ______
 #    / \  _   _| |_ ___   \ \      / /  _ \
 #   / _ \| | | | __/ _ \   \ \ /\ / /| |_) |

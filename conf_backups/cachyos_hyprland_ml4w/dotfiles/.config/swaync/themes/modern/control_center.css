@@ -87,7 +87,6 @@
 .widget-mpris {
   border-radius: 10px;
   margin: 2px 12px 12px 12px;
-  align-items: center;
   color: alpha(#000000, 0.8);
 }
 
@@ -105,10 +104,6 @@
 
 .widget-mpris-player {
   border-radius: 10px;
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  overflow: hidden;
   color: alpha(#000000, 0.8);
 }
 
@@ -185,13 +180,17 @@
 }
 
 /* === Notifications === */
-.control-center .notification-row .notification-background .notification.critical {
+.control-center .notification-row .notification-background .notification {
   background-color: @surface_container;
   border-radius: 10px;
   margin: 5px 0px;
   padding: 15px;
   border: 2px solid @bordercolor;
   min-height: 2.5em;
+}
+
+.control-center .notification-row .notification-background .notification.critical {
+  border-color: @error;
 }
 
 .control-center .notification-row .notification-background .close-button {
@@ -219,7 +218,13 @@ trough highlight {
 }
 .notification-group-headers {
   font-weight: 900;
-  font-size: 0
+  font-size: 1rem;
+}
+
+/* Lower cards stay stacked, but their contents must not draw over the front. */
+.notification-group.collapsed .notification-row:not(:last-child) .notification-action,
+.notification-group.collapsed .notification-row:not(:last-child) .notification-default-action {
+  opacity: 0;
 }
 
 .notification-group-icon {

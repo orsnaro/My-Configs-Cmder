@@ -195,10 +195,10 @@ hl.layer_rule({ name = "rofi-fade", match = { namespace = "^rofi$" }, no_anim = 
 hl.layer_rule({ name = "rofi-dismiss-instant", match = { namespace = "^rofi-dismiss-guard$" }, no_anim = true })
 
 -- Browser: default.lua binds SUPER+B to ml4w browser.sh (Firefox).
--- Overridden here to Brave; browser.sh stays untouched for other ML4W consumers.
+-- Browser binding: SUPER+B opens Firefox (default browser), same as ML4W's default.sh.
 hl.unbind("SUPER + B")
-hl.bind("SUPER + B", hl.dsp.exec_cmd("brave"),
-    { description = "Open Brave" })
+hl.bind("SUPER + B", hl.dsp.exec_cmd("firefox"),
+    { description = "Open Firefox (default browser)" })
 
 -- Keyboard layout switch: SUPER+Space toggles us/ara (SHIFT+SPACE freed:
 -- it fired while typing and is problematic).
@@ -298,6 +298,78 @@ hl.on("window.title", float_google_signin)
 hl.on("window.close", function(w)
     if w ~= nil then handled_google_signin[w.address] = nil end
 end)
+
+-- Firefox HTML preview panel for aerc Mail: class firefox is shared with normal browsing,
+-- so it cannot be routed with a static rule; handle it on open: direct it to mail ws
+-- (with follow=false), swap it to the right side of aerc, and give focus back to aerc.
+local handled_preview_windows = {}
+local function find_mail_window()
+    local windows = hl.get_windows()
+    if windows == nil then return nil end
+    for _, m in ipairs(windows) do
+        local ok, mapped, class, address = pcall(function() return m.mapped, m.class, m.address end)
+        if ok and mapped and class == "aerc-mail" and address ~= nil then return m end
+    end
+    return nil
+end
+
+local function window_x(window)
+    if window == nil then return nil end
+    local ok, x = pcall(function() return window.at.x end)
+    if ok then return x end
+    return nil
+end
+
+local function window_workspace(window)
+    if window == nil then return nil end
+    local ok, id = pcall(function() return window.workspace.id end)
+    if ok then return id end
+    return nil
+end
+
+-- Swap the preview into the right split slot once dwindle has assigned geometry.
+-- Window objects carry at/size only after layout, so retry briefly (max 2s).
+local function place_preview_right(address, attempt)
+    attempt = attempt or 0
+    local w = hl.get_window("address:" .. address)
+    if w == nil then return end -- preview closed; nothing left to place
+    local mail = find_mail_window()
+    if mail == nil then return end
+    local wws, mws = window_workspace(w), window_workspace(mail)
+    if wws ~= nil and mws ~= nil and wws ~= mws then
+        hl.dispatch(hl.dsp.window.move({ workspace = mws, follow = false, window = w }))
+    end
+    local wx, mx = window_x(w), window_x(mail)
+    if wx == nil or mx == nil then
+        if attempt < 20 then
+            hl.timer(function() place_preview_right(address, attempt + 1) end, { timeout = 100, type = "oneshot" })
+        end
+        return
+    end
+    -- Only touch the layout while the preview still owns focus; if the user has moved
+    -- on, leave the workspace alone.
+    local active = hl.get_active_window()
+    if active == nil or active.address ~= address then return end
+    if wx < mx then
+        hl.dispatch(hl.dsp.focus({ window = w }))
+        hl.dispatch(hl.dsp.layout("swapsplit"))
+    end
+    hl.dispatch(hl.dsp.focus({ window = mail }))
+end
+
+local function move_mail_preview_to_mail(w)
+    if w == nil or type(w.address) ~= "string" or handled_preview_windows[w.address] then return end
+    if w.class ~= "firefox" then return end
+    if type(w.title) ~= "string" or w.title:sub(1, #("aerc Mail preview")) ~= "aerc Mail preview" then return end
+    handled_preview_windows[w.address] = true
+    -- Placement is deferred: at title time the window has no tile geometry yet.
+    hl.timer(function() place_preview_right(w.address) end, { timeout = 150, type = "oneshot" })
+end
+hl.on("window.open", move_mail_preview_to_mail)
+hl.on("window.title", move_mail_preview_to_mail)
+hl.on("window.close", function(w)
+    if w ~= nil then handled_preview_windows[w.address] = nil end
+end)
 -- Steam Settings dialog shares the main client's "steam" class; match its title instead.
 hl.window_rule({ name = "float-steam-settings", match = { class = "^steam$", title = "Settings$" }, float = true, center = true })
 -- Obsidian Settings shares the main client's class; float it on the current
@@ -314,13 +386,28 @@ hl.window_rule({ name = "float-obsidian-settings", match = { class = "^(obsidian
 hl.window_rule({ name = "qbit-main-tiled", match = { class = "^org\\.qbittorrent\\.qBittorrent$", title = ".*qBittorrent v[0-9]+(\\.[0-9]+)+.*" }, float = false })
 hl.window_rule({ name = "float-qbit-dialogs", match = { class = "^org\\.qbittorrent\\.qBittorrent$", title = "negative:.*qBittorrent v[0-9]+(\\.[0-9]+)+.*" }, float = true, center = true })
 
+-- polkit-gnome's prompt is a plain toplevel: Wayland has no keep-above hint,
+-- so Hyprland must float and hold focus or it can open behind app windows.
+-- Only the Quickshell stack runs this agent; the Pleamar scene dialog is an overlay.
+hl.window_rule({
+    name         = "polkit-auth-prompt",
+    match        = { class = "^polkit-gnome-authentication-agent-1$" },
+    float        = true,
+    center       = true,
+    stay_focused = true,
+})
+
 -- Hyprland-only boot apps (NOT ~/.config/autostart, so KDE is unaffected).
 -- Obsidian launches here only, never from KDE/plasma autostart.
 -- Workspace routing comes from glaze-apps.tsv silent rules.
 hl.on("hyprland.start", function()
     hl.exec_cmd("kitty")
     hl.exec_cmd("~/.local/bin/glaze-obsidian-notes")
-    hl.exec_cmd("~/.local/bin/glaze-discord")
+    -- Brave Discord autostart removed at user's explicit request (2026-11-12): Discord now launches as
+    -- a Firefox Taskbar Tab via the line below. Brave is kept installed; restore by uncommenting.
+    -- hl.exec_cmd("~/.local/bin/glaze-discord")
+    -- Firefox Discord Taskbar Tab (parallel phase, Option B); replaces the Brave line at the Gate-5 cutover.
+    hl.exec_cmd('firefox -taskbar-tab 53503413-c803-4462-b33c-df79e9e2e486 -new-window https://discord.com/channels/@me -profile /home/narol/.config/mozilla/firefox/9v2q7xek.app -container 0')
     hl.exec_cmd("~/.local/bin/glaze-mail")
     hl.exec_cmd("~/.local/bin/albion-data-watch")
     -- The tray indicator activates the daemon over D-Bus; no second startup needed.
@@ -332,11 +419,18 @@ end)
 -- except the retargeted browser/terminal/notes/Spotify overrides below.
 hl.window_rule({ name = "focus-code", match = { class = "^(code|code-oss)$" }, workspace = "2" })
 hl.window_rule({ name = "focus-kate", match = { class = "^(kate|org.kde.kate)$" }, workspace = "2" })
-hl.window_rule({ name = "focus-browser", match = { class = "^(brave-browser|firefox)$" }, workspace = "3" })
+-- Exposed globally so the aerc preview launcher can suspend it while a preview maps:
+-- Firefox preview windows carry no distinguishing class or initial title, so the only way
+-- to keep them off the search workspace is to briefly disable this rule around launch.
+glaze_focus_browser_rule = hl.window_rule({ name = "focus-browser", match = { class = "^(brave-browser|firefox)$", title = "negative:^aerc Mail preview" }, workspace = "3" })
 hl.window_rule({ name = "focus-term", match = { class = "^(kitty|konsole|org.kde.konsole|Alacritty)$" }, workspace = "7" })
 hl.window_rule({ name = "glaze-mail-tiled", match = { class = "^aerc-mail$" }, workspace = "6 silent", float = false })
 hl.window_rule({ name = "focus-notes", match = { class = "^(obsidian|md.obsidian.Obsidian)$", modal = false, float = false }, workspace = "4" })
 hl.window_rule({ name = "focus-spotify", match = { class = "^brave-open\\.spotify\\.com__-Default$" }, workspace = "8" })
+-- Firefox Taskbar Tab Spotify: same focus behavior as the Brave web-app window (parallel phase).
+hl.window_rule({ name = "focus-firefox-taskbar-spotify", match = { class = "^firefox\\.webapp-c2ce0393-a858-42a0-82f6-779b2ac8fd8f$" }, workspace = "8" })
+-- Dedicated app profile taskbar apps (always chromeless there); same routing/focus intent
+hl.window_rule({ name = "focus-firefox-app-spotify", match = { class = "^firefox\\.webapp-6b716290-f586-4d9c-a11c-0b76efd19f74$" }, workspace = "8" })
 hl.window_rule({ name = "focus-vortex", match = { class = "^vortex\\.exe$"}, workspace = "9", float = true, size = "1600 900", center = true })
 
 -- Lutris / Wine / Proton games (workspace 9 = gaming).
@@ -348,6 +442,10 @@ hl.window_rule({ name = "focus-vortex", match = { class = "^vortex\\.exe$"}, wor
 hl.window_rule({ name = "gaming-wine-exe", match = { class = "\\.exe$" }, workspace = "9", float = true })
 hl.window_rule({ name = "gaming-steam-app", match = { class = "^steam_app_" }, workspace = "9", float = true })
 hl.window_rule({ name = "gaming-cemu", match = { class = "^[Cc]emu$" }, workspace = "9", float = true })
+-- ARC Raiders (Steam appid 1808500, exe PioneerGame.exe). The generic rules
+-- above already match both classes, but pin them explicitly so a future
+-- reordering or a Proton class quirk can't drop it off the gaming workspace.
+hl.window_rule({ name = "gaming-arc-raiders", match = { class = "^(steam_app_1808500|PioneerGame\\.exe)$" }, workspace = "9", float = true })
 
 -- Focus follows mouse, mouse doesn't follow focus
 hl.config({

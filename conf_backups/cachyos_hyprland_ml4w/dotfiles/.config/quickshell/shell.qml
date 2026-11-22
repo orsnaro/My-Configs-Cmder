@@ -1,4 +1,5 @@
 //@ pragma UseQApplication
+//@ pragma IconTheme ml4w-quickshell
 
 import Quickshell
 import Quickshell.Io

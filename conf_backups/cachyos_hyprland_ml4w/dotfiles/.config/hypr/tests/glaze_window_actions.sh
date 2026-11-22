@@ -13,7 +13,7 @@ case "$1" in
             if [[ ${DISPATCH_FAIL:-0} == 1 ]]; then exit 1; fi
             export DISPATCH_EXPR="$2"
             export TEST_FOCUS_ADDRESS="${DISPATCH_FOCUS_ADDRESS:-$(jq -r '.address' <<< "$ACTIVE_JSON")}" \
-                TEST_FOCUS_WORKSPACE="${DISPATCH_FOCUS_WORKSPACE:-$(jq -r '.workspace.id' <<< "$ACTIVE_JSON")}"
+                TEST_FOCUS_WORKSPACE="${DISPATCH_FOCUS_WORKSPACE:-$(jq -r '.workspace.id' <<< "$ACTIVE_JSON")}" 
             lua - <<'LUA' >> "$COMMAND_LOG"
 hl = {
     get_active_window = function()

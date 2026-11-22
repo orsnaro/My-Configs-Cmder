@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# desktop-stack managed
+source "$HOME/.config/ml4w/scripts/desktop-stack-mode"
 WALLPAPER_APP="quickshell"
 
 # Colors for UI
@@ -47,6 +49,7 @@ elif [ "$1" == "--random" ]; then
 fi
 
 # Launch wallpaper app
+desktop_stack_is_qs || exit 0
 if [ "$WALLPAPER_APP" == "quickshell" ]; then
     info "Toggle Quickshell Wallpaper App"
     qs ipc call wallpaper toggle

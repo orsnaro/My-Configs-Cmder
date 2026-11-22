@@ -1,0 +1,12 @@
+[Icon Theme]
+Name=ml4w-quickshell
+Comment=Shell-local aliases for Quickshell tray and menu icons
+Inherits=breeze-dark
+Directories=scalable/status
+
+[scalable/status]
+Size=16
+MinSize=16
+MaxSize=256
+Type=Scalable
+Context=Status
