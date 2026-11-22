@@ -194,6 +194,12 @@ hl.animation({ leaf = "fadeLayersOut", enabled = true, speed = 1.5, bezier = "de
 hl.layer_rule({ name = "rofi-fade", match = { namespace = "^rofi$" }, no_anim = false, animation = "fade" })
 hl.layer_rule({ name = "rofi-dismiss-instant", match = { namespace = "^rofi-dismiss-guard$" }, no_anim = true })
 
+-- Rofi keeps its fade; approved shared layer fade-out is 150 ms (in unchanged).
+require("rofi_session").setup()
+hl.animation({ leaf = "fadeLayersOut", enabled = true, speed = 1.5, bezier = "default" })
+hl.layer_rule({ name = "rofi-fade", match = { namespace = "^rofi$" }, no_anim = false, animation = "fade" })
+hl.layer_rule({ name = "rofi-dismiss-instant", match = { namespace = "^rofi-dismiss-guard$" }, no_anim = true })
+
 -- Browser: default.lua binds SUPER+B to ml4w browser.sh (Firefox).
 -- Overridden here to Brave; browser.sh stays untouched for other ML4W consumers.
 hl.unbind("SUPER + B")
