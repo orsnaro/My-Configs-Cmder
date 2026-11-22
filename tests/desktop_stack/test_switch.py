@@ -220,6 +220,40 @@ class StackTests(unittest.TestCase):
         self.assertFalse(any(event[0] == 'spawn' and event[1] in ('walker', 'elephant', 'rofi')
                              for event in self.backend.events))
 
+    def test_qs_preflight_needs_no_legacy_launcher_binaries(self) -> None:
+        self.backend.missing.update({'walker', 'elephant'})
+        self.manager.preflight('quickshell')
+
+    def test_missing_smart_plugin_refuses_before_stopping_current_stack(self) -> None:
+        (self.home / '.local/lib/rofi-trial/smart.so').unlink()
+        with self.assertRaisesRegex(stack.SwitchError, 'smart.so'):
+            self.manager.switch('quickshell')
+        self.assertEqual(self.backend.events, [])
+
+    def test_qs_readiness_is_on_demand_and_rejects_legacy_daemons(self) -> None:
+        backend = stack.Backend(self.home)
+        self.backend.items = [stack.Process(1, ('swaync',), 'a'), stack.Process(2, (stack.POLKIT,), 'b')]
+        def run(argv: list[str], *, check: bool = True) -> subprocess.CompletedProcess[str]:
+            return subprocess.CompletedProcess(argv, 0, '[{"pid": 20}]', '')
+        with mock.patch.object(backend, 'run', side_effect=run), \
+             mock.patch.object(backend, 'processes', side_effect=self.backend.processes), \
+             mock.patch.object(backend, 'notifications_owned_by', return_value=True):
+            self.assertTrue(backend.ready('quickshell', self.home))
+            self.backend.items.append(stack.Process(3, ('walker',), 'c'))
+            self.assertFalse(backend.ready('quickshell', self.home))
+
+    def test_qs_start_stops_old_launchers_without_unmasking_or_killing_app_children(self) -> None:
+        self.process(50, 'walker')
+        self.process(51, 'elephant')
+        self.process(52, 'obsidian', ppid=50)
+        self.manager.start('quickshell')
+        self.assertEqual({p.pid for p in self.backend.items}, {52})
+        for unit in ('walker.service', 'elephant.service'):
+            self.assertIn(('systemctl', '--user', 'stop', unit), self.backend.events)
+            self.assertNotIn(('systemctl', '--user', 'unmask', unit), self.backend.events)
+        self.assertFalse(any(event[0] == 'spawn' and event[1] in ('walker', 'elephant', 'rofi')
+                             for event in self.backend.events))
+
     def test_switch_refuses_to_stop_its_own_managed_service_context(self) -> None:
         self.backend.unsafe_context = True
         with self.assertRaisesRegex(stack.SwitchError, 'external terminal'):

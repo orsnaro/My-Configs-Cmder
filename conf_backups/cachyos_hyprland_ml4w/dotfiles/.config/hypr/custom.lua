@@ -204,7 +204,7 @@ hl.bind("SUPER + B", hl.dsp.exec_cmd("firefox"),
 -- it fired while typing and is problematic).
 -- Uses hyprctl switchxkblayout so ALT+SHIFT+keys (move/resize) keep working.
 -- XKB group toggles would eat those combos or hijack Caps Lock, so input.lua leaves kb_options empty.
--- SUPER+RETURN restored to terminal (default); layout moved to SUPER+SPACE, run moved to SUPER+R (walker).
+-- SUPER+RETURN restored to terminal (default); layout moved to SUPER+SPACE, run moved to SUPER+R (Rofi).
 hl.unbind("SHIFT + SPACE") -- keep old layout switch freed
 hl.unbind("SUPER + RETURN") -- clear default.lua duplicate, single terminal below
 hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("~/.local/bin/hypr-switch-xkblayout"),
