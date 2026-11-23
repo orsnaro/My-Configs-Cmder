@@ -200,17 +200,11 @@ hl.unbind("SUPER + B")
 hl.bind("SUPER + B", hl.dsp.exec_cmd("firefox"),
     { description = "Open Firefox (default browser)" })
 
--- Rofi keeps its fade; approved shared layer fade-out is 150 ms (in unchanged).
-require("rofi_session").setup()
-hl.animation({ leaf = "fadeLayersOut", enabled = true, speed = 1.5, bezier = "default" })
-hl.layer_rule({ name = "rofi-fade", match = { namespace = "^rofi$" }, no_anim = false, animation = "fade" })
-hl.layer_rule({ name = "rofi-dismiss-instant", match = { namespace = "^rofi-dismiss-guard$" }, no_anim = true })
-
 -- Keyboard layout switch: SUPER+Space toggles us/ara (SHIFT+SPACE freed:
 -- it fired while typing and is problematic).
 -- Uses hyprctl switchxkblayout so ALT+SHIFT+keys (move/resize) keep working.
 -- XKB group toggles would eat those combos or hijack Caps Lock, so input.lua leaves kb_options empty.
--- SUPER+RETURN restored to terminal (default); layout moved to SUPER+SPACE, run moved to SUPER+R (Rofi).
+-- SUPER+RETURN restored to terminal (default); layout moved to SUPER+SPACE, run moved to SUPER+R (walker).
 hl.unbind("SHIFT + SPACE") -- keep old layout switch freed
 hl.unbind("SUPER + RETURN") -- clear default.lua duplicate, single terminal below
 hl.bind("SUPER + SPACE", hl.dsp.exec_cmd("~/.local/bin/hypr-switch-xkblayout"),
