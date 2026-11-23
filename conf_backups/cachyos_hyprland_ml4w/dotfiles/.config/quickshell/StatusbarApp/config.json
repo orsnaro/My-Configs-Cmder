@@ -27,7 +27,7 @@ change. The statusbar writes enabled / alwaysExpanded / autohide back into it.
         "animationDuration": 350
     },
     "modules": {
-        "left":   ["launcher", "logo", "workspaces", "media"],
+        "left":   ["launcher", "logo", "workspaces", "title", "media"],
         "center": ["weather", "clock", "swaync"],
         "right":  ["cpu", "mem", "updates", "battery", "powerprofile", "systemtray", "mic", "volume", "keyboard", "power"]
     },

@@ -589,11 +589,11 @@ Item {
                             width: ListView.view.width
                             spacing: 8
                             Text {
-                                Layout.preferredWidth: 118
+                                Layout.preferredWidth: 148
                                 text: {
                                     if (modelData.allDay)
                                         return panel.allDayLabel(modelData.start)
-                                    return Qt.formatDateTime(new Date(modelData.start), "ddd d MMM · hh:mm")
+                                    return Qt.formatDateTime(new Date(modelData.start), "ddd d MMM · h:mm AP")
                                 }
                                 color: Theme.on_background
                                 font.family: Theme.fontFamily

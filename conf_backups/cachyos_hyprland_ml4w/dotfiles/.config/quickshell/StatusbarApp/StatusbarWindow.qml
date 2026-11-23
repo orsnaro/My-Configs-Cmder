@@ -37,7 +37,14 @@ PanelWindow {
     }
 
     // --- WAYLAND CONFIGURATION ---
-    WlrLayershell.layer: WlrLayer.Top
+    // Bottom layer: ordinary windows render above the bar, so floating/PiP
+    // windows and fullscreen apps are never covered by it. Tiled and maximized
+    // windows still stay below the reserved band (Hyprland honors the
+    // exclusive zone on every layer), so the bar stays visible. The dropdown
+    // panels extend below the band, where tiled windows would cover them, so
+    // raise the bar to the top layer only while a panel is open.
+    WlrLayershell.layer: (root.calendarOpen || root.mediaOpen || root.sysOpen
+        || root.volumeOpen) ? WlrLayer.Top : WlrLayer.Bottom
     // Keyboard focus is owned by the HyprlandFocusGrab below (the same primitive
     // the Calendar/Power popups use), not by the layer-shell focus mode. A
     // WlrKeyboardFocus.Exclusive grab held the keyboard until Escape and left
@@ -109,7 +116,7 @@ PanelWindow {
                     "alwaysExpanded": true, "autohide": false, "hideDelay": 400,
                     "marginTop": 0 },
         "pill":   { "collapsedWidth": 0, "expandedWidth": 680, "radius": 12, "animationDuration": 350 },
-        "modules":{ "left": ["launcher", "logo", "workspaces", "media"],
+        "modules":{ "left": ["launcher", "logo", "workspaces", "title", "media"],
                     "center": ["weather", "clock", "swaync"],
                     "right": ["cpu", "mem", "updates", "battery", "powerprofile", "systemtray", "mic", "volume", "keyboard", "power"] },
         "border": { "width": 2, "colorTop": "", "colorBottom": "" },
@@ -293,12 +300,16 @@ PanelWindow {
     // knows or cares whether this bar is the one on screen. The pill itself is
     // hidden in that case (see below).
     visible: (barEnabled || calendarPanel.showPanel || mediaPanel.showPanel || sysPanel.showPanel || volumePanel.showPanel) && ready
-    // Reserve one window gap less than the band: Hyprland adds its own gaps_out
-    // below the reserved zone, so windows end up level with the band's bottom
-    // edge and the gap below the pill matches the one above it. An autohiding
+    // The pill is centred in the reserved band (see pill.revealedOffset), so
+    // its lower edge sits at half the band plus half the pill. Reserve down to
+    // that edge plus 20px of clear padding, matching DP-2's 21px bottom gap
+    // (20px + 1px window border). The panel's top margin cancels out because
+    // Hyprland applies it to both the surface and the reserved zone.
+    // Hyprland's top gaps are zeroed in bar_padding.lua, so this is the only
+    // space between the bar and tiled windows in every mode. An autohiding
     // bar reserves nothing: it floats over the windows and slides in on demand.
-    readonly property int windowGap: 16
-    exclusiveZone: (barEnabled && !autohide) ? reservedHeight - windowGap : 0
+    readonly property int pillFootprint: reservedHeight / 2 + (barHeight + 10) / 2
+    exclusiveZone: (barEnabled && !autohide) ? pillFootprint + 20 : 0
 
     // Persist the enabled state into the settings file and apply it.
     // applySettings re-parses the
@@ -382,6 +393,24 @@ PanelWindow {
         }
     }
     Component { id: cLauncher;   LauncherModule {} }
+    Component {
+        id: cTitle
+        FocusedTitleModule { availableWidth: root.titleAvailableWidth }
+    }
+    // Budget from configured/screen width, not contentWidth (which includes title).
+    readonly property real titleAvailableWidth: {
+        let used = 0
+        let count = 0
+        for (let i = 0; i < leftRepeater.count; i++) {
+            const loader = leftRepeater.itemAt(i)
+            if (root.settings.modules.left[i] !== "title" && loader && loader.item && loader.visible) {
+                used += loader.width
+                count++
+            }
+        }
+        const barWidth = Math.min(root.width - 32, root.settings.pill.expandedWidth)
+        return Math.max(0, (barWidth - centerArea.implicitWidth) / 2 - 36 - used - count * leftArea.spacing)
+    }
     // Whether the calendar panel is showing. The panel is an information layer
     // of the clock module, drawn inside this window (see CalendarPanel.qml), so
     // the bar carries it rather than depending on a separate calendar window.
@@ -525,6 +554,7 @@ PanelWindow {
     readonly property var moduleComponents: ({
         "terminal":   cTerminal,
         "workspaces": cWorkspaces,
+        "title":      cTitle,
         "launcher":   cLauncher,
         "clock":      cClock,
         "swaync":     cSwaync,
@@ -1027,6 +1057,7 @@ PanelWindow {
                 Loader {
                     Layout.alignment: Qt.AlignVCenter
                     sourceComponent: root.moduleComponents[modelData] || null
+                    visible: (item && item.collapsed !== undefined) ? !item.collapsed : true
                     onLoaded: Qt.callLater(root.rebuildNavItems)
                 }
             }
@@ -1211,7 +1242,7 @@ PanelWindow {
                 Math.min(root.width - width - 8, center - width / 2)))
         }
 
-        readonly property int volumeGap: 26
+        readonly property int volumeGap: 20
         openY: Math.round(pill.y + pill.height + volumeGap - cardInset)
     }
 }

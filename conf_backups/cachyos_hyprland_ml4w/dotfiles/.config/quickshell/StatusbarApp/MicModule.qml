@@ -1,6 +1,7 @@
 import Quickshell
 import Quickshell.Services.Pipewire
 import QtQuick
+import QtQuick.Controls
 import QtQuick.Effects
 import qs.CustomTheme
 
@@ -74,6 +75,10 @@ Rectangle {
     implicitWidth: mic.iconSize
     implicitHeight: mic.pillHeight
     radius: mic.pillHeight / 2
+
+    ToolTip.visible: mouseArea.containsMouse
+    ToolTip.delay: 300
+    ToolTip.text: (mic.muted ? "Mic muted · " : "Mic ") + Math.round(mic.level * 100) + "%"
 
     // Same accent-filled highlight as the other modules on hover/selection.
     color: active ? Theme.primary : "transparent"

@@ -503,10 +503,7 @@ PanelWindow {
                         }
 
                         // BLUE LIGHT FILTER (HYPRSUNSET) TOGGLE
-                        // Arms the auto schedule in hyprsunset.conf (warm
-                        // 00:00-07:00, identity off otherwise). The running
-                        // process is the only state there is; OFF also resets
-                        // the filter so no warm tint is left stuck on screen.
+                        // Share Vitreus's saved state and schedule with the keyboard/Waybar toggle.
                         RowLayout {
                             Layout.fillWidth: true
                             visible: root.isHyprsunsetInstalled
@@ -520,7 +517,7 @@ PanelWindow {
                                     font.pixelSize: 16
                                 }
                                 Text {
-                                    text: "Auto 00:00–07:00"
+                                    text: "Shared with Vitreus"
                                     color: Theme.primary
                                     opacity: 0.7
                                     font.family: Theme.fontFamily
@@ -531,14 +528,15 @@ PanelWindow {
                             ML4WSwitch {
                                 id: hyprsunsetSwitch
                                 property bool ready: false
-                                // The running process is the only state there is.
+                                // Query the saved UI state, not the backend's process existence.
                                 Process {
                                     id: hyprsunsetStateProc
-                                    command: ["bash", "-c", "pgrep -x hyprsunset > /dev/null && echo 1 || echo 0"]
+                                    command: ["bash", "-c", "~/.config/ml4w/scripts/ml4w-toggle-hyprsunset status"]
                                     stdout: StdioCollector {
                                         onStreamFinished: {
-                                            hyprsunsetSwitch.checked = (this.text.trim() === "1")
-                                            hyprsunsetSwitch.ready = true
+                                            const state = this.text.trim()
+                                            hyprsunsetSwitch.checked = (state === "true")
+                                            hyprsunsetSwitch.ready = (state === "true" || state === "false")
                                         }
                                     }
                                 }
@@ -556,10 +554,8 @@ PanelWindow {
                                     // Absolute command matching the switch's
                                     // post-click position instead of a blind
                                     // toggle, so it can't get out of sync.
-                                    let cmd = checked
-                                        ? "pgrep -x hyprsunset > /dev/null || setsid -f hyprsunset > /dev/null 2>&1"
-                                        : "hyprctl hyprsunset identity > /dev/null 2>&1; pkill -x hyprsunset"
-                                    Quickshell.execDetached(["bash", "-c", cmd])
+                                    const action = checked ? "on" : "off"
+                                    Quickshell.execDetached(["bash", "-c", "~/.config/ml4w/scripts/ml4w-toggle-hyprsunset " + action])
                                 }
                             }
                             Item { implicitWidth: 28 }

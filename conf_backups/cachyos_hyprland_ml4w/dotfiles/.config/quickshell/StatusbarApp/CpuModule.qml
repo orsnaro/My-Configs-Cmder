@@ -3,8 +3,9 @@ import Quickshell.Io
 import QtQuick
 import QtQuick.Layouts
 import qs.CustomTheme
+import "SystemMetricFormat.js" as Metrics
 
-// CPU pill: usage percent + clock. Left click opens the shared system
+// CPU/GPU/VRAM pill using one sample. Left click opens the shared system
 // panel; data comes from hypr-sysinfo via ~/.cache/sysinfo.json.
 Rectangle {
     id: cpu
@@ -15,6 +16,10 @@ Rectangle {
 
     property int pct: 0
     property real ghz: 0
+    property var gpuPct: null
+    property var vramUsed: null
+    readonly property string gpuText: gpuPct === null ? "—" : gpuPct + "%"
+    readonly property string vramText: Metrics.memoryUsed(vramUsed)
     property bool focused: false
     readonly property bool active: mouseArea.containsMouse || cpu.focused
     readonly property bool collapsed: false
@@ -24,6 +29,11 @@ Rectangle {
             let d = JSON.parse(src)
             cpu.pct = d.cpu_pct || 0
             cpu.ghz = d.cpu_ghz || 0
+            const gpu = d.gpu || {}
+            cpu.gpuPct = typeof gpu.usage === "number" && Number.isFinite(gpu.usage)
+                && gpu.usage >= 0 && gpu.usage <= 100 ? gpu.usage : null
+            cpu.vramUsed = typeof gpu.vram_used_gb === "number" && Number.isFinite(gpu.vram_used_gb)
+                && gpu.vram_used_gb >= 0 ? gpu.vram_used_gb : null
         } catch (e) {
             // Keep the previous reading on malformed cache.
         }
@@ -62,6 +72,15 @@ Rectangle {
             color: cpu.active ? Theme.background : Theme.primary
             font.family: Theme.fontFamily
             font.pixelSize: 14
+            font.bold: true
+        }
+        Text {
+            Layout.alignment: Qt.AlignVCenter
+            Layout.leftMargin: 4
+            text: "GPU " + cpu.gpuText + " · VRAM " + cpu.vramText
+            color: cpu.active ? Theme.background : Theme.primary
+            font.family: Theme.fontFamily
+            font.pixelSize: 12
             font.bold: true
         }
     }

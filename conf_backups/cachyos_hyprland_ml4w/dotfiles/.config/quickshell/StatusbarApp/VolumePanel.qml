@@ -72,6 +72,20 @@ Item {
         color: Qt.rgba(Theme.shadow.r, Theme.shadow.g, Theme.shadow.b, 0.4)
     }
 
+    // Hover over the full panel bounds (including inset padding) so moving
+    // between the volume icon and the dropdown stays in the combined area.
+    HoverHandler {
+        id: panelHover
+        onHoveredChanged: {
+            if (!panel.volumeModule)
+                return
+            if (panelHover.hovered)
+                panel.volumeModule.cancelClose()
+            else
+                panel.volumeModule.scheduleClose()
+        }
+    }
+
     Rectangle {
         id: card
         x: panel.cardInset
@@ -82,18 +96,6 @@ Item {
         color: Theme.background
         border.color: Theme.primary
         border.width: 2
-
-        HoverHandler {
-            id: cardHover
-            onHoveredChanged: {
-                if (!panel.volumeModule)
-                    return
-                if (cardHover.hovered)
-                    panel.volumeModule.cancelClose()
-                else
-                    panel.volumeModule.scheduleClose()
-            }
-        }
 
         ColumnLayout {
             id: list

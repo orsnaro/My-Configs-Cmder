@@ -9,7 +9,7 @@
         "expandedWidth": 2520
     },
     "modules": {
-        "left": ["logo", "workspaces", "media"],
+        "left": ["logo", "workspaces", "title", "media"],
         "center": ["weather", "clock", "pomo", "swaync"],
         "right": ["cpu", "mem", "updates", "battery", "powerprofile", "systemtray", "keyboard", "mic", "volume", "power"]
     }

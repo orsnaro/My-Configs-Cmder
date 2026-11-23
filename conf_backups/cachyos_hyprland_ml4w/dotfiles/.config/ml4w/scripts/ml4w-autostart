@@ -1,4 +1,7 @@
 #!/usr/bin/env bash
+# desktop-stack managed
+source "$HOME/.config/ml4w/scripts/desktop-stack-mode"
+desktop_stack_is_qs || exit 0
 
 # Default variables
 CACHE_FOLDER="$HOME/.cache/ml4w/hyprland-dotfiles"
@@ -30,7 +33,7 @@ if [ ! -f $CACHE_FILE ]; then
 fi
 
 # Start nmapplet
-nm-applet --indicator &
+if ! pgrep -u "$(id -u)" -x nm-applet >/dev/null; then nm-applet --indicator & fi
 
 # Quickshell reads its icon theme from QS_ICON_THEME, not from GTK. Hyprland
 # normally exports it (conf/environment.lua); fall back to reading the GTK
