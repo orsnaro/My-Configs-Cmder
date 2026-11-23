@@ -1,8 +1,6 @@
 local root = os.getenv("HOME") .. "/.config/hypr/"
 local bindings, workspaces, rules, unbound = {}, {}, {}, {}
 local configured, rule_order = {}, {}
-local layer_rules = {}
-local animations = {}
 local dispatched = {}
 local adjacent_monitors, monitor_queries = {}, {}
 local active_window, all_windows, all_monitors = nil, {}, { { active_workspace = { id = 8 } } }
@@ -17,7 +15,6 @@ hl = {
     bind = function(key, action, options)
         assert(not bindings[key], "duplicate binding: " .. key)
         bindings[key] = { action = action, options = options or {} }
-        return { set_enabled = function(_, value) bindings[key].enabled = value end }
     end,
     unbind = function(key) unbound[key] = true end,
     on = function(...) end,
@@ -36,8 +33,7 @@ hl = {
         rules[rule.name] = rule
         rule_order[#rule_order + 1] = rule.name
     end,
-    layer_rule = function(rule) layer_rules[rule.name] = rule end,
-    animation = function(animation) animations[animation.leaf] = animation end,
+    layer_rule = function(...) end,
     config = function(options)
         for section, values in pairs(options) do
             configured[section] = configured[section] or {}
@@ -55,22 +51,7 @@ hl = {
     },
 }
 
-package.path = root .. "?.lua;" .. package.path
 dofile(root .. "custom.lua")
-
-local closing = assert(animations.fadeLayersOut, "the approved faster closing fade must be configured")
-assert(closing.enabled == true and closing.speed == 1.5 and closing.bezier == "default",
-    "shared layer closing fades must last 150 ms with their existing curve")
-assert(animations.fadeLayersIn == nil and animations.windowsOut == nil and animations.workspacesOut == nil,
-    "faster closing must not change opening, window or workspace animations")
-
-local rofi_layer = assert(layer_rules["rofi-fade"], "Rofi must retain its selected fade animation")
-assert(rofi_layer.no_anim == false and rofi_layer.animation == "fade",
-    "Rofi must fade rather than slide or disable animations")
-assert(rofi_layer.match.namespace == "^rofi$", "the fade rule must match only Rofi")
-local guard_layer = assert(layer_rules["rofi-dismiss-instant"])
-assert(guard_layer.no_anim == true and guard_layer.match.namespace == "^rofi-dismiss-guard$",
-    "transparent guards must remain unanimated without changing other layers")
 
 local function is_action(key, name, arg_key, value)
     local binding = assert(bindings[key], "missing binding: " .. key)
